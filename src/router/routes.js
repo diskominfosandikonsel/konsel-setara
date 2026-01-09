@@ -1,8 +1,26 @@
+import MainLayout from 'layouts/MainLayout.vue'
+
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    component: MainLayout,
+    children: [
+      {
+        path: '',
+        component: () => import('pages/IndexPage.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sapa_dashboard',
+        component: () => import('pages/SapaKonsel/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sapa_riwayat',
+        component: () => import('pages/SapaKonsel/Riwayat.vue'),
+        meta: { showBottomNav: false }
+      }
+    ]
   },
 
   // Always leave this as last one,
