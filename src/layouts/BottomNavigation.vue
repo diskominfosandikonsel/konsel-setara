@@ -1,6 +1,6 @@
 <template>
   <q-footer elevated class="bg-white bottom-nav">
-    <q-tabs v-if="!disableActive" v-model="tab" dense align="justify" indicator-color="transparent" class="text-grey-4" no-caps >
+    <q-tabs v-model="tab" dense align="justify" indicator-color="transparent" class="text-grey-4" no-caps >
 
       <q-tab name="beranda" @click="go('/')">
         <div class="pill" :class="{ active: tab === 'beranda' }">
@@ -39,32 +39,11 @@
       </q-tab>
 
     </q-tabs>
-
-    <div v-else class="icon-only">
-      <div class="icon-btn" @click="go('/')">
-        <img src="~assets/icons/home.svg" class="icon" />
-      </div>
-      <div class="icon-btn" @click="go('/news')">
-        <img src="~assets/icons/news.svg" class="icon" />
-      </div>
-      <div class="icon-btn" @click="go('/notifikasi')">
-        <img src="~assets/icons/bell.svg" class="icon" />
-      </div>
-      <div class="icon-btn" @click="go('/profil')">
-        <img src="~assets/icons/user.svg" class="icon" />
-      </div>
-    </div>
   </q-footer>
 </template>
 <script>
 export default {
   name: 'BottomNavigation',
-
-  computed: {
-    disableActive () {
-      return this.$route.meta.disableActiveTab
-    },
-  },
 
   data () {
     return {
@@ -80,6 +59,7 @@ export default {
         else if (path.startsWith('/news')) this.tab = 'news'
         else if (path.startsWith('/notifikasi')) this.tab = 'notifikasi'
         else if (path.startsWith('/profil')) this.tab = 'profil'
+        else this.tab = null
       }
     }
   },
@@ -89,15 +69,12 @@ export default {
       this.$router.push(path)
     }
   },
-  mounted() {
-    console.log(this.disableActive);
-   }
 }
 </script>
 
 <style scoped>
 .bottom-nav {
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border-top: 1px solid rgba(0,0,0,0.05);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -106,21 +83,28 @@ export default {
   text-transform: none !important;
 }
 
-.q-tab--active {
-  background: transparent !important;
-}
-
 .pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  border-radius: 15px;
-  transition: background 0.25s ease;
+
+  height: 36px;
+  max-width: 36px;
+  padding: 0 8px;
+
+  border-radius: 18px;
+  overflow: hidden;
+
+  transition:
+    background 0.25s ease,
+    max-width 0.25s ease,
+    padding 0.25s ease;
 }
 
 .pill.active {
   background: rgba(17, 78, 164, 0.12);
+  max-width: 130px;
+  padding: 0 14px;
   border-radius: 50px;
 }
 
@@ -128,11 +112,13 @@ export default {
   width: 25px;
   height: 25px;
   margin-bottom: 3px;
+
   filter: grayscale(100%) brightness(1.3);
-  transition: filter 0.25s ease;
+  transition: filter 0.25s ease, transform 0.25s ease;
 }
 
 .icon.active {
+  transform: translateY(-1px);
   filter: brightness(0) saturate(100%)
     invert(20%)
     sepia(91%)
@@ -150,7 +136,7 @@ export default {
 }
 
 .slide-fade-enter-active {
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-fade-leave-active {
@@ -165,21 +151,6 @@ export default {
 .slide-fade-leave-to {
   opacity: 0;
   transform: translateX(-6px);
-}
-
-.pill:not(.active) .icon {
-  margin-bottom: 0;
-}
-
-.icon-only {
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.icon-btn {
-  padding: 8.5px;
 }
 
 </style>

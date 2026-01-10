@@ -28,10 +28,7 @@ const routes = [
       {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
-        meta: { 
-          showBottomNav: true,
-          disableActiveTab: true
-       }
+        meta: { showBottomNav: true }
       },
       {
         path: 'sapa_riwayat',
