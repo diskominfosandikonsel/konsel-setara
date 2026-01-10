@@ -7,13 +7,13 @@
     />
     <br>
     <div>
-    hello Index Page
+    hello Notif Page
     </div>
   </q-page>
 </template>
 
 <script>
 export default {
-  name: 'IndexPage',
+  name: 'NotifPage',
 }
 </script>

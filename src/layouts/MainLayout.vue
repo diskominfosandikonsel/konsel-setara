@@ -23,7 +23,7 @@ export default {
   computed: {
     showBottomNav () {
       return this.$route.meta.showBottomNav === true
-    }
+    },
   }
 }
 </script>
