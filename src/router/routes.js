@@ -40,7 +40,7 @@ const routes = [
       {
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
-        meta: { showBottomNav: false }
+        meta: { showBottomNav: true }
       }
     ]
   },
