@@ -2,6 +2,13 @@
 
 Konsel Setara
 
+## Tech Stack
+
+```bash
+Node v24.12.0
+@quasar/app-vite 2.4.0 
+```
+
 ## Install the dependencies
 
 ```bash
@@ -13,7 +20,10 @@ npm install
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 
 ```bash
+# Quasar installed globally
 quasar dev
+# Quasar not installed globally
+npx quasar dev
 ```
 
 ### Lint the files
