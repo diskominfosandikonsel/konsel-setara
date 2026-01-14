@@ -5,7 +5,7 @@ Konsel Setara
 ## Tech Stack
 
 ```bash
-Node v24.12.0
+Node v24.12.0 (alt node v20+ )
 @quasar/app-vite 2.4.0 
 ```
 
