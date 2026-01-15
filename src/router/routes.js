@@ -41,6 +41,11 @@ const routes = [
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
         meta: { showBottomNav: true }
+      },
+      {
+        path: 'Perda',
+        component: () => import('pages/Sippadu/Perda.vue'),
+        meta: { showBottomNav: true }
       }
     ]
   },

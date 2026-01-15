@@ -82,11 +82,11 @@
         Informasi Tentang Perda dan Perkada
       </div>
 
-      <q-card class="q-mb-sm rounded-card">
+      <q-card clickable @click="goPerdaInfo" class="q-mb-sm rounded-card">
         <q-img src="/icons/sippadu/banner-perda.png" ratio="4.68" />
       </q-card>
 
-      <q-card class="rounded-card">
+      <q-card clickable @click="goPerkadaInfo" class="rounded-card">
         <q-img src="/icons/sippadu/banner-perkada.png" ratio="4.68" />
       </q-card>
 
@@ -114,14 +114,14 @@ export default {
     }
   },
   methods: {
-    goPerda () {
-      this.$router.push('/sippadu/perda')
+    goPerdaInfo () {
+      this.$router.push('/Perda')
     },
-    goPerkada () {
-      this.$router.push('/sippadu/perkada')
+    goPerkadaInfo () {
+      this.$router.push('/Perkada')
     },
     goRiwayat () {
-      this.$router.push('/sippadu/riwayat')
+      this.$router.push('/Riwayat')
     }
   }
 }
