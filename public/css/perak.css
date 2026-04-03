@@ -1,0 +1,53 @@
+/* DASHBOARD */
+.h1judul {
+    color: #364151;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dashboard-PERAK {
+    background-color: #ffffff;
+    width: 100%;
+    min-width: 412px;
+    min-height: 917px;
+    position: relative;
+}
+
+.app-header {
+    height: 268px;
+    background: linear-gradient(to bottom, #114EA4 1%, #5FAEEE 22%, #FFFFFF 100%);
+}
+
+.logo-wrapper {
+    align-items: center;
+    margin-top: -20px;
+}
+
+.card {
+    text-align: center;
+    border-radius: 14px;
+    background: #FCFBFC;
+    box-shadow: 0px 4px 4px #00000040;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-inside {
+    background-color: #5faeeeb2;
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 4px #00000040;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 10px auto;
+    margin-bottom: 10px;
+}
+
+.card-icon {
+    max-width: 35px;
+    height: 35px;
+}
+/* DASHBOARD */
