@@ -7,7 +7,7 @@
           <q-avatar>
             <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
           </q-avatar>
-          <span style="font-size: 20px; margin-left: 16px;">
+          <span class="sapa_title">
           Riwayat Laporan
           </span>
         </q-toolbar-title>
@@ -15,24 +15,33 @@
     </q-header>
 
     <q-page-container>
-      <q-page class="q-pa-md" style="background-color: #F6F6F6;">
-        <div class="row q-col-gutter-md">
+      <q-page class="q-pa-md mulish" style="background-color: #F6F6F6;">
+        <div v-if="icons" class="row q-col-gutter-sm">
           <div class="col-12" v-for="icon in icons" :key="icon">
-            <q-card class="bg-white text-black full-width no-shadow" style="border-radius: 10px; opacity: 0.85;">
+            <q-card class="bg-white full-width no-shadow cursor-pointer" style="border-radius: 10px; opacity: 0.85;" @click="goBack">
               <q-card-section>
                 <div class="row">
                   <div class="col-2">
-                    <img :src="icon" style="height: 44px; width: 44px;" />
+                    <img :src="icon" width="44px" style="display: block;" />
                   </div>
 
-                  <div class="col-10 q-px-sm">
-                    <div style="font-size: 16px; font-weight: 600; color: #152C07;">Kekerasan Perempuan</div>
+                  <div class="col-10 q-pl-md">
+                    <div style="font-size: 16px; font-weight: bold; color: #152C07;">Kekerasan Perempuan</div>
                     <div style="font-size: 12px; color: #5D5C5D;" class="two_line">Telah terjadi tindak pidana pelecehan terhadap perempuan di desa andoolo ......</div>
                     <div style="font-size: 12px; color: #BEBEBE;">29 November 2021 (13.00)</div>
                   </div>
                 </div>
               </q-card-section>
             </q-card>
+          </div>
+        </div>
+        <div v-else class="column flex-center" style="height: 75vh;">
+          <div>
+            <img class="q-pb-md" src="~src/assets/sapa/searching.png" width="200">
+            
+            <div style="font-family: 'Poppins', sans-serif; font-size: 16px; color: #707070; font-weight: 300; opacity: 0.75;">
+              Tidak ada riwayat laporan
+            </div>
           </div>
         </div>
       </q-page>

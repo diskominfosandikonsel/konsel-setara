@@ -44,34 +44,34 @@
     </div>
     <div class="row q-col-gutter-md q-px-md q-py-lg text-center">
   <div class="col-6">
-    <q-card class="bg-warning text-white full-width" style="border-radius: 15px; background-color: #FF8D00; opacity: 0.85;">
+    <q-card class="bg-warning text-white full-width" style="border-radius: 15px; background-color: #FF8D00;">
       <q-card-section>
-        <q-icon name="r_warning_amber" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
-        <div class="text-subtitle2">by John Doe</div>
+        <q-icon name="eva-alert-triangle-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <div class="text-subtitle2">Laporan Darurat</div>
       </q-card-section>
     </q-card>
   </div>
   <div class="col-6">
     <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;">
       <q-card-section>
-        <q-icon name="o_chat" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
-        <div class="text-subtitle2">by John Doe</div>
+        <q-icon name="eva-message-square-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <div class="text-subtitle2">Kirim Pesan</div>
       </q-card-section>
     </q-card>
   </div>
   <div class="col-6">
     <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;">
       <q-card-section>
-        <q-icon name="o_group" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
-        <div class="text-subtitle2">by John Doe</div>
+        <q-icon name="eva-people-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <div class="text-subtitle2">Satgas PPPA</div>
       </q-card-section>
     </q-card>
   </div>
   <div class="col-6">
     <q-card class="text-white full-width" style="border-radius: 15px; background-color: #E9F0FF;">
       <q-card-section>
-        <q-icon name="o_description" size="61px" style="color: #3683FD;" class="cursor-pointer q-py-md" @click="goBack" />
-        <div class="text-subtitle2" style="color: #3683FD;">by John Doe</div>
+        <q-icon name="eva-file-text-outline" size="61px" style="color: #3683FD;" class="cursor-pointer q-py-md" @click="goBack" />
+        <div class="text-subtitle2" style="color: #3683FD;">Riwayat Laporan</div>
       </q-card-section>
     </q-card>
   </div>

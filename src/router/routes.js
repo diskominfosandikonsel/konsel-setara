@@ -35,6 +35,11 @@ const routes = [
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
         meta: { showBottomNav: false }
       },
+      {
+        path: 'sapa_detail',
+        component: () => import('pages/SapaKonsel/Detail.vue'),
+        meta: { showBottomNav: false }
+      },
 
       // SIPPADU
       {
