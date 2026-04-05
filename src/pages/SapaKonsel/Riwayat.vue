@@ -18,7 +18,7 @@
       <q-page class="q-pa-md mulish" style="background-color: #F6F6F6;">
         <div v-if="icons" class="row q-col-gutter-sm">
           <div class="col-12" v-for="icon in icons" :key="icon">
-            <q-card class="bg-white full-width no-shadow cursor-pointer" style="border-radius: 10px; opacity: 0.85;" @click="goBack">
+            <q-card class="bg-white full-width no-shadow cursor-pointer" style="border-radius: 10px; opacity: 0.85;" @click="detail">
               <q-card-section>
                 <div class="row">
                   <div class="col-2">
@@ -65,6 +65,9 @@ export default {
   methods: {
     goBack () {
       this.$router.back()
+    },
+    detail () {
+      this.$router.push('/sapa_detail')
     }
   }
 }

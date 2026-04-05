@@ -60,17 +60,17 @@
     </q-card>
   </div>
   <div class="col-6">
-    <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;">
+    <q-card class="text-white full-width cursor-pointer" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;" @click="satgas">
       <q-card-section>
-        <q-icon name="eva-people-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <q-icon name="eva-people-outline" size="61px" color="white" class="cursor-pointer q-py-md" />
         <div class="text-subtitle2">Satgas PPPA</div>
       </q-card-section>
     </q-card>
   </div>
   <div class="col-6">
-    <q-card class="text-white full-width" style="border-radius: 15px; background-color: #E9F0FF;">
+    <q-card class="text-white full-width cursor-pointer" style="border-radius: 15px; background-color: #E9F0FF;" @click="riwayat">
       <q-card-section>
-        <q-icon name="eva-file-text-outline" size="61px" style="color: #3683FD;" class="cursor-pointer q-py-md" @click="goBack" />
+        <q-icon name="eva-file-text-outline" size="61px" style="color: #3683FD;" class="cursor-pointer q-py-md" />
         <div class="text-subtitle2" style="color: #3683FD;">Riwayat Laporan</div>
       </q-card-section>
     </q-card>
@@ -97,6 +97,12 @@ export default {
   methods: {
   goBack () {
     this.$router.back()
+  },
+  satgas () {
+    this.$router.push('/sapa_satgas')
+  },
+  riwayat () {
+    this.$router.push('/sapa_riwayat')
   }
 }
 }
