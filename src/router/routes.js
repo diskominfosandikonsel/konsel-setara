@@ -58,7 +58,12 @@ const routes = [
         path: 'perak_dashboard',
         component: () => import('pages/PerakKonsel/Dashboard.vue'),
         meta: { showBottomNav: true }
-      }
+      },
+      {
+        path: 'biodata',
+        component: () => import('pages/PerakKonsel/biodata.vue'),
+        meta: { showBottomNav: true }
+      },
     ]
   },
 

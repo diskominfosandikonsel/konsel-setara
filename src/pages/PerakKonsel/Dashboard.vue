@@ -7,7 +7,7 @@
     </q-header>
     <div class="row q-col-gutter-md q-px-md q-py-lg text-center">
       <div class="col-6">
-        <div class="card">
+        <div class="card" @click="goBiodata">
           <q-card-section>
             <div class="card-inside">
               <q-img src="/img/perak/binders.png" class="card-icon" />
@@ -62,6 +62,16 @@
 
 <script>
 export default {
-  name: 'Perak Dashboard',
+  name: 'PerakDashboard',
+  data () {
+    return {
+
+    }
+  },
+  methods: {
+    goBiodata() {
+      this.$router.push('/biodata');
+    }
+  }
 }
 </script>
