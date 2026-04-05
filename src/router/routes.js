@@ -40,6 +40,11 @@ const routes = [
         component: () => import('pages/SapaKonsel/Detail.vue'),
         meta: { showBottomNav: false }
       },
+      {
+        path: 'sapa_satgas',
+        component: () => import('pages/SapaKonsel/Satgas.vue'),
+        meta: { showBottomNav: false }
+      },
 
       // SIPPADU
       {
