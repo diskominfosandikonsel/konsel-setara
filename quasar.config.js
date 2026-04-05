@@ -30,7 +30,7 @@ export default defineConfig((/* ctx */) => {
       'material-icons-round', // optional, you are not bound to it
       'material-icons-outlined', // optional, you are not bound to it
       'fontawesome-v5',
-      // 'material-icons', // optional, you are not bound to it
+      'material-icons', // optional, you are not bound to it
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
@@ -82,7 +82,10 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'Notify',
+        'Dialog'
+      ],
     },
 
     // animations: 'all', // --- includes all animations

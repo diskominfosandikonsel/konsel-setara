@@ -50,6 +50,21 @@ const routes = [
       {
         path: 'Perda',
         component: () => import('pages/Sippadu/Perda.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'Perkada',
+        component: () => import('pages/Sippadu/Perkada.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sippadu_riwayat',
+        component: () => import('pages/Sippadu/Riwayat.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'sippadu_detail',
+        component: () => import('pages/Sippadu/Detail.vue'),
         meta: { showBottomNav: false }
       },
 
