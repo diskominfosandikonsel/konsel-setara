@@ -50,7 +50,7 @@ const routes = [
       {
         path: 'Perda',
         component: () => import('pages/Sippadu/Perda.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: false }
       },
 
       // PERAK
@@ -58,7 +58,7 @@ const routes = [
         path: 'perak_dashboard',
         component: () => import('pages/PerakKonsel/Dashboard.vue'),
         meta: { showBottomNav: true }
-      },
+      }
     ]
   },
 
