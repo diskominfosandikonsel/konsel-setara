@@ -84,6 +84,21 @@ const routes = [
         component: () => import('pages/PerakKonsel/biodata.vue'),
         meta: { showBottomNav: true }
       },
+      {
+        path: 'tambahBiodata',
+        component: () => import('pages/PerakKonsel/tambahBiodata.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'editBiodata',
+        component: () => import('pages/PerakKonsel/editBiodata.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'pendidikanFormal',
+        component: () => import('pages/PerakKonsel/PendidikanFormal.vue'),
+        meta: { showBottomNav: true }
+      },
     ]
   },
 

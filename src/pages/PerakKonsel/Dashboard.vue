@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="col-6">
-        <div class="card">
+        <div class="card" @click="goPendidikan">
           <q-card-section>
             <div class="card-inside">
               <q-img src="/img/perak/toga.png" class="card-icon" />
@@ -71,6 +71,9 @@ export default {
   methods: {
     goBiodata() {
       this.$router.push('/biodata');
+    },
+    goPendidikan(){
+      this.$router.push('/pendidikanFormal');
     }
   }
 }

@@ -19,7 +19,29 @@
             <q-card class="cardBiodata q-pa-md">
               <div class="row items-center justify-between q-mb-md">
                 <div class="textBiodata">Biodata</div>
-                <q-btn flat round color="grey-7" icon="r_settings" size="20px" />
+                <q-btn flat round color="grey-7" icon="r_settings" size="20px">
+                  <q-menu auto-close transition-show="scale" transition-hide="scale" class="menu-setting">
+                    <q-list style="min-width: 120px">
+
+                      <q-item clickable @click="goEdit">
+                        <q-item-section>
+                          <q-icon name="r_edit" color="warning" size="20px" />
+                        </q-item-section>
+                        <q-item-section class="text-weight-medium">Edit</q-item-section>
+                      </q-item>
+
+                      <q-separator />
+
+                      <q-item clickable>
+                        <q-item-section avatar>
+                          <q-icon name="r_delete" color="negative" size="20px" />
+                        </q-item-section>
+                        <q-item-section class="text-weight-medium">Hapus</q-item-section>
+                      </q-item>
+
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </div>
 
               <q-separator class="q-mb-md" />
@@ -110,7 +132,7 @@
             </q-card>
           </div>
         </div>
-        <div class="divBtn flex flex-center" @click="tambahData">
+        <div class="divBtn flex flex-center" @click="goAdd">
           <q-icon name="r_add" color="white" size="40px" />
         </div>
       </q-page>
@@ -130,6 +152,12 @@ export default {
   methods: {
     goBack() {
       this.$router.back()
+    },
+    goAdd() {
+      this.$router.push('/tambahBiodata');
+    },
+    goEdit() {
+      this.$router.push('/editBiodata');
     }
   }
 }
