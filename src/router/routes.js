@@ -99,6 +99,80 @@ const routes = [
         component: () => import('pages/PerakKonsel/PendidikanFormal.vue'),
         meta: { showBottomNav: true }
       },
+
+      // SIMCARD
+      {
+        path: 'simcard_dashboard',
+        component: () => import('pages/Simcard/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path: 'simcard_login',
+        component: () => import('pages/Simcard/Login.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'KK1',
+        name  :'Kartu Keluarga Baru',
+        component: () => import('pages/Simcard/KK/KK1.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'KK2',
+        name  :'Permohonan Perubahan Kartu Keluarga (Perubahan Data) WNI',
+        component: () => import('pages/Simcard/KK/KK2.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'KK3',
+        name  :'Permohonan Kartu Keluarga (KK) Baru Orang Asing Yang Memiliki Izin Tinggal Tetap',
+        component: () => import('pages/Simcard/KK/KK3.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'PPD1',
+        name  :'Permohonan Pindah Antar Kabupaten/Kota Antar Provinsi',
+        component: () => import('pages/Simcard/PPD/PPD1.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'PPD2',
+        name  :'Permohonan Pindah Antar Desa/Kelurahan Dalam Satu Kecamatan',
+        component: () => import('pages/Simcard/PPD/PPD2.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'PPD3',
+        name  :'Permohonan Pindah Dalam Satu Desa/Kelurahan',
+        component: () => import('pages/Simcard/PPD/PPD3.vue'),
+        meta: { showBottomNav: true }
+      },      
+
+      {
+        path : 'LAHIR1',
+        name  :'Surat Keterangan Kelahiran',
+        component: () => import('pages/Simcard/Lahir/Lahir1.vue'),
+        meta: { showBottomNav: true }
+      },      
+      {
+        path : 'LAHIR2',
+        name  :'Surat Keterangan Kelahiran (Anak Yang Tidak Diketahui Asal-Usulnya) ',
+        component: () => import('pages/Simcard/Lahir/Lahir2.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path : 'MATI1',
+        name  :'Pelaporan Lahir Mati ',
+        component: () => import('pages/Simcard/Mati/Mati1.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path : 'MATI2',
+        name  :'Pelaporan Kematian ',
+        component: () => import('pages/Simcard/Mati/Mati2.vue'),
+        meta: { showBottomNav: true }
+       }      
+      // SIMCARD
     ]
   },
 
