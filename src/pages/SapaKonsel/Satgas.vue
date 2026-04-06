@@ -8,7 +8,7 @@
             <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
           </q-avatar>
           <span class="sapa_title">
-          Satgas PPPA
+          Satgas PPA
           </span>
         </q-toolbar-title>
       </q-toolbar>
@@ -16,19 +16,34 @@
 
     <q-page-container>
       <q-page class="q-pa-md mulish" style="background-color: #F6F6F6;">
-        <div v-if="icons" class="row q-col-gutter-sm">
-          <div class="col-12" v-for="icon in icons" :key="icon">
-            <q-card class="bg-white full-width no-shadow cursor-pointer" style="border-radius: 10px; opacity: 0.85;" @click="goBack">
+        <div v-if="sapa.loading" class="text-center q-mt-md">
+          Loading...
+        </div>
+        <div v-else-if="sapa.pengguna.length" class="row q-col-gutter-sm">
+          <div class="col-12" v-for="item in sapa.pengguna" :key="item.id">
+            <q-card
+              class="bg-white full-width no-shadow cursor-pointer"
+              style="border-radius: 10px; opacity: 0.85;"
+              @click="goBack"
+            >
               <q-card-section>
                 <div class="row">
                   <div class="col-2">
-                    <img :src="icon" width="44px" style="display: block;" />
+                    <img :src="profil" width="44px" />
                   </div>
 
                   <div class="col-10 q-pl-md">
-                    <div style="font-size: 16px; font-weight: bold; color: #152C07;">Riswan M Rizal</div>
-                    <div style="font-size: 12px; color: #5D5C5D;" class="two_line">Kecamatan Palangga</div>
-                    <div style="font-size: 12px; color: #BEBEBE;">082290374843</div>
+                    <div style="font-size: 16px; font-weight: bold;">
+                      {{ item.nama }}
+                    </div>
+
+                    <div style="font-size: 12px;" class="two_line">
+                      {{ item.email }}
+                    </div>
+
+                    <div style="font-size: 12px;">
+                      {{ item.hp }}
+                    </div>
                   </div>
                 </div>
               </q-card-section>
@@ -51,19 +66,40 @@
 </template>
 
 <script>
+import { useSapaStore } from 'stores/sapa'
 import profil from 'src/assets/sapa/profil.png'
 
 export default {
   name: 'SapaSatgas',
-  data () {
+
+  data() {
     return {
-      icons: [ profil, profil, profil, profil ]
+      profil,
+      cari: '',
+      page: 1,
     }
   },
-  methods: {
-    goBack () {
-      this.$router.back()
+
+  computed: {
+    sapa() {
+      return useSapaStore()
     }
+  },
+
+  methods: {
+    goBack() {
+      this.$router.back()
+    },
+    loadData() {
+      this.sapa.fetchPengguna({
+        cari_value: this.cari,
+        data_ke: this.page
+      })
+    },
+  },
+
+  mounted() {
+    this.loadData()
   }
 }
 </script>

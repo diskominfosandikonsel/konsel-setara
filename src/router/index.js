@@ -1,4 +1,5 @@
 import { defineRouter } from '#q-app/wrappers'
+import { useAuthStore } from 'stores/auth'
 import {
   createRouter,
   createMemoryHistory,
@@ -31,6 +32,17 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  })
+
+  Router.beforeEach((to, from, next) => {
+    const auth = useAuthStore()
+
+    // check if route needs login
+    if (to.meta.requiresAuth && !auth.token) {
+      next('/login') // redirect to login
+    } else {
+      next()
+    }
   })
 
   return Router

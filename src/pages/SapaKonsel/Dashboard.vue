@@ -55,7 +55,7 @@
     <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;">
       <q-card-section>
         <q-icon name="eva-message-square-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
-        <div class="text-subtitle2">Kirim Pesan</div>
+        <div class="text-subtitle2">Edukasi PPA</div>
       </q-card-section>
     </q-card>
   </div>
@@ -63,7 +63,7 @@
     <q-card class="text-white full-width cursor-pointer" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;" @click="satgas">
       <q-card-section>
         <q-icon name="eva-people-outline" size="61px" color="white" class="cursor-pointer q-py-md" />
-        <div class="text-subtitle2">Satgas PPPA</div>
+        <div class="text-subtitle2">Satgas PPA</div>
       </q-card-section>
     </q-card>
   </div>

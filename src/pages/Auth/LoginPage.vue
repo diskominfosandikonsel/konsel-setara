@@ -20,11 +20,11 @@
             <p class="instruction-text">Silakan login menggunakan akun anda</p>
 
             <div class="input-group">
-                <input type="email" placeholder="user_ifoid@gmail.com" v-model="email" class="custom-input">
+                <input type="email" placeholder="user_ifoid@gmail.com" v-model="form.username" class="custom-input">
             </div>
 
             <div class="input-group">
-                <input type="password" placeholder="**********" v-model="password" class="custom-input">
+                <input type="password" placeholder="**********" v-model="form.password" class="custom-input">
             </div>
 
             <div class="links-section">
@@ -32,28 +32,41 @@
             </div>
 
             <div class="button-group">
-                <button class="btn btn-primary" @click="handleLogin">Masuk</button>
+                <button class="btn btn-primary" @click="doLogin">Masuk</button>
                 <button class="btn btn-outline" @click="handleRegister">Daftar</button>
             </div>
         </div>
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script >
+import { useAuthStore } from 'src/stores/auth';
+export default {
+    name : 'LoginPage',
 
-const email = ref('');
-const password = ref('');
+    data() {
+        return {
+        form: {
+            username: '',
+            password: ''
+        }
+        }
+    },
+    computed: {
+        auth() {
+            return useAuthStore()
+        }
+    },
+    methods: {
+        async doLogin() {
+        const success = await this.auth.login(this.form)
 
-const handleLogin = () => {
-    console.log('Logging in with:', email.value, password.value);
-    // Implementation logic here
-};
-
-const handleRegister = () => {
-    console.log('Navigating to registration');
-    // Navigation logic here
-};
+        if (success) {
+            this.$router.push('/')
+        }
+        }
+    }
+}
 </script>
 
 <style scoped>
