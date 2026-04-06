@@ -23,6 +23,12 @@
     margin-top: -20px;
 }
 
+.textPrimary{
+    color: #5FAEEE;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
 .card {
     text-align: center;
     border-radius: 14px;
@@ -66,8 +72,18 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.menu-setting {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.menu-setting .q-item__section--avatar {
+  min-width: 30px;
+  padding-right: 8px;
+}
+
 .divBtn {
-    position: absolute;
+    position: fixed;
     bottom: 80px;
     right: 16px;
     width: 60px;
@@ -114,6 +130,11 @@
     white-space: nowrap;
 }
 
+.frame{
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
 .formInput .q-field__control {
     border-radius: 15px !important;
     height: 60px;
@@ -149,14 +170,30 @@
 }
 
 .judul {
-    font-size: 13px;
-    color: #494949;
+    font-size: 12px;
     font-weight: bold;
+    color: #494949;
 }
 
 .subJudul {
-    font-size: 11px;
-    color: #A0A0A0;
+    font-size: 12px;
+    color: #494949;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #C1C1C1;
+}
+
+.border-bottom:last-child {
+  border-bottom: none;
+}
+
+.cardPengalaman {
+    border-radius: 17px !important;
+    border: 1px solid #f0f0f0;
+    box-shadow: -1px 2px 5px #00000040 !important;
+    width: 321px;
+    background-color: #FCFBFC !important;
 }
 
 /* BIODATA PENCAKER */

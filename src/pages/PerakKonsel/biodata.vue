@@ -24,7 +24,7 @@
                     <q-list style="min-width: 120px">
 
                       <q-item clickable @click="goEdit">
-                        <q-item-section>
+                        <q-item-section avatar>
                           <q-icon name="r_edit" color="warning" size="20px" />
                         </q-item-section>
                         <q-item-section class="text-weight-medium">Edit</q-item-section>
@@ -143,7 +143,7 @@
 <script>
 
 export default {
-  name: 'biodata',
+  name: 'Biodata',
   data() {
     return {
 

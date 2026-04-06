@@ -5,8 +5,7 @@
             <q-toolbar>
                 <q-toolbar-title>
                     <q-avatar>
-                        <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer"
-                            @click="goBack" />
+                        <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
                     </q-avatar>
                     <span class="headerText">Pendidikan Formal</span>
                 </q-toolbar-title>
@@ -15,12 +14,12 @@
 
         <q-page-container>
             <q-page class="q-pa-md" style="background-color: #FFFFFF;">
-                <div class="row items-center q-gutter-y-md" style="margin-top: 48px;">
+                <div class="row items-center q-gutter-y-md" style="margin-top: 20px;">
                     <q-card v-for="(item, index) in listPendidikan" :key="index" class="cardPendidikan q-pa-sm">
                         <div class="row items-center no-wrap">
 
                             <div class="col-auto q-mr-md">
-                                <q-img src="/img/perak/file.png" style="width: 35px; height: 35px;" />
+                                <q-img src="/img/perak/report.png" style="width: 35px; height: 35px;" />
                             </div>
 
                             <div class="col">
@@ -34,8 +33,17 @@
                                         class="menu-setting">
                                         <q-list style="min-width: 120px">
 
-                                            <q-item clickable @click="goEdit">
+                                            <q-item clickable @click="goDetile">
                                                 <q-item-section>
+                                                    <q-icon name="r_find_in_page" color="primary" size="20px" />
+                                                </q-item-section>
+                                                <q-item-section class="text-weight-medium">Detile</q-item-section>
+                                            </q-item>
+
+                                            <q-separator />
+
+                                            <q-item clickable @click="goEdit">
+                                                <q-item-section avatar>
                                                     <q-icon name="r_edit" color="warning" size="20px" />
                                                 </q-item-section>
                                                 <q-item-section class="text-weight-medium">Edit</q-item-section>
@@ -69,7 +77,7 @@
 <script>
 
 export default {
-    name: 'biodata',
+    name: 'PendidikanFormal',
     data() {
         return {
             listPendidikan: [
@@ -84,11 +92,14 @@ export default {
         goBack() {
             this.$router.back()
         },
+        goDetile(){
+            this.$router.push('/detilePendidikan');
+        },
         goAdd() {
-            this.$router.push('/tambahBiodata');
+            this.$router.push('/tambahPendidikan');
         },
         goEdit() {
-            this.$router.push('/editBiodata');
+            this.$router.push('/editPendidikan');
         }
     }
 }

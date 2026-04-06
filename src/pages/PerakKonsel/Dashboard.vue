@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="col-6">
-        <div class="card">
+        <div class="card" @click="goPengalaman">
           <q-card-section>
             <div class="card-inside">
               <q-img src="/img/perak/certificate.png" class="card-icon" />
@@ -37,7 +37,7 @@
         </div>
       </div>
       <div class="col-6">
-        <div class="card">
+        <div class="card" @click="goJabatan">
           <q-card-section>
             <div class="card-inside">
               <q-img src="/img/perak/pen.png" class="card-icon" />
@@ -47,7 +47,7 @@
         </div>
       </div>
       <div class="col-6">
-        <div class="card">
+        <div class="card" @click="goLampiran">
           <q-card-section>
             <div class="card-inside">
               <q-img src="/img/perak/file.png" class="card-icon" />
@@ -74,7 +74,16 @@ export default {
     },
     goPendidikan(){
       this.$router.push('/pendidikanFormal');
-    }
+    },
+    goPengalaman(){
+      this.$router.push('/pengalamanKerja');
+    },
+    goJabatan(){
+      this.$router.push('/jabatan');
+    },
+    goLampiran(){
+      this.$router.push('/lampiran');
+    },
   }
 }
 </script>
