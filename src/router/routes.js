@@ -81,17 +81,17 @@ const routes = [
       },
       {
         path: 'biodata',
-        component: () => import('/pages/PerakKonsel/Biodata.vue'),
+        component: () => import('pages/PerakKonsel/Biodata.vue'),
         meta: { showBottomNav: true }
       },
       {
         path: 'tambahBiodata',
-        component: () => import('/pages/PerakKonsel/TambahBiodata.vue'),
+        component: () => import('pages/PerakKonsel/TambahBiodata.vue'),
         meta: { showBottomNav: true }
       },
       {
         path: 'editBiodata',
-        component: () => import('/pages/PerakKonsel/EditBiodata.vue'),
+        component: () => import('pages/PerakKonsel/EditBiodata.vue'),
         meta: { showBottomNav: true }
       },
       {
