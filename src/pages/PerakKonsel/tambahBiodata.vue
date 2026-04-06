@@ -14,7 +14,7 @@
 
         <q-page-container>
             <q-page class="q-pa-md">
-                <div class="row">
+                <div class="row" style="margin-top: 30px">
                     <div class="col-12 col-md-12">
                         <q-input v-model="prov" outlined placeholder="Provinsi" class="formInput" />
                     </div>
@@ -85,7 +85,7 @@
 <script>
 
 export default {
-    name: 'tambahBiodata',
+    name: 'TambahBiodata',
     data() {
         return {
             prov: 'Sulawesi Tenggara',

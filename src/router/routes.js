@@ -81,22 +81,82 @@ const routes = [
       },
       {
         path: 'biodata',
-        component: () => import('pages/PerakKonsel/biodata.vue'),
+        component: () => import('pages/PerakKonsel/Biodata.vue'),
         meta: { showBottomNav: true }
       },
       {
         path: 'tambahBiodata',
-        component: () => import('pages/PerakKonsel/tambahBiodata.vue'),
+        component: () => import('pages/PerakKonsel/TambahBiodata.vue'),
         meta: { showBottomNav: true }
       },
       {
         path: 'editBiodata',
-        component: () => import('pages/PerakKonsel/editBiodata.vue'),
+        component: () => import('pages/PerakKonsel/EditBiodata.vue'),
         meta: { showBottomNav: true }
       },
       {
         path: 'pendidikanFormal',
         component: () => import('pages/PerakKonsel/PendidikanFormal.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'detilePendidikan',
+        component: () => import('src/pages/PerakKonsel/DetilePendidikan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'tambahPendidikan',
+        component: () => import('src/pages/PerakKonsel/TambahPendidikan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'editPendidikan',
+        component: () => import('src/pages/PerakKonsel/EditPendidikan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'pengalamanKerja',
+        component: () => import('src/pages/PerakKonsel/PengalamanKerja.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'tambahPengalaman',
+        component: () => import('src/pages/PerakKonsel/TambahPengalaman.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'editPengalaman',
+        component: () => import('src/pages/PerakKonsel/EditPengalaman.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'jabatan',
+        component: () => import('src/pages/PerakKonsel/Jabatan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'tambahJabatan',
+        component: () => import('src/pages/PerakKonsel/TambahJabatan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'editJabatan',
+        component: () => import('src/pages/PerakKonsel/EditJabatan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'lampiran',
+        component: () => import('src/pages/PerakKonsel/Lampiran.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'tambahLampiran',
+        component: () => import('src/pages/PerakKonsel/TambahLampiran.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'editLampiran',
+        component: () => import('src/pages/PerakKonsel/EditLampiran.vue'),
         meta: { showBottomNav: true }
       },
 
