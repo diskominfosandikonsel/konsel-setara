@@ -236,8 +236,15 @@ const routes = [
         path: 'login',
         component: () => import('pages/Auth/LoginPage.vue'),
         meta: { showBottomNav: false }
-      }
+      },
       // SIMCARD
+
+      // JDIH
+      {
+        path: 'jdih_dashboard',
+        component: () => import('pages/Jdih/Dashboard.vue'),
+        meta: { showBottomNav: false }
+      }
     ]
   },
 
