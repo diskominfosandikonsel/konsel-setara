@@ -171,7 +171,12 @@ const routes = [
         name  :'Pelaporan Kematian ',
         component: () => import('pages/Simcard/Mati/Mati2.vue'),
         meta: { showBottomNav: true }
-       }      
+      },
+      {
+        path: 'login',
+        component: () => import('pages/Auth/LoginPage.vue'),
+        meta: { showBottomNav: false }
+      }
       // SIMCARD
     ]
   },
