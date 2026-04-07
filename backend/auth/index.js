@@ -34,13 +34,11 @@ router.post('/login', (req, res) => {
 
   dbs.query(sql, [req.body.username], async (err, rows) => {
 
-    // 🔥 HANDLE ERROR FIRST
     if (err) {
       console.error('DB ERROR:', err)
       return res.status(500).json({ message: 'Database error' })
     }
 
-    // 🔥 SAFE CHECK
     if (!rows || rows.length === 0) {
       return respondError422(res, "Username Salah")
     }

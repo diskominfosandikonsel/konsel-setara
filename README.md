@@ -5,8 +5,13 @@ Konsel Setara
 ## Tech Stack
 
 ```bash
+Frontend
 Node v24.12.0 (alt node v20+ )
 @quasar/app-vite 2.4.0 
+
+Backend
+Node v24.12.0 (alt node v20+ )
+Express.js 5.2.1
 ```
 
 ## Install the dependencies
