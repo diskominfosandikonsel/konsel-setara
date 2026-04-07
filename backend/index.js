@@ -14,6 +14,15 @@ app.use(express.json());
 
 app.use(middleware.checkTokenSeetUser);
 
+app.use((req, res, next) => {
+  console.log('==========================')
+  console.log('🌐 REQUEST:', req.method, req.url)
+  console.log('📦 BODY:', req.body)
+  console.log('🔑 AUTH:', req.headers.authorization)
+  console.log('==========================')
+  next()
+})
+
 app.get('/', (req, res) => {
   res.json({
     message: '🦄🌈✨Hello pengunjung,,, Anda mengunjugi alamat yg salah... mungkin maksud anda http://konaweselatankab.go.id ! 🌈✨🦄',

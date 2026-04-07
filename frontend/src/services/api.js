@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://10.202.204.37:5028/'
+  baseURL: 'https://konsel-setara.konaweselatankab.go.id/'
 })
 
 api.interceptors.request.use((config) => {

@@ -15,7 +15,11 @@ export const useAuthStore = defineStore('auth', {
       Loading.show()
 
       try {
+        console.log('LOGIN PAYLOAD:', form)
+
         const res = await AuthService.login(form)
+
+        console.log('LOGIN RESPONSE:', res.data)
 
         // 🔥 adjust based on your backend response
         const { token, user } = res.data
@@ -35,9 +39,9 @@ export const useAuthStore = defineStore('auth', {
         return true
       } catch (err) {
         Notify.create({
-          message: 'Login gagal',
-          color: 'negative'
-        })
+  message: err.response?.data?.message || 'Login gagal',
+  color: 'negative'
+})
         return false
       } finally {
         this.loading = false

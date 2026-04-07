@@ -21,9 +21,13 @@ function respondError422(res, text){
 
 router.post('/login', (req, res) => {
 
+  console.log('===== LOGIN REQUEST =====')
+  console.log('BODY:', req.body)
+
   const result = schema.validate(req.body)
 
   if (result.error) {
+    console.log('❌ VALIDATION ERROR:', result.error.details)
     return respondError422(res, "Gagal Login, periksa username/password")
   }
 
@@ -32,23 +36,35 @@ router.post('/login', (req, res) => {
     WHERE username = ?
   `
 
+  console.log('➡️ QUERY:', sql)
+  console.log('➡️ PARAM:', req.body.username)
+
   dbs.query(sql, [req.body.username], async (err, rows) => {
 
     if (err) {
-      console.error('DB ERROR:', err)
+      console.error('❌ DB ERROR:', err)
       return res.status(500).json({ message: 'Database error' })
     }
 
+    console.log('✅ DB RESULT:', rows)
+
     if (!rows || rows.length === 0) {
+      console.log('❌ USER NOT FOUND')
       return respondError422(res, "Username Salah")
     }
 
     const user = rows[0]
+    console.log('👤 USER FOUND:', user.username)
 
     try {
+      console.log('🔐 CHECKING PASSWORD...')
+
       const match = await bcrypt.compare(req.body.password, user.password)
 
+      console.log('🔐 PASSWORD MATCH:', match)
+
       if (!match) {
+        console.log('❌ WRONG PASSWORD')
         return respondError422(res, "Password salah")
       }
 
@@ -64,10 +80,16 @@ router.post('/login', (req, res) => {
         }
       }
 
+      console.log('📦 PAYLOAD:', payload)
+
       jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
         if (err) {
+          console.error('❌ JWT ERROR:', err)
           return respondError422(res, "Gagal membuat token")
         }
+
+        console.log('✅ LOGIN SUCCESS')
+        console.log('🔑 TOKEN:', token)
 
         return res.json({
           token,
@@ -76,12 +98,12 @@ router.post('/login', (req, res) => {
       })
 
     } catch (e) {
-      console.error('BCRYPT ERROR:', e)
+      console.error('❌ BCRYPT ERROR:', e)
       return res.status(500).json({ message: 'Auth error' })
     }
 
   })
-});
+})
 
 router.post('/register', (req, res, next) => {
 
