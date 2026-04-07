@@ -48,7 +48,7 @@
 
       <!-- Menu Grid -->
       <div class="row q-col-gutter-y-lg justify-start menu-grid">
-        <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index">
+        <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index" @click="goToRoute(item.route)">
           <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
             <template v-if="item.img">
               <img :src="item.img" style="width: 44px; height: 44px; object-fit: contain;" />
@@ -110,6 +110,7 @@
 
 <script>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { Autoplay } from 'swiper/modules'
@@ -121,6 +122,7 @@ export default {
     SwiperSlide
   },
   setup () {
+    const router = useRouter()
     const swiperRef = ref(null)
     const activeIndex = ref(0)
     
@@ -136,6 +138,13 @@ export default {
       }
     }
 
+    const goToRoute = (route) => {
+      if (route) {
+        // Assume route doesn't have leading slash if it's named or path, let Vue Router handle resolution
+        router.push(route)
+      }
+    }
+
     return {
       modules: [Autoplay],
       swiperRef,
@@ -143,17 +152,18 @@ export default {
       onSwiper,
       onSlideChange,
       goToSlide,
+      goToRoute,
       search: ref(''),
       menuItems: [
-        { label: 'Firetap', img: 'icons/Firetap.png' },
-        { label: 'SapaKonsel', img: 'icons/Sapakonsel.png' },
-        { label: 'PERAK', img: 'icons/Perak.png' },
-        { label: 'PPID', img: 'icons/Ppid.png' },
-        { label: 'JDIH', img: 'icons/Jdih.png' },
-        { label: 'SIPADU', img: 'icons/Sipadu.png' },
-        { label: 'SIMCARD', img: 'icons/Simcard.png' },
-        { label: 'E-Rida', img: 'icons/E-rida.png' },
-        { label: 'Lainnya', icon: 'grid_view', color: 'black' }
+        { label: 'Firetap', img: 'icons/Firetap.png', route: '' },
+        { label: 'SapaKonsel', img: 'icons/Sapakonsel.png', route: '/sapa_dashboard' },
+        { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
+        { label: 'PPID', img: 'icons/Ppid.png', route: '' },
+        { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
+        { label: 'SIPADU', img: 'icons/Sipadu.png', route: '/sippadu_dashboard' },
+        { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
+        { label: 'E-Rida', img: 'icons/E-rida.png', route: '' },
+        { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
     }
   }
