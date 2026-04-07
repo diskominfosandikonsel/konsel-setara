@@ -39,7 +39,7 @@
       </template>
 
       <!-- Teks indikator habisa data (jika database sudah tersedot semua) -->
-      <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-grey-5 q-py-md text-caption">
+      <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-clack-5 q-py-md text-caption">
         Semua berita terkini telah dimuat.
       </div>
     </q-infinite-scroll>
@@ -77,7 +77,7 @@ const fetchNews = async (page, limit = 10) => {
         })
       }
       resolve(dbHalaman)
-    }, 1500)
+    }, 1000)
   })
 }
 
@@ -93,7 +93,7 @@ const onLoad = async (index, done) => {
       
       // Simulasi batasan total database (Misal hanya ada 30 data berita)
       // Hal ini agar animasi load berhenti ketika seluruh berita habis di database.
-      if (newsList.value.length >= 30) {
+      if (newsList.value.length >= 25) {
         allDataLoaded.value = true
         done(true) // parameter true = henti pencarian data bawah
       } else {
@@ -122,7 +122,7 @@ const onLoad = async (index, done) => {
   padding-right: 16px;
 }
 .pb-xl {
-  padding-bottom: 80px; /* Alokasi bottom navigation di MainLayout */
+  padding-bottom: 30px; /* Alokasi bottom navigation di MainLayout */
 }
 .news-item {
   border-bottom: 1px solid #eeeeee;
