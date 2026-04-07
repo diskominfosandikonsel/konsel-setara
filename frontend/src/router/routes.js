@@ -244,6 +244,11 @@ const routes = [
         path: 'jdih_dashboard',
         component: () => import('pages/Jdih/Dashboard.vue'),
         meta: { showBottomNav: false }
+      },
+      {
+        path: 'peraturanDaerah',
+        component: () => import('pages/Jdih/Perda.vue'),
+        meta: { showBottomNav: false }
       }
     ]
   },

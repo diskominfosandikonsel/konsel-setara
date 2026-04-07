@@ -23,7 +23,7 @@
     margin-top: -20px;
 }
 
-.textPrimary{
+.textPrimary {
     color: #5FAEEE;
     font-size: 14px;
     line-height: 1.2;
@@ -40,7 +40,7 @@
 }
 
 .card-inside {
-    background-color: #5faeeeb2;
+    background: linear-gradient(180deg, #bbdefb 0%, #90caf9 100%);
     width: 55px;
     height: 55px;
     border-radius: 15px;
@@ -73,13 +73,13 @@
 }
 
 .menu-setting {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
 .menu-setting .q-item__section--avatar {
-  min-width: 30px;
-  padding-right: 8px;
+    min-width: 30px;
+    padding-right: 8px;
 }
 
 .divBtn {
@@ -130,7 +130,7 @@
     white-space: nowrap;
 }
 
-.frame{
+.frame {
     padding-left: 1%;
     padding-right: 1%;
 }
@@ -181,11 +181,11 @@
 }
 
 .border-bottom {
-  border-bottom: 1px solid #C1C1C1;
+    border-bottom: 1px solid #C1C1C1;
 }
 
 .border-bottom:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .cardPengalaman {
