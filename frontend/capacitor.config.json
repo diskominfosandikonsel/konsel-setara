@@ -1,0 +1,6 @@
+{
+  "appId": "go.id.konaweselatankab",
+  "appName": "Konsel Setara",
+  "webDir": "dist/spa",
+  "bundledWebRuntime": false
+}
