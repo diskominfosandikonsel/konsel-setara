@@ -1,74 +1,146 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md bg-white pb-xl">
+    <!-- Header Berita -->
+    <div class="row items-center q-mb-lg header-title">
+      <q-btn flat round dense icon="keyboard_arrow_left" size="18px" @click="$router.back()" class="q-mr-sm" />
+      <div class="text-h5 text-weight-regular text-black">Berita</div>
+    </div>
 
-    <!-- 🔍 SEARCH -->
-    <q-input
-      v-model="sippadu.cari"
-      label="Cari laporan..."
-      outlined
-      dense
-      @keyup.enter="onSearch"
-      class="q-mb-md"
-    />
-
-    <q-btn label="Cari" @click="onSearch" color="primary" />
-
-    <!-- 📊 DATA -->
-    <div v-if="sippadu.loading">Loading...</div>
-
-    <div v-else>
-      <div v-for="item in sippadu.list_laporan" :key="item.id">
-        {{ item.uraian }} - {{ item.createBy }}
+    <!-- Infinite Scroll Container -->
+    <!-- :offset="150" berarti load triggger ketika pengguna mencapai 150px dari bawah -->
+    <q-infinite-scroll @load="onLoad" :offset="150" ref="infiniteScrollRef">
+      <!-- List Berita -->
+      <div v-for="(news, idx) in newsList" :key="idx" class="row q-mb-md news-item items-start">
+        <div class="col-4">
+          <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
+        </div>
+        <div class="col-8 q-pl-md column justify-between py-1" style="min-height: 85px">
+          <div>
+            <div class="text-subtitle2 text-weight-bold line-clamp-2 text-grey-10 lh-tight letter-spacing-tight" style="font-family: serif;">
+              {{ news.title }}
+            </div>
+            <div class="text-caption text-grey-6 q-mt-xs text-weight-medium">
+              {{ news.author }}
+            </div>
+          </div>
+          <div class="q-mt-xs">
+            <q-chip color="blue-2" text-color="blue-8" size="sm" class="q-ma-none text-weight-bold" square>
+              {{ news.date }}
+            </q-chip>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- 🔢 PAGINATION -->
-    <div class="q-mt-md">
-      <q-btn label="Prev" @click="prevPage" :disable="sippadu.page === 1" />
-      <span class="q-mx-sm">Page {{ sippadu.page }}</span>
-      <q-btn label="Next" @click="nextPage" />
-    </div>
+      <!-- Icon Loading Quasar standar -->
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
 
+      <!-- Teks indikator habisa data (jika database sudah tersedot semua) -->
+      <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-grey-5 q-py-md text-caption">
+        Semua berita terkini telah dimuat.
+      </div>
+    </q-infinite-scroll>
   </q-page>
 </template>
 
-<script>
-import { useSippaduStore } from 'stores/sippadu'
+<script setup>
+import { ref } from 'vue'
 
-export default {
-  name: 'NewsPage',
+const newsList = ref([])
+const allDataLoaded = ref(false)
 
-  computed: {
-    sippadu() {
-      return useSippaduStore()
-    }
-  },
-
-  methods: {
-    loadData() {
-      this.sippadu.getLaporan()
-    },
-
-    onSearch() {
-      this.sippadu.page = 1 // reset page
-      this.loadData()
-    },
-
-    nextPage() {
-      this.sippadu.page++
-      this.loadData()
-    },
-
-    prevPage() {
-      if (this.sippadu.page > 1) {
-        this.sippadu.page--
-        this.loadData()
+// Fungsi mock panggilan API
+// limit = 10 berarti default ambil 10 berita sesuai permintaan
+const fetchNews = async (page, limit = 10) => {
+  
+  // GANTI BAGIAN INI DENGAN FUNGSI API DARI DATABASE ASLI ANDA
+  // Contoh: 
+  // const response = await api.get(`/endpoint-berita?page=${page}&limit=${limit}`)
+  // return response.data
+  
+  return new Promise((resolve) => {
+    // Simulasi delay pemuatan data 1,5 detik
+    setTimeout(() => {
+      const dbHalaman = []
+      // Menghasilkan dummy data
+      for(let i = 1; i <= limit; i++) {
+        const id = ((page - 1) * limit) + i
+        dbHalaman.push({
+          id,
+          title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+          author: 'Pemkab Konawe Selatan',
+          date: '1 Years ago',
+          img: `https://picsum.photos/300/300?random=${id}`
+        })
       }
-    }
-  },
+      resolve(dbHalaman)
+    }, 1500)
+  })
+}
 
-  mounted() {
-    this.loadData()
+// Handler Infinite Scroll dari API Quasar
+const onLoad = async (index, done) => {
+  try {
+    // index bernilai urutan per-halaman yang langsung dikasih Quasar secara matematis (1, 2, 3...)
+    const dataBatch = await fetchNews(index, 10)
+    
+    // Jika data tidak kosong, masukkan
+    if (dataBatch && dataBatch.length > 0) {
+      newsList.value.push(...dataBatch)
+      
+      // Simulasi batasan total database (Misal hanya ada 30 data berita)
+      // Hal ini agar animasi load berhenti ketika seluruh berita habis di database.
+      if (newsList.value.length >= 30) {
+        allDataLoaded.value = true
+        done(true) // parameter true = henti pencarian data bawah
+      } else {
+        done() // teruskan pemantauan scorll untuk load API part selanjutnya
+      }
+    } else {
+      // Tidak ada data kembali
+      allDataLoaded.value = true
+      done(true)
+    }
+  } catch (error) {
+    console.error('Error memuat berita:', error)
+    done()
   }
 }
 </script>
+
+<style scoped>
+.header-title {
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
+  /* Trick membuat border tembus sampai pinggir meski q-page ada padding */
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.pb-xl {
+  padding-bottom: 80px; /* Alokasi bottom navigation di MainLayout */
+}
+.news-item {
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 16px;
+}
+.news-img {
+  border-radius: 4px; /* Border tajam minimalis sesuai gambar */
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lh-tight {
+  line-height: 1.2;
+}
+.letter-spacing-tight {
+  letter-spacing: -0.2px;
+}
+</style>

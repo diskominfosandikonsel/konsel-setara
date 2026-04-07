@@ -1,29 +1,36 @@
 <template>
-  <q-page class="q-pa-md page-bg pb-xl">
+  <q-page class="q-pt-md page-bg pb-xl">
     <!-- Top Carousel (Swiper) -->
     <swiper
+      v-if="displayCarouselItems.length > 0"
       :modules="modules"
-      :slides-per-view="1.15"
+      :slides-per-view="1.2"
       :centered-slides="true"
-      :space-between="16"
+      :space-between="12"
       :loop="true"
       :autoplay="{ delay: 4000, disableOnInteraction: false }"
       @swiper="onSwiper"
       @slideChange="onSlideChange"
       class="q-mt-sm main-swiper"
     >
-      <swiper-slide v-for="n in 6" :key="'slide-'+n">
-        <img :src="`img/card${((n-1)%3)+1}.png`" class="slide-img shadow-2" />
+      <swiper-slide v-for="(item, idx) in displayCarouselItems" :key="'slide-'+idx">
+        <img :src="item.img" class="slide-img shadow-2" />
       </swiper-slide>
     </swiper>
+    
+    <!-- Shimmer/Skeleton if loading -->
+    <div v-else class="q-mt-sm q-px-md row justify-center">
+      <q-skeleton height="170px" width="100%" class="rounded-edges shadow-2" />
+    </div>
 
-    <!-- Custom Navigation Dots for 3 Items -->
-    <div class="row justify-center q-my-sm q-pb-sm">
+    <div class="q-px-md">
+      <!-- Custom Navigation Dots -->
+    <div class="row justify-center q-my-sm q-pb-sm" v-if="carouselItems.length > 0">
       <div 
-        v-for="n in 3" :key="'dot-'+n"
+        v-for="(item, idx) in carouselItems" :key="'dot-'+idx"
         class="nav-dot q-mx-xs cursor-pointer"
-        :class="(activeIndex % 3) === (n - 1) ? 'dot-active' : 'dot-inactive'"
-        @click="goToSlide(n - 1)"
+        :class="(activeIndex % carouselItems.length) === idx ? 'dot-active' : 'dot-inactive'"
+        @click="goToSlide(idx)"
       ></div>
     </div>
 
@@ -32,7 +39,7 @@
       <div class="text-subtitle1 text-weight-bold q-mb-sm text-grey-9">Menu</div>
       
       <!-- Search Input -->
-      <q-input 
+      <!-- <q-input 
         v-model="search" 
         outlined
         dense
@@ -44,14 +51,14 @@
         <template v-slot:append>
           <q-icon name="search" color="primary" />
         </template>
-      </q-input>
+      </q-input> -->
 
       <!-- Menu Grid -->
       <div class="row q-col-gutter-y-lg justify-start menu-grid">
         <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index" @click="goToRoute(item.route)">
           <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
             <template v-if="item.img">
-              <img :src="item.img" style="width: 44px; height: 44px; object-fit: contain;" />
+              <img :src="item.img" style="width: 50px; height: 50px; object-fit: contain;" />
             </template>
             <template v-else>
               <q-icon :name="item.icon" color="indigo-5" size="32px"/>
@@ -66,54 +73,88 @@
     <div class="q-mb-lg">
       <div class="text-subtitle1 text-weight-bold q-mb-sm text-grey-9">Video Berita</div>
       <div class="video-scroll-container">
-        <q-card v-for="n in 4" :key="'vid'+n" class="video-card q-mr-sm no-shadow bordered-card">
-          <q-img src="https://picsum.photos/300/200?random=1" height="140px" class="bg-dark rounded-borders">
-            <div class="absolute-center bg-transparent">
-              <q-icon name="play_circle_outline" color="white" size="48px" />
-            </div>
-            <div class="absolute-bottom text-caption text-left text-white video-overlay">
-              Lorem ipsum dolor sit amet, Consectetur adipiscing elit
-            </div>
-          </q-img>
-        </q-card>
+        <!-- Render videos dynamically or show skeleton/dummy -->
+        <template v-if="videoBerita.length > 0">
+          <q-card 
+            v-for="(vid, idx) in videoBerita" 
+            :key="'vid'+idx" 
+            class="video-card q-mr-sm no-shadow bordered-card cursor-pointer"
+            @click="openVideoLink(vid.link)"
+          >
+            <q-img :src="vid.img || getThumbnail(vid.link)" height="140px" class="bg-dark rounded-borders">
+              <div class="absolute-center bg-transparent">
+                <q-icon name="play_circle_outline" color="white" size="48px" />
+              </div>
+              <div class="absolute-bottom text-caption text-left text-white video-overlay">
+                <div class="line-clamp-2">{{ vid.title }}</div>
+              </div>
+            </q-img>
+          </q-card>
+        </template>
+        <!-- Shimmer loading state -->
+        <template v-else>
+           <q-card v-for="n in 3" :key="'skel-vid'+n" class="video-card q-mr-sm no-shadow bordered-card">
+              <q-skeleton height="140px" square class="rounded-borders" />
+           </q-card>
+        </template>
       </div>
     </div>
 
     <!-- Berita Terbaru -->
-    <div class="q-mb-lg">
+    <div class="q-mb-sm">
       <div class="text-subtitle1 text-weight-bold q-mb-md text-grey-9">Berita terbaru</div>
       
-      <div v-for="n in 3" :key="'news'+n" class="row q-mb-md news-item">
-        <div class="col-4">
-          <q-img :src="`https://picsum.photos/200/200?random=${n+1}`" class="rounded-borders news-img" ratio="1" />
-        </div>
-        <div class="col-8 q-pl-md column justify-between py-1">
-          <div>
-            <div class="text-subtitle2 text-weight-bold line-clamp-2 text-grey-9 lh-tight">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit
+      <template v-if="beritaTerbaru.length > 0">
+        <div v-for="(news, idx) in beritaTerbaru" :key="'news'+idx" class="row q-mb-md news-item">
+          <div class="col-4">
+            <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
+          </div>
+          <div class="col-8 q-pl-md column justify-between py-1">
+            <div>
+              <div class="text-subtitle2 text-weight-bold line-clamp-2 text-grey-9 lh-tight">
+                {{ news.title }}
+              </div>
+              <div class="text-caption text-grey-6 q-mt-xs">
+                {{ news.author }}
+              </div>
             </div>
-            <div class="text-caption text-grey-6 q-mt-xs">
-              Pemkab Konawe Selatan
+            <div class="q-mt-xs">
+              <q-chip color="blue-2" text-color="blue-8" size="sm" class="q-ma-none text-weight-bold" square>
+                {{ news.date }}
+              </q-chip>
             </div>
           </div>
-          <div class="q-mt-xs">
-            <q-chip color="blue-2" text-color="blue-8" size="sm" class="q-ma-none text-weight-bold" square>
-              1 Years ago
-            </q-chip>
+        </div>
+      </template>
+
+      <!-- Skeleton Loading State -->
+      <template v-else>
+        <div v-for="n in 3" :key="'skel-news'+n" class="row q-mb-md news-item">
+          <div class="col-4">
+            <q-skeleton type="rect" height="100px" class="rounded-borders" />
+          </div>
+          <div class="col-8 q-pl-md column justify-between">
+            <div>
+              <q-skeleton type="text" class="text-subtitle2" />
+              <q-skeleton type="text" width="60%" class="q-mt-xs" />
+            </div>
+            <q-skeleton type="QChip" width="80px" />
           </div>
         </div>
-      </div>
+      </template>
     </div>
 
+    </div>
   </q-page>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { Autoplay } from 'swiper/modules'
+import { api } from 'src/services/api'
 
 export default {
   name: 'IndexPage',
@@ -138,6 +179,127 @@ export default {
       }
     }
 
+    const carouselItems = ref([])
+    
+    // Duplikasi item agar efek loop Swiper tetap berjalan mulus
+    const displayCarouselItems = computed(() => {
+      if (carouselItems.value.length > 0) {
+        return [...carouselItems.value, ...carouselItems.value]
+      }
+      return carouselItems.value
+    })
+
+    const fetchCarousel = async () => {
+      try {
+      
+        // DUMMY DATA SEMENTARA (Hapus bagian ini jika API sudah terpasang)
+        carouselItems.value = [
+          { img: 'img/card1.png' },
+          { img: 'img/card2.png' },
+          { img: 'img/card3.png' },
+          { img: 'img/card4.png' }
+        ]
+      } catch (error) {
+        console.error('Gagal mengambil gambar carousel:', error)
+      }
+    }
+
+    const videoBerita = ref([])
+
+    const getThumbnail = (url) => {
+      if (!url) return 'https://picsum.photos/300/200?random=1'
+      
+      // Deteksi Youtube
+      const ytRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+      const match = url.match(ytRegExp)
+      if (match && match[2].length === 11) {
+        return `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
+      }
+      
+      // Deteksi Tiktok Placeholder
+      if (url.includes('tiktok.com')) {
+         // Menggunakan abu-abu gelap Inline SVG agar menjadi watermark dan tak menabrak ikon play putih
+         return "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cg transform='translate(116, 96) scale(0.6)'%3E%3Cpath fill='%23383838' d='M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z'/%3E%3C/g%3E%3C/svg%3E"
+      }
+      return 'https://picsum.photos/300/200?random=1'
+    }
+
+    const openVideoLink = (url) => {
+      if (url) window.open(url, '_blank')
+    }
+
+    const fetchVideoBerita = async () => {
+      try {
+
+        // DUMMY DATA SEMENTARA
+        const dummyData = [
+          { title: 'FULL TAUSIYAH Ustadz Prof. H. Abdul Somad HALAL BIHALAL', link: 'https://www.youtube.com/watch?v=ZjKHf-lENnc' },
+          { title: 'Presensi ASN Konawe Selatan akan beralih ke teknologi canggih dengan Face Recognition!', link: 'https://www.tiktok.com/@diskominfo.konsel/video/7598871375364836626' },
+          { title: 'Pak Bupati Irham Kalenggo arahkan pejabat dukung UMKM kuliner lokal', link: 'https://www.tiktok.com/@diskominfo.konsel/video/7602798528351554824' },
+          { title: 'SHOLAT IDUL FITRI 1447 H / 2026 M', link: 'https://www.youtube.com/watch?v=0oz4yDGfiCU' },
+          { title: 'Launching Sistem Digital Unggulan "Warga Bicara" dan Layanan Darurat 112', link: 'https://www.youtube.com/watch?v=ORvEs3q1wig' },
+          { title: 'Penyerahan SK #CPNS dan #PPPK Kabupaten', link: 'https://www.youtube.com/watch?v=lbIja4U1H5M' }
+        ]
+        
+        // Membatasi hanya 5 video saja yang tampil
+        const slicedData = dummyData.slice(0, 5)
+        videoBerita.value = slicedData
+
+        // Fetch Tiktok thumbnail secara asinkron menggunakan TikWM API langsung
+        // Mengubah dari "forEach" paralel menjadi "for" biasa yang berfase, untuk mencegah penolakan API ganda (Rate Limit) oleh TikWM
+        for (let i = 0; i < slicedData.length; i++) {
+          const vid = slicedData[i]
+          if (vid.link.includes('tiktok.com')) {
+            try {
+              // Jeda aman 1,5 detik untuk menembus proteksi anti-spam / Rate-limit TikWM API
+              await new Promise(resolve => setTimeout(resolve, 1500))
+
+              // TikWM API bersifat public dan terbuka terhadap CORS
+              const res = await fetch(`https://tikwm.com/api/?url=${vid.link}`)
+              const dataInfo = await res.json()
+              
+              if (dataInfo.code === 0 && dataInfo.data && dataInfo.data.cover) {
+                // Menimpa indeks lama secara mutasi aman agar antarmuka Vue terbaharui
+                videoBerita.value[i] = { ...videoBerita.value[i], img: dataInfo.data.cover }
+              }
+            } catch (e) {
+              console.error('Gagal mengambil thumbnail tiktok', e)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Gagal mengambil data video:', error)
+      }
+    }
+
+    const beritaTerbaru = ref([])
+
+    const fetchBeritaTerbaru = async () => {
+      try {
+
+        // DUMMY DATA SEMENTARA
+        const dummyBerita = [
+          { title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', author: 'Pemkab Konawe Selatan', date: '1 Years ago', img: 'https://picsum.photos/200/200?random=1' },
+          { title: 'Perubahan Jadwal Pelayanan Masyarakat Selama Bulan Suci', author: 'Sekretariat Daerah', date: '2 Days ago', img: 'https://picsum.photos/200/200?random=2' },
+          { title: 'Pengembangan Infrastruktur Jembatan Antar Desa', author: 'Dinas PU', date: '5 Days ago', img: 'https://picsum.photos/200/200?random=3' },
+          { title: 'Rapat Kerja Tahunan Kabupaten Konawe Selatan', author: 'Humas Konsel', date: '1 Week ago', img: 'https://picsum.photos/200/200?random=4' },
+          { title: 'Pembagian Sembako Gratis di Tiga Kecamatan', author: 'Dinas Sosial', date: '2 Weeks ago', img: 'https://picsum.photos/200/200?random=5' },
+          { title: 'Berita Ke-6 Yang Tidak Boleh Tampil', author: 'Admin', date: 'Today', img: 'https://picsum.photos/200/200?random=6' }
+        ]
+        
+        // Membatasi hanya 5 berita saja yang tampil
+        beritaTerbaru.value = dummyBerita.slice(0, 5)
+      } catch (error) {
+        console.error('Gagal mengambil data berita:', error)
+      }
+    }
+
+    onMounted(() => {
+      fetchCarousel()
+      fetchVideoBerita()
+      fetchBeritaTerbaru()
+    })
+
     const goToRoute = (route) => {
       if (route) {
         // Assume route doesn't have leading slash if it's named or path, let Vue Router handle resolution
@@ -153,6 +315,12 @@ export default {
       onSlideChange,
       goToSlide,
       goToRoute,
+      carouselItems,
+      displayCarouselItems,
+      videoBerita,
+      beritaTerbaru,
+      getThumbnail,
+      openVideoLink,
       search: ref(''),
       menuItems: [
         { label: 'Firetap', img: 'icons/Firetap.png', route: '' },
@@ -163,7 +331,7 @@ export default {
         { label: 'SIPADU', img: 'icons/Sipadu.png', route: '/sippadu_dashboard' },
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
         { label: 'E-Rida', img: 'icons/E-rida.png', route: '' },
-        { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
+        // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
     }
   }
@@ -172,7 +340,7 @@ export default {
 
 <style scoped>
 .pb-xl {
-  padding-bottom: 80px; /* Space for bottom nav */
+  padding-bottom: 10px; /* Space for bottom nav */
 }
 .page-bg {
   background: linear-gradient(180deg, #90caf9 0%, #e3f2fd 12%, #ffffff 25%);
@@ -203,18 +371,7 @@ export default {
   border-radius: 16px;
   display: block;
 }
-.rounded-edges {
-  border-radius: 16px;
-}
-.img-banner-1 {
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-}
-.img-banner-2 {
-  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-}
-.img-banner-3 {
-  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-}
+
 .rounded-box {
   border-radius: 20px;
 }
@@ -225,9 +382,9 @@ export default {
   margin-top: 8px;
 }
 .menu-item {
-  width: 20%;
-  padding: 0 4px;
-  margin-bottom: 12px;
+  width: 25%;
+  padding: 4px 4px;
+  margin-bottom: 8px;
 }
 .menu-icon-wrap {
   width: 55px;
