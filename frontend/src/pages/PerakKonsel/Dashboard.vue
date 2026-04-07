@@ -1,11 +1,19 @@
 <template>
   <q-page class="">
-    <q-header class="app-header">
-      <div class="text-center">
-        <img src="/img/perak/contactUs.png" alt="" class="logo-wrapper" style="width: 313px; height: 155px; margin-top: 113px;">
+    <div class="app-header q-pa-md">
+      <div class="row items-center justify-between relative-position" style="min-height: 50px;">
+        <q-btn flat round icon="arrow_back" color="white" @click="$router.back()" />
+        <div class="absolute-center row items-center q-gutter-sm logo-wrapper">
+          <div class="logo-image-container">
+            <img src="/icons/sippadu/logo_konsel.png" class="header-logo" alt="Logo Konsel" />
+          </div>
+        </div>
       </div>
-    </q-header>
-    <div class="row q-col-gutter-md q-px-md q-py-lg text-center">
+      <div class="q-mt-md flex flex-center">
+        <img src="/img/perak/contactUs.png" alt="" class="banner-main">
+      </div>
+    </div>
+    <div class="row q-col-gutter-md q-px-md text-center" style="margin-top: -30px;">
       <div class="col-6">
         <div class="card" @click="goBiodata">
           <q-card-section>
