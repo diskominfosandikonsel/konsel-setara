@@ -1,34 +1,29 @@
 <template>
   <q-page class="q-pa-md page-bg pb-xl">
-    <!-- Top Carousel -->
-    <q-carousel
-      v-model="slide"
-      transition-prev="slide-right"
-      transition-next="slide-left"
-      swipeable
-      animated
-      padding
-      height="180px"
-      class="rounded-edges q-mt-sm"
+    <!-- Top Carousel (Swiper) -->
+    <swiper
+      :modules="modules"
+      :slides-per-view="1.15"
+      :centered-slides="true"
+      :space-between="16"
+      :loop="true"
+      :autoplay="{ delay: 4000, disableOnInteraction: false }"
+      @swiper="onSwiper"
+      @slideChange="onSlideChange"
+      class="q-mt-sm main-swiper"
     >
-      <q-carousel-slide name="1" class="column no-wrap flex-center img-banner-1">
-        <div class="text-white text-h5 font-weight-bold">Konawe Selatan</div>
-      </q-carousel-slide>
-      <q-carousel-slide name="2" class="column no-wrap flex-center img-banner-2">
-        <div class="text-white text-h5 font-weight-bold">Portal Resmi</div>
-      </q-carousel-slide>
-      <q-carousel-slide name="3" class="column no-wrap flex-center img-banner-3">
-        <div class="text-white text-h5 font-weight-bold">Menuju Masyarakat Sejahtera</div>
-      </q-carousel-slide>
-    </q-carousel>
+      <swiper-slide v-for="n in 6" :key="'slide-'+n">
+        <img :src="`img/card${((n-1)%3)+1}.png`" class="slide-img shadow-2" />
+      </swiper-slide>
+    </swiper>
 
-    <!-- Custom Navigation Dots -->
-    <div class="row justify-center q-my-md">
+    <!-- Custom Navigation Dots for 3 Items -->
+    <div class="row justify-center q-my-sm q-pb-sm">
       <div 
-        v-for="n in 3" :key="n"
+        v-for="n in 3" :key="'dot-'+n"
         class="nav-dot q-mx-xs cursor-pointer"
-        :class="slide === String(n) ? 'bg-primary' : 'bg-grey-4'"
-        @click="slide = String(n)"
+        :class="(activeIndex % 3) === (n - 1) ? 'dot-active' : 'dot-inactive'"
+        @click="goToSlide(n - 1)"
       ></div>
     </div>
 
@@ -52,17 +47,17 @@
       </q-input>
 
       <!-- Menu Grid -->
-      <div class="row q-col-gutter-y-md q-col-gutter-x-xs justify-start">
-        <div class="col-3 text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index">
-          <q-btn
-            round
-            unelevated
-            class="menu-btn shadow-2 q-mb-xs"
-            size="22px"
-          >
-            <q-icon :name="item.icon" :color="item.color" size="28px"/>
-          </q-btn>
-          <div class="text-xs text-weight-medium text-grey-9" style="font-size: 11px;">{{ item.label }}</div>
+      <div class="row q-col-gutter-y-lg justify-start menu-grid">
+        <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index">
+          <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
+            <template v-if="item.img">
+              <img :src="item.img" style="width: 44px; height: 44px; object-fit: contain;" />
+            </template>
+            <template v-else>
+              <q-icon :name="item.icon" color="indigo-5" size="32px"/>
+            </template>
+          </div>
+          <div class="text-xs text-weight-bold text-grey-9" style="font-size: 11px;">{{ item.label }}</div>
         </div>
       </div>
     </div>
@@ -115,23 +110,50 @@
 
 <script>
 import { ref } from 'vue'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import 'swiper/css'
+import { Autoplay } from 'swiper/modules'
 
 export default {
   name: 'IndexPage',
+  components: {
+    Swiper,
+    SwiperSlide
+  },
   setup () {
+    const swiperRef = ref(null)
+    const activeIndex = ref(0)
+    
+    const onSwiper = (swiper) => {
+      swiperRef.value = swiper
+    }
+    const onSlideChange = (swiper) => {
+      activeIndex.value = swiper.realIndex
+    }
+    const goToSlide = (index) => {
+      if (swiperRef.value) {
+        swiperRef.value.slideToLoop(index)
+      }
+    }
+
     return {
-      slide: ref('1'),
+      modules: [Autoplay],
+      swiperRef,
+      activeIndex,
+      onSwiper,
+      onSlideChange,
+      goToSlide,
       search: ref(''),
       menuItems: [
-        { label: 'Firetap', icon: 'local_fire_department', color: 'red-8' },
-        { label: 'SapaKonsel', icon: 'support_agent', color: 'pink-6' },
-        { label: 'PERAK', icon: 'description', color: 'green-8' },
-        { label: 'PPID', icon: 'computer', color: 'purple-6' },
-        { label: 'JDIH', icon: 'gavel', color: 'brown-6' },
-        { label: 'SIPADU', icon: 'menu_book', color: 'orange-8' },
-        { label: 'SIMCARD', icon: 'badge', color: 'teal-7' },
-        { label: 'E-Rida', icon: 'assignment', color: 'blue-8' },
-        { label: 'Lainnya', icon: 'grid_view', color: 'primary' }
+        { label: 'Firetap', img: 'icons/Firetap.png' },
+        { label: 'SapaKonsel', img: 'icons/Sapakonsel.png' },
+        { label: 'PERAK', img: 'icons/Perak.png' },
+        { label: 'PPID', img: 'icons/Ppid.png' },
+        { label: 'JDIH', img: 'icons/Jdih.png' },
+        { label: 'SIPADU', img: 'icons/Sipadu.png' },
+        { label: 'SIMCARD', img: 'icons/Simcard.png' },
+        { label: 'E-Rida', img: 'icons/E-rida.png' },
+        { label: 'Lainnya', icon: 'grid_view', color: 'black' }
       ]
     }
   }
@@ -146,11 +168,30 @@ export default {
   background: linear-gradient(180deg, #90caf9 0%, #e3f2fd 12%, #ffffff 25%);
   min-height: 100vh;
 }
+.main-swiper {
+  width: 100%;
+}
 .nav-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   transition: background-color 0.3s ease;
+}
+.dot-inactive {
+  background: #cfd8dc;
+}
+.dot-active {
+  background: #1976D2; /* primary blue */
+}
+.main-swiper :deep(.swiper-slide) {
+  height: 170px;
+}
+.slide-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
 }
 .rounded-edges {
   border-radius: 16px;
@@ -170,9 +211,29 @@ export default {
 .search-input :deep(.q-field__control) {
   border-radius: 12px;
 }
-.menu-btn {
+.menu-grid {
+  margin-top: 8px;
+}
+.menu-item {
+  width: 20%;
+  padding: 0 4px;
+  margin-bottom: 12px;
+}
+.menu-icon-wrap {
+  width: 55px;
+  height: 55px;
   background: linear-gradient(180deg, #bbdefb 0%, #90caf9 100%);
-  border-radius: 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(144, 202, 249, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.menu-icon-wrap.is-lainnya {
+  background: #e0e0e0;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .video-scroll-container {
   display: flex;
