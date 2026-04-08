@@ -43,7 +43,15 @@ export const useJdihStore = defineStore('jdih', {
             } finally {
                 this.loading = false;
             }
-        }
-
+        },
+        // untuk load infinity scroll
+        async fetchMoreProdukHukum(payload) {
+            try {
+                const res = await JdihService.getProdukHukum(payload);
+                this.produkHukum = [...this.produkHukum, ...res.data.data];
+            } catch (err) {
+                console.error(err);
+            }
+        },
     }
 })

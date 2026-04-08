@@ -46,48 +46,56 @@
                     </div>
                 </div>
                 <q-list class="mulish q-pa-md">
-                    <q-card 
-                        v-for="(item, index) in jdih.produkHukum"
-                        :key="index" 
-                        class="q-mb-md cardPerda"
-                    >
-                        <q-card-section class="q-pa-md">
-                            <div class="text-subtitle1 text-weight-bold text-grey-9 q-mb-xs line-clamp-2" @click="getDetil(item.id)">
-                                {{ item.nama }}
-                            </div>
-                            <div class="text-caption text-grey-7 q-mb-sm">
-                                <div class="text-primary text-weight-medium">Nomor: {{ item.nomor }} | Tahun: {{ item.tahun }}</div>
-                                <div class="row items-center q-mt-xs">
-                                    <span>Sumber: {{ item.sumber || 'Sekretariat Daerah' }}</span>
+                    <q-infinite-scroll @load="onLoad" :offset="250" :disable="page_first >= jdih.jml_data">
+                        <q-card 
+                            v-for="(item, index) in jdih.produkHukum"
+                            :key="index" 
+                            class="q-mb-md cardPerda"
+                        >
+                            <q-card-section class="q-pa-md">
+                                <div class="text-subtitle1 text-weight-bold text-grey-9 q-mb-xs line-clamp-2" @click="getDetil(item.id)">
+                                    {{ item.nama }}
                                 </div>
-                            </div>
+                                <div class="text-caption text-grey-7 q-mb-sm">
+                                    <div class="text-primary text-weight-medium">Nomor: {{ item.nomor }} | Tahun: {{ item.tahun }}</div>
+                                    <div class="row items-center q-mt-xs">
+                                        <span>Sumber: {{ item.sumber || 'Sekretariat Daerah' }}</span>
+                                    </div>
+                                </div>
 
-                            <q-separator inset class="q-my-sm" style="opacity: 0.5;" />
+                                <q-separator inset class="q-my-sm" style="opacity: 0.5;" />
 
-                            <div class="row items-center q-mt-sm">
-                                <div class="row items-center text-grey-7">
-                                    <q-icon name="r_location_on" size="16px" class="q-mr-xs" />
-                                    <span class="text-caption">{{ item.tempat_terbit }}</span>
+                                <div class="row items-center q-mt-sm">
+                                    <div class="row items-center text-grey-7">
+                                        <q-icon name="r_location_on" size="16px" class="q-mr-xs" />
+                                        <span class="text-caption">{{ item.tempat_terbit }}</span>
+                                    </div>
+                                    <q-space />
+                                    <div v-if="item.status === 'Aktif' || item.status === 'Berlaku'" class="text-positive text-caption text-weight-bolder">
+                                        <q-icon name="check_circle" size="14px" class="q-mr-xs" />
+                                        Berlaku
+                                    </div>
+                                    <div v-else class="text-negative text-caption text-weight-bolder">
+                                        <q-icon name="cancel" size="14px" class="q-mr-xs" />
+                                        Tidak Berlaku
+                                    </div>
                                 </div>
-                                <q-space />
-                                <div v-if="item.status === 'Aktif' || item.status === 'Berlaku'" class="text-positive text-caption text-weight-bolder">
-                                    <q-icon name="check_circle" size="14px" class="q-mr-xs" />
-                                    Berlaku
-                                </div>
-                                <div v-else class="text-negative text-caption text-weight-bolder">
-                                    <q-icon name="cancel" size="14px" class="q-mr-xs" />
-                                    Tidak Berlaku
-                                </div>
+                            </q-card-section>
+                        </q-card>
+
+                        <template v-slot:loading>
+                            <div class="row justify-center q-my-md">
+                                <q-spinner-dots color="primary" size="40px" />
                             </div>
-                        </q-card-section>
-                    </q-card>
+                        </template>
+                    </q-infinite-scroll>
 
                     <div v-if="jdih.produkHukum.length === 0" class="text-center q-pa-xl">
                         <q-icon name="r_find_in_page" size="60px" color="grey-6" />
                         <div class="text-grey-6 q-mt-sm">Data tidak ditemukan</div>
                     </div>
                 </q-list>
-                <div class="q-pa-lg flex flex-center">
+                <!-- <div class="q-pa-lg flex flex-center">
                     <q-pagination
                         v-model="page_first"
                         :max="jdih.jml_data"
@@ -98,7 +106,7 @@
                         active-text-color="white"
                         @update:model-value="loadData"
                     />
-                </div>
+                </div> -->
             </q-page>
         </q-page-container>
     </q-layout>
@@ -111,6 +119,7 @@ export default {
     data() {
         return {
             cari_value: '',
+            cari_tahun: '',
             page_first: 1,
             page_last: 0,
             jenis: 'Peraturan Daerah',
@@ -162,12 +171,42 @@ export default {
             const payload = {
                 data_ke: parseInt(this.page_first) || 1,
                 cari_value: this.cari_value,
-                cari_jenis: 'Peraturan Daerah',
+                cari_jenis: this.jenis,
                 cari_tahun: this.pilih_tahun || '',
             }
             // console.log("Data dikirim:", payload);
             this.jdih.fetchProdukHukum(payload)
         },
+
+        async onLoad(index, done){
+            if (this.page_first >= this.jdih.jml_data) {
+                done(); // Berhenti jika sudah halaman terakhir
+                return;
+            }
+            this.page_first++;
+            const payload = {
+                data_ke: this.page_first,
+                cari_value: this.cari_value,
+                cari_jenis: this.jenis,
+                cari_tahun: this.pilih_tahun || '',
+            };
+            await this.jdih.fetchMoreProdukHukum(payload);
+            done();
+        },
+        async resetAndLoad() {
+            this.page_first = 1;
+            const payload = {
+                data_ke: 1,
+                cari_value: this.cari_value || '',
+                cari_jenis: this.jenis,
+                cari_tahun: this.pilih_tahun || ''
+            };
+            await this.jdih.fetchProdukHukum(payload);
+        },
+        watch: {
+            cari_value() { this.resetAndLoad() },
+            tahun_dipilih() { this.resetAndLoad() }
+        }
     },
     mounted() {
         this.loadData()
