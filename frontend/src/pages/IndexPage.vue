@@ -58,7 +58,7 @@
         <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index" @click="goToRoute(item.route)">
           <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
             <template v-if="item.img">
-              <img :src="item.img" style="width: 50px; height: 50px; object-fit: contain;" />
+              <img :src="item.img" style="width: 35px; height: 35px; object-fit: contain;" />
             </template>
             <template v-else>
               <q-icon :name="item.icon" color="indigo-5" size="32px"/>
@@ -324,7 +324,7 @@ export default {
       search: ref(''),
       menuItems: [
         { label: 'Firetap', img: 'icons/Firetap.png', route: '' },
-        { label: 'SapaKonsel', img: 'icons/Sapakonsel.png', route: '/sapa_dashboard' },
+        { label: 'SapaKonsel', img: 'src/assets/sapa/logo.svg', route: '/sapa_dashboard' },
         { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
         { label: 'PPID', img: 'icons/Ppid.png', route: '' },
         { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
