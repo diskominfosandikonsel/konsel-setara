@@ -18,6 +18,18 @@
     background: linear-gradient(to bottom, #114EA4 1%, #5FAEEE 22%, #FFFFFF 100%);
 }
 
+.header-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.banner-main {
+  max-width: 260px;
+  height: auto;
+  object-fit: contain;
+}
+
 .logo-wrapper {
     align-items: center;
     margin-top: -20px;

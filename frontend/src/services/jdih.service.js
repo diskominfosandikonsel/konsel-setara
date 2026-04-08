@@ -10,6 +10,9 @@ export const JdihService = {
   // 🌐 NO TOKEN
   getProdukHukum(payload) {
     return apiJdih.post('publish_produk_hukum/views', payload)
-  }
+  },
+  getDetailProduk(id) {
+    return apiJdih.post('publish_produk_hukum/getOne', { id: id });
+}
 
 }

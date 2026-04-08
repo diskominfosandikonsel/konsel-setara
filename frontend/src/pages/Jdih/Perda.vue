@@ -31,9 +31,10 @@
                         
                         <div class="col-4">
                             <q-select 
-                                v-model="tahun" 
+                                v-model="pilih_tahun" 
                                 :options="tahun" 
-                                dense outlined 
+                                :dense="true" outlined 
+                                label="Pilih Tahun"
                                 option-value="id"
                                 option-label="tahun"
                                 bg-color="grey-1"
@@ -41,10 +42,6 @@
                                 class="filter-year"
                                 @update:model-value="loadData"
                             />
-
-                            <q-select v-model="form.tahun" :options="$store.state.list_tahunx" option-value="id"
-                           option-label="tahun" outlined square :dense="true" class="bg-white margin_btn" emit-value
-                           map-options />
                         </div>
                     </div>
                 </div>
@@ -55,44 +52,32 @@
                         class="q-mb-md cardPerda"
                     >
                         <q-card-section class="q-pa-md">
-                            <div class="row justify-between items-center q-mb-sm">
-                                <div v-if="item.status === 'Aktif'" class="text-positive text-caption text-weight-bolder">
-                                    <q-icon name="check_circle" />
-                                    Aktif
-                                </div>
-                                <div v-else class="text-negative text-caption text-weight-bolder">
-                                    <q-icon name="cancel" />
-                                    Tidak Aktif
-                                </div>
-                            </div>
-
-                            <div class="text-subtitle1 text-weight-bold text-grey-9 q-mb-xs line-clamp-2">
+                            <div class="text-subtitle1 text-weight-bold text-grey-9 q-mb-xs line-clamp-2" @click="getDetil(item.id)">
                                 {{ item.nama }}
                             </div>
                             <div class="text-caption text-grey-7 q-mb-sm">
                                 <div class="text-primary text-weight-medium">Nomor: {{ item.nomor }} | Tahun: {{ item.tahun }}</div>
                                 <div class="row items-center q-mt-xs">
-                                    <q-icon name="r_account_balance" size="14px" class="q-mr-xs" />
                                     <span>Sumber: {{ item.sumber || 'Sekretariat Daerah' }}</span>
                                 </div>
                             </div>
 
                             <q-separator inset class="q-my-sm" style="opacity: 0.5;" />
 
-                            <div class="row items-center justify-between q-mt-sm">
+                            <div class="row items-center q-mt-sm">
                                 <div class="row items-center text-grey-7">
                                     <q-icon name="r_location_on" size="16px" class="q-mr-xs" />
                                     <span class="text-caption">{{ item.tempat_terbit }}</span>
                                 </div>
-                                
-                                <q-btn 
-                                    flat dense 
-                                    color="primary" 
-                                    icon="r_description" 
-                                    label="Lihat PDF" 
-                                    class="text-capitalize text-caption"
-                                    @click.stop="downloadFile(item.file)"
-                                />
+                                <q-space />
+                                <div v-if="item.status === 'Aktif' || item.status === 'Berlaku'" class="text-positive text-caption text-weight-bolder">
+                                    <q-icon name="check_circle" size="14px" class="q-mr-xs" />
+                                    Berlaku
+                                </div>
+                                <div v-else class="text-negative text-caption text-weight-bolder">
+                                    <q-icon name="cancel" size="14px" class="q-mr-xs" />
+                                    Tidak Berlaku
+                                </div>
                             </div>
                         </q-card-section>
                     </q-card>
@@ -102,6 +87,18 @@
                         <div class="text-grey-6 q-mt-sm">Data tidak ditemukan</div>
                     </div>
                 </q-list>
+                <div class="q-pa-lg flex flex-center">
+                    <q-pagination
+                        v-model="page_first"
+                        :max="jdih.jml_data"
+                        :max-pages="4"
+                        direction-links
+                        boundary-links
+                        active-color="primary"
+                        active-text-color="white"
+                        @update:model-value="loadData"
+                    />
+                </div>
             </q-page>
         </q-page-container>
     </q-layout>
@@ -117,15 +114,33 @@ export default {
             page_first: 1,
             page_last: 0,
             jenis: 'Peraturan Daerah',
+            pilih_tahun: null,
             tahun: [
-                { id: 2023, tahun: '2023'},
-                { id: 2024, tahun: '2024'},
-                { id: 2025, tahun: '2025'},
-                { id: 2025, tahun: '2026'},
-                { id: 2025, tahun: '2027'},
-                { id: 2025, tahun: '2028'},
-                ],
-            }
+                { id: 2027, tahun: '2027' },
+                { id: 2026, tahun: '2026' },
+                { id: 2025, tahun: '2025' },
+                { id: 2024, tahun: '2024' },
+                { id: 2023, tahun: '2023' },
+                { id: 2022, tahun: '2022' },
+                { id: 2021, tahun: '2021' },
+                { id: 2020, tahun: '2020' },
+                { id: 2019, tahun: '2019' },
+                { id: 2018, tahun: '2018' },
+                { id: 2017, tahun: '2017' },
+                { id: 2016, tahun: '2016' },
+                { id: 2015, tahun: '2015' },
+                { id: 2014, tahun: '2014' },
+                { id: 2013, tahun: '2013' },
+                { id: 2012, tahun: '2012' },
+                { id: 2011, tahun: '2011' },
+                { id: 2010, tahun: '2010' },
+                { id: 2009, tahun: '2009' },
+                { id: 2008, tahun: '2008' },
+                { id: 2007, tahun: '2007' },
+                { id: 2006, tahun: '2006' },
+                { id: 2005, tahun: '2005' }
+            ],
+        }
     },
     computed: {
         jdih() {
@@ -136,29 +151,21 @@ export default {
         goBack() {
             this.$router.back()
         },
-        getBadgeColor(jenis) {
-            const j = jenis.toLowerCase();
-            if (j.includes('perda')) return 'indigo-7';
-            if (j.includes('perbup')) return 'teal-7';
-            return 'orange-8'; // Untuk Keputusan Bupati
-        },
-        lihatDetail(item) {
-            console.log('Lihat Detail:', item.judul);
-            // Navigasi ke halaman detail atau buka dialog
-        },
-        downloadFile(fileName) {
-            console.log('Membuka file:', fileName);
+        getDetil(id) {
+            this.$router.push({
+                path: '/detilData',
+                query: { id: id }
+            });
         },
 
         loadData() {
             const payload = {
-                data_ke: this.page_first,
+                data_ke: parseInt(this.page_first) || 1,
                 cari_value: this.cari_value,
                 cari_jenis: 'Peraturan Daerah',
-                cari_tahun: ''
+                cari_tahun: this.pilih_tahun || '',
             }
             // console.log("Data dikirim:", payload);
-
             this.jdih.fetchProdukHukum(payload)
         },
     },

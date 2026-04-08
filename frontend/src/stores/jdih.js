@@ -3,32 +3,47 @@ import { Loading, Notify } from 'quasar'
 import { JdihService } from 'src/services/jdih.service'
 
 export const useJdihStore = defineStore('jdih', {
-  state: () => ({
-    produkHukum: [],
-    loading: false
-  }),
+    state: () => ({
+        produkHukum: [],
+        detailProduk: null,
+        jml_data: 0,
+        loading: false
+    }),
 
-  actions: {
-    // 🌐 PRODUK HUKUM (NO TOKEN)
-    async fetchProdukHukum(payload = {}) {
-      console.log("terpanggil");
-      this.loading = true
-      Loading.show()
+    actions: {
+        // 🌐 PRODUK HUKUM (NO TOKEN)
+        async fetchProdukHukum(payload = {}) {
+            console.log("terpanggil");
+            this.loading = true
+            Loading.show()
 
-      try {
-        const res = await JdihService.getProdukHukum(payload)
-        console.log("Response Backend:", res.data)
-        this.produkHukum = res.data.data || res.data
-      } catch (err) {
-        Notify.create({
-          message: 'Gagal ambil data',
-          color: 'negative'
-        })
-      } finally {
-        this.loading = false
-        Loading.hide()
-      }
+            try {
+                const res = await JdihService.getProdukHukum(payload)
+                // console.log("Response Backend:", res.data)
+                this.produkHukum = res.data.data
+                this.jml_data = res.data.jml_data
+            } catch (err) {
+                Notify.create({
+                    message: 'Gagal ambil data',
+                    color: 'negative'
+                })
+            } finally {
+                this.loading = false
+                Loading.hide()
+            }
+        },
+        async fetchDetailProduk(id) {
+            this.loading = true;
+            try {
+                const res = await JdihService.getDetailProduk(id);
+                // console.log('Detail Produk Response:', res.data);
+                this.detailProduk = res.data;
+            } catch (err) {
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
+        }
+
     }
-
-  }
 })
