@@ -1,5 +1,5 @@
-import { apiSippadu } from './apiSippadu'
-import { api } from './api'
+import { apiSippadu } from '../api/apiSippadu'
+import axios from 'axios'
 
 export const SippaduService = {
   getLaporan(payload = {}) {
@@ -21,9 +21,9 @@ export const SippaduService = {
 
   // 📰 BERITA / BERANDA (Lewat Proxy API Backend Konsel-Setara lokal untuk bypass CORS)
   getBerita() {
-    return api.get('api/v1/sippadu_berita')
+    return axios.get('http://localhost:5028/api/v1/sippadu_berita')
   },
   getDetailBerita(payload) {
-    return api.post('api/v1/sippadu_berita/isi_berita', payload)
+    return axios.post('http://localhost:5028/api/v1/sippadu_berita/isi_berita', payload)
   }
 }
