@@ -154,7 +154,7 @@ import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { Autoplay } from 'swiper/modules'
-import { api } from 'src/services/api'
+import { api } from 'src/api/api'
 
 export default {
   name: 'IndexPage',

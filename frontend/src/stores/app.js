@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Loading, Notify } from 'quasar'
-import { api } from 'src/services/api'
+import { api } from 'src/api/api'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
