@@ -267,6 +267,26 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'keputusanBupati',
+        component: () => import('pages/Jdih/keputusan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'instruksiBupati',
+        component: () => import('pages/Jdih/Instruksi.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'keputusanSKPD',
+        component: () => import('pages/Jdih/KeputusanSKPD.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'pemdes',
+        component: () => import('pages/Jdih/Pemdes.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
         path: 'detilData',
         component: () => import('pages/Jdih/detilData.vue'),
         meta: { showBottomNav: true }

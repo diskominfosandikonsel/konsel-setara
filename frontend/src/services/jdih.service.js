@@ -1,4 +1,4 @@
-import { apiJdih } from './apiJdih'
+import { apiJdih } from '../api/apiJdih'
 
 export const JdihService = {
 

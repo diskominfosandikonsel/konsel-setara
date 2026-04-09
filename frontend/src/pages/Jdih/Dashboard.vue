@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goKeputusan">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/kepbup.png" class="card-icon" />
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goInstruksi">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/insbup.png" class="card-icon" />
@@ -70,7 +70,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goSkpd">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/skpd.png" class="card-icon" />
@@ -80,7 +80,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goPemdes">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/pemdes.png" class="card-icon" />
@@ -182,6 +182,18 @@ export default {
         },
         goPerbup() {
             this.$router.push('/peraturanBupati');
+        },
+        goKeputusan() {
+            this.$router.push('/keputusanBupati');
+        },
+        goInstruksi() {
+            this.$router.push('/instruksiBupati');
+        },
+        goSkpd() {
+            this.$router.push('/keputusanSKPD');
+        },
+        goPemdes() {
+            this.$router.push('/Pemdes');
         },
     }
 }
