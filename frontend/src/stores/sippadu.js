@@ -7,7 +7,6 @@ export const useSippaduStore = defineStore('sippadu', {
     list_laporan: [],
     list_perda: [],
     list_perkada: [],
-    list_berita: [],
     list_riwayat: [],
     total: 0,
     page: 1,
@@ -89,20 +88,6 @@ export const useSippaduStore = defineStore('sippadu', {
         }
     },
 
-    // 📰 BERITA
-    async fetchBerita() {
-        try {
-            const res = await SippaduService.getBerita()
-            console.log('BERITA:', res.data)
-            this.list_berita = res.data
-        } catch (err) {
-            console.error(err)
-            Notify.create({
-                message: 'Gagal ambil data Berita',
-                color: 'negative'
-            })
-        }
-    },
 
     // 📖 RIWAYAT LAPORAN USER
     async fetchRiwayat() {
@@ -125,6 +110,32 @@ export const useSippaduStore = defineStore('sippadu', {
             })
         } finally {
             this.loading = false
+            Loading.hide()
+        }
+    },
+
+    // 📝 TAMBAH LAPORAN BARU
+    async addData(payload) {
+        Loading.show({ message: 'Mengirim Laporan...' })
+        try {
+            const res = await SippaduService.addData(payload)
+            if (res.data.success) {
+                Notify.create({
+                    message: 'Berhasil Kirim Laporan',
+                    color: 'positive',
+                    icon: 'check'
+                })
+                this.fetchRiwayat() // Refresh list riwayat
+                return true
+            }
+        } catch (err) {
+            console.error(err)
+            Notify.create({
+                message: 'Gagal mengirim laporan',
+                color: 'negative'
+            })
+            return false
+        } finally {
             Loading.hide()
         }
     }

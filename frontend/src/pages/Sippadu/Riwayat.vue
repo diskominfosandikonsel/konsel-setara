@@ -1,10 +1,10 @@
 <template>
   <q-page class="bg-gray-soft">
     <!-- TEAM STANDARD HEADER -->
-    <div class="row items-center q-px-sm q-py-md bg-white" style="border-bottom: 1px solid #e5e7eb;">
+    <!-- TEAM STANDARD HEADER -->
+    <div class="row items-center q-px-sm q-py-md bg-white border-bottom sticky-header">
       <q-btn flat round dense icon="chevron_left" color="dark" size="18px" @click="$router.back()" />
-      <div class="text-h6 text-weight-regular q-ml-sm text-uppercase" style="letter-spacing: 1.5px;">RIWAYAT LAPORAN
-      </div>
+      <div class="text-h6 text-weight-regular q-ml-sm text-uppercase text-dark" style="letter-spacing: 1.5px;">RIWAYAT LAPORAN</div>
     </div>
 
     <!-- SEARCH & FILTER AREA -->
@@ -116,9 +116,7 @@ const formatDate = (dateStr) => {
 }
 
 const goDetail = (id) => {
-  // Sementara diarahkan ke halaman detail kosong,
-  // ke depannya bisa router.push(`/sippadu_detail/${id}`)
-  router.push('/sippadu_detail')
+  router.push(`/sippadu_detail/${id}`)
 }
 </script>
 
@@ -126,6 +124,17 @@ const goDetail = (id) => {
 /* BACKGROUND UTAMA */
 .bg-gray-soft {
   background-color: #f4f7fc;
+  min-height: 100vh;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #e5e7eb;
 }
 
 

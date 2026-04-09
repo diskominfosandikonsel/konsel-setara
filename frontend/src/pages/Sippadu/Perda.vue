@@ -1,18 +1,10 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header bordered class="bg-white text-black">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
-          </q-avatar>
-          <span class="headerText">Peraturan Daerah (PERDA)</span>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <q-page style="background-color: #FFFFFF;">
+  <q-page style="background-color: #FFFFFF;">
+    <!-- TEAM STANDARD HEADER -->
+    <div class="row items-center q-px-sm q-py-md bg-white border-bottom sticky-header">
+      <q-btn flat round dense icon="chevron_left" color="dark" size="18px" @click="goBack" />
+      <div class="text-h6 text-weight-regular q-ml-sm text-uppercase text-dark" style="letter-spacing: 1.5px;">PERATURAN DAERAH (PERDA)</div>
+    </div>
 
         <!-- LOADING STATE -->
         <div v-if="sippadu.loading" class="row justify-center q-pa-xl">
@@ -41,9 +33,7 @@
           </div>
         </div>
 
-      </q-page>
-    </q-page-container>
-  </q-layout>
+  </q-page>
 </template>
 
 <script>
@@ -73,6 +63,16 @@ export default {
 </script>
 
 <style scoped>
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #e0e0e0;
+}
+
 .headerText {
   font-size: 16px;
   font-weight: 600;

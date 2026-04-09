@@ -74,42 +74,6 @@
         <q-icon name="chevron_right" color="grey-6" size="24px" />
       </q-card>
 
-      <!-- LATEST NEWS SECTION -->
-      <div class="row items-center justify-between q-mb-sm">
-        <div class="text-subtitle2 text-weight-bold text-grey-9">Berita Terbaru Satpol-PP Konsel</div>
-        <!-- <div class="text-caption text-primary text-weight-bold cursor-pointer">Lihat Semua</div> -->
-      </div>
-
-      <div class="news-list q-gutter-y-md">
-        <!-- LOADING BERITA -->
-        <div v-if="sippaduStore.loading" class="row justify-center q-my-md">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-
-        <!-- EMPTY BERITA -->
-        <div v-else-if="beritaList.length === 0" class="text-center text-grey-6 q-pa-md">
-          Belum ada berita terbaru
-        </div>
-
-        <!-- LIST BERITA API -->
-        <q-card v-else v-for="news in beritaList" :key="news.id" flat bordered
-          class="news-card rounded-card shadow-mini overflow-hidden cursor-pointer" v-ripple
-          @click="router.push(`/sippadu_berita/${news.id}`)">
-          <div class="row no-wrap">
-            <q-img :src="getImageUrl(news.foto)" class="col-4 news-img" />
-            <q-card-section class="col-8 q-pa-sm">
-              <div class="news-title ellipsis-2-lines q-mb-xs">
-                {{ news.judul }}
-              </div>
-              <div class="news-date row items-center text-grey-6">
-                <q-icon name="event" size="14px" class="q-mr-xs" />
-                {{ formatDate(news.createAt) }}
-              </div>
-            </q-card-section>
-          </div>
-        </q-card>
-      </div>
-
     </div>
 
     <!-- HIDDEN CAMERA INPUT -->
@@ -157,38 +121,23 @@ const sippaduStore = useSippaduStore()
 const cameraInput = ref(null)
 const showLaporDialog = ref(false)
 const capturedImage = ref(null)
+const capturedFile = ref(null)
 const laporanText = ref('')
 const selectedType = ref('')
 
-// -- GET DATA BERITA DARI STORE --
-const beritaList = computed(() => sippaduStore.list_berita)
-
 onMounted(() => {
-  sippaduStore.fetchBerita()
+  // Hanya fetch yang benar-benar dibutuhkan jika ada nanti
 })
 
-const getImageUrl = (foto) => {
-  if (!foto) return 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&h=300&auto=format&fit=crop'
-  // Gambar ditarik dari server web konsel (portal utama)
-  return `https://server-web.konaweselatankab.go.id/uploads/${foto}`
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric'
-  })
-}
-
 const goPerda = () => {
-  selectedType.value = 'Perda'
+  selectedType.value = 'perda'
   if (cameraInput.value) {
     cameraInput.value.click()
   }
 }
 
 const goPerkada = () => {
-  selectedType.value = 'Perkada'
+  selectedType.value = 'perkada'
   if (cameraInput.value) {
     cameraInput.value.click()
   }
@@ -197,6 +146,7 @@ const goPerkada = () => {
 const onCameraCapture = (event) => {
   const file = event.target.files[0]
   if (file) {
+    capturedFile.value = file
     capturedImage.value = URL.createObjectURL(file)
     laporanText.value = ''
     showLaporDialog.value = true
@@ -208,10 +158,11 @@ const closeLaporDialog = () => {
   showLaporDialog.value = false
   setTimeout(() => {
     capturedImage.value = null
+    capturedFile.value = null
   }, 300)
 }
 
-const kirimLaporan = () => {
+const kirimLaporan = async () => {
   if (!laporanText.value) {
     $q.notify({
       color: 'negative',
@@ -221,17 +172,34 @@ const kirimLaporan = () => {
     return
   }
 
-  $q.dialog({
-    title: 'Alert',
-    message: 'Berhasil Kirim Laporan',
-    ok: {
-      label: 'Ok',
-      flat: true,
-      color: 'primary'
+  // Ambil lokasi
+  $q.loading.show({ message: 'Mengambil lokasi...' })
+  
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const { latitude, longitude } = position.coords
+    
+    const payload = {
+      uraian: laporanText.value,
+      objek: selectedType.value === 'perkada' ? 1 : 0, // 0: Perda, 1: Perkada
+      lat: latitude,
+      lng: longitude,
+      status: 'proses',
+      file: capturedFile.value ? capturedFile.value.name : ''
     }
-  }).onOk(() => {
-    closeLaporDialog()
-  })
+
+    const success = await sippaduStore.addData(payload)
+    if (success) {
+      closeLaporDialog()
+    }
+    $q.loading.hide()
+  }, (err) => {
+    $q.loading.hide()
+    $q.notify({
+      color: 'negative',
+      message: 'Gagal mengambil lokasi. Pastikan GPS aktif.',
+      position: 'top'
+    })
+  }, { enableHighAccuracy: true })
 }
 const goPerdaInfo = () => router.push('/Perda')
 const goPerkadaInfo = () => router.push('/Perkada')

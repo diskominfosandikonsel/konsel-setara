@@ -86,15 +86,11 @@ const routes = [
         meta: { showBottomNav: false }
       },
       {
-        path: 'sippadu_detail',
+        path: 'sippadu_detail/:id',
         component: () => import('pages/Sippadu/Detail.vue'),
         meta: { showBottomNav: false }
       },
-      {
-        path: 'sippadu_berita/:id',
-        component: () => import('pages/Sippadu/DetailBerita.vue'),
-        meta: { showBottomNav: false }
-      },
+
 
       // PERAK
       {
