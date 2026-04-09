@@ -15,9 +15,12 @@
   object-fit: cover;
 }
 
-.empty-img {
-  width: 220px;
-  max-width: 80vw;
+.empty-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px; /* Memberi ruang agar terlihat di tengah halaman */
 }
 
 .q-carousel-slide {
@@ -133,7 +136,7 @@
 /* DASHBOARD */
 
 /* PERDA */
-/* .cardPerda{
+.cardPerda{
   
-} */
+}
 /* PERDA */

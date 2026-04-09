@@ -251,6 +251,11 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'peraturanBupati',
+        component: () => import('pages/Jdih/Perbup.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
         path: 'detilData',
         component: () => import('pages/Jdih/detilData.vue'),
         meta: { showBottomNav: true }
