@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-var db = require('../db/MySql/umum');
+var db = require('../db/MySql/utama');
 
 
 router.post('/', (req, res)=>{

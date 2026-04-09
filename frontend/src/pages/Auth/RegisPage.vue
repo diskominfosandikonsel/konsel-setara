@@ -33,6 +33,21 @@
         </div>
       </div>
 
+      <div class="input-group">
+        <label class="input-label">Username</label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Andi"
+            v-model="form.username"
+            class="custom-input"
+          />
+        </div>
+      </div>
+
       <!-- Email -->
       <div class="input-group">
         <label class="input-label">E-mail Aktif</label>
@@ -59,7 +74,7 @@
           <input
             type="tel"
             placeholder="081212145607"
-            v-model="form.telepon"
+            v-model="form.hp"
             class="custom-input"
           />
         </div>
@@ -146,15 +161,17 @@
 </template>
 
 <script>
+import { useAuthStore } from 'stores/auth'
 export default {
   name: 'RegisPage',
 
   data() {
     return {
       form: {
+        username: '',
         nama: '',
         email: '',
-        telepon: '',
+        hp: '',
         password: '',
         konfirmasi: ''
       },
@@ -165,12 +182,18 @@ export default {
     }
   },
 
+   computed: {
+    auth() {
+      return useAuthStore()
+    }
+  },
+
   methods: {
     async doRegister() {
       this.errorMsg = ''
 
-      // Validasi sederhana
-      if (!this.form.nama || !this.form.email || !this.form.telepon || !this.form.password || !this.form.konfirmasi) {
+      // VALIDATION
+      if (!this.form.username || !this.form.nama || !this.form.email || !this.form.hp || !this.form.password || !this.form.konfirmasi) {
         this.errorMsg = 'Semua field wajib diisi.'
         return
       }
@@ -180,21 +203,36 @@ export default {
         return
       }
 
-      if (this.form.password.length < 8) {
-        this.errorMsg = 'Password minimal 8 karakter.'
+      if (this.form.password.length < 6) {
+        this.errorMsg = 'Password minimal 6 karakter.'
         return
       }
 
       this.isLoading = true
+
       try {
-        // TODO: Integrasikan dengan API register
-        // const response = await authService.register(this.form)
-        // Simulasi sukses
-        await new Promise(resolve => setTimeout(resolve, 1200))
-        this.$router.push('/login')
+        // 🔥 BUILD PAYLOAD FOR BACKEND
+        const payload = {
+          username: this.form.username, // 👉 or generate from email
+          nama: this.form.nama,
+          email: this.form.email,
+          hp: this.form.hp, // 👉 mapping
+          password: this.form.password
+        }
+
+        console.log('REGISTER PAYLOAD:', payload)
+
+        const success = await this.auth.register(payload)
+
+        if (success) {
+          this.$router.push('/login')
+        }
+
       } catch (error) {
-        this.errorMsg = error?.message || 'Pendaftaran gagal. Coba lagi.'
-      } finally {
+  console.error('REGISTER ERROR:', error.response?.data)
+
+  this.errorMsg = error.response?.data?.message || 'Pendaftaran gagal'
+} finally {
         this.isLoading = false
       }
     }

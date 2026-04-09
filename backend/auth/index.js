@@ -2,14 +2,19 @@ const express = require('express');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const uniqid = require('uniqid')
 
-var dbs = require('../db/MySql/umum');
+var db = require('../db/MySql/utama');
+var dbErida = require('../db/MySql/erida');
 
 const router = express.Router();
 
 const schema = Joi.object().keys({
     username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
     password: Joi.string().min(6).required(),
+    nama: Joi.string().min(3).required(),
+    email: Joi.string().email().required(),
+    hp: Joi.string().min(8).required()
 });
 
 function respondError422(res, text){
@@ -39,7 +44,7 @@ router.post('/login', (req, res) => {
   console.log('➡️ QUERY:', sql)
   console.log('➡️ PARAM:', req.body.username)
 
-  dbs.query(sql, [req.body.username], async (err, rows) => {
+  db.query(sql, [req.body.username], async (err, rows) => {
 
     if (err) {
       console.error('❌ DB ERROR:', err)
@@ -105,77 +110,104 @@ router.post('/login', (req, res) => {
   })
 })
 
-router.post('/register', (req, res, next) => {
+router.post('/register', async (req, res) => {
 
-    console.log(req.body)
+  console.log('REGISTER BODY:', req.body)
 
-    const request = {
-        username: req.body.username,
-        password: req.body.password,
+  const result = schema.validate(req.body)
+
+  if (result.error) {
+    return respondError422(res, "Validasi gagal")
+  }
+
+  const checkSql = `
+    SELECT * FROM users
+    WHERE username = ? OR email = ?
+  `
+
+  db.query(checkSql, [req.body.username, req.body.email], async (err, rows) => {
+
+    if (err) {
+      console.error(err)
+      return res.status(500).json({ message: 'DB error' })
     }
 
-    const result = Joi.validate(request, schema);
+    if (rows.length > 0) {
+      return res.status(409).json({
+        message: 'Username atau email sudah digunakan'
+      })
+    }
 
-    if (result.error === null) {
+    try {
+      const hashed = await bcrypt.hash(req.body.password, 12)
+      const userId = uniqid()
 
-        
-        let view = `
-            SELECT * 
-            FROM user
-            WHERE 
-            user.username = '`+ req.body.username +`' OR user.email = '`+req.body.email +`'
+      const insertUtama = `
+        INSERT INTO users 
+        (id, username, nama, hp, email, password, menu_klp, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+      `
+
+      db.query(insertUtama, [
+        userId,
+        req.body.username,
+        req.body.nama,
+        req.body.hp,
+        req.body.email,
+        hashed,
+        3
+      ], (err, result) => {
+
+        if (err) {
+          console.error('❌ UMUM INSERT ERROR:', err)
+          return res.status(500).json({ message: 'Insert gagal (umum)' })
+        }
+
+        console.log('✅ INSERT UMUM SUCCESS')
+
+        // ✅ INSERT TO ERIDA
+        const insertErida = `
+          INSERT INTO user 
+          (id, username, nama, hp, email, password, id_pengguna, createAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         `
 
-        dbs.query(view, (err, row) => {
-            if (err) {
-                console.log(err);
-                res.send(err);
-            } else{
-                if (row.length <= 0) {
-                    bcrypt.hash(req.body.password.trim(), 12).then(hashedPassword => {
+        dbErida.query(insertErida, [
+          userId,
+          req.body.username,
+          req.body.nama,
+          req.body.hp,
+          req.body.email,
+          hashed,
+          3
+        ], (err2, result2) => {
 
-                        var query = '';
-                            req.body.menu_klp = 3;
-                            query = `
-                            INSERT INTO user (id, username, nama, hp, email, password, level_id, createAt)
-                            VALUES (
-                                '`+uniqid()+`',
-                                '`+req.body.username+`',
-                                '`+req.body.nama+`',
-                                '`+req.body.hp+`',
-                                '`+req.body.email+`',
-                                '`+hashedPassword+`',
-                                '`+req.body.menu_klp+`',
-                                NOW()
-                            )
-                        `;
+          if (err2) {
+            console.error('❌ ERIDA INSERT ERROR:', err2)
 
-                        dbs.query(query, (err, row) => {
-                            if (err) {
-                                console.log(err)
-                                res.send('Gagal Registrasi');
-                            }else{
-                                console.log('Sukses Registrasi')
-                                res.send(row);
-                            }
-                        })
+            // ⚠️ OPTIONAL: still return success
+            return res.json({
+              success: true,
+              message: 'Registrasi berhasil (umum), gagal sync erida'
+            })
+          }
 
-                    });
+          console.log('✅ INSERT ERIDA SUCCESS')
 
-                }else{
-                    const error = new Error('Username atau email sudah digunakan');
-                    res.status(409);
-                    next(error);
-                }
-            }
+          return res.json({
+            success: true,
+            message: 'Registrasi berhasil (sync semua database)'
+          })
         })
 
+      })
 
-    } else {
-        res.status(422);
-        next(result.error);
+    } catch (e) {
+      console.error(e)
+      res.status(500).json({ message: 'Hash error' })
     }
 
-});
+  })
+})
 
 module.exports = router;

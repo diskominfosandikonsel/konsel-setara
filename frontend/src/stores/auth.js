@@ -4,7 +4,7 @@ import { AuthService } from 'src/services/auth.service'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
+    user: JSON.parse(localStorage.user || 'null'),
     token: localStorage.token || null,
     loading: false
   }),
@@ -43,6 +43,38 @@ export const useAuthStore = defineStore('auth', {
   color: 'negative'
 })
         return false
+      } finally {
+        this.loading = false
+        Loading.hide()
+      }
+    },
+
+    async register(form) {
+      this.loading = true
+      Loading.show()
+
+      try {
+        console.log('REGISTER PAYLOAD:', form) // 🔥 DEBUG
+
+        const res = await AuthService.register(form)
+
+        Notify.create({
+          message: 'Registrasi berhasil',
+          color: 'positive'
+        })
+
+        return true
+
+      } catch (err) {
+        console.error(err)
+
+        Notify.create({
+          message: err.response?.data?.message || 'Registrasi gagal',
+          color: 'negative'
+        })
+
+        return false
+
       } finally {
         this.loading = false
         Loading.hide()
