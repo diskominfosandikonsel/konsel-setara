@@ -1,62 +1,71 @@
 const express = require('express');
 const router = express.Router();
-const https = require('https');
+const http = require('http');
 
-// Proxy GET List Berita
 router.get('/', (req, res) => {
-  const url = 'https://server-web.konaweselatankab.go.id/api/v1/publish_satpol_pengumuman/beritaAndroidDashboard';
+  try {
+    // Mencoba lewat HTTP biasa (port 80)
+    const url = 'http://server-web.konaweselatankab.go.id/api/v1/publish_satpol_pengumuman/beritaAndroidDashboard';
 
-  https.get(url, (response) => {
-    let data = '';
-    response.on('data', chunk => { data += chunk; });
-    response.on('end', () => {
-      try {
-        res.json(JSON.parse(data));
-      } catch (e) {
-        res.status(500).json({ message: 'Error parsing data', error: e.message });
-      }
+    http.get(url, (response) => {
+      let data = '';
+      response.on('data', chunk => { data += chunk; });
+      response.on('end', () => {
+        try {
+          if (!data) return res.status(502).json({ message: 'Empty response dari server web' });
+          res.json(JSON.parse(data));
+        } catch (e) {
+          res.status(500).json({ message: 'Data bukan JSON valid', error: e.message, snippet: data.substring(0, 50) });
+        }
+      });
+    }).on('error', (err) => {
+      res.status(500).json({ message: 'HTTP Request Error', error: err.message });
     });
-  }).on('error', (err) => {
-    res.status(500).json({ message: 'Error fetching berita', error: err.message });
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Global Router Error', error: error.message });
+  }
 });
 
-// Proxy POST Detail Berita
 router.post('/isi_berita', (req, res) => {
-  const url = 'https://server-web.konaweselatankab.go.id/api/v1/publish_satpol_pengumuman/isi_berita';
-  
-  const payloadData = JSON.stringify({
-    id: req.body.id,
-    data_ke: 1,
-    cari_value: ""
-  });
-
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(payloadData)
-    }
-  };
-
-  const proxyReq = https.request(url, options, (response) => {
-    let data = '';
-    response.on('data', chunk => { data += chunk; });
-    response.on('end', () => {
-      try {
-        res.json(JSON.parse(data));
-      } catch (e) {
-        res.status(500).json({ message: 'Error parsing data', error: e.message });
-      }
+  try {
+    const url = 'http://server-web.konaweselatankab.go.id/api/v1/publish_satpol_pengumuman/isi_berita';
+    
+    const payloadData = JSON.stringify({
+      id: req.body.id,
+      data_ke: 1,
+      cari_value: ""
     });
-  });
 
-  proxyReq.on('error', (err) => {
-    res.status(500).json({ message: 'Error fetching detail berita', error: err.message });
-  });
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payloadData)
+      }
+    };
 
-  proxyReq.write(payloadData);
-  proxyReq.end();
+    const proxyReq = http.request(url, options, (response) => {
+      let data = '';
+      response.on('data', chunk => { data += chunk; });
+      response.on('end', () => {
+        try {
+          if (!data) return res.status(502).json({ message: 'Empty response dari detail' });
+          res.json(JSON.parse(data));
+        } catch (e) {
+          res.status(500).json({ message: 'Detail JSON error', error: e.message });
+        }
+      });
+    });
+
+    proxyReq.on('error', (err) => {
+      res.status(500).json({ message: 'Detail HTTP error', error: err.message });
+    });
+
+    proxyReq.write(payloadData);
+    proxyReq.end();
+  } catch (error) {
+    res.status(500).json({ message: 'Global Detail Error', error: error.message });
+  }
 });
 
 module.exports = router;

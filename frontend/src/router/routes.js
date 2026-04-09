@@ -29,7 +29,7 @@ const routes = [
       {
         path: 'edit_profile',
         component: () => import('pages/Profile/EditProfilePage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'sapa_dashboard',

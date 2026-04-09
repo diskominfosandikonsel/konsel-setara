@@ -38,7 +38,6 @@ app.use('/uploads', express.static(path.join(__dirname, './uploads')))
 const checkAuth = require('./apiMysql/checkAuth');
 app.use('/api/v1/checkAuth', checkAuth);
 
-// Proxy SIPPADU (Bypass CORS)
 const sippaduBerita = require('./apiMysql/sippadu/berita');
 app.use('/api/v1/sippadu_berita', sippaduBerita);
 

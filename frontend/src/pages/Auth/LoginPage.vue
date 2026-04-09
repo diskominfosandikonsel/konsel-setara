@@ -52,18 +52,14 @@ export default {
         }
         }
     },
-    computed: {
-        auth() {
-            return useAuthStore()
-        }
-    },
     methods: {
         async doLogin() {
-        const success = await this.auth.login(this.form)
+          const auth = useAuthStore()
+          const success = await auth.login(this.form)
 
-        if (success) {
+          if (success) {
             this.$router.push('/')
-        }
+          }
         }
     }
 }

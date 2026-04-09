@@ -3,11 +3,23 @@ import { Notify, Loading } from 'quasar'
 import { AuthService } from 'src/services/auth.service'
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: JSON.parse(localStorage.user || 'null'),
-    token: localStorage.token || null,
-    loading: false
-  }),
+  state: () => {
+    let user = null
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser && storedUser !== 'undefined') {
+        user = JSON.parse(storedUser)
+      }
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e)
+    }
+
+    return {
+      user: user,
+      token: localStorage.getItem('token') || null,
+      loading: false
+    }
+  },
 
   actions: {
     async login(form) {
