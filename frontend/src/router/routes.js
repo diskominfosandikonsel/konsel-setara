@@ -81,6 +81,11 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'sippadu_aduan/:type',
+        component: () => import('pages/Sippadu/Aduan.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+      {
         path: 'sippadu_riwayat',
         component: () => import('pages/Sippadu/Riwayat.vue'),
         meta: { showBottomNav: false }

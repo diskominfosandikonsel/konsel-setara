@@ -23,55 +23,34 @@
     <transition appear enter-active-class="animated fadeInUp">
       <div v-if="item.id" class="content-area">
 
-        <!-- STATUS HERO CARD — Premium Glassmorphism Effect -->
-        <div class="status-hero-card shadow-premium" :class="`card-${statusColor}`">
+        <!-- STATUS HERO CARD — Compact -->
+        <div class="status-hero-card" :class="`card-${statusColor}`">
           <div class="hero-pattern"></div>
-          
-          <div class="col items-center text-center">
-            <div class="status-icon-glow" :class="`glow-${statusColor}`">
-              <q-icon :name="statusIcon" size="40px" />
-            </div>
-            
-            <div class="text-overline q-mt-md text-white-70">{{ itemJenis.toUpperCase() }}</div>
-            <div class="text-h4 text-weight-bolder text-white q-mt-xs">{{ statusLabel }}</div>
-            <div class="row items-center justify-center q-mt-sm text-white-60">
-              <q-icon name="event" size="14px" class="q-mr-xs" />
-              <span>Dilaporkan {{ formatDate(item.createAt) }}</span>
+
+          <div class="hero-inner">
+            <div class="status-icon-glow">
+              <q-icon :name="statusIcon" size="28px" />
             </div>
 
-            <div class="status-badge-premium q-mt-lg">
-              <q-icon :name="statusIcon" size="16px" class="q-mr-xs" />
-              {{ item.status === 'proses' ? 'Sedang Diproses' : item.status === 'selesai' ? 'Selesai Terverifikasi' : 'Perlu Perbaikan' }}
+            <div class="q-ml-md">
+              <div class="text-caption text-white-70">{{ itemJenis.toUpperCase() }}</div>
+              <div class="text-h6 text-weight-bolder text-white">{{ statusLabel }}</div>
+              <div class="row items-center q-mt-xs text-white-60" style="font-size:11px">
+                <q-icon name="event" size="12px" class="q-mr-xs" />
+                <span>{{ formatDate(item.createAt) }}</span>
+              </div>
             </div>
+
+            <q-space />
+
+            <!-- <div class="status-badge-sm">
+              <q-icon :name="statusIcon" size="13px" class="q-mr-xs" />
+              {{ item.status === 'proses' ? 'Diproses' : item.status === 'selesai' ? 'Selesai' : 'Dikembalikan' }}
+            </div> -->
           </div>
         </div>
 
-        <!-- ── INFORMASI PELAPOR ── -->
-        <div class="premium-info-card q-mb-md">
-          <div class="card-head">
-            <q-icon name="person" color="primary" size="20px" />
-            <span>Informasi Pelapor</span>
-          </div>
-          
-          <div class="card-body">
-            <div class="data-row">
-              <span class="label">Nama Lengkap</span>
-              <span class="value">{{ item.nama || authStore.user?.nama || 'Anonim' }}</span>
-            </div>
-            <div class="data-row">
-              <span class="label">Nomor WhatsApp</span>
-              <span class="value">{{ item.hp || authStore.user?.hp || '-' }}</span>
-            </div>
-            <div class="data-row">
-              <span class="label">Kategori</span>
-              <span class="value">
-                <q-badge :color="itemJenis === 'Perkada' ? 'deep-purple-6' : 'blue-8'" rounded>
-                  {{ itemJenis }}
-                </q-badge>
-              </span>
-            </div>
-          </div>
-        </div>
+
 
         <!-- ── KETERANGAN ── -->
         <div class="premium-info-card q-mb-md">
@@ -83,7 +62,7 @@
             <div class="uraian-content">
               {{ item.uraian || '-' }}
             </div>
-            
+
             <!-- Tindak Lanjut UI -->
             <div v-if="item.status !== 'proses' && item.keterangan" class="tl-alert q-mt-md">
               <div class="tl-alert-head">Pesan Petugas:</div>
@@ -100,7 +79,7 @@
           </div>
           <div class="card-body">
             <div class="photo-container" @click="showImageFullscreen = true">
-              <q-img :src="getImageUrl(item.file)" class="detail-photo" fit="cover" :ratio="16/9">
+              <q-img :src="getImageUrl(item.file)" class="detail-photo" fit="cover" :ratio="16 / 9">
                 <template #loading><q-spinner-puff color="white" /></template>
               </q-img>
               <div class="photo-hint">
@@ -118,16 +97,10 @@
           </div>
           <div class="card-body">
             <div class="lokasi-pill q-mb-sm">
-                <q-icon name="place" class="q-mr-xs" />
-                {{ item.lokasi || `${item.lat}, ${item.lng}` }}
+              <q-icon name="place" class="q-mr-xs" />
+              {{ item.lokasi || `${item.lat}, ${item.lng}` }}
             </div>
-            <q-btn 
-              unelevated 
-              color="blue-7" 
-              class="full-width maps-action-btn" 
-              no-caps
-              @click="openLocation"
-            >
+            <q-btn unelevated color="blue-7" class="full-width maps-action-btn" no-caps @click="openLocation">
               <q-icon name="map" class="q-mr-sm" />
               Buka di Google Maps
               <div class="btn-glow"></div>
@@ -207,70 +180,101 @@ const openLocation = () => {
 </script>
 
 <style scoped>
-.detail-bg { background: #f0f4f9; min-height: 100vh; }
+.detail-bg {
+  background: #f0f4f9;
+  min-height: 100vh;
+}
 
-.header-text { letter-spacing: 2px; font-size: 16px; }
+.header-text {
+  letter-spacing: 2px;
+  font-size: 16px;
+}
 
-.sticky-header { position: sticky; top: 0; z-index: 100; }
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-.content-area { padding: 16px; }
+.content-area {
+  padding: 16px;
+}
 
 /* ─── HERO CARD ─── */
 .status-hero-card {
   position: relative;
-  border-radius: 28px;
-  padding: 40px 24px;
+  border-radius: 20px;
+  padding: 18px 20px;
   overflow: hidden;
-  margin-bottom: 20px;
-  transition: all 0.4s ease;
+  margin-bottom: 16px;
 }
 
 .hero-pattern {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
   background-size: 24px 24px;
   opacity: 0.5;
 }
 
-.card-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.card-positive { background: linear-gradient(135deg, #10b981, #059669); }
-.card-negative { background: linear-gradient(135deg, #ef4444, #dc2626); }
-.card-grey     { background: linear-gradient(135deg, #6b7280, #4b5563); }
+.card-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.card-positive {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.card-negative {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.card-grey {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
 
 .status-icon-glow {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
   color: white;
-  background: rgba(255,255,255,0.2);
-  box-shadow: 0 0 30px rgba(255,255,255,0.2);
-  animation: pulse 2s infinite;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255,255,255,0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+.hero-inner {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
-.text-white-70 { color: rgba(255,255,255,0.7); }
-.text-white-60 { color: rgba(255,255,255,0.6); }
-
-.status-badge-premium {
+.status-badge-sm {
   display: inline-flex;
   align-items: center;
-  padding: 8px 20px;
-  background: white;
-  color: #1e293b;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
   border-radius: 99px;
-  font-weight: 800;
-  font-size: 13px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.text-white-70 {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.text-white-60 {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* ─── INFO CARDS ─── */
@@ -279,8 +283,8 @@ const openLocation = () => {
   border-radius: 20px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-  border: 1px solid rgba(0,0,0,0.02);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .card-head {
@@ -295,7 +299,9 @@ const openLocation = () => {
   font-size: 14px;
 }
 
-.card-body { padding: 20px; }
+.card-body {
+  padding: 20px;
+}
 
 .data-row {
   display: flex;
@@ -304,10 +310,20 @@ const openLocation = () => {
   border-bottom: 1px dotted #e2e8f0;
 }
 
-.data-row:last-child { border-bottom: none; }
+.data-row:last-child {
+  border-bottom: none;
+}
 
-.data-row .label { color: #94a3b8; font-size: 13px; }
-.data-row .value { color: #1e293b; font-weight: 700; font-size: 13px; }
+.data-row .label {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.data-row .value {
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 13px;
+}
 
 .uraian-content {
   background: #f8fafc;
@@ -325,8 +341,17 @@ const openLocation = () => {
   padding: 14px;
 }
 
-.tl-alert-head { font-weight: 800; color: #92400e; font-size: 12px; margin-bottom: 4px; }
-.tl-alert-body { color: #b45309; font-size: 13px; }
+.tl-alert-head {
+  font-weight: 800;
+  color: #92400e;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.tl-alert-body {
+  color: #b45309;
+  font-size: 13px;
+}
 
 .photo-container {
   position: relative;
@@ -335,14 +360,22 @@ const openLocation = () => {
   cursor: pointer;
 }
 
-.detail-photo { border-radius: 16px; transition: transform 0.3s ease; }
-.photo-container:active .detail-photo { transform: scale(0.98); }
+.detail-photo {
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+}
+
+.photo-container:active .detail-photo {
+  transform: scale(0.98);
+}
 
 .photo-hint {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 12px;
-  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
   color: white;
   font-size: 12px;
   display: flex;
@@ -351,14 +384,14 @@ const openLocation = () => {
 }
 
 .lokasi-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 16px;
-    background: #eff6ff;
-    color: #3b82f6;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .maps-action-btn {
@@ -371,15 +404,25 @@ const openLocation = () => {
 
 .btn-glow {
   position: absolute;
-  top: 0; left: -100%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   animation: shine 3s infinite;
 }
 
 @keyframes shine {
-  0% { left: -100%; }
-  30% { left: 150%; }
-  100% { left: 150%; }
+  0% {
+    left: -100%;
+  }
+
+  30% {
+    left: 150%;
+  }
+
+  100% {
+    left: 150%;
+  }
 }
 </style>

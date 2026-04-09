@@ -21,5 +21,17 @@ export const SippaduService = {
   // 📝 KIRIM LAPORAN BARU
   addData(payload) {
     return apiSippadu.post('publish_laporan/addData', payload)
+  },
+
+  // 📸 UPLOAD FOTO LAPORAN
+  // Server mengharapkan raw binary (octet-stream) dengan header File-Name
+  // Endpoint: /api/v1/laporan (lihat uploadImage.js di server referensi)
+  uploadFile(fileBlob, fileName) {
+    return apiSippadu.post('laporan', fileBlob, {
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'File-Name': fileName
+      }
+    })
   }
 }

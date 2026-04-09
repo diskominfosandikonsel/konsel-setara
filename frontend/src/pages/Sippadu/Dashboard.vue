@@ -39,7 +39,7 @@
 
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <div class="premium-card perda ripple" @click="goLapor('perda')">
+            <div class="premium-card perda ripple" @click="goAduan('perda')">
               <div class="card-icon">
                 <img src="/icons/sippadu/icon-perda.png" alt="Perda" />
               </div>
@@ -49,7 +49,7 @@
             </div>
           </div>
           <div class="col-6">
-            <div class="premium-card perkada ripple" @click="goLapor('perkada')">
+            <div class="premium-card perkada ripple" @click="goAduan('perkada')">
               <div class="card-icon">
                 <img src="/icons/sippadu/icon-perkada.png" alt="Perkada" />
               </div>
@@ -103,79 +103,7 @@
 
     </div>
 
-    <!-- ═══════════════════════════════════════════ -->
-    <!-- FORM ADUAN DIALOG — Premium Experience      -->
-    <!-- ═══════════════════════════════════════════ -->
-    <q-dialog v-model="showLaporDialog" maximized transition-show="slide-up" transition-hide="slide-down">
-      <q-card class="lapor-dialog-card bg-grey-1 col column">
-
-        <!-- Animated Header -->
-        <div class="lapor-header" :class="selectedType">
-          <div class="row items-center q-pa-md">
-            <q-btn round flat icon="close" color="white" v-close-popup />
-            <div class="text-subtitle1 text-weight-bold q-ml-sm">BUAT LAPORAN {{ selectedType.toUpperCase() }}</div>
-          </div>
-
-          <div class="header-content column flex-center q-py-lg">
-            <div class="photo-preview-container" @click="triggerCamera">
-              <q-img v-if="capturedImage" :src="capturedImage" class="preview-img" fit="cover" />
-              <div v-else class="empty-photo column flex-center">
-                <q-icon name="add_a_photo" size="48px" />
-                <div class="text-caption q-mt-sm">Ambil Foto Kejadian</div>
-              </div>
-              <div class="edit-badge" v-if="capturedImage"><q-icon name="edit" /></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Form Body -->
-        <div class="lapor-body col q-pa-lg scroll">
-          <div class="form-container">
-
-            <div class="form-section-title">Informasi Pelapor</div>
-            <div class="row q-col-gutter-sm q-mb-md">
-              <div class="col-12">
-                <q-input v-model="pelaporNama" label="Nama Lengkap" outlined bg-color="white" dense
-                  class="premium-input">
-                  <template v-slot:prepend><q-icon name="person" /></template>
-                </q-input>
-              </div>
-              <div class="col-12">
-                <q-input v-model="pelaporHp" label="Nomor WhatsApp" outlined bg-color="white" dense
-                  class="premium-input" type="tel">
-                  <template v-slot:prepend><q-icon name="whatsapp" /></template>
-                </q-input>
-              </div>
-            </div>
-
-            <div class="form-section-title">Detail Pengaduan</div>
-            <q-input v-model="laporanText" type="textarea" outlined bg-color="white"
-              placeholder="Jelaskan secara detail kejadian yang Anda temukan..." class="premium-input q-mb-lg"
-              rows="4" />
-
-            <!-- Location Info -->
-            <div class="location-box q-mb-lg" :class="{ 'has-loc': hasLocation }">
-              <div class="row items-center no-wrap">
-                <div class="loc-icon-ring"><q-icon :name="hasLocation ? 'my_location' : 'location_off'" /></div>
-                <div class="q-ml-md">
-                  <div class="text-weight-bold" style="font-size: 13px;">Lokasi Kejadian</div>
-                  <div class="text-caption text-grey-7">{{ locationLabel }}</div>
-                </div>
-              </div>
-              <q-btn v-if="!hasLocation" flat color="primary" label="Ambil Lokasi" no-caps dense class="q-mt-sm"
-                @click="getLocation" />
-            </div>
-
-            <q-btn unelevated color="primary" class="full-width premium-submit" label="KIRIM LAPORAN SEKARANG"
-              :loading="isSending" @click="handleKirim" />
-            <div class="text-center q-mt-md text-caption text-grey-6 px-lg">
-              Data laporan Anda akan kami teruskan ke pihak berwenang untuk ditindaklanjuti.
-            </div>
-          </div>
-        </div>
-
-      </q-card>
-    </q-dialog>
+    <!-- FORM ADUAN DIALOG — dihapus, kini navigasi ke halaman Aduan.vue -->
 
     <!-- HIDDEN CAMERA INPUT -->
     <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
@@ -187,104 +115,18 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useSippaduStore } from 'stores/sippadu'
 import { useAuthStore } from 'stores/auth'
 
 const router = useRouter()
-const $q = useQuasar()
 const sippaduStore = useSippaduStore()
 const authStore = useAuthStore()
 
-// -- STATE --
-const cameraInput = ref(null)
-const showLaporDialog = ref(false)
-const capturedImage = ref(null)
-const capturedFile = ref(null)
-const laporanText = ref('')
-const selectedType = ref('')
-const isSending = ref(false)
-
-// Data Pelapor
-const pelaporNama = ref(authStore.user?.nama || '')
-const pelaporHp = ref(authStore.user?.hp || '')
-
-// Location State
-const lat = ref(null)
-const lng = ref(null)
-const hasLocation = computed(() => !!lat.value)
-const locationLabel = computed(() => hasLocation.value ? `${lat.value.toFixed(6)}, ${lng.value.toFixed(6)}` : 'Belum mengambil lokasi')
-
 onMounted(() => {
-  // Try to get location early if possible
-  getLocation()
+  // Preload jika diperlukan
 })
 
-const getLocation = () => {
-  navigator.geolocation.getCurrentPosition((pos) => {
-    lat.value = pos.coords.latitude
-    lng.value = pos.coords.longitude
-  }, (err) => {
-    console.warn('Geolocation failed', err)
-  }, { enableHighAccuracy: true })
-}
-
-const triggerCamera = () => {
-  if (cameraInput.value) cameraInput.value.click()
-}
-
-const goLapor = (type) => {
-  selectedType.value = type
-  triggerCamera()
-}
-
-const onCameraCapture = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    capturedFile.value = file
-    capturedImage.value = URL.createObjectURL(file)
-    showLaporDialog.value = true
-  }
-  event.target.value = ''
-}
-
-const handleKirim = async () => {
-  if (!capturedFile.value) {
-    return $q.notify({ color: 'negative', message: 'Foto kejadian wajib dilampirkan', icon: 'photo' })
-  }
-  if (!laporanText.value) {
-    return $q.notify({ color: 'negative', message: 'Keterangan tidak boleh kosong', icon: 'edit' })
-  }
-  if (!hasLocation.value) {
-    return $q.notify({ color: 'negative', message: 'Lokasi wajib diambil untuk pelaporan tepat sasaran', icon: 'place' })
-  }
-
-  isSending.value = true
-
-  const payload = {
-    uraian: laporanText.value,
-    objek: selectedType.value === 'perkada' ? 1 : 0,
-    lat: lat.value,
-    lng: lng.value,
-    status: 'proses',
-    file: capturedFile.value ? capturedFile.value.name : '',
-    // Tambahkan info pelapor ke payload (untuk disimpan di backend)
-    nama: pelaporNama.value,
-    hp: pelaporHp.value
-  }
-
-  const success = await sippaduStore.addData(payload)
-  if (success) {
-    showLaporDialog.value = false
-    // Reset form
-    capturedImage.value = null
-    capturedFile.value = null
-    laporanText.value = ''
-    $q.notify({ color: 'positive', message: 'Laporan Anda berhasil dikirim', icon: 'check_circle' })
-  }
-  isSending.value = false
-}
-
+const goAduan = (type) => router.push(`/sippadu_aduan/${type}`)
 const goRiwayat = () => router.push('/sippadu_riwayat')
 const goPerdaInfo = () => router.push('/Perda')
 const goPerkadaInfo = () => router.push('/Perkada')
