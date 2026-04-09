@@ -1,19 +1,16 @@
 import { apiErida } from '../../api/erida'
 
 export const PenelitianService = {
-  getAll(params = {}) {
-    return apiErida.get('penelitian', { params })
+
+  getData(payload) {
+    return apiErida.post('server_penelitian/view', payload)
   },
 
-  create(data) {
-    return apiErida.post('penelitian', data)
+  addData(formData) {
+    return apiErida.post('server_penelitian/addData', formData)
   },
 
-  update(id, data) {
-    return apiErida.put(`penelitian/${id}`, data)
-  },
-
-  delete(id) {
-    return apiErida.delete(`penelitian/${id}`)
+  editData(formData) {
+    return apiErida.post('server_penelitian/editData', formData)
   }
 }

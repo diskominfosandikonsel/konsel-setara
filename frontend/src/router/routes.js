@@ -18,32 +18,38 @@ const routes = [
       {
         path: 'notifikasi',
         component: () => import('pages/NotifPage.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true , requiresAuth: true }
       },
       {
         path: 'profil',
         component: () => import('pages/ProfilPage.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true , requiresAuth: true }
       },
       {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true , requiresAuth: true }
       },
       {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true , requiresAuth: true }
       },
       {
         path: 'sapa_detail',
         component: () => import('pages/SapaKonsel/Detail.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false , requiresAuth: true }
       },
       {
         path: 'sapa_satgas',
         component: () => import('pages/SapaKonsel/Satgas.vue'),
         meta: { showBottomNav: false }
+      },
+
+      {
+        path: 'erida_penelitian',
+        component: () => import('pages/Erida/Penelitian.vue'),
+        meta: { showBottomNav: false , requiresAuth: true }
       },
 
       // SIPPADU

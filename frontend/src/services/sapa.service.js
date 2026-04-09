@@ -1,5 +1,5 @@
-import { apiSapa } from './apiSapa'
-import { sapaPublic } from './sapaPublic'
+import { apiSapa } from '../api/sapakonsel'
+// import { sapaPublic } from './sapaPublic'
 
 export const SapaService = {
 

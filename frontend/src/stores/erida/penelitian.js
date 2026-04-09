@@ -5,30 +5,35 @@ import { PenelitianService } from 'src/services/erida/penelitian.service'
 export const usePenelitianStore = defineStore('penelitian', {
   state: () => ({
     list: [],
-    loading: false,
     page: 1,
+    cari: '',
     total: 0,
-    cari: ''
+    loading: false
   }),
 
   actions: {
+
     // 🔥 GET DATA
     async fetchData() {
       this.loading = true
       Loading.show()
 
       try {
-        const params = {
-          page: this.page,
-          cari: this.cari
+        const payload = {
+          data_ke: this.page,
+          cari_value: this.cari
         }
 
-        const res = await PenelitianService.getAll(params)
+        const res = await PenelitianService.getData(payload)
 
-        this.list = res.data.data || res.data
-        this.total = res.data.total || 0
+        console.log('DATA ERIDA:', res.data)
+
+        this.list = res.data.data
+        this.total = res.data.jml_data
 
       } catch (err) {
+        console.error(err)
+
         Notify.create({
           message: 'Gagal ambil data',
           color: 'negative'
@@ -39,31 +44,37 @@ export const usePenelitianStore = defineStore('penelitian', {
       }
     },
 
-    // 🔥 CREATE
-    async addData(payload) {
+    // ➕ ADD
+    async addData(form) {
       Loading.show()
 
       try {
         const formData = new FormData()
 
-        formData.append('title', payload.title)
+        formData.append('file', form.file)
 
-        if (payload.file) {
-          formData.append('file', payload.file)
-        }
+        formData.append('data', JSON.stringify({
+          nama: form.nama,
+          alamat: form.alamat,
+          hp: form.hp,
+          email: form.email,
+          nik: form.nik
+        }))
 
-        await PenelitianService.create(formData)
+        await PenelitianService.addData(formData)
 
         Notify.create({
-          message: 'Berhasil tambah data',
+          message: 'Berhasil tambah',
           color: 'positive'
         })
 
         this.fetchData()
 
       } catch (err) {
+        console.error(err)
+
         Notify.create({
-          message: err.response?.data?.message || 'Gagal tambah',
+          message: 'Gagal tambah data',
           color: 'negative'
         })
       } finally {
@@ -71,20 +82,28 @@ export const usePenelitianStore = defineStore('penelitian', {
       }
     },
 
-    // 🔥 UPDATE
-    async editData(id, payload) {
+    // ✏️ EDIT
+    async editData(form) {
       Loading.show()
 
       try {
         const formData = new FormData()
 
-        formData.append('title', payload.title)
-
-        if (payload.file) {
-          formData.append('file', payload.file)
+        if (form.file) {
+          formData.append('file', form.file)
         }
 
-        await PenelitianService.update(id, formData)
+        formData.append('data', JSON.stringify({
+          id: form.id,
+          nama: form.nama,
+          alamat: form.alamat,
+          hp: form.hp,
+          email: form.email,
+          nik: form.nik,
+          ktp: form.ktp // old file
+        }))
+
+        await PenelitianService.editData(formData)
 
         Notify.create({
           message: 'Berhasil update',
@@ -94,32 +113,10 @@ export const usePenelitianStore = defineStore('penelitian', {
         this.fetchData()
 
       } catch (err) {
+        console.error(err)
+
         Notify.create({
           message: 'Gagal update',
-          color: 'negative'
-        })
-      } finally {
-        Loading.hide()
-      }
-    },
-
-    // 🔥 DELETE
-    async deleteData(id) {
-      Loading.show()
-
-      try {
-        await PenelitianService.delete(id)
-
-        Notify.create({
-          message: 'Berhasil hapus',
-          color: 'positive'
-        })
-
-        this.fetchData()
-
-      } catch (err) {
-        Notify.create({
-          message: 'Gagal hapus',
           color: 'negative'
         })
       } finally {
