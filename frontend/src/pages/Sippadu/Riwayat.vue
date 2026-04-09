@@ -13,9 +13,9 @@
         <q-tabs v-model="activeFilter" dense active-color="primary" indicator-color="primary" align="left"
           narrow-indicator class="filter-tabs">
           <q-tab name="semua" label="Semua" />
-          <q-tab name="pending" label="Pending" />
-          <q-tab name="diterima" label="Diterima" />
-          <q-tab name="ditolak" label="Ditolak" />
+          <q-tab name="proses" label="Proses" />
+          <q-tab name="selesai" label="Selesai" />
+          <q-tab name="dikembalikan" label="Dikembalikan" />
         </q-tabs>
       </div>
     </div>
@@ -40,8 +40,8 @@
           <q-card-section class="q-pa-md">
             <div class="row items-center justify-between q-mb-sm">
               <div class="row items-center">
-                <div class="category-dot" :class="item.jenis"></div>
-                <div class="text-overline text-grey-7">{{ item.jenis.toUpperCase() }}</div>
+                <div class="category-dot" :class="itemJenis(item.objek)"></div>
+                <div class="text-overline text-grey-7">{{ itemJenis(item.objek).toUpperCase() }}</div>
               </div>
               <div class="status-chip" :class="`chip-${item.status}`">
                 <q-icon :name="statusIcon(item.status)" size="14px" class="q-mr-xs" />
@@ -49,14 +49,15 @@
               </div>
             </div>
 
-            <div class="laporan-title q-mb-sm">{{ item.judul }}</div>
+            <!-- Uraian pengaduan dipakai sebagai Judul laporan -->
+            <div class="laporan-title q-mb-sm">{{ item.uraian }}</div>
 
             <div class="divider"></div>
 
             <div class="row items-center justify-between q-mt-sm">
               <div class="row items-center text-grey-6 text-caption">
                 <q-icon name="schedule" size="14px" class="q-mr-xs" />
-                {{ formatDate(item.tanggal) }}
+                {{ formatDate(item.createAt) }}
               </div>
               <div class="text-primary text-caption text-weight-bold row items-center cursor-pointer">
                 Lihat Detail <q-icon name="chevron_right" />
@@ -70,68 +71,53 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useSippaduStore } from 'stores/sippadu'
 
 const router = useRouter()
+const sippaduStore = useSippaduStore()
 
 // -- REAKTIFITAS (Composition API) --
 const activeFilter = ref('semua')
 
-const laporanList = ref([
-  {
-    id: 1,
-    judul: 'Penertiban PKL di trotoar depan kantor bupati',
-    jenis: 'perda',
-    status: 'diterima',
-    tanggal: '2025-04-02',
-  },
-  {
-    id: 2,
-    judul: 'Gangguan ketertiban umum di terminal malam hari',
-    jenis: 'perkada',
-    status: 'pending',
-    tanggal: '2025-04-05',
-  },
-  {
-    id: 3,
-    judul: 'Laporan pembuangan sampah liar di drainase',
-    jenis: 'perda',
-    status: 'ditolak',
-    tanggal: '2025-03-30',
-  },
-  {
-    id: 4,
-    judul: 'Izin reklame yang menghalangi marka jalan',
-    jenis: 'perkada',
-    status: 'diterima',
-    tanggal: '2025-03-25',
-  }
-])
+onMounted(() => {
+  sippaduStore.fetchRiwayat()
+})
 
 // -- LOGIKA --
 const filteredList = computed(() => {
-  if (activeFilter.value === 'semua') return laporanList.value
-  return laporanList.value.filter(i => i.status === activeFilter.value)
+  const list = sippaduStore.list_riwayat || []
+  if (activeFilter.value === 'semua') return list
+  return list.filter(i => i.status === activeFilter.value)
 })
 
+const itemJenis = (objek) => {
+  // Objek dari backend: 0 = Perda, 1 = Perkada
+  return String(objek) === '1' ? 'perkada' : 'perda'
+}
+
 const statusLabel = (status) => {
-  const map = { pending: 'Sedang Proses', diterima: 'Diterima', ditolak: 'Ditolak' }
+  // Mapping kata dari backend 'proses', 'selesai', 'dikembalikan'
+  const map = { proses: 'Sedang Proses', selesai: 'Selesai', dikembalikan: 'Dikembalikan' }
   return map[status] || status
 }
 
 const statusIcon = (status) => {
-  const map = { pending: 'sync', diterima: 'check_circle', ditolak: 'cancel' }
+  const map = { proses: 'sync', selesai: 'check_circle', dikembalikan: 'cancel' }
   return map[status] || 'info'
 }
 
 const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', {
     day: 'numeric', month: 'short', year: 'numeric'
   })
 }
 
 const goDetail = (id) => {
+  // Sementara diarahkan ke halaman detail kosong,
+  // ke depannya bisa router.push(`/sippadu_detail/${id}`)
   router.push('/sippadu_detail')
 }
 </script>
@@ -206,19 +192,19 @@ const goDetail = (id) => {
   align-items: center;
 }
 
-.chip-pending {
+.chip-proses {
   background: #fffbeb;
   color: #d97706;
   border: 1px solid #fef3c7;
 }
 
-.chip-diterima {
+.chip-selesai {
   background: #f0fdf4;
   color: #16a34a;
   border: 1px solid #dcfce7;
 }
 
-.chip-ditolak {
+.chip-dikembalikan {
   background: #fef2f2;
   color: #dc2626;
   border: 1px solid #fee2e2;

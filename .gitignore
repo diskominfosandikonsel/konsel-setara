@@ -144,4 +144,4 @@ dump.rdb
 # Dokumentasi lokal (tidak perlu di-push ke GitHub)
 docs/
 
-.DS_Store
+.DS_Store.quasar

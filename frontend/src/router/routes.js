@@ -18,27 +18,27 @@ const routes = [
       {
         path: 'notifikasi',
         component: () => import('pages/NotifPage.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'profil',
         component: () => import('pages/ProfilPage.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
-        meta: { showBottomNav: true , requiresAuth: true}
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'sapa_detail',
         component: () => import('pages/SapaKonsel/Detail.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'sapa_satgas',
@@ -50,7 +50,7 @@ const routes = [
       {
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'Perda',
@@ -70,6 +70,11 @@ const routes = [
       {
         path: 'sippadu_detail',
         component: () => import('pages/Sippadu/Detail.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'sippadu_berita/:id',
+        component: () => import('pages/Sippadu/DetailBerita.vue'),
         meta: { showBottomNav: false }
       },
 
