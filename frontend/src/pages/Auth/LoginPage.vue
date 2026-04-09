@@ -33,7 +33,7 @@
 
             <div class="button-group">
                 <button class="btn btn-primary" @click="doLogin">Masuk</button>
-                <button class="btn btn-outline" @click="handleRegister">Daftar</button>
+                <button class="btn btn-outline" @click="$router.push('/register')">Daftar</button>
             </div>
         </div>
     </div>

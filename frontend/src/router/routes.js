@@ -49,7 +49,7 @@ const routes = [
       {
         path: 'erida_penelitian',
         component: () => import('pages/Erida/Penelitian.vue'),
-        meta: { showBottomNav: false , requiresAuth: true }
+        meta: { showBottomNav: false, requiresAuth: true }
       },
 
       // SIPPADU
@@ -246,6 +246,11 @@ const routes = [
       {
         path: 'login',
         component: () => import('pages/Auth/LoginPage.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'register',
+        component: () => import('pages/Auth/RegisPage.vue'),
         meta: { showBottomNav: false }
       },
       // SIMCARD
