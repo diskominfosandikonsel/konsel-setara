@@ -105,7 +105,12 @@
       <div class="text-subtitle1 text-weight-bold q-mb-md text-grey-9">Berita terbaru</div>
       
       <template v-if="beritaTerbaru.length > 0">
-        <div v-for="(news, idx) in beritaTerbaru" :key="'news'+idx" class="row q-mb-md news-item">
+        <div
+          v-for="(news, idx) in beritaTerbaru"
+          :key="'news'+idx"
+          class="row q-mb-md news-item news-clickable"
+          @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date } })"
+        >
           <div class="col-4">
             <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
           </div>
@@ -279,12 +284,12 @@ export default {
 
         // DUMMY DATA SEMENTARA
         const dummyBerita = [
-          { title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', author: 'Pemkab Konawe Selatan', date: '1 Years ago', img: 'https://picsum.photos/200/200?random=1' },
-          { title: 'Perubahan Jadwal Pelayanan Masyarakat Selama Bulan Suci', author: 'Sekretariat Daerah', date: '2 Days ago', img: 'https://picsum.photos/200/200?random=2' },
-          { title: 'Pengembangan Infrastruktur Jembatan Antar Desa', author: 'Dinas PU', date: '5 Days ago', img: 'https://picsum.photos/200/200?random=3' },
-          { title: 'Rapat Kerja Tahunan Kabupaten Konawe Selatan', author: 'Humas Konsel', date: '1 Week ago', img: 'https://picsum.photos/200/200?random=4' },
-          { title: 'Pembagian Sembako Gratis di Tiga Kecamatan', author: 'Dinas Sosial', date: '2 Weeks ago', img: 'https://picsum.photos/200/200?random=5' },
-          { title: 'Berita Ke-6 Yang Tidak Boleh Tampil', author: 'Admin', date: 'Today', img: 'https://picsum.photos/200/200?random=6' }
+          { id: 1, title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', author: 'Pemkab Konawe Selatan', date: '1 Years ago', img: 'https://picsum.photos/200/200?random=1' },
+          { id: 2, title: 'Perubahan Jadwal Pelayanan Masyarakat Selama Bulan Suci', author: 'Sekretariat Daerah', date: '2 Days ago', img: 'https://picsum.photos/200/200?random=2' },
+          { id: 3, title: 'Pengembangan Infrastruktur Jembatan Antar Desa', author: 'Dinas PU', date: '5 Days ago', img: 'https://picsum.photos/200/200?random=3' },
+          { id: 4, title: 'Rapat Kerja Tahunan Kabupaten Konawe Selatan', author: 'Humas Konsel', date: '1 Week ago', img: 'https://picsum.photos/200/200?random=4' },
+          { id: 5, title: 'Pembagian Sembako Gratis di Tiga Kecamatan', author: 'Dinas Sosial', date: '2 Weeks ago', img: 'https://picsum.photos/200/200?random=5' },
+          { id: 6, title: 'Berita Ke-6 Yang Tidak Boleh Tampil', author: 'Admin', date: 'Today', img: 'https://picsum.photos/200/200?random=6' }
         ]
         
         // Membatasi hanya 5 berita saja yang tampil
@@ -430,6 +435,14 @@ export default {
 }
 .news-img {
   border-radius: 8px;
+}
+.news-clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 6px;
+}
+.news-clickable:active {
+  background-color: #f5f5f5;
 }
 .line-clamp-2 {
   display: -webkit-box;

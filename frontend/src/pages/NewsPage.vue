@@ -10,7 +10,12 @@
     <!-- :offset="150" berarti load triggger ketika pengguna mencapai 150px dari bawah -->
     <q-infinite-scroll @load="onLoad" :offset="150" ref="infiniteScrollRef">
       <!-- List Berita -->
-      <div v-for="(news, idx) in newsList" :key="idx" class="row q-mb-md news-item items-start">
+      <div
+        v-for="(news, idx) in newsList"
+        :key="idx"
+        class="row q-mb-md news-item items-start clickable-item"
+        @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date } })"
+      >
         <div class="col-4">
           <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
         </div>
@@ -30,6 +35,7 @@
           </div>
         </div>
       </div>
+
 
       <!-- Icon Loading Quasar standar -->
       <template v-slot:loading>
@@ -143,4 +149,13 @@ const onLoad = async (index, done) => {
 .letter-spacing-tight {
   letter-spacing: -0.2px;
 }
+.clickable-item {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 6px;
+}
+.clickable-item:active {
+  background-color: #f5f5f5;
+}
+
 </style>

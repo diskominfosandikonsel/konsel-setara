@@ -16,6 +16,12 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'news/:id',
+        component: () => import('pages/NewsDetailPage.vue'),
+        meta: { showBottomNav: false }
+      },
+
+      {
         path: 'notifikasi',
         component: () => import('pages/NotifPage.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
@@ -259,6 +265,11 @@ const routes = [
         component: () => import('pages/Auth/RegisPage.vue'),
         meta: { showBottomNav: false }
       },
+      {
+        path: 'lupa-password',
+        component: () => import('pages/Auth/LupapassPage.vue'),
+        meta: { showBottomNav: false }
+      },
       // SIMCARD
 
       // JDIH
@@ -279,7 +290,7 @@ const routes = [
       },
       {
         path: 'keputusanBupati',
-        component: () => import('pages/Jdih/keputusan.vue'),
+        component: () => import('pages/Jdih/Keputusan.vue'),
         meta: { showBottomNav: true }
       },
       {
