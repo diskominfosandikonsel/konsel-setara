@@ -20,10 +20,16 @@ const routes = [
         component: () => import('pages/NotifPage.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
       },
+      // PROFILE
       {
         path: 'profil',
         component: () => import('pages/ProfilPage.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
+      },
+      {
+        path: 'edit_profile',
+        component: () => import('pages/Profile/EditProfilePage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
       },
       {
         path: 'sapa_dashboard',
