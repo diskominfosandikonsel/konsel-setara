@@ -15,6 +15,11 @@
   object-fit: cover;
 }
 
+.empty-img {
+  width: 220px;
+  max-width: 80vw;
+}
+
 .q-carousel-slide {
   padding: 0 12px; 
 }
@@ -128,7 +133,7 @@
 /* DASHBOARD */
 
 /* PERDA */
-.cardPerda{
+/* .cardPerda{
   
-}
+} */
 /* PERDA */

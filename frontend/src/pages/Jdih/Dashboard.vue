@@ -33,7 +33,7 @@
                         <div @click="goPerda">
                             <q-card-section class="menuSection">
                                 <div class="cardx flex flex-center">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/perda.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Peraturan Daerah</div>
                             </q-card-section>
@@ -43,7 +43,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/perbup.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Peraturan Bupati</div>
                             </q-card-section>
@@ -53,7 +53,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/kepbup.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Keputusan Bupati</div>
                             </q-card-section>
@@ -63,7 +63,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/insbup.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Instruksi Bupati</div>
                             </q-card-section>
@@ -73,7 +73,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/skpd.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Keputusan Kepala OPD</div>
                             </q-card-section>
@@ -83,7 +83,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/pemdes.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Pemerintah Desa</div>
                             </q-card-section>
@@ -99,7 +99,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx flex flex-center">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/dokumen.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Surat Keputusan</div>
                             </q-card-section>
@@ -109,7 +109,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/list.png" class="card-icon" />
                                 </div>
                                 <div class="judul">SOP</div>
                             </q-card-section>
@@ -119,7 +119,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/putusan.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Putusan Pengadilan</div>
                             </q-card-section>
@@ -129,7 +129,7 @@
                         <div>
                             <q-card-section class="menuSection">
                                 <div class="cardx">
-                                    <q-img src="" class="card-icon" />
+                                    <q-img src="/img/jdih/folder.png" class="card-icon" />
                                 </div>
                                 <div class="judul">Dokumen Lainnya</div>
                             </q-card-section>
