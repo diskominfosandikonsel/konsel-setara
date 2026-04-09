@@ -6,7 +6,7 @@
                     <q-avatar>
                         <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
                     </q-avatar>
-                    <span class="headerText">Peraturan Daerah</span>
+                    <span class="headerText">Peraturan Bupati</span>
                 </q-toolbar-title>
             </q-toolbar>
         </q-header>
@@ -117,7 +117,7 @@ export default {
             cari_tahun: '',
             page_first: 1,
             page_last: 0,
-            jenis: 'Peraturan Daerah',
+            jenis: 'Peraturan Bupati',
             pilih_tahun: null,
             tahun: [
                 { id: 2027, tahun: '2027' },

@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goPerbup">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/perbup.png" class="card-icon" />
@@ -179,7 +179,10 @@ export default {
         },
         goPerda() {
             this.$router.push('/peraturanDaerah');
-        }
+        },
+        goPerbup() {
+            this.$router.push('/peraturanBupati');
+        },
     }
 }
 </script>

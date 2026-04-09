@@ -76,22 +76,34 @@
 
       <!-- LATEST NEWS SECTION -->
       <div class="row items-center justify-between q-mb-sm">
-        <div class="text-subtitle2 text-weight-bold text-grey-9">Berita Terbaru</div>
-        <div class="text-caption text-primary text-weight-bold cursor-pointer">Lihat Semua</div>
+        <div class="text-subtitle2 text-weight-bold text-grey-9">Berita Terbaru Satpol-PP Konsel</div>
+        <!-- <div class="text-caption text-primary text-weight-bold cursor-pointer">Lihat Semua</div> -->
       </div>
 
       <div class="news-list q-gutter-y-md">
-        <q-card v-for="news in beritaList" :key="news.id" flat bordered
-          class="news-card rounded-card shadow-mini overflow-hidden">
+        <!-- LOADING BERITA -->
+        <div v-if="sippaduStore.loading" class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+
+        <!-- EMPTY BERITA -->
+        <div v-else-if="beritaList.length === 0" class="text-center text-grey-6 q-pa-md">
+          Belum ada berita terbaru
+        </div>
+
+        <!-- LIST BERITA API -->
+        <q-card v-else v-for="news in beritaList" :key="news.id" flat bordered
+          class="news-card rounded-card shadow-mini overflow-hidden cursor-pointer" v-ripple
+          @click="router.push(`/sippadu_berita/${news.id}`)">
           <div class="row no-wrap">
-            <q-img :src="news.img" class="col-4 news-img" />
+            <q-img :src="getImageUrl(news.foto)" class="col-4 news-img" />
             <q-card-section class="col-8 q-pa-sm">
               <div class="news-title ellipsis-2-lines q-mb-xs">
                 {{ news.judul }}
               </div>
               <div class="news-date row items-center text-grey-6">
                 <q-icon name="event" size="14px" class="q-mr-xs" />
-                {{ news.tanggal }}
+                {{ formatDate(news.createAt) }}
               </div>
             </q-card-section>
           </div>
@@ -101,50 +113,29 @@
     </div>
 
     <!-- HIDDEN CAMERA INPUT -->
-    <input 
-      type="file" 
-      accept="image/*" 
-      capture="environment" 
-      ref="cameraInput" 
-      style="display: none" 
-      @change="onCameraCapture"
-    />
+    <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
+      @change="onCameraCapture" />
 
     <!-- FULLSCREEN LAPORAN DIALOG -->
     <q-dialog v-model="showLaporDialog" maximized transition-show="slide-up" transition-hide="slide-down">
       <q-card class="bg-dark text-white relative-position">
-        <q-img 
-          v-if="capturedImage"
-          :src="capturedImage" 
-          class="absolute-full"
-          fit="cover"
-        />
-        
+        <q-img v-if="capturedImage" :src="capturedImage" class="absolute-full" fit="cover" />
+
         <!-- Header area for close icon -->
-        <div class="absolute-top row items-center q-pa-md z-max" style="background: linear-gradient(rgba(0,0,0,0.6), transparent);">
+        <div class="absolute-top row items-center q-pa-md z-max"
+          style="background: linear-gradient(rgba(0,0,0,0.6), transparent);">
           <q-btn round flat dense icon="arrow_back" color="white" @click="closeLaporDialog" class="q-mr-sm" />
-          <div class="text-subtitle1 text-weight-bold" style="text-shadow: 1px 1px 2px black;">SIPPADU Aduan {{ selectedType.toUpperCase() }}</div>
+          <div class="text-subtitle1 text-weight-bold" style="text-shadow: 1px 1px 2px black;">SIPPADU Aduan {{
+            selectedType.toUpperCase() }}</div>
         </div>
-        
+
         <!-- Bottom Overlay -->
-        <div class="absolute-bottom q-pa-md z-top" style="background: linear-gradient(transparent, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.9)); padding-top: 60px;">
-          <q-input 
-            v-model="laporanText" 
-            outlined 
-            bg-color="white" 
-            color="primary"
-            placeholder="Tulis keterangan..."
-            class="q-mb-md"
-            dense
-          />
-          <q-btn 
-            unelevated 
-            color="primary" 
-            class="full-width text-weight-bold" 
-            label="KIRIM LAPORAN"
-            style="border-radius: 8px; padding: 12px 0;"
-            @click="kirimLaporan"
-          />
+        <div class="absolute-bottom q-pa-md z-top"
+          style="background: linear-gradient(transparent, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.9)); padding-top: 60px;">
+          <q-input v-model="laporanText" outlined bg-color="white" color="primary" placeholder="Tulis keterangan..."
+            class="q-mb-md" dense />
+          <q-btn unelevated color="primary" class="full-width text-weight-bold" label="KIRIM LAPORAN"
+            style="border-radius: 8px; padding: 12px 0;" @click="kirimLaporan" />
         </div>
       </q-card>
     </q-dialog>
@@ -153,12 +144,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useSippaduStore } from 'stores/sippadu'
 
 const router = useRouter()
 const $q = useQuasar()
+const sippaduStore = useSippaduStore()
 
 // -- CAMERA & LAPORAN STATE --
 const cameraInput = ref(null)
@@ -167,27 +160,25 @@ const capturedImage = ref(null)
 const laporanText = ref('')
 const selectedType = ref('')
 
-// -- DATA BERITA (DUMMY) --
-const beritaList = ref([
-  {
-    id: 1,
-    judul: 'Satpol PP Konsel Lakukan Sosialisasi Perda Kawasan Tanpa Rokok',
-    tanggal: '03 April 2025',
-    img: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&h=300&auto=format&fit=crop'
-  },
-  {
-    id: 2,
-    judul: 'Penerapan Sanksi Administratif Bagi Pelanggar Perkada Kebersihan',
-    tanggal: '01 April 2025',
-    img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=400&h=300&auto=format&fit=crop'
-  },
-  {
-    id: 3,
-    judul: 'SIPPADU Menjadi Inovasi Unggulan Pelayanan Publik di Konawe Selatan',
-    tanggal: '28 Maret 2025',
-    img: 'https://images.unsplash.com/photo-1577563906417-45c1d3024f02?q=80&w=400&h=300&auto=format&fit=crop'
-  }
-])
+// -- GET DATA BERITA DARI STORE --
+const beritaList = computed(() => sippaduStore.list_berita)
+
+onMounted(() => {
+  sippaduStore.fetchBerita()
+})
+
+const getImageUrl = (foto) => {
+  if (!foto) return 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&h=300&auto=format&fit=crop'
+  // Gambar ditarik dari server web konsel (portal utama)
+  return `https://server-web.konaweselatankab.go.id/uploads/${foto}`
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  })
+}
 
 const goPerda = () => {
   selectedType.value = 'Perda'
@@ -229,7 +220,7 @@ const kirimLaporan = () => {
     })
     return
   }
-  
+
   $q.dialog({
     title: 'Alert',
     message: 'Berhasil Kirim Laporan',
