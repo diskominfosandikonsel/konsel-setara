@@ -122,6 +122,41 @@ export const usePenelitianStore = defineStore('penelitian', {
       } finally {
         Loading.hide()
       }
-    }
+    },
+
+    async deleteData(item) {
+        Loading.show()
+
+        try {
+            const payload = {
+            id: item.id,
+            ktp: item.ktp,
+            proposal: item.proposal,
+            laporan: item.laporan,
+            rekomendasi: item.rekomendasi,
+            suratP: item.suratP,
+            suratR: item.suratR
+            }
+
+            await PenelitianService.deleteData(payload)
+
+            Notify.create({
+            message: 'Berhasil hapus data',
+            color: 'positive'
+            })
+
+            this.fetchData()
+
+        } catch (err) {
+            console.error(err)
+
+            Notify.create({
+            message: 'Gagal hapus data',
+            color: 'negative'
+            })
+        } finally {
+            Loading.hide()
+        }
+        }
   }
 })

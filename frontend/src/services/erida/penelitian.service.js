@@ -12,5 +12,9 @@ export const PenelitianService = {
 
   editData(formData) {
     return apiErida.post('server_penelitian/editData', formData)
+  },
+
+  deleteData(payload) {
+    return apiErida.post('server_penelitian/removeData', payload)
   }
 }
