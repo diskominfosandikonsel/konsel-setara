@@ -9,6 +9,11 @@ var dbErida = require('../db/MySql/erida');
 
 const router = express.Router();
 
+const loginSchema = Joi.object().keys({
+    username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
+    password: Joi.string().min(6).required()
+});
+
 const schema = Joi.object().keys({
     username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
     password: Joi.string().min(6).required(),
@@ -29,7 +34,7 @@ router.post('/login', (req, res) => {
   console.log('===== LOGIN REQUEST =====')
   console.log('BODY:', req.body)
 
-  const result = schema.validate(req.body)
+  const result = loginSchema.validate(req.body)
 
   if (result.error) {
     console.log('❌ VALIDATION ERROR:', result.error.details)
