@@ -158,4 +158,23 @@ const onLoad = async (index, done) => {
   background-color: #f5f5f5;
 }
 
+/* Tablet responsive — batasi ukuran thumbnail berita */
+@media (min-width: 600px) {
+  .news-item .col-4 {
+    max-width: 150px;
+    flex: 0 0 150px;
+  }
+  .news-item .col-8 {
+    flex: 1;
+    max-width: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .news-item .col-4 {
+    max-width: 180px;
+    flex: 0 0 180px;
+  }
+}
+
 </style>

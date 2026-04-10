@@ -39,23 +39,22 @@
         <template v-slot:append>
           <q-icon name="search" color="primary" />
         </template>
-</q-input> -->
+          </q-input> -->
 
-        <!-- Menu Grid -->
-        <div class="row q-col-gutter-y-lg justify-start menu-grid">
-          <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index"
-            @click="goToRoute(item.route)">
-            <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
-              <template v-if="item.img">
-                <img :src="item.img" class="menu-icon-img" />
-              </template>
-              <template v-else>
-                <q-icon :name="item.icon" color="indigo-5" size="32px" />
-              </template>
-            </div>
-            <div class="text-xs text-weight-bold text-grey-9" style="font-size: 11px;">{{ item.label }}</div>
+      <!-- Menu Grid -->
+      <div class="row q-col-gutter-y-lg justify-start menu-grid">
+        <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index" @click="goToRoute(item.route)">
+          <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
+            <template v-if="item.img">
+              <img :src="item.img" class="menu-icon-img" />
+            </template>
+            <template v-else>
+              <q-icon :name="item.icon" color="indigo-5" class="menu-icon-q"/>
+            </template>
           </div>
+          <div class="menu-label text-weight-bold text-grey-9">{{ item.label }}</div>
         </div>
+      </div>
       </div>
 
       <!-- Video Berita -->
@@ -68,7 +67,7 @@
               class="video-card q-mr-sm no-shadow bordered-card cursor-pointer" @click="openVideoLink(vid.link)">
               <q-img :src="vid.img || getThumbnail(vid.link)" height="140px" class="bg-dark rounded-borders">
                 <div class="absolute-center bg-transparent">
-                  <q-icon name="play_circle_outline" color="white" size="48px" />
+                  <q-icon name="play_circle_outline" color="white" size="40px" />
                 </div>
                 <div class="absolute-bottom text-caption text-left text-white video-overlay">
                   <div class="line-clamp-2">{{ vid.title }}</div>
@@ -404,7 +403,12 @@ export default {
   object-fit: contain;
   border-radius: 10px;
 }
-
+.menu-icon-q {
+  font-size: 32px;
+}
+.menu-label {
+  font-size: 11px;
+}
 .menu-icon-wrap.is-lainnya {
   background: #e0e0e0;
   border-radius: 50%;
@@ -461,7 +465,7 @@ export default {
 
 .line-clamp-2 {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -477,5 +481,76 @@ export default {
 .py-1 {
   padding-top: 4px;
   padding-bottom: 4px;
+}
+
+/* Tablet responsive — berita thumbnail kecilkan, video card besarkan, menu besarkan */
+@media (min-width: 600px) {
+  .news-item .col-4 {
+    max-width: 150px;
+    flex: 0 0 150px;
+  }
+  .news-item .col-8 {
+    flex: 1;
+    max-width: none;
+  }
+  .video-card {
+    min-width: 200px;
+    max-width: 200px;
+  }
+  .video-card .q-img {
+    height: 180px !important;
+  }
+  /* Menu tablet */
+  .menu-icon-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+  }
+  .menu-icon-img {
+    width: 42px;
+    height: 42px;
+  }
+  .menu-icon-q {
+    font-size: 38px;
+  }
+  .menu-label {
+    font-size: 13px;
+  }
+  .menu-container .text-subtitle1 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .news-item .col-4 {
+    max-width: 180px;
+    flex: 0 0 180px;
+  }
+  .video-card {
+    min-width: 240px;
+    max-width: 240px;
+  }
+  .video-card .q-img {
+    height: 200px !important;
+  }
+  /* Menu tablet besar */
+  .menu-icon-wrap {
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+  }
+  .menu-icon-img {
+    width: 60px;
+    height: 60px;
+  }
+  .menu-icon-q {
+    font-size: 50px;
+  }
+  .menu-label {
+    font-size: 18px;
+  }
+  .menu-container .text-subtitle1 {
+    font-size: 1.2rem;
+  }
 }
 </style>

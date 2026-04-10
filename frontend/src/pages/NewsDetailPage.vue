@@ -133,4 +133,44 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 .q-pb-xl {
   padding-bottom: 40px;
 }
+
+/* Tablet responsive — perbesar font dan batasi lebar konten */
+@media (min-width: 600px) {
+  .news-title {
+    font-size: 1.8rem;
+    line-height: 1.4;
+  }
+  .news-meta {
+    font-size: 1.0 rem;
+  }
+  .news-body {
+    font-size: 1.1rem;
+    line-height: 1.85;
+  }
+  .news-cover-img {
+    border-radius: 10px;
+  }
+  .q-px-md {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  .news-title {
+    font-size: 2.0rem;
+    line-height: 1.45;
+  }
+  .news-meta {
+    font-size: 1.15rem;
+  }
+  .news-body {
+    font-size: 1.3rem;
+    line-height: 1.9;
+  }
+  .q-px-md {
+    max-width: 800px;
+  }
+}
 </style>

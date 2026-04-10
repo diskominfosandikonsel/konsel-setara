@@ -1,20 +1,176 @@
 <template>
-  <q-page class="flex flex-center">
-    <div class="column items-center q-gutter-md">
-      <div>hello Profil Page</div>
-      <q-btn
-        label="Edit Profile"
-        color="primary"
-        unelevated
-        no-caps
-        to="/edit_profile"
-      />
+  <q-page class="profile-page q-pb-xl">
+    <!-- Header -->
+    <div class="row items-center q-px-md header-title q-pt-md">
+      <q-btn flat round dense icon="keyboard_arrow_left" size="18px" @click="$router.back()" class="q-mr-sm" />
+      <div class="text-h5 text-weight-regular text-black">Profile</div>
+    </div>
+
+    <div class="content-wrapper q-px-md q-pt-md q-pb-xl">
+      <!-- Profile Card -->
+      <q-card class="profile-card q-mb-lg no-shadow rounded-box q-pa-md cursor-pointer" @click="$router.push('/edit_profile')">
+        <div class="row items-center justify-between">
+          <div class="row items-center">
+            <q-avatar size="60px" class="q-mr-md bg-grey-3">
+              <!-- Using standard picsum or placeholder for avatar -->
+              <img src="https://picsum.photos/200/200?random=10" />
+            </q-avatar>
+            <div class="column">
+              <div class="text-subtitle1 text-weight-bold text-black" style="line-height: 1.2;">Abram</div>
+              <div class="text-caption text-grey-7" style="line-height: 1.2; margin-bottom: 2px;">user_ifoid@gmail.com</div>
+              <div class="text-caption text-grey-7" style="line-height: 1.2;">+6281080709012</div>
+            </div>
+          </div>
+          <div>
+            <q-icon name="edit" size="22px" color="grey-8" />
+          </div>
+        </div>
+      </q-card>
+
+      <!-- Preferensi Section -->
+      <div class="section-title q-mb-sm text-grey-9 text-weight-medium">Preferensi</div>
+      <q-card class="menu-card q-mb-lg no-shadow rounded-box">
+        <q-list class="rounded-borders">
+          <q-item clickable v-ripple class="q-py-md">
+            <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+              <q-icon name="security" size="24px" color="grey-9" />
+            </q-item-section>
+            <q-item-section class="text-weight-medium text-grey-9">
+              Pengaturan Akun
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+
+      <!-- Lainnya Section -->
+      <div class="section-title q-mb-sm text-grey-9 text-weight-medium">Lainnya</div>
+      <q-card class="menu-card q-mb-lg no-shadow rounded-box">
+        <q-list class="rounded-borders">
+          <!-- Panduan Konsel Digital -->
+          <q-item clickable v-ripple class="q-py-md item-bordered">
+            <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+              <q-icon name="book" size="24px" color="grey-9" />
+            </q-item-section>
+            <q-item-section class="text-weight-medium text-grey-9">
+              Panduan Konsel Digital
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+            </q-item-section>
+          </q-item>
+
+          <!-- Syarat & Ketentuan -->
+          <q-item clickable v-ripple class="q-py-md item-bordered">
+            <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+              <q-icon name="description" size="24px" color="grey-9" />
+            </q-item-section>
+            <q-item-section class="text-weight-medium text-grey-9">
+              Syarat & Ketentuan
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+            </q-item-section>
+          </q-item>
+
+          <!-- Kebijakan Privasi -->
+          <q-item clickable v-ripple class="q-py-md">
+            <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+              <q-icon name="privacy_tip" size="24px" color="grey-9" />
+            </q-item-section>
+            <q-item-section class="text-weight-medium text-grey-9">
+              Kebijakan Privasi
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+
+      <!-- Keluar Section -->
+      <q-card class="menu-card q-mb-xl no-shadow rounded-box">
+        <q-list class="rounded-borders">
+          <q-item clickable v-ripple class="q-py-md" @click="handleLogout">
+            <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+              <q-icon name="logout" size="24px" color="grey-9" />
+            </q-item-section>
+            <q-item-section class="text-weight-medium text-grey-9">
+              Keluar
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
     </div>
   </q-page>
 </template>
 
-<script>
-export default {
-  name: 'ProfilPage',
+<script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth';
+
+const router = useRouter()
+
+const handleLogout = () => {
+  // TODO: Add real logout logic here
+  console.log('Logging out...')
+  const auth = useAuthStore()
+  auth.logout()
+
+  // Tampilkan notifikasi (Toast/Snack bar) berhasil logout
+  $q.notify({
+    message: 'Anda Berhasil Keluar',
+    color: 'positive',
+    position: 'top',
+    timeout: 2000
+  })
+
+  router.push('/login')
 }
 </script>
+
+<style scoped>
+.profile-page {
+  background-color: #f2eeeb; /* Matches the slightly warm greyish background in the image */
+  min-height: 100vh;
+}
+
+.header-title {
+  padding-bottom: 14px;
+}
+
+.rounded-box {
+  border-radius: 16px;
+}
+
+.profile-card {
+  transition: background-color 0.2s ease;
+}
+
+.profile-card:active {
+  background-color: #f5f5f5;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  margin-left: 4px;
+}
+
+.item-bordered {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Tablet / Desktop Responsive */
+@media (min-width: 600px) {
+  .content-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 24px;
+  }
+}
+</style>
