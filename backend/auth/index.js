@@ -10,19 +10,19 @@ var dbErida = require('../db/MySql/erida');
 const router = express.Router();
 
 const loginSchema = Joi.object().keys({
-    username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
-    password: Joi.string().min(6).required()
+  username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
+  password: Joi.string().min(6).required()
 });
 
 const schema = Joi.object().keys({
-    username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
-    password: Joi.string().min(6).required(),
-    nama: Joi.string().min(3).required(),
-    email: Joi.string().email().required(),
-    hp: Joi.string().min(8).required()
+  username: Joi.string().regex(/^[a-zA-Z0-9_]*$/).min(3).max(20).required(),
+  password: Joi.string().min(6).required(),
+  nama: Joi.string().min(3).required(),
+  email: Joi.string().email().required(),
+  hp: Joi.string().min(8).required()
 });
 
-function respondError422(res, text){
+function respondError422(res, text) {
   return res.status(422).json({
     success: false,
     message: text
