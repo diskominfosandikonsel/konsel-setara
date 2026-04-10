@@ -96,6 +96,28 @@ const routes = [
         meta: { showBottomNav: false }
       },
 
+      // FIRETAP
+      {
+        path: 'firetap_dashboard',
+        component: () => import('pages/Firetap/Dashboard.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
+      {
+        path: 'firetap_lapor',
+        component: () => import('pages/Firetap/Lapor.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+      {
+        path: 'firetap_riwayat',
+        component: () => import('pages/Firetap/Riwayat.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+      {
+        path: 'firetap_detail/:id',
+        component: () => import('pages/Firetap/Detail.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+
 
       // PERAK
       {

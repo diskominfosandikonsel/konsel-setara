@@ -328,7 +328,7 @@ export default {
       openVideoLink,
       search: ref(''),
       menuItems: [
-        { label: 'Firetap', img: 'icons/Firetap.png', route: '' },
+        { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
         { label: 'SapaKonsel', img: 'src/assets/sapa/logo.svg', route: '/sapa_dashboard' },
         { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
         { label: 'PPID', img: 'icons/Ppid.png', route: '' },
