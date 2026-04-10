@@ -106,7 +106,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goSop">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/list.png" class="card-icon" />
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goDll">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/folder.png" class="card-icon" />
@@ -193,7 +193,16 @@ export default {
             this.$router.push('/keputusanSKPD');
         },
         goPemdes() {
-            this.$router.push('/Pemdes');
+            this.$router.push('/pemdes');
+        },
+        goSk() {
+            this.$router.push('/sk');
+        },
+        goSop() {
+            this.$router.push('/sop');
+        },
+        goDll() {
+            this.$router.push('/dll');
         },
     }
 }

@@ -6,7 +6,7 @@
                     <q-avatar>
                         <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
                     </q-avatar>
-                    <span class="headerText">SOP</span>
+                    <span class="headerText">Putusan Pengadilan</span>
                 </q-toolbar-title>
             </q-toolbar>
         </q-header>
@@ -103,7 +103,7 @@ export default {
             cari_value: '',
             page_first: 1,
             page_last: 0,
-            jenis: 'SOP',
+            jenis: 'Putusan Pengadilan',
         }
     },
     computed: {

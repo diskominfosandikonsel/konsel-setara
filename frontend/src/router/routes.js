@@ -313,7 +313,32 @@ const routes = [
         path: 'detilData',
         component: () => import('pages/Jdih/detilData.vue'),
         meta: { showBottomNav: true }
-      }
+      },
+      {
+        path: 'sk',
+        component: () => import('pages/Jdih/Sk.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sop',
+        component: () => import('pages/Jdih/Sop.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'putusan',
+        component: () => import('pages/Jdih/Putusan.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'dll',
+        component: () => import('pages/Jdih/Dll.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'detilDokumen',
+        component: () => import('pages/Jdih/DetilDokumen.vue'),
+        meta: { showBottomNav: true }
+      },
     ]
   },
 

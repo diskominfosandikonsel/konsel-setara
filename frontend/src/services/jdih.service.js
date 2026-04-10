@@ -13,6 +13,12 @@ export const JdihService = {
   },
   getDetailProduk(id) {
     return apiJdih.post('publish_produk_hukum/getOne', { id: id });
-}
+  },
+  getDokumen(payload) {
+    return apiJdih.post('publish_dokumen/view', payload)
+  },
+  // getDetailDokumen(id) {
+  //   return apiJdih.post('publish_produk_hukum/', { id: id });
+  // },
 
 }
