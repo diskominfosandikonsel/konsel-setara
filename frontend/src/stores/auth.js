@@ -34,14 +34,18 @@ export const useAuthStore = defineStore('auth', {
         console.log('LOGIN RESPONSE:', res.data)
 
         // 🔥 adjust based on your backend response
-        const { token, user } = res.data
+        const { token, profile } = res.data
+
+        console.log('====================================');
+        console.log(token,profile);
+        console.log('====================================');
 
         this.token = token
-        this.user = user
+        this.user = profile
 
         // save to localStorage
-        localStorage.token = token
-        localStorage.user = JSON.stringify(user)
+        localStorage.token = this.token
+        localStorage.user = JSON.stringify(this.user)
 
         Notify.create({
           message: 'Login berhasil',
@@ -51,9 +55,9 @@ export const useAuthStore = defineStore('auth', {
         return true
       } catch (err) {
         Notify.create({
-  message: err.response?.data?.message || 'Login gagal',
-  color: 'negative'
-})
+          message: err.response?.data?.message || 'Login gagal',
+          color: 'negative'
+        })
         return false
       } finally {
         this.loading = false
@@ -99,6 +103,15 @@ export const useAuthStore = defineStore('auth', {
 
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+
+      Notify.create({
+        message: 'Anda Berhasil Keluar',
+        color: 'positive',
+        position: 'top',
+        timeout: 2000
+      })
+
+      return true
     }
   }
 })

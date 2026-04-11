@@ -110,27 +110,20 @@
   </q-page>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router'
+<script >
 import { useAuthStore } from 'src/stores/auth';
 
-const router = useRouter()
+export default {
+    name : 'ProfilPage',
 
-const handleLogout = () => {
-  // TODO: Add real logout logic here
-  console.log('Logging out...')
-  const auth = useAuthStore()
-  auth.logout()
+    methods: {
+        async handleLogout() {
+          const auth = useAuthStore()
+          auth.logout()
 
-  // Tampilkan notifikasi (Toast/Snack bar) berhasil logout
-  $q.notify({
-    message: 'Anda Berhasil Keluar',
-    color: 'positive',
-    position: 'top',
-    timeout: 2000
-  })
-
-  router.push('/login')
+          this.$router.push('/')
+        }
+    }
 }
 </script>
 
