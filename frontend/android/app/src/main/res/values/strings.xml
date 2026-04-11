@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Konsel Setara</string>
-    <string name="title_activity_main">Konsel Setara</string>
-    <string name="package_name">go.id.konaweselatankab</string>
-    <string name="custom_url_scheme">go.id.konaweselatankab</string>
-</resources>
