@@ -44,13 +44,8 @@
         </div>
         <div class="form-card-body">
           <div class="row q-gutter-sm">
-            <div
-              v-for="(kat, i) in kategoriList"
-              :key="i"
-              class="kategori-chip-btn"
-              :class="{ 'kat-active': form.jenis_kasus === i }"
-              @click="form.jenis_kasus = i"
-            >
+            <div v-for="(kat, i) in kategoriList" :key="i" class="kategori-chip-btn"
+              :class="{ 'kat-active': form.jenis_kasus === i }" @click="form.jenis_kasus = i">
               <span class="kat-icon">{{ kat.icon }}</span>
               <span class="kat-label">{{ kat.label }}</span>
             </div>
@@ -65,13 +60,8 @@
           <span>Judul Laporan</span>
         </div>
         <div class="form-card-body">
-          <q-input
-            v-model="form.judul_kasus"
-            outlined
-            placeholder="Contoh: Kebakaran rumah di Jl. Merdeka"
-            bg-color="white"
-            color="deep-orange"
-          />
+          <q-input v-model="form.judul_kasus" outlined placeholder="Contoh: Kebakaran rumah di Jl. Merdeka"
+            bg-color="white" color="deep-orange" />
         </div>
       </div>
 
@@ -82,15 +72,9 @@
           <span>Catatan / Keterangan</span>
         </div>
         <div class="form-card-body">
-          <q-input
-            v-model="form.catatan_kasus"
-            type="textarea"
-            outlined
-            placeholder="Jelaskan secara rinci situasi dan kondisi kejadian..."
-            rows="3"
-            bg-color="white"
-            color="deep-orange"
-          />
+          <q-input v-model="form.catatan_kasus" type="textarea" outlined
+            placeholder="Jelaskan secara rinci situasi dan kondisi kejadian..." rows="3" bg-color="white"
+            color="deep-orange" />
         </div>
       </div>
 
@@ -147,14 +131,8 @@
       </div>
 
       <!-- SUBMIT BUTTON -->
-      <q-btn
-        unelevated
-        class="submit-btn full-width"
-        no-caps
-        :loading="isSending"
-        :disable="!canSubmit"
-        @click="handleKirim"
-      >
+      <q-btn unelevated class="submit-btn full-width" no-caps :loading="isSending" :disable="!canSubmit"
+        @click="handleKirim">
         <q-icon name="send" class="q-mr-sm" />
         KIRIM LAPORAN DARURAT
         <div class="btn-shine"></div>
@@ -166,7 +144,8 @@
     </div>
 
     <!-- HIDDEN CAMERA INPUT -->
-    <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none" @change="onCameraCapture" />
+    <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
+      @change="onCameraCapture" />
 
   </q-page>
 </template>
@@ -294,9 +273,32 @@ const handleKirim = async () => {
   }, 250)
 
   try {
+    let user = {}
+    try {
+      const tokenStr = localStorage.getItem('token')
+      if (tokenStr) {
+        const payloadStr = atob(tokenStr.split('.')[1])
+        user = JSON.parse(payloadStr)
+      }
+    } catch (e) {
+      console.error('Failed to parse token', e)
+      user = authStore.user || {}
+    }
+
+    console.log('🔥 [FIRETAP DEBUG] Parsed token user:', JSON.stringify(user))
+
+    const hpValue = user.hp || user.no_telp || user.phone || user.profile?.hp || ''
+    const namaValue = user.nama || user.name || user.username || user.profile?.nama || ''
+
+    console.log('🔥 [FIRETAP DEBUG] nama:', namaValue, '| hp:', hpValue)
+
     const payload = {
       judul_kasus: form.value.judul_kasus.trim(),
       catatan_kasus: form.value.catatan_kasus.trim(),
+      deskripsi_kasus: `${form.value.catatan_kasus.trim()}\n\n---\nData Pelapor:\nNama: ${namaValue || '-'}\nNo. HP: ${hpValue || '-'}`,
+      alamat_kasus: hasLocation.value
+        ? `${Number(form.value.latitude).toFixed(5)}, ${Number(form.value.longitude).toFixed(5)}`
+        : '',
       jenis_kasus: form.value.jenis_kasus,
       latitude: form.value.latitude,
       longitude: form.value.longitude,
@@ -414,8 +416,15 @@ const handleKirim = async () => {
 }
 
 @keyframes pulse-border {
-  0%, 100% { border-color: rgba(255, 255, 255, 0.5); }
-  50% { border-color: rgba(255, 255, 255, 0.9); }
+
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  50% {
+    border-color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .camera-hint {
@@ -426,8 +435,15 @@ const handleKirim = async () => {
 }
 
 /* ─── TRANSITION ─── */
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 /* ─── FORM AREA ─── */
 .form-area {
@@ -454,7 +470,9 @@ const handleKirim = async () => {
   letter-spacing: 0.3px;
 }
 
-.form-card-body { padding: 16px 20px; }
+.form-card-body {
+  padding: 16px 20px;
+}
 
 /* ─── KATEGORI CHIPS ─── */
 .kategori-chip-btn {
@@ -471,16 +489,30 @@ const handleKirim = async () => {
   background: #fafafa;
 }
 
-.kategori-chip-btn:active { transform: scale(0.93); }
+.kategori-chip-btn:active {
+  transform: scale(0.93);
+}
 
 .kategori-chip-btn.kat-active {
   border-color: #ea580c;
   background: #fff7ed;
 }
 
-.kat-icon { font-size: 22px; }
-.kat-label { font-size: 10px; font-weight: 700; color: #374151; margin-top: 4px; text-align: center; }
-.kat-active .kat-label { color: #c2410c; }
+.kat-icon {
+  font-size: 22px;
+}
+
+.kat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #374151;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.kat-active .kat-label {
+  color: #c2410c;
+}
 
 /* ─── LOCATION STYLES ─── */
 .loc-tap-box {
@@ -494,7 +526,10 @@ const handleKirim = async () => {
   transition: all 0.2s ease;
 }
 
-.loc-tap-box:active { transform: scale(0.98); background: #fed7aa; }
+.loc-tap-box:active {
+  transform: scale(0.98);
+  background: #fed7aa;
+}
 
 .loc-tap-icon {
   width: 48px;
@@ -534,8 +569,15 @@ const handleKirim = async () => {
 }
 
 @keyframes blink {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2); }
-  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
 }
 
 /* ─── UPLOAD PROGRESS ─── */
@@ -576,8 +618,16 @@ const handleKirim = async () => {
 }
 
 @keyframes shine {
-  0% { left: -100%; }
-  40% { left: 150%; }
-  100% { left: 150%; }
+  0% {
+    left: -100%;
+  }
+
+  40% {
+    left: 150%;
+  }
+
+  100% {
+    left: 150%;
+  }
 }
 </style>
