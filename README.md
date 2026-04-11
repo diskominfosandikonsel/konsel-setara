@@ -9,6 +9,11 @@ Frontend
 Node v24.12.0 (alt node v20+ )
 @quasar/app-vite 2.4.0 
 
+Mobile
+@capacitor/android 8.3.0
+@capacitor/cli 8.3.0
+@capacitor/core 8.3.0
+
 Backend
 Node v24.12.0 (alt node v20+ )
 Express.js 5.2.1
@@ -51,6 +56,16 @@ npm run format
 
 ```bash
 quasar build
+```
+
+
+### Build the app for mobile production
+
+```bash
+npm run build
+npx cap add android
+npx cap sync
+npx cap open android
 ```
 
 ### Customize the configuration
