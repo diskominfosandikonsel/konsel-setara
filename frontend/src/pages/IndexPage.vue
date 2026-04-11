@@ -11,7 +11,7 @@
 
     <!-- Shimmer/Skeleton if loading -->
     <div v-else class="q-mt-sm q-px-md row justify-center">
-      <q-skeleton height="170px" width="100%" class="rounded-edges shadow-2" />
+      <q-skeleton width="100%" class="carousel-skeleton rounded-edges shadow-2" />
     </div>
 
     <div class="q-px-md">
@@ -354,14 +354,18 @@ export default {
   /* primary blue */
 }
 
-.main-swiper :deep(.swiper-slide) {
-  height: 170px;
+.main-swiper :deep(.swiper-slide),
+.carousel-skeleton {
+  width: 100%;
+  aspect-ratio: 16 / 7; /* Menjaga rasio panorama secara otomatis di segala layar */
+  height: auto;
 }
 
 .slide-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Gunakan contain jika ingin garansi 100% utuh, atau biarkan cover dengan aspect-ratio yang benar */
+  object-fit: cover; 
   border-radius: 16px;
   display: block;
 }
@@ -533,6 +537,7 @@ export default {
   .video-card .q-img {
     height: 200px !important;
   }
+
   /* Menu tablet besar */
   .menu-icon-wrap {
     width: 90px;

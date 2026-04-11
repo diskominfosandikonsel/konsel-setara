@@ -1,11 +1,59 @@
 body {
   font-family: 'Poppins', sans-serif;
 }
+
 .mulish {
   font-family: 'Mulish', sans-serif;
 }
+
 .sapa_title {
   font-size: 20px;
   margin-left: 16px;
   font-family: 'Poppins', sans-serif;
+}
+
+/* ==========================================================
+   Quasar Notify (Snackbar) Global Upscaling untuk Mode Tablet
+   ========================================================== */
+
+/* Tablet (Layar Sedang) Upscaling */
+@media (min-width: 600px) {
+  .q-notification {
+    min-height: 60px !important;
+    padding: 14px 28px !important;
+    border-radius: 12px !important;
+  }
+
+  .q-notification__message {
+    font-size: 1.15rem !important;
+  }
+
+  .q-notification__icon {
+    font-size: 1.6rem !important;
+  }
+
+  .q-notification__actions .q-btn {
+    font-size: 1.05rem !important;
+  }
+}
+
+/* Desktop / Tablet Landscape Upscaling */
+@media (min-width: 900px) {
+  .q-notification {
+    min-height: 70px !important;
+    padding: 16px 36px !important;
+    border-radius: 16px !important;
+  }
+
+  .q-notification__message {
+    font-size: 1.40rem !important;
+  }
+
+  .q-notification__icon {
+    font-size: 1.8rem !important;
+  }
+
+  .q-notification__actions .q-btn {
+    font-size: 1.20rem !important;
+  }
 }

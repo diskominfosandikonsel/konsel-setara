@@ -7,462 +7,633 @@
 
 /* ─── CSS Variables ─────────────────────────────── */
 :root {
-  --auth-bg: #154694;
-  --auth-accent: #64b5f6;
-  --auth-white: #ffffff;
-  --auth-text-muted: rgba(255, 255, 255, 0.8);
-  --auth-text-label: rgba(255, 255, 255, 0.85);
-  --auth-input-bg: #ffffff;
-  --auth-input-text: #333333;
-  --auth-input-placeholder: #b8c4d4;
-  --auth-input-icon: #9eb3d4;
-  --auth-error-text: #ffb3b3;
-  --auth-error-banner-bg: rgba(255, 100, 100, 0.18);
-  --auth-error-banner-border: rgba(255, 100, 100, 0.35);
-  --auth-error-banner-color: #ffdddd;
-  --auth-radius-input: 16px;
-  --auth-radius-btn: 16px;
-  --auth-font: 'Plus Jakarta Sans', sans-serif;
-  --auth-transition: all 0.3s ease;
+    --auth-bg: #154694;
+    --auth-accent: #64b5f6;
+    --auth-white: #ffffff;
+    --auth-text-muted: rgba(255, 255, 255, 0.8);
+    --auth-text-label: rgba(255, 255, 255, 0.85);
+    --auth-input-bg: #ffffff;
+    --auth-input-text: #333333;
+    --auth-input-placeholder: #b8c4d4;
+    --auth-input-icon: #9eb3d4;
+    --auth-error-text: #ffb3b3;
+    --auth-error-banner-bg: rgba(255, 100, 100, 0.18);
+    --auth-error-banner-border: rgba(255, 100, 100, 0.35);
+    --auth-error-banner-color: #ffdddd;
+    --auth-radius-input: 16px;
+    --auth-radius-btn: 16px;
+    --auth-font: 'Plus Jakarta Sans', sans-serif;
+    --auth-transition: all 0.3s ease;
 }
 
 /* ─── Base Container (shared) ───────────────────── */
 .login-container,
 .lupa-container,
 .register-container {
-  min-height: 100vh;
-  background-color: var(--auth-bg);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  font-family: var(--auth-font);
-  color: var(--auth-white);
-  overflow-y: auto;
+    min-height: 100vh;
+    background-color: var(--auth-bg);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    font-family: var(--auth-font);
+    color: var(--auth-white);
+    overflow-y: auto;
 }
 
 /* ─── Status Bar (LoginPage only) ───────────────── */
 .status-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 24px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 .status-bar .icons {
-  display: flex;
-  gap: 6px;
-  align-items: center;
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
 
 .status-bar .material-icons {
-  font-size: 1.1rem;
+    font-size: 1.1rem;
 }
 
 /* ─── Illustration (LoginPage) ───────────────────── */
 .illustration-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 40px;
-  padding-bottom: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 32px;
 }
 
 .illustration {
-  width: 82%;
-  max-width: 300px;
-  height: auto;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 82%;
+    max-width: 300px;
+    height: auto;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .illustration:hover {
-  transform: scale(1.03);
+    transform: scale(1.03);
 }
 
 /* ─── Illustration (LupapassPage) ───────────────── */
 .lupa-container .illustration-section {
-  flex-direction: column;
-  padding: 20px 28px 28px;
-  gap: 12px;
+    flex-direction: column;
+    padding: 20px 28px 28px;
+    gap: 12px;
 }
 
 .icon-wrapper {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: float 3s ease-in-out infinite;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
 .illustration-hint {
-  font-size: 0.88rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.75);
-  margin: 0;
-  text-align: center;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    text-align: center;
 }
 
 /* ─── Header Section (Regis & Lupapass) ─────────── */
 .header-section {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 52px 28px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 52px 28px 24px;
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  border-radius: 12px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--auth-white);
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-top: 4px;
-  transition: background 0.3s ease;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--auth-white);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 4px;
+    transition: background 0.3s ease;
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .header-title h1 {
-  font-size: 1.65rem;
-  font-weight: 700;
-  margin: 0 0 4px;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
 }
 
 .header-title p {
-  font-size: 1rem;
-  font-weight: 400;
-  margin: 0;
-  opacity: 0.85;
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+    opacity: 0.85;
 }
 
 /* ─── Form Section ───────────────────────────────── */
 .form-section {
-  padding: 0 28px 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
+    padding: 0 28px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* LoginPage form has different bottom padding */
 .login-container .form-section {
-  padding: 0 32px 50px;
+    padding: 0 32px 50px;
 }
 
 /* ─── Instruction Text (LoginPage only) ─────────── */
 .instruction-text {
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--auth-white);
-  margin-bottom: 30px;
-  text-align: center;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--auth-white);
+    margin-bottom: 30px;
+    text-align: center;
 }
 
 /* ─── Step Wrapper (LupapassPage) ───────────────── */
 .step-wrapper {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ─── Input Group ────────────────────────────────── */
 .input-group {
-  width: 100%;
-  max-width: 440px;
-  margin-bottom: 16px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 16px;
 }
 
 /* LoginPage uses bigger bottom margin */
 .login-container .input-group {
-  margin-bottom: 18px;
+    margin-bottom: 18px;
 }
 
 .input-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--auth-text-label);
-  margin-bottom: 8px;
-  letter-spacing: 0.01em;
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--auth-text-label);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
 }
 
 /* ─── Input Wrapper (Regis & Lupapass) ──────────── */
 .input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  background-color: var(--auth-input-bg);
-  border-radius: var(--auth-radius-input);
-  border: 2px solid transparent;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  transition: var(--auth-transition);
-  overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--auth-input-bg);
+    border-radius: var(--auth-radius-input);
+    border: 2px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: var(--auth-transition);
+    overflow: hidden;
 }
 
 .input-wrapper:focus-within {
-  border-color: var(--auth-accent);
-  box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2);
+    border-color: var(--auth-accent);
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2);
 }
 
 .input-wrapper.input-error {
-  border-color: #ff6b6b;
-  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.15);
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.15);
 }
 
 .input-icon {
-  color: var(--auth-input-icon);
-  flex-shrink: 0;
-  margin-left: 16px;
+    color: var(--auth-input-icon);
+    flex-shrink: 0;
+    margin-left: 16px;
 }
 
 /* ─── Custom Input ───────────────────────────────── */
 /* Standalone (LoginPage) */
 .login-container .custom-input {
-  width: 100%;
-  padding: 18px 24px;
-  border-radius: 18px;
-  border: 2px solid transparent;
-  background-color: var(--auth-input-bg);
-  font-size: 1rem;
-  color: var(--auth-input-text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: var(--auth-transition);
-  font-family: var(--auth-font);
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 18px;
+    border: 2px solid transparent;
+    background-color: var(--auth-input-bg);
+    font-size: 1rem;
+    color: var(--auth-input-text);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: var(--auth-transition);
+    font-family: var(--auth-font);
 }
 
 .login-container .custom-input:focus {
-  outline: none;
-  border-color: var(--auth-accent);
-  box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2);
+    outline: none;
+    border-color: var(--auth-accent);
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2);
 }
 
 /* Inside input-wrapper (Regis & Lupapass) */
 .input-wrapper .custom-input {
-  flex: 1;
-  padding: 16px 12px 16px 10px;
-  border: none;
-  background: transparent;
-  font-size: 0.97rem;
-  color: var(--auth-input-text);
-  font-family: var(--auth-font);
-  outline: none;
-  min-width: 0;
-  box-sizing: border-box;
+    flex: 1;
+    padding: 16px 12px 16px 10px;
+    border: none;
+    background: transparent;
+    font-size: 0.97rem;
+    color: var(--auth-input-text);
+    font-family: var(--auth-font);
+    outline: none;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .custom-input::placeholder {
-  color: var(--auth-input-placeholder);
+    color: var(--auth-input-placeholder);
 }
 
 /* ─── Toggle Password Button ─────────────────────── */
 .toggle-password {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0 14px;
-  color: var(--auth-input-icon);
-  display: flex;
-  align-items: center;
-  transition: color 0.2s ease;
-  flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 14px;
+    color: var(--auth-input-icon);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .toggle-password:hover {
-  color: var(--auth-bg);
+    color: var(--auth-bg);
 }
 
 /* ─── Error States ───────────────────────────────── */
 .error-text {
-  display: block;
-  font-size: 0.78rem;
-  color: var(--auth-error-text);
-  margin-top: 6px;
-  font-weight: 500;
+    display: block;
+    font-size: 0.78rem;
+    color: var(--auth-error-text);
+    margin-top: 6px;
+    font-weight: 500;
 }
 
 .error-banner {
-  width: 100%;
-  max-width: 440px;
-  background: var(--auth-error-banner-bg);
-  border: 1px solid var(--auth-error-banner-border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--auth-error-banner-color);
-  margin-bottom: 16px;
-  text-align: center;
+    width: 100%;
+    max-width: 440px;
+    background: var(--auth-error-banner-bg);
+    border: 1px solid var(--auth-error-banner-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--auth-error-banner-color);
+    margin-bottom: 16px;
+    text-align: center;
 }
 
 /* ─── Links Section (LoginPage) ─────────────────── */
 .links-section {
-  width: 100%;
-  max-width: 440px;
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 32px;
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 32px;
 }
 
 .forgot-password {
-  color: var(--auth-white);
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: opacity 0.3s ease;
+    color: var(--auth-white);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: opacity 0.3s ease;
 }
 
 .forgot-password:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 /* ─── Login / Register Link ──────────────────────── */
 .login-link {
-  font-size: 0.9rem;
-  color: var(--auth-text-muted);
-  text-align: center;
+    font-size: 0.9rem;
+    color: var(--auth-text-muted);
+    text-align: center;
 }
 
 .link-text {
-  color: var(--auth-accent);
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
+    color: var(--auth-accent);
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
 }
 
 .link-text:hover {
-  opacity: 0.8;
-  text-decoration: underline;
+    opacity: 0.8;
+    text-decoration: underline;
 }
 
 /* ─── Button Group ───────────────────────────────── */
 .button-group {
-  width: 100%;
-  max-width: 440px;
-  margin-top: 8px;
-  margin-bottom: 20px;
+    width: 100%;
+    max-width: 440px;
+    margin-top: 8px;
+    margin-bottom: 20px;
 }
 
 /* LoginPage has side-by-side buttons */
 .login-container .button-group {
-  display: flex;
-  gap: 16px;
-  margin-top: 0;
-  margin-bottom: 0;
+    display: flex;
+    gap: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* ─── Buttons ────────────────────────────────────── */
 .btn {
-  width: 100%;
-  padding: 17px 0;
-  border-radius: var(--auth-radius-btn);
-  border: none;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--auth-font);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+    width: 100%;
+    padding: 17px 0;
+    border-radius: var(--auth-radius-btn);
+    border: none;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--auth-font);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 /* LoginPage: both buttons share same color */
 .login-container .btn {
-  flex: 1;
-  padding: 16px 0;
-  border-radius: 14px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    flex: 1;
+    padding: 16px 0;
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .btn-primary,
 .btn-outline {
-  background-color: var(--auth-accent);
-  color: var(--auth-white);
+    background-color: var(--auth-accent);
+    color: var(--auth-white);
 }
 
 .btn-primary:hover:not(:disabled),
 .login-container .btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
 }
 
 .btn-primary:active:not(:disabled),
 .login-container .btn:active {
-  transform: translateY(1px);
+    transform: translateY(1px);
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* ─── Spinner ────────────────────────────────────── */
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.4);
-  border-top-color: var(--auth-white);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-top-color: var(--auth-white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ─── Fade-slide Transition (LupapassPage) ───────── */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: all 0.35s ease;
+    transition: all 0.35s ease;
 }
 
 .fade-slide-enter-from {
-  opacity: 0;
-  transform: translateX(20px);
+    opacity: 0;
+    transform: translateX(20px);
 }
 
 .fade-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
+    opacity: 0;
+    transform: translateX(-20px);
 }
 
 /* ─── Responsive ─────────────────────────────────── */
 @media (max-width: 400px) {
-  .header-section {
-    padding: 44px 20px 20px;
-  }
+    .header-section {
+        padding: 44px 20px 20px;
+    }
 
-  .form-section,
-  .login-container .form-section {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
+    .form-section,
+    .login-container .form-section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* Tablet (Layar Sedang) Upscaling */
+@media (min-width: 600px) {
+    .illustration {
+        width: 350px;
+        max-width: 100%;
+        /* Pastikan ilustrasi cukup besar dan mendominasi */
+    }
+
+    .instruction-text {
+        font-size: 1.25rem;
+        margin-bottom: 35px;
+    }
+
+    .input-label {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+
+    /* Mensejajarkan Judul Header (Regis & LupaPass) */
+    .header-title h1 {
+        font-size: 2rem;
+    }
+
+    .header-title p {
+        font-size: 1.15rem;
+    }
+
+    .back-btn {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Upscaling Icon Bulat Besar di LupaPass */
+    .icon-wrapper {
+        width: 150px;
+        height: 150px;
+    }
+
+    /* Ratakan semua container input, link, dan button */
+    .input-group,
+    .button-group,
+    .links-section {
+        max-width: 480px;
+        width: 100%;
+    }
+
+    /* Upscaling Input & Tombol Khusus Regis/LupaPass (yg dibungkus wrapper) */
+    .input-wrapper .custom-input {
+        font-size: 1.1rem;
+        padding: 20px 16px 20px 14px;
+    }
+
+    .input-icon {
+        width: 24px !important;
+        height: 24px !important;
+        margin-left: 20px;
+    }
+
+    /* Upscaling Input & Tombol (Login) */
+    .custom-input,
+    .login-container .custom-input {
+        font-size: 1.15rem;
+        padding: 20px 26px;
+    }
+
+    .btn {
+        font-size: 1.2rem;
+        padding: 18px;
+    }
+
+    /* Membesarkan Teks Lupa Password */
+    .forgot-password {
+        font-size: 1rem !important;
+    }
+
+    .links-section {
+        margin-top: 15px;
+        margin-bottom: 30px;
+    }
+}
+
+/* Desktop / Tablet Landscape Upscaling */
+@media (min-width: 900px) {
+    .illustration {
+        width: 450px;
+        max-width: 100%;
+        /* Gambar Extra Besar */
+    }
+
+    .instruction-text {
+        font-size: 1.4rem;
+    }
+
+    /* Header Regis/LupaPass Super Besar */
+    .header-title h1 {
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+    }
+
+    .header-title p {
+        font-size: 1.35rem;
+    }
+
+    .back-btn {
+        width: 56px;
+        height: 56px;
+        margin-top: 6px;
+    }
+
+    .back-btn svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .icon-wrapper {
+        width: 180px;
+        height: 180px;
+    }
+
+    /* Ratakan ukuran container di desktop */
+    .input-group,
+    .button-group,
+    .links-section {
+        max-width: 600px;
+        width: 100%;
+    }
+
+    .input-wrapper .custom-input {
+        font-size: 1.25rem;
+        padding: 24px 20px 24px 18px;
+    }
+
+    .input-icon {
+        width: 28px !important;
+        height: 28px !important;
+        margin-left: 24px;
+    }
+
+    .custom-input,
+    .login-container .custom-input {
+        font-size: 1.25rem;
+        padding: 22px 30px;
+    }
+
+    .btn {
+        font-size: 1.35rem;
+        padding: 22px;
+    }
+
+    .forgot-password {
+        font-size: 1.15rem !important;
+    }
+
+    /* Pusatkan semua layout ke tengah untuk efek halaman Desktop/Floating */
+    .illustration-section,
+    .form-section,
+    .header-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
 }

@@ -59,7 +59,10 @@ export default {
           const success = await auth.login(this.form)
 
           if (success) {
-            this.$router.push('/')
+            // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
+            setTimeout(() => {
+              this.$router.push('/')
+            }, 50)
           }
         }
     }
