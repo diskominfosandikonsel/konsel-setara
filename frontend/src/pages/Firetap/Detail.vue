@@ -48,14 +48,35 @@
           </div>
         </div>
 
-        <!-- ── LAMPIRAN FOTO ── -->
+        <!-- ── BUKTI PENANGANAN (JIKA SELESAI) ── -->
+        <div class="premium-info-card q-mb-md" v-if="item.status_kasus == 3 && item.bukti_kasus">
+          <div class="card-head" style="color: #16a34a; border-bottom-color: #dcfce7;">
+            <q-icon name="verified" color="green" size="20px" />
+            <span>Foto Bukti Penanganan</span>
+          </div>
+          <div class="card-body">
+            <div class="photo-container" @click="openFullscreen(item.bukti_kasus)">
+              <q-img :src="getImageUrl(item.bukti_kasus)" class="detail-photo" fit="cover" :ratio="16/9">
+                <template #loading><q-spinner-puff color="white" /></template>
+              </q-img>
+              <div class="photo-hint bg-green-fade">
+                <q-icon name="check_circle" class="q-mr-xs" /> Penanganan Selesai
+              </div>
+            </div>
+            <div class="q-mt-sm text-caption text-grey-8 bg-green-1 q-pa-sm" style="border-radius: 8px; border: 1px dashed #bbf7d0;">
+              Laporan kebakaran ini telah berhasil ditangani oleh tim pemadam kebakaran.
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LAMPIRAN FOTO PELAPOR ── -->
         <div class="premium-info-card q-mb-md" v-if="item.foto_kasus">
           <div class="card-head">
             <q-icon name="image" color="deep-orange" size="20px" />
-            <span>Lampiran Foto</span>
+            <span>Foto Kejadian (Dari Pelapor)</span>
           </div>
           <div class="card-body">
-            <div class="photo-container" @click="showImageFullscreen = true">
+            <div class="photo-container" @click="openFullscreen(item.foto_kasus)">
               <q-img :src="getImageUrl(item.foto_kasus)" class="detail-photo" fit="cover" :ratio="16/9">
                 <template #loading><q-spinner-puff color="white" /></template>
               </q-img>
@@ -115,7 +136,7 @@
     <q-dialog v-model="showImageFullscreen" maximized>
       <div class="bg-black flex flex-center relative-position">
         <q-btn icon="close" flat round color="white" class="absolute-top-right q-ma-md z-top" v-close-popup />
-        <q-img :src="getImageUrl(item?.foto_kasus)" class="full-width" fit="contain" style="max-height: 90vh" />
+        <q-img :src="getImageUrl(fullscreenFilename)" class="full-width" fit="contain" style="max-height: 90vh" />
       </div>
     </q-dialog>
 
@@ -131,6 +152,7 @@ const route = useRoute()
 const firetapStore = useFiretapStore()
 
 const showImageFullscreen = ref(false)
+const fullscreenFilename = ref(null)
 const reportId = route.params.id
 
 // Ambil dari store
@@ -162,6 +184,11 @@ const openLocation = () => {
   if (item.value?.latitude && item.value?.longitude) {
     window.open(`https://www.google.com/maps/search/?api=1&query=${item.value.latitude},${item.value.longitude}`, '_blank')
   }
+}
+
+const openFullscreen = (filename) => {
+  fullscreenFilename.value = filename
+  showImageFullscreen.value = true
 }
 </script>
 
@@ -288,6 +315,10 @@ const openLocation = () => {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.bg-green-fade {
+  background: linear-gradient(to top, rgba(22, 163, 74, 0.8), transparent);
 }
 
 /* ─── LOKASI ─── */

@@ -74,9 +74,22 @@
         >
           <div class="card-status-bar" :class="`bar-${item.status_kasus}`"></div>
 
-          <!-- Foto Thumbnail jika ada -->
+          <!-- Foto Thumbnail (Bukti Penanganan jika Selesai, Batal, dll) -->
           <q-img
-            v-if="item.foto_kasus"
+            v-if="item.status_kasus == 3 && item.bukti_kasus"
+            :src="firetapStore.fileUrl + item.bukti_kasus"
+            height="140px"
+            fit="cover"
+            class="card-photo"
+          >
+            <div class="absolute-bottom text-center text-subtitle2 bg-green shadow-up-2 q-py-xs" style="font-size: 11px; font-weight: 700;">
+              <q-icon name="check_circle" size="14px" class="q-mr-xs" /> FOTO PENANGANAN
+            </div>
+          </q-img>
+
+          <!-- Foto Thumbnail (Laporan awal) -->
+          <q-img
+            v-else-if="item.foto_kasus"
             :src="firetapStore.fileUrl + item.foto_kasus"
             height="140px"
             fit="cover"
