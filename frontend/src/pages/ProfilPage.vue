@@ -122,9 +122,29 @@ export default {
     methods: {
         async handleLogout() {
           const auth = useAuthStore()
-          auth.logout()
-
-          this.$router.push('/')
+          
+          Dialog.create({
+            title: 'Konfirmasi Keluar',
+            message: 'Apakah Anda yakin ingin keluar dari akun ini?',
+            cancel: {
+              color: 'grey',
+              label: 'Batal',
+              flat: true
+            },
+            ok: {
+              color: 'negative',
+              label: 'Ya, Keluar',
+              unelevated: true
+            },
+            persistent: true
+          }).onOk(async () => {
+            const success = await auth.logout()
+            console.log('Logging out...')
+            
+            if (success) {
+              this.$router.push('/')
+            }
+          })
         }
     }
 }
