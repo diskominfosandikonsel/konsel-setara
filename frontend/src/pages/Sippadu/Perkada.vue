@@ -1,49 +1,72 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header bordered class="bg-white text-black">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
-          </q-avatar>
-          <span class="headerText">Peraturan Kepala Daerah (PERKADA)</span>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-header>
+  <q-page class="perkada-page">
+    <!-- HEADER -->
+    <div class="perkada-header sticky-header">
+      <q-btn flat round dense icon="chevron_left" color="white" size="16px" @click="goBack" class="back-btn" />
+      <span class="header-title">Peraturan Kepala Daerah</span>
+    </div>
 
-    <q-page-container>
-      <q-page style="background-color: #FFFFFF;">
+    <!-- HERO BANNER -->
+    <div class="perkada-hero">
+      <q-icon name="r_policy" size="36px" color="white" class="q-mb-sm" />
+      <div class="hero-title">PERKADA</div>
+      <div class="hero-sub">Peraturan Kepala Daerah Kabupaten Konawe Selatan</div>
+    </div>
 
-        <!-- LOADING STATE -->
-        <div v-if="sippadu.loading" class="row justify-center q-pa-xl">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
+    <!-- LOADING STATE -->
+    <div v-if="sippadu.loading" class="state-container">
+      <q-spinner-dots color="primary" size="48px" />
+      <div class="state-text">Memuat data...</div>
+    </div>
 
-        <!-- EMPTY STATE -->
-        <div v-else-if="sippadu.list_perkada.length === 0" class="text-center q-pa-xl">
-          <q-icon name="r_find_in_page" size="60px" color="grey-6" />
-          <div class="text-grey-6 q-mt-sm">Data perkada tidak ditemukan</div>
-        </div>
+    <!-- EMPTY STATE -->
+    <div v-else-if="sippadu.list_perkada.length === 0" class="state-container">
+      <q-icon name="r_find_in_page" size="64px" color="grey-4" />
+      <div class="state-text">Belum ada data perkada tersedia</div>
+    </div>
 
-        <!-- ISI PERKADA LANGSUNG -->
-        <div v-else class="q-pa-md">
-          <div v-for="(item, index) in sippadu.list_perkada" :key="index" class="perkada-section">
-            <div class="text-h6 text-weight-bold text-grey-9 q-mb-xs">
-              {{ item.judul }}
+    <!-- LIST PERKADA -->
+    <div v-else class="perkada-list q-px-md q-pb-xl">
+      <div
+        v-for="(item, index) in sippadu.list_perkada"
+        :key="index"
+        class="perkada-card"
+      >
+        <div class="card-body">
+          <!-- Tanggal -->
+          <div class="card-date">
+            <q-icon name="r_calendar_today" size="13px" class="q-mr-xs" />
+            {{ formatDate(item.createAt) }}
+          </div>
+
+          <!-- Judul -->
+          <div class="card-title">{{ item.judul }}</div>
+
+          <!-- Divider -->
+          <div class="card-divider"></div>
+
+          <!-- Isi — parsed -->
+          <div v-if="item.isi" class="card-isi">
+            <div
+              v-for="(block, bi) in parseIsi(item.isi)"
+              :key="bi"
+              :class="block.type === 'point' ? 'isi-point' : 'isi-para'"
+            >
+              <!-- Poin bernomor -->
+              <template v-if="block.type === 'point'">
+                <span class="point-num">{{ block.num }}.</span>
+                <span class="point-text">{{ block.text }}</span>
+              </template>
+              <!-- Paragraf biasa -->
+              <template v-else>
+                {{ block.text }}
+              </template>
             </div>
-            <div class="row items-center text-caption text-grey-6 q-mb-md">
-              <q-icon name="event" size="14px" class="q-mr-xs" />
-              <span>{{ formatDate(item.createAt) }}</span>
-            </div>
-            <div class="text-body1 text-grey-8 perkada-isi" v-if="item.isi" v-html="item.isi"></div>
-
-            <q-separator class="q-my-lg" v-if="index < sippadu.list_perkada.length - 1" />
           </div>
         </div>
-
-      </q-page>
-    </q-page-container>
-  </q-layout>
+      </div>
+    </div>
+  </q-page>
 </template>
 
 <script>
@@ -64,6 +87,28 @@ export default {
       return new Date(dateStr).toLocaleDateString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric'
       })
+    },
+    /**
+     * Parse plain text isi menjadi array blok:
+     * - type 'point' : baris yang diawali angka (1. 2. dst)
+     * - type 'para'  : paragraf teks biasa
+     */
+    parseIsi(isi) {
+      if (!isi) return []
+      const lines = isi
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0)
+
+      return lines.map(line => {
+        const match = line.match(/^(\d+)[.)]\s*(.+)/)
+        if (match) {
+          return { type: 'point', num: match[1], text: match[2] }
+        }
+        return { type: 'para', text: line }
+      })
     }
   },
   mounted() {
@@ -73,17 +118,151 @@ export default {
 </script>
 
 <style scoped>
-.headerText {
+/* ── PAGE ──────────────────────────────────────────── */
+.perkada-page {
+  background-color: #f4f6fb;
+  min-height: 100vh;
+}
+
+/* ── STICKY HEADER ─────────────────────────────────── */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+}
+
+.back-btn { flex-shrink: 0; }
+
+.header-title {
   font-size: 16px;
   font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
 }
 
-.perkada-section {
-  padding-bottom: 8px;
+/* ── HERO BANNER ───────────────────────────────────── */
+.perkada-hero {
+  background: linear-gradient(135deg, #1565C0 0%, #42A5F5 100%);
+  padding: 24px 20px 32px;
+  text-align: center;
+  color: #fff;
 }
 
-.perkada-isi {
-  line-height: 1.8;
+.hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  line-height: 1.2;
+}
+
+.hero-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* ── STATES ────────────────────────────────────────── */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+}
+
+.state-text {
+  font-size: 14px;
+  color: #9e9e9e;
+}
+
+/* ── LIST ──────────────────────────────────────────── */
+.perkada-list {
+  margin-top: -16px;
+}
+
+/* ── CARD ──────────────────────────────────────────── */
+.perkada-card {
+  background: #ffffff;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.card-date {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #1976D2;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.5;
+}
+
+.card-divider {
+  height: 1px;
+  background: #e8eaf0;
+  margin: 10px 0 12px;
+}
+
+/* ── ISI ───────────────────────────────────────────── */
+.card-isi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Paragraf biasa */
+.isi-para {
+  font-size: 13px;
+  color: #4a4a4a;
+  line-height: 1.75;
   text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Baris bernomor */
+.isi-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.point-num {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  min-width: 22px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.point-text {
+  font-size: 13px;
+  color: #4a4a4a;
+  line-height: 1.75;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  flex: 1;
 }
 </style>

@@ -38,14 +38,73 @@ const routes = [
         meta: { showBottomNav: false, requiresAuth: true }
       },
       {
+        path: 'account_settings',
+        component: () => import('pages/Profile/AccountSettingsPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      {
+        path: 'delete_account',
+        component: () => import('pages/Profile/DeleteAccountPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      {
+        path: 'change_email',
+        component: () => import('pages/Profile/ChangeEmailPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      {
+        path: 'change_password',
+        component: () => import('pages/Profile/ChangePasswordPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      // PROFILE END
+      //Legal Start
+      {
+        path: 'user_guide',
+        component: () => import('pages/Legal/GuidePage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      {
+        path: 'privacy_policy',
+        component: () => import('pages/Legal/PrivacyPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      {
+        path: 'terms_conditions',
+        component: () => import('pages/Legal/TermsPage.vue'),
+        meta: { showBottomNav: false , requiresAuth: true}
+      },
+      // Route baru (tanpa requiresAuth agar bisa dibuka dari Play Store link)
+      {
+        path: 'syarat-ketentuan',
+        component: () => import('pages/Profile/SyaratKetentuanPage.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'kebijakan-privasi',
+        component: () => import('pages/Profile/KebijakanPrivasiPage.vue'),
+        meta: { showBottomNav: false }
+      },
+      // Legal End
+      {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sapa_edukasi',
+        component: () => import('pages/SapaKonsel/Edukasi.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sapa_edukasi/:id',
+        component: () => import('pages/SapaKonsel/DetailEdukasi.vue'),
+        meta: { showBottomNav: false }
       },
       {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'sapa_detail',
@@ -57,7 +116,11 @@ const routes = [
         component: () => import('pages/SapaKonsel/Satgas.vue'),
         meta: { showBottomNav: false }
       },
-
+      {
+        path: 'erida_dashboard',
+        component: () => import('pages/Erida/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
       {
         path: 'erida_penelitian',
         component: () => import('pages/Erida/Penelitian.vue'),
@@ -68,7 +131,7 @@ const routes = [
       {
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'Perda',
@@ -83,7 +146,7 @@ const routes = [
       {
         path: 'sippadu_aduan/:type',
         component: () => import('pages/Sippadu/Aduan.vue'),
-        meta: { showBottomNav: false, requiresAuth: true }
+        meta: { showBottomNav: false }
       },
       {
         path: 'sippadu_riwayat',

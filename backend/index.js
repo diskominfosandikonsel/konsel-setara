@@ -41,6 +41,15 @@ app.use('/api/v1/checkAuth', checkAuth);
 const sippaduBerita = require('./apiMysql/sippadu/berita');
 app.use('/api/v1/sippadu_berita', sippaduBerita);
 
+// STATIC LEGAL PAGES FOR PLAY STORE
+app.get('/kebijakan-privasi', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/html/kebijakan-privasi.html'));
+});
+
+app.get('/syarat-ketentuan', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/html/syarat-ketentuan.html'));
+});
+
 // API ENDPOINTS
 
 // ERROR HANDLER

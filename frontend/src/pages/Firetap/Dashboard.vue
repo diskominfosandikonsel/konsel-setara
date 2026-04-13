@@ -46,7 +46,8 @@
 
       <!-- MENU UTAMA — 2 Kolom Grid -->
       <div class="q-pt-xl q-pb-md">
-        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Layanan Darurat</div>
+        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Layanan Darurat
+        </div>
 
         <div class="row q-col-gutter-md">
           <!-- Lapor -->
@@ -81,7 +82,8 @@
 
       <!-- TELEPON PENTING / DARURAT -->
       <div class="q-mt-md q-mb-xl">
-        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Telepon Penting</div>
+        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Telepon Penting
+        </div>
 
         <!-- Loading -->
         <div v-if="loadingTelp" class="text-center q-py-lg">
@@ -95,22 +97,20 @@
 
         <!-- List -->
         <div v-else class="telp-list-card">
-          <div
-            v-for="(item, idx) in listTelepon"
-            :key="idx"
-            class="telp-item"
-            :class="{ 'telp-item-border': idx < listTelepon.length - 1 }"
-          >
+          <div v-for="(item, idx) in listTelepon" :key="idx" class="telp-item"
+            :class="{ 'telp-item-border': idx < listTelepon.length - 1 }">
             <div class="telp-info">
               <div class="telp-name">{{ item.nama_instansi }}</div>
               <div class="telp-address">{{ item.alamat_instansi || '-' }}</div>
             </div>
             <div class="telp-actions">
-              <q-btn flat round dense icon="phone" color="deep-orange" size="sm" @click.stop="callNumber(item.no_telp_instansi)">
+              <q-btn flat round dense icon="phone" color="deep-orange" size="sm"
+                @click.stop="callNumber(item.no_telp_instansi)">
                 <q-tooltip>Telepon</q-tooltip>
               </q-btn>
               <q-btn flat round dense size="sm" @click.stop="openWA(item.no_telp_instansi)">
-                <img src="/icons/wa-icon.png" style="width: 20px; height: 20px;" onerror="this.parentElement.style.display='none'" />
+                <img src="/icons/wa-icon.png" style="width: 20px; height: 20px;"
+                  onerror="this.parentElement.style.display='none'" />
                 <q-tooltip>WhatsApp</q-tooltip>
               </q-btn>
             </div>
@@ -132,7 +132,7 @@ const router = useRouter()
 
 const goLapor = () => router.push('/firetap_lapor')
 const goRiwayat = () => router.push('/firetap_riwayat')
-const callHotline = () => window.open('tel:113')
+const callHotline = () => window.open('tel:+6282110969668')
 
 // Telepon Penting
 const listTelepon = ref([])

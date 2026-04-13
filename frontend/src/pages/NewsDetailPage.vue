@@ -25,7 +25,7 @@
       <q-img
         :src="news.img"
         class="news-cover-img q-mb-md"
-        ratio="16/9"
+        :ratio="16/9"
         fit="cover"
       />
 
@@ -81,7 +81,7 @@ onMounted(async () => {
     title: state?.title || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
     date: state?.date || 'December 22, 2025',
     author: state?.author || 'Admin',
-    img: state?.img || `https://picsum.photos/800/450?random=${id}`,
+    img: state?.img || `https://picsum.photos/800/450?random=1`,
     content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 Aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -130,9 +130,6 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
   white-space: pre-line;
 }
 
-.q-pb-xl {
-  padding-bottom: 40px;
-}
 
 /* Tablet responsive — perbesar font dan batasi lebar konten */
 @media (min-width: 600px) {
@@ -141,7 +138,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
     line-height: 1.4;
   }
   .news-meta {
-    font-size: 1.0 rem;
+    font-size: 1rem;
   }
   .news-body {
     font-size: 1.1rem;

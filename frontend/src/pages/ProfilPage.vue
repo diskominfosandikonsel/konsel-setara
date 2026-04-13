@@ -64,7 +64,7 @@
             </q-item>
 
             <!-- Syarat & Ketentuan -->
-            <q-item clickable v-ripple class="q-py-md item-bordered">
+            <q-item clickable v-ripple class="q-py-md item-bordered" @click="$router.push('/syarat-ketentuan')">
               <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
                 <q-icon name="description" size="24px" color="grey-9" />
               </q-item-section>
@@ -77,7 +77,7 @@
             </q-item>
 
             <!-- Kebijakan Privasi -->
-            <q-item clickable v-ripple class="q-py-md">
+            <q-item clickable v-ripple class="q-py-md" @click="$router.push('/kebijakan-privasi')">
               <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
                 <q-icon name="privacy_tip" size="24px" color="grey-9" />
               </q-item-section>
