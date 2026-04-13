@@ -57,3 +57,71 @@ body {
     font-size: 1.20rem !important;
   }
 }
+
+
+
+// SIMCARD
+.dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #3683FD 0%,
+    #3683FD 15%,
+    #78ACFE 30%,
+    #e3f2fd 45%,
+    #ffffff 85%
+  );
+}
+
+.containerOne {
+  padding: 20px;
+  margin: 0;
+}
+
+.itemsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.itemsContainer > div:first-child {
+  flex: 1;
+}
+
+.itemsContainer > div:last-child {
+  display: flex;
+  align-items: center;
+}
+
+.itemsContainer img {
+  display: block;
+}
+
+.logo-shadow {
+  filter: drop-shadow(0 0 2.5px #fff)
+          drop-shadow(0 0 5px #fff);
+}
+
+.mobile-carousel {
+  padding: 0 20px;
+}
+
+.carousel-slide {
+  border-radius: 25px;
+  overflow: hidden;
+  transition: transform 0.35s ease;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 400;
+  color: #000000;
+} 
+
+.sub-title {
+  font-size: 12px;
+  font-weight: 250;
+  color: #000000;
+}
+// SIMCARD
