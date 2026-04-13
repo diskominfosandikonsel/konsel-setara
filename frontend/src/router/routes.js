@@ -24,13 +24,13 @@ const routes = [
       {
         path: 'notifikasi',
         component: () => import('pages/NotifPage.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       // PROFILE
       {
         path: 'profil',
         component: () => import('pages/ProfilPage.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'edit_profile',
@@ -40,12 +40,12 @@ const routes = [
       {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'sapa_detail',
@@ -56,6 +56,12 @@ const routes = [
         path: 'sapa_satgas',
         component: () => import('pages/SapaKonsel/Satgas.vue'),
         meta: { showBottomNav: false }
+      },
+
+      {
+        path: 'erida_dashboard',
+        component: () => import('pages/Erida/Dashboard.vue'),
+        meta: { showBottomNav: true }
       },
 
       {
