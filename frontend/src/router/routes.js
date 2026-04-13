@@ -43,6 +43,16 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'sapa_edukasi',
+        component: () => import('pages/SapaKonsel/Edukasi.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'sapa_edukasi/:id',
+        component: () => import('pages/SapaKonsel/DetailEdukasi.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
         meta: { showBottomNav: true }
@@ -57,13 +67,11 @@ const routes = [
         component: () => import('pages/SapaKonsel/Satgas.vue'),
         meta: { showBottomNav: false }
       },
-
       {
         path: 'erida_dashboard',
         component: () => import('pages/Erida/Dashboard.vue'),
         meta: { showBottomNav: true }
       },
-
       {
         path: 'erida_penelitian',
         component: () => import('pages/Erida/Penelitian.vue'),
@@ -74,7 +82,7 @@ const routes = [
       {
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
-        meta: { showBottomNav: true, requiresAuth: true }
+        meta: { showBottomNav: true }
       },
       {
         path: 'Perda',
@@ -89,7 +97,7 @@ const routes = [
       {
         path: 'sippadu_aduan/:type',
         component: () => import('pages/Sippadu/Aduan.vue'),
-        meta: { showBottomNav: false, requiresAuth: true }
+        meta: { showBottomNav: false }
       },
       {
         path: 'sippadu_riwayat',

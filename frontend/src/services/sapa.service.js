@@ -11,6 +11,10 @@ export const SapaService = {
   // 🌐 NO TOKEN
   getPengguna(payload) {
     return apiSapa.post('server_pengguna/view', payload)
+  },
+
+  getEdukasi(payload) {
+    return apiSapa.post('client_artikel/view', payload)
   }
 
 }

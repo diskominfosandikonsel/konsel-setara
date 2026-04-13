@@ -52,9 +52,9 @@
     </q-card>
   </div>
   <div class="col-6">
-    <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;">
+    <q-card class="text-white full-width" style="border-radius: 15px; background-color: #3683FD; opacity: 0.85;" @click="edukasi">
       <q-card-section>
-        <q-icon name="eva-message-square-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <q-icon name="eva-message-square-outline" size="61px" color="white" class="cursor-pointer q-py-md" />
         <div class="text-subtitle2">Edukasi PPA</div>
       </q-card-section>
     </q-card>
@@ -103,6 +103,9 @@ export default {
   },
   riwayat () {
     this.$router.push('/sapa_riwayat')
+  },
+  edukasi () {
+    this.$router.push('/sapa_edukasi')
   }
 }
 }

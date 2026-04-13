@@ -47,7 +47,20 @@ export const useSapaStore = defineStore('sapa', {
         this.loading = false
         Loading.hide()
       }
-    }
+    },
+
+    async fetchEdukasi(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await SapaService.getEdukasi(payload)
+        return res.data // ⬅️ return full response
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
 
   }
 })
