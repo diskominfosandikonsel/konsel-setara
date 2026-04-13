@@ -74,6 +74,17 @@ const routes = [
         component: () => import('pages/Legal/TermsPage.vue'),
         meta: { showBottomNav: false , requiresAuth: true}
       },
+      // Route baru (tanpa requiresAuth agar bisa dibuka dari Play Store link)
+      {
+        path: 'syarat-ketentuan',
+        component: () => import('pages/Profile/SyaratKetentuanPage.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'kebijakan-privasi',
+        component: () => import('pages/Profile/KebijakanPrivasiPage.vue'),
+        meta: { showBottomNav: false }
+      },
       // Legal End
       {
         path: 'sapa_dashboard',
