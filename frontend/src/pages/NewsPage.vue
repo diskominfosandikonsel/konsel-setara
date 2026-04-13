@@ -79,7 +79,7 @@ const fetchNews = async (page, limit = 10) => {
           title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
           author: 'Pemkab Konawe Selatan',
           date: '1 Years ago',
-          img: `https://picsum.photos/300/300?random=1`
+          img: `https://picsum.photos/300/300?random=${id}`
         })
       }
       resolve(dbHalaman)

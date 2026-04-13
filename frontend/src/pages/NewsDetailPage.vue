@@ -23,7 +23,7 @@
 
       <!-- Gambar Utama -->
       <q-img
-        :src="news.img || 'https://picsum.photos/800/450?random=1'"
+        :src="news.img"
         class="news-cover-img q-mb-md"
         :ratio="16/9"
         fit="cover"
