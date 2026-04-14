@@ -35,8 +35,15 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   })
 
   Router.beforeEach((to, from, next) => {
-    const auth = useAuthStore()
+    if (to.path !== '/splash') {
+      const splashShown = sessionStorage.getItem('splashShown')
+      if (!splashShown) {
+        sessionStorage.setItem('splashShown', 'true')
+        return next('/splash')
+      }
+    }
 
+    const auth = useAuthStore()
     // check if route needs login
     if (to.meta.requiresAuth && !auth.token) {
       next('/login') // redirect to login

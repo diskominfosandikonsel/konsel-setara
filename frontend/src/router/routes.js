@@ -2,6 +2,12 @@ import MainLayout from 'layouts/MainLayout.vue'
 
 const routes = [
   {
+    path: '/splash',
+    component: () => import('pages/SplashPage.vue'),
+    meta: { showBottomNav: false }
+  },
+
+  {
     path: '/',
     component: MainLayout,
     children: [
@@ -40,39 +46,39 @@ const routes = [
       {
         path: 'account_settings',
         component: () => import('pages/Profile/AccountSettingsPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'delete_account',
         component: () => import('pages/Profile/DeleteAccountPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'change_email',
         component: () => import('pages/Profile/ChangeEmailPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'change_password',
         component: () => import('pages/Profile/ChangePasswordPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       // PROFILE END
       //Legal Start
       {
         path: 'user_guide',
         component: () => import('pages/Legal/GuidePage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'privacy_policy',
         component: () => import('pages/Legal/PrivacyPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'terms_conditions',
         component: () => import('pages/Legal/TermsPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       // Route baru (tanpa requiresAuth agar bisa dibuka dari Play Store link)
       {
