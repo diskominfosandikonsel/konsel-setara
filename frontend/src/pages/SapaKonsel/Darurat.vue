@@ -1,67 +1,87 @@
 <template>
   <q-page class="bg-black text-white">
 
-    <div class="camera-wrapper">
+    <!-- 🔴 CAMERA MODE -->
+    <div v-if="mode === 'camera'" class="camera-wrapper">
+      <div id="cameraPreview" class="camera-preview"></div>
 
-      <img
-        v-if="capturedImage"
-        :src="capturedImage"
-        class="camera-preview"
-      />
-
-      <div v-else class="camera-placeholder flex flex-center">
-        <q-icon name="photo_camera" size="80px" />
-      </div>
-
-      <div class="top-bar row items-center justify-between q-px-md">
+      <!-- TOP -->
+      <!-- <div class="top-bar row items-center justify-between q-px-md">
         <q-btn flat round icon="close" @click="$router.back()" />
         <div class="text-weight-bold">Mode Darurat</div>
         <div style="width: 40px"></div>
+      </div> -->
+
+      <div class="top-bar row items-center justify-between q-px-md">
+        <q-btn flat round icon="close" @click="$router.back()" />
+
+        <div class="text-weight-bold">Laporan Darurat</div>
+
+        <!-- 🔄 SWITCH CAMERA -->
+        <div style="width: 40px"></div>
       </div>
 
-      <div class="bottom-bar column">
-
-        <q-input
-          v-model="uraian"
-          dark
-          filled
-          placeholder="Apa yang terjadi? (opsional)"
-          class="q-mb-md"
-        />
-
+      <!-- BOTTOM -->
+      <div class="bottom-bar">
         <div class="row items-center justify-around">
 
-          <q-btn flat round icon="photo_library" @click="pickFromGallery" />
+          <q-btn flat round size="20px" icon="photo_library" @click="pickFromGallery" />
 
-          <q-btn
-            round
-            size="lg"
-            class="capture-btn"
-            @click="takePicture"
-          />
+          <div class="capture-wrapper" @click="takePicture">
+            <div class="capture-ring">
+              <div class="capture-inner"></div>
+            </div>
+          </div>
 
-          <q-btn
-            flat
-            round
-            icon="send"
-            :loading="isSending"
-            :disable="!capturedImage || isSending"
-            @click="sendEmergency"
-          />
+          <q-btn flat round size="20px" icon="flip_camera_android" @click="switchCamera" />
 
         </div>
       </div>
+    </div>
 
+    <!-- 🟡 PREVIEW MODE -->
+    <div v-else class="camera-wrapper">
+      <div v-if="flash" class="flash"></div>
+
+      <img :src="capturedImage" :key="capturedImage" class="preview-image" />
+
+      <!-- TOP -->
+      <div class="top-bar row items-center justify-between q-px-md">
+        <q-btn flat round icon="arrow_back" @click="retake" />
+        <div class="text-weight-bold">Preview</div>
+        <div style="width: 40px"></div>
+      </div>
+
+      <!-- FORM -->
+      <div class="bottom-bar column">
+        <q-input
+          v-model="uraian"
+          dark
+          borderless
+          placeholder="Tambahkan keterangan (opsional)"
+          class="q-mb-sm"
+        />
+
+        <q-btn
+          round="20px"
+          color="primary"
+          label="Kirim Laporan"
+          :loading="isSending"
+          @click="sendEmergency"
+          class="q-mb-md"
+        />
+      </div>
     </div>
 
   </q-page>
 </template>
 
 <script>
-import { App } from '@capacitor/app'
 import { Camera } from '@capacitor/camera'
+import { CameraPreview } from '@capacitor-community/camera-preview'
 import { Geolocation } from '@capacitor/geolocation'
-import { SapaService } from 'src/services/sapa.service'
+import { App } from '@capacitor/app'
+
 import { useSapaStore } from 'stores/sapa'
 import { useAuthStore } from 'stores/auth'
 import { useQuasar } from 'quasar'
@@ -71,260 +91,212 @@ export default {
 
   data() {
     return {
+      mode: 'camera',
+      cameraPosition: 'rear', // 'rear' | 'front'
+
       capturedImage: null,
       capturedFile: null,
       uraian: '',
+
       lat: null,
       lng: null,
 
+      isSending: false,
+      flash: false,
+
       sapaStore: useSapaStore(),
       authStore: useAuthStore(),
-      $q: useQuasar(),
-
-      isSending: false
+      $q: useQuasar()
     }
   },
 
+  async mounted() {
+    const allowed = await this.initPermissions()
+    if (!allowed) return
+
+    await this.startCamera()
+  },
+
+  beforeUnmount() {
+    try {
+      CameraPreview.stop()
+    } catch (e) {}
+  },
+
   methods: {
-    async takePicture() {
-      const allowed = await this.checkPermissions()
-      if (!allowed) return
 
-      try {
-        await this.getLocation()
-
-        const image = await Camera.getPhoto({
-          quality: 80,
-          resultType: 'dataUrl',
-          source: 'camera',
-          correctOrientation: true
-        })
-
-        if (!image || !image.dataUrl) return
-
-        const compressed = await this.compressImage(image.dataUrl, 0.6, 1280)
-
-        this.capturedImage = compressed
-
-        const blob = this.dataURLtoBlob(compressed)
-
-        this.capturedFile = new File(
-          [blob],
-          `emergency_${Date.now()}.jpg`,
-          { type: 'image/jpeg' }
-        )
-
-        await this.sendEmergency()
-
-      } catch (err) {
-        console.error(err)
+    // 🔥 INIT PERMISSION FLOW
+    async initPermissions() {
+      // CAMERA
+      const cam = await Camera.requestPermissions()
+      if (cam.camera !== 'granted') {
+        this.openSettingDialog('Kamera dibutuhkan')
+        return false
       }
-    },
 
-    async checkPermissions() {
-      const permissions = await Camera.checkPermissions()
-
-      if (permissions.camera !== 'granted') {
-        const request = await Camera.requestPermissions({
-          permissions: ['camera', 'photos']
-        })
-
-        if (request.camera !== 'granted') {
-
-          // 🚨 SHOW DIALOG HERE
-          this.$q.dialog({
-            title: 'Izin Dibutuhkan',
-            message: 'Aplikasi butuh kamera untuk laporan darurat',
-            ok: 'Buka Pengaturan',
-            cancel: true
-          }).onOk(() => {
-            App.openSettings() // 🔥 OPEN ANDROID SETTINGS
-          })
-
-          return false
-        }
+      // LOCATION
+      const loc = await Geolocation.requestPermissions()
+      if (loc.location !== 'granted') {
+        this.openSettingDialog('Lokasi dibutuhkan')
+        return false
       }
+
+      const pos = await Geolocation.getCurrentPosition()
+      this.lat = pos.coords.latitude
+      this.lng = pos.coords.longitude
 
       return true
     },
 
-    async pickFromGallery() {
+    openSettingDialog(message) {
+      this.$q.dialog({
+        title: 'Izin Dibutuhkan',
+        message,
+        ok: 'Buka Pengaturan',
+        cancel: true
+      }).onOk(() => {
+        App.openSettings()
+      })
+    },
+
+    // 🔥 START CAMERA (LIVE)
+    async startCamera() {
+      await this.$nextTick()
+
+      await CameraPreview.start({
+        parent: 'cameraPreview',
+        className: 'camera-preview',
+        position: this.cameraPosition,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        toBack: true
+      })
+    },
+
+    async switchCamera() {
       try {
-        const image = await Camera.getPhoto({
-          resultType: 'dataUrl',
-          source: 'photos'
-        })
+        this.cameraPosition = this.cameraPosition === 'rear' ? 'front' : 'rear'
 
-        if (!image || !image.dataUrl) return
+        await CameraPreview.stop()
+        await this.startCamera()
 
-        const compressed = await this.compressImage(image.dataUrl, 0.6, 1280)
+      } catch (err) {
+        console.error('Switch camera error:', err)
+      }
+    },
 
+    // 🔥 CAPTURE
+    async takePicture() {
+      try {
+        this.flash = true
+        setTimeout(() => (this.flash = false), 120)
+
+        const result = await CameraPreview.capture({ quality: 80 })
+        const dataUrl = 'data:image/jpeg;base64,' + result.value
+
+        const compressed = await this.compressImage(dataUrl)
+
+        // ✅ SET IMAGE FIRST
         this.capturedImage = compressed
 
         const blob = this.dataURLtoBlob(compressed)
-
-        this.capturedFile = new File(
-          [blob],
-          `gallery_${Date.now()}.jpg`,
-          { type: 'image/jpeg' }
-        )
-
-      } catch (err) {
-        if (err?.message !== 'User cancelled photos app') {
-          console.error('Gallery error:', err)
-        }
-      }
-    },
-
-    async getLocation() {
-      try {
-        const permission = await Geolocation.requestPermissions()
-
-        if (permission.location !== 'granted') {
-
-          this.$q.dialog({
-            title: 'Izin Lokasi Dibutuhkan',
-            message: 'Aktifkan lokasi untuk mengirim laporan',
-            ok: 'Buka Pengaturan',
-            cancel: true
-          }).onOk(() => {
-            App.openSettings()
-          })
-
-          return false
-        }
-
-        const pos = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true
+        this.capturedFile = new File([blob], `img_${Date.now()}.jpg`, {
+          type: 'image/jpeg'
         })
 
-        this.lat = pos.coords.latitude
-        this.lng = pos.coords.longitude
-
-        return true
+        // ✅ STOP CAMERA AFTER IMAGE READY
+        this.mode = 'preview'
+        await this.$nextTick()
+        await CameraPreview.stop()
 
       } catch (err) {
         console.error(err)
-        return false
       }
     },
 
+    // 🔥 GALLERY
+    async pickFromGallery() {
+      const image = await Camera.getPhoto({
+        resultType: 'dataUrl',
+        source: 'photos'
+      })
+
+      if (!image?.dataUrl) return
+
+      const compressed = await this.compressImage(image.dataUrl)
+
+      this.capturedImage = compressed
+
+      console.log('IMAGE:', this.capturedImage?.substring(0, 50))
+
+      const blob = this.dataURLtoBlob(compressed)
+      this.capturedFile = new File([blob], `img_${Date.now()}.jpg`, {
+        type: 'image/jpeg'
+      })
+
+      this.mode = 'preview'
+      await this.$nextTick()
+      await CameraPreview.stop()
+    },
+
+    // 🔥 RETAKE
+    async retake() {
+      this.mode = 'camera'
+      this.capturedImage = null
+      this.capturedFile = null
+      this.uraian = ''
+
+      await this.startCamera()
+    },
+
+    // 🔥 SEND
     async sendEmergency() {
-      if (!this.capturedFile || this.isSending) return
+      if (!this.capturedFile) return
 
       this.isSending = true
 
       try {
-        await this.getLocation()
-
-        const originalName = this.capturedFile.name
-        const fileName = `image-${originalName}`
-
         const payload = {
           uraian: this.uraian || 'Laporan darurat',
           lat: this.lat,
           lng: this.lng,
           lokasi: `${this.lat},${this.lng}`,
-          file: fileName,
-
           jenis: 1,
           objek: 0,
           status: 'baru',
           keterangan: this.uraian || '-',
-
           nama: this.authStore.user?.nama || '',
           hp: this.authStore.user?.hp || ''
         }
 
-        if (!navigator.onLine) {
-          this.saveToQueue(payload, this.capturedImage)
-
-          this.$q.notify({
-            color: 'warning',
-            message: 'Offline: laporan disimpan & akan dikirim otomatis'
-          })
-
-          this.$router.replace('/sapa_riwayat')
-          return
-        }
-
-        // NORMAL FLOW
-        await SapaService.uploadFile(this.capturedFile, originalName)
-        const success = await this.sapaStore.addData(payload)
+        const success = await this.sapaStore.sendLaporan(
+          payload,
+          this.capturedFile
+        )
 
         if (success) {
-          this.$q.notify({
-            color: 'positive',
-            message: 'Laporan darurat terkirim'
-          })
-
           this.$router.replace('/sapa_riwayat')
         }
 
       } catch (err) {
         console.error(err)
-
-        // 🔥 FAIL → SAVE TO QUEUE
-        this.saveToQueue(
-          {
-            uraian: this.uraian || 'Laporan darurat',
-            lat: this.lat,
-            lng: this.lng,
-            lokasi: `${this.lat},${this.lng}`,
-            file: `image-${this.capturedFile.name}`,
-            nama: this.authStore.user?.nama || '',
-            hp: this.authStore.user?.hp || ''
-          },
-          this.capturedImage
-        )
-
-        this.$q.notify({
-          color: 'warning',
-          message: 'Gagal kirim, akan dicoba ulang otomatis'
-        })
-
       } finally {
         this.isSending = false
       }
     },
 
+    // 🔧 UTIL
     dataURLtoBlob(dataurl) {
       const arr = dataurl.split(',')
       const mime = arr[0].match(/:(.*?);/)[1]
       const bstr = atob(arr[1])
-      let n = bstr.length
-      const u8arr = new Uint8Array(n)
+      const u8arr = new Uint8Array(bstr.length)
 
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n)
+      for (let i = 0; i < bstr.length; i++) {
+        u8arr[i] = bstr.charCodeAt(i)
       }
 
       return new Blob([u8arr], { type: mime })
-    },
-
-    async retryQueue() {
-      const queue = JSON.parse(localStorage.getItem('laporan_queue') || '[]')
-
-      if (!queue.length) return
-
-      const newQueue = []
-
-      for (const item of queue) {
-        try {
-          const blob = this.dataURLtoBlob(item.file)
-          const file = new File([blob], item.payload.file.replace('image-', ''), {
-            type: 'image/jpeg'
-          })
-
-          await SapaService.uploadFile(file, file.name)
-          await this.sapaStore.addData(item.payload)
-
-        } catch (err) {
-          newQueue.push(item) // gagal → simpan lagi
-        }
-      }
-
-      localStorage.setItem('laporan_queue', JSON.stringify(newQueue))
     },
 
     async compressImage(dataUrl, quality = 0.6, maxWidth = 1280) {
@@ -336,94 +308,148 @@ export default {
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')
 
-          let width = img.width
-          let height = img.height
+          let w = img.width
+          let h = img.height
 
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width
-            width = maxWidth
+          // 🔥 resize
+          if (w > maxWidth) {
+            h = (h * maxWidth) / w
+            w = maxWidth
           }
 
-          canvas.width = width
-          canvas.height = height
+          canvas.width = w
+          canvas.height = h
 
-          ctx.drawImage(img, 0, 0, width, height)
+          ctx.drawImage(img, 0, 0, w, h)
 
+          // =========================
           // 🔥 WATERMARK
+          // =========================
+
           const now = new Date()
           const time = now.toLocaleString()
 
+          const gps = (this.lat && this.lng)
+            ? `${this.lat.toFixed(5)}, ${this.lng.toFixed(5)}`
+            : 'No GPS'
+
+          const text = `${time} | ${gps}`
+
+          // background box
           ctx.fillStyle = 'rgba(0,0,0,0.6)'
-          ctx.fillRect(0, height - 40, width, 40)
+          ctx.fillRect(0, h - 50, w, 50)
 
+          // text
           ctx.fillStyle = '#fff'
-          ctx.font = '14px Arial'
-          ctx.fillText(time, 10, height - 15)
+          ctx.font = 'bold 14px Arial'
+          ctx.fillText(text, 10, h - 20)
 
-          if (this.lat && this.lng) {
-            ctx.fillText(
-              `${this.lat.toFixed(5)}, ${this.lng.toFixed(5)}`,
-              width - 180,
-              height - 15
-            )
-          }
+          // =========================
 
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
-          resolve(compressedDataUrl)
+          const final = canvas.toDataURL('image/jpeg', quality)
+          resolve(final)
         }
       })
-    },
-    saveToQueue(payload, fileBase64) {
-      const queue = JSON.parse(localStorage.getItem('laporan_queue') || '[]')
-
-      queue.push({
-        payload,
-        file: fileBase64,
-        createdAt: Date.now()
-      })
-
-      localStorage.setItem('laporan_queue', JSON.stringify(queue))
     }
-  },
-  mounted() {
-    this.takePicture()
 
-    window.addEventListener('online', this.retryQueue)
-
-    this.retryQueue()
   }
 }
 </script>
 
 <style scoped>
-.camera-wrapper {
-  position: relative;
-  height: 100vh;
+
+body, html {
+  background: transparent !important;
 }
 
 .camera-preview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 🔘 CAPTURE BUTTON */
+.capture-wrapper {
+  width: 90px;
+  height: 90px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 1;
 }
 
-.camera-placeholder {
+.capture-ring {
+  width: 80px;
+  height: 80px;
+  border: 4px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.capture-ring:active {
+  transform: scale(0.85);
+  box-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+
+.capture-inner {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* ⚡ FLASH EFFECT */
+.flash {
+  position: absolute;
+  width: 100%;
   height: 100%;
-  background: #111;
+  background: white;
+  z-index: 20;
+  opacity: 0.8;
+  animation: flashAnim 0.15s ease-out;
+}
+
+@keyframes flashAnim {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
+
+.q-page {
+  background: transparent !important; /* 🔥 IMPORTANT */
 }
 
 .top-bar {
-  position: absolute;
+  position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
-  padding-top: 20px;
+  z-index: 9999;
+  padding: 12px 16px;
+  padding-top: calc(env(safe-area-inset-top) + 12px);
 }
 
 .bottom-bar {
-  position: absolute;
+  position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
+  z-index: 9999;
+
   padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+
   background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
 }
 
@@ -431,5 +457,23 @@ export default {
   width: 70px;
   height: 70px;
   background: white;
+}
+
+.camera-wrapper {
+  position: relative;
+  height: 100vh;
+  z-index: 0;
+}
+
+#cameraPreview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.bottom-bar .row {
+  max-width: 400px;
+  /* margin: 0 auto; */
 }
 </style>
