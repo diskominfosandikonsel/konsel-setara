@@ -44,9 +44,9 @@
     </div>
     <div class="row q-col-gutter-md q-px-md q-py-lg text-center">
   <div class="col-6">
-    <q-card class="bg-warning text-white full-width" style="border-radius: 15px; background-color: #FF8D00;">
+    <q-card class="bg-warning text-white full-width" style="border-radius: 15px; background-color: #FF8D00;" @click="darurat">
       <q-card-section>
-        <q-icon name="eva-alert-triangle-outline" size="61px" color="white" class="cursor-pointer q-py-md" @click="goBack" />
+        <q-icon name="eva-alert-triangle-outline" size="61px" color="white" class="cursor-pointer q-py-md" />
         <div class="text-subtitle2">Laporan Darurat</div>
       </q-card-section>
     </q-card>
@@ -97,6 +97,9 @@ export default {
   methods: {
   goBack () {
     this.$router.back()
+  },
+  darurat () {
+    this.$router.push('/sapa_darurat')
   },
   satgas () {
     this.$router.push('/sapa_satgas')

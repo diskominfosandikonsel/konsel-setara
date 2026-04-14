@@ -92,6 +92,11 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'sapa_darurat',
+        component: () => import('pages/SapaKonsel/Darurat.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
         path: 'sapa_edukasi',
         component: () => import('pages/SapaKonsel/Edukasi.vue'),
         meta: { showBottomNav: true }

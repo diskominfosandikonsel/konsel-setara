@@ -62,5 +62,89 @@ export const useSapaStore = defineStore('sapa', {
       }
     },
 
+    async sendLaporan(payload, file, fileName) {
+      this.loading = true
+      Loading.show()
+
+      try {
+        // 1. upload file
+        await SapaService.uploadFile(file, fileName)
+
+        // 2. send data
+        await SapaService.addLaporan(payload)
+
+        Notify.create({
+          message: 'Laporan berhasil dikirim',
+          color: 'positive'
+        })
+
+        return true
+
+      } catch (err) {
+        console.error(err)
+
+        Notify.create({
+          message: 'Gagal kirim laporan',
+          color: 'negative'
+        })
+
+        return false
+
+      } finally {
+        this.loading = false
+        Loading.hide()
+      }
+    },
+
+    async retryQueue() {
+      const queue = JSON.parse(localStorage.getItem('laporan_queue') || '[]')
+
+      if (!queue.length) return
+
+      const newQueue = []
+
+      for (const item of queue) {
+        try {
+          const blob = this.dataURLtoBlob(item.file)
+
+          const file = new File(
+            [blob],
+            item.payload.file.replace('image-', ''),
+            { type: 'image/jpeg' }
+          )
+
+          await SapaService.uploadFile(file, file.name)
+          await SapaService.addLaporan(item.payload)
+
+          // delay biar server ga ke spam
+          await new Promise(r => setTimeout(r, 1000))
+
+        } catch (err) {
+          newQueue.push(item)
+        }
+      }
+
+      localStorage.setItem('laporan_queue', JSON.stringify(newQueue))
+    },
+
+    async fetchDetail(id) {
+      this.loading = true
+      Loading.show()
+
+      try {
+        const res = await SapaService.getDetail({ id })
+        return res.data?.[0] || null
+      } catch (err) {
+        Notify.create({
+          message: 'Gagal ambil detail',
+          color: 'negative'
+        })
+        return null
+      } finally {
+        this.loading = false
+        Loading.hide()
+      }
+    }
+
   }
 })
