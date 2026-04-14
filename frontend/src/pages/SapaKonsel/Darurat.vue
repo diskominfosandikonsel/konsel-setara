@@ -92,7 +92,7 @@ export default {
   data() {
     return {
       mode: 'camera',
-      cameraPosition: 'rear', // 'rear' | 'front'
+      cameraPosition: 'rear',
 
       capturedImage: null,
       capturedFile: null,
@@ -263,7 +263,7 @@ export default {
           lokasi: `${this.lat},${this.lng}`,
           jenis: 1,
           objek: 0,
-          status: 'baru',
+          status: 'proses',
           keterangan: this.uraian || '-',
           nama: this.authStore.user?.nama || '',
           hp: this.authStore.user?.hp || ''
