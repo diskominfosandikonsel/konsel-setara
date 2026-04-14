@@ -99,7 +99,7 @@ const routes = [
       },
       {
         path: 'sapa_darurat',
-        component: () => import('pages/SapaKonsel/Emergency.vue'),
+        component: () => import('pages/SapaKonsel/Darurat.vue'),
         meta: { showBottomNav: false }
       },
       {
@@ -119,7 +119,7 @@ const routes = [
       },
       {
         path: 'sapa_detail',
-        component: () => import('pages/SapaKonsel/Detail.vue'),
+        component: () => import('pages/SapaKonsel/DetailRiwayat.vue'),
         meta: { showBottomNav: false, requiresAuth: true }
       },
       {
