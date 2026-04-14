@@ -3,6 +3,9 @@
 
 
 
+
+
+
     <div class="containerOne ">
       <div class="itemsContainer">
         <div>
@@ -32,7 +35,7 @@
 
         <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
         <div class="row items-center no-wrap" style="justify-content: space-between; padding: 0 10px;">
-          <input type="text" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
+          <input type="text" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
           <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" style="margin-top: 16px;">
             <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
           </q-btn>
@@ -75,16 +78,54 @@
               <div class="text-right" style="margin: 0px 0px 0px 0px ;">
 
                 <!-- Button Icon -->
-                <q-btn class="text-right" color="primary" icon="settings">
+                <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
+                  <q-menu>
+                    <q-list>
+                      <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
+                        <q-item-section avatar>
+                          <q-icon name="source" color="primary" />
+                        </q-item-section>
+                        <q-item-section>Lihat Hasil Permohonan</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
+                        <q-item-section avatar>
+                          <q-icon name="remove_red_eye" color="primary" />
+                        </q-item-section>
+                        <q-item-section>Detail</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                        <q-item-section avatar>
+                          <q-icon name="timeline" color="primary" />
+                        </q-item-section>
+                        <q-item-section>Alur Permohonan</q-item-section>
+                      </q-item>
+
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+
+                <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
                   <q-menu>
                     <q-list>
                       <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
                         <q-item-section avatar>
-                          <q-icon name="search" color="primary" />
+                          <q-icon name="remove_red_eye" color="primary" />
                         </q-item-section>
                         <q-item-section>Detail</q-item-section>
                       </q-item>
-                      <q-item clickable v-close-popup @click="selectData(item), modal_edit = true ">
+                      <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
+                        <q-item-section avatar>
+                          <q-icon name="circle_notifications" color="red" />
+                        </q-item-section>
+                        <q-item-section>Alasan Pengembalian</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                        <q-item-section avatar>
+                          <q-icon name="timeline" color="primary" />
+                        </q-item-section>
+                        <q-item-section>Alur Permohonan</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_edit = true ">
                         <q-item-section avatar>
                           <q-icon name="edit" color="warning" />
                         </q-item-section>
@@ -1368,19 +1409,23 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Provinsi</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.m_provinsi || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_provinsi || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_provinsi || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kabupaten</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.m_kabupaten || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_kabupaten || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_kabupaten || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kecamatan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.m_kecamatan || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_kecamatan || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_kecamatan || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Desa/Kelurahan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.m_desa_kelurahan || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_desa_kelurahan || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_desa_kelurahan || '-' }}</div>
                   </div>
                 </div>
               </div>
@@ -1455,19 +1500,23 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Provinsi</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.provinsi || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah_alamat.uraian_provinsi || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah_alamat.kd_provinsi || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kabupaten</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.kabupaten || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah_alamat.uraian_kabupaten || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah_alamat.kd_kabupaten || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kecamatan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.kecamatan || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah_alamat.uraian_kecamatan || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah_alamat.kd_kecamatan || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Desa/Kelurahan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.desa_kelurahan || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayah_alamat.uraian_desa_kelurahan || '-' }}</div>
+                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah_alamat.kd_desa_kelurahan || '-' }}</div>
                   </div>
                   <div style="grid-column: 1 / -1;">
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
@@ -1578,6 +1627,144 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="modal_alur">
+      <q-card style="min-width: 95%; max-width: 95%;">
+        <q-toolbar>
+          <q-toolbar-title>
+            <q-icon name="visibility" color="primary" class="q-mr-md" />
+            <span class="text-weight-bold">Alur Permohonan</span>
+          </q-toolbar-title>
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-toolbar>
+
+        <q-separator />
+
+        <q-scroll-area style="height: 500px; width: 100%;">
+          <q-card-section>
+            <div class="q-gutter-lg">
+              <!-- Bagian 1: Data Daerah Administratif -->
+              <div>
+ 
+                             
+                <q-list bordered padding separator>
+                          <q-item>
+                            <q-item-section>
+                              <q-item-label overline>INPUT DATA</q-item-label>
+                              <q-item-label caption>Tahap pertama berhasil</q-item-label>
+                              <q-item-label> 
+                                <div>
+                                  <q-icon color="green-8" size="2em" name="fa fa-check-square" /> <label>Selesai </label>
+                                </div>    
+                              </q-item-label>
+                            </q-item-section>
+
+                            <q-item-section side top>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt).time}}</q-item-label>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt).tgl}}</q-item-label>
+                            </q-item-section>
+                          </q-item>                  
+                          
+                          <q-item>
+                            <q-item-section>                     
+                              <q-item-label overline>TAHAPAN KECAMATAN</q-item-label>
+                              <q-item-label caption>Tahap Kedua berhasil</q-item-label>
+                              <q-item-label>
+                                  <template v-if="form.status_kecamatan == 0"> 
+                                    <q-spinner-pie size="2em" title="Proses" color="orange" /> <label>Menunggu Verifikasi Kecamatan</label>
+                                  </template>
+                                  <template v-if="form.status_kecamatan == 1"> 
+                                    <q-icon color="green-8" size="2em" name="fa fa-check-square" /> <label>Data Telah Diverifikasi </label>
+                                  </template>
+                                  <template v-if="form.status_kecamatan == 2"> 
+                                    <q-icon color="red-8" size="2em" name="fas fa-window-close" /> <label>Dikembalikan </label>
+                                  </template>
+ 
+                              </q-item-label>
+                            </q-item-section>
+
+                            <q-item-section side top>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kecamatan).time}}</q-item-label>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kecamatan).tgl}}</q-item-label>
+                            </q-item-section>
+                          </q-item>                  
+                          <q-item  v-if="form.status_kecamatan == 1">
+                            <q-item-section>
+                              <q-item-label overline>TAHAPAN KECAMATAN</q-item-label>
+                                <q-item-label> 
+                                  <div>
+                                    <q-icon color="blue-8" size="2em" name="fa fa-share-alt-square" /> <label>Telah Diteruskan Ke Kabupaten</label>
+                                  </div>                             
+                                </q-item-label>
+                              <q-item-label caption>{{form.keterangan_kecamatan}}</q-item-label>
+                            </q-item-section> 
+                            <q-item-section side top>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kecamatan).time}}</q-item-label>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kecamatan).tgl}}</q-item-label>
+                            </q-item-section>
+                          </q-item>    
+
+                          <q-item> 
+                            <q-item-section>
+                              <q-item-label overline>TAHAPAN KABUPATEN</q-item-label>
+                              <q-item-label> 
+                                  <template v-if="form.status_kabupaten == 0">  
+                                    <q-spinner-pie  size="2em" title="Proses" color="orange" /> <label>Menunggu Verifikasi Kabupaten</label>
+                                  </template>
+   
+                                  <template v-if="form.status_kabupaten == 1">  
+                                    <q-icon color="green-8" size="2em" name="fa fa-check-square" /> <label>Data Telah Diverifikasi </label>
+                                  </template> 
+                                  <template v-if="form.status_kabupaten == 2">  
+                                  <q-icon color="red-8" size="2em" name="fa fa-check-square" /> <label>Dikembalikan </label>
+                                  </template>                          
+                              </q-item-label>
+                                <template v-if="form.status_kabupaten == 1">  
+                                  <q-item-label caption>{{form.keterangan_kabupaten}}</q-item-label>
+                                </template>
+                            </q-item-section>
+
+                            <q-item-section side top>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kabupaten).time}}</q-item-label>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kabupaten).tgl}}</q-item-label>
+                            </q-item-section>
+                          </q-item>                  
+                          
+                          <q-item class="bg-teal text-white"  v-if="form.status_kabupaten == 1">
+                            <q-item-section side>
+                                  <q-icon color="indigo-1" size="2em" name="fa fa-laptop-house" />
+                            </q-item-section>
+                            <q-item-section>
+                              <!-- <q-item-label style="color:#ffffff" overline>SEMUA TAHAPAN SELESAI</q-item-label> -->
+                              <q-item-label style="color:#fadadab3" caption>{{form.keterangan_kabupaten}}.</q-item-label>
+                            </q-item-section>
+                            <q-item-section side top style="color:#ffffff">
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kabupaten).time}}</q-item-label>
+                              <q-item-label caption>{{simcard.tglConvert(form.createdAt_kabupaten).tgl}}</q-item-label>
+                            </q-item-section>
+                          </q-item>   
+                    
+
+                </q-list>
+                 
+              </div>
+
+ 
+
+ 
+
+ 
+            </div>
+          </q-card-section>
+        </q-scroll-area>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-btn flat label="Tutup" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-dialog v-model="modal_syarat">
       <q-card style="min-width: 90%; max-width: 90%;">
         <q-toolbar>
@@ -1648,6 +1835,7 @@ export default {
       modal_lihat   : false,
       modal_add   : false,
       modal_edit  : false,
+      modal_alur  : false,
       modal_delete  : false,
       modal_syarat  : false,
       loading: false,
@@ -1839,6 +2027,12 @@ export default {
       this.$router.back()
     },
 
+    bukaLink(file) {
+      if (file) {
+        window.open(this.simcard.url.URL_APP+"uploads/"+file, '_blank')
+      }
+    },
+
     onFileLampiranChange(newFile) {
       // Set file baru ke form.file_lampiran
       this.form.file_lampiran = newFile
@@ -1850,7 +2044,8 @@ export default {
         data_ke: this.page_first,
         page_limit: this.page_limit,
         cari_value: this.cari_value,
-        createdBy: this.user
+        // createdBy: this.user
+        createdBy: this.form.createdBy
       }
       var result = await this.simcard.getView(payload)
       this.list_data = result.data.data; 
@@ -2740,15 +2935,18 @@ export default {
   },  
 
   mounted() {
-    this.getview()
-    this.loadfilter()
-    this.getmasterData()
     var user = JSON.parse(localStorage.getItem('user') || '')
     var profile = user.profile
     this.form.emailPemohon  = profile.email;
     this.form.email_from    = profile.email;
-    // this.form.createdBy     = user._id; 
-    this.form.createdBy     = this.user; 
+    this.form.createdBy     = user._id; 
+
+    this.getview()
+    this.loadfilter()
+    this.getmasterData()
+
+    console.log(this.form.createdBy);
+    // this.form.createdBy     = this.user; 
   },
 
 }

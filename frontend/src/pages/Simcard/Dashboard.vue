@@ -1,15 +1,20 @@
 <template>
   <q-page class="dashboard-page">
 
+     
+
 
 
     <div class="containerOne ">
         <div class="itemsContainer">
             <div>
-                <p class="text-white">Eleanor Pena</p>
+                <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
             </div>
             <div>
-                <img src="~assets/simcard/FotoProfile.png" alt="">
+                <p class="text-white text-right">{{ nama || 'nama user' }}</p>
+            </div>
+            <div>
+                <img src="~assets/simcard/FotoProfile.png" alt="" style="height: 40px; width: 40px;">
             </div>
         </div> 
     </div>
@@ -227,7 +232,10 @@ export default {
         'https://cdn.quasar.dev/img/parallax2.jpg',
         'https://cdn.quasar.dev/img/quasar.jpg'
       ],
-      hasil: null
+      hasil: null,
+      username: null,
+      nama: null,
+      foto: null,
     }
   },
   computed: {
@@ -252,6 +260,13 @@ export default {
   },
   mounted() {
     this.cekUser()
+    var user = JSON.parse(localStorage.getItem('user') || '')
+    var profile = user.profile
+    console.log(profile);
+    
+    this.nama  = profile.nama;
+    // this.form.email_from    = profile.email;
+    // this.form.createdBy     = user._id; 
   },
 }
 </script>
@@ -294,5 +309,64 @@ export default {
   font-weight: 250;
   color: #000000;
 } 
+/* =============== */
+.header-premium {
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&auto=format&fit=crop') center top;
+  background-size: cover;
+  min-height: 280px;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  overflow: hidden;
+}
 
+.header-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(59, 130, 246, 0.85) 100%);
+}
+
+.logo-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  padding: 4px;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-badge img {
+  height: 26px;
+}
+
+.glass-btn {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+}
+
+.hotline-premium {
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  font-weight: 800;
+}
+
+.hero-banner {
+  max-width: 180px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+}
+
+.app-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 4px;
+  margin-top: 12px;
+}
+
+.app-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+}
 </style>
