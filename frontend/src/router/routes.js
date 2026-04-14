@@ -99,7 +99,7 @@ const routes = [
       },
       {
         path: 'sapa_darurat',
-        component: () => import('pages/SapaKonsel/Darurat.vue'),
+        component: () => import('pages/SapaKonsel/Emergency.vue'),
         meta: { showBottomNav: true }
       },
       {

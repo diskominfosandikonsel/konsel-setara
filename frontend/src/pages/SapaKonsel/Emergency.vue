@@ -1,16 +1,24 @@
 <template>
   <q-page class="bg-black text-white">
 
-    <!-- CAMERA MODE -->
+    <!-- 🔴 CAMERA MODE -->
     <div v-if="mode === 'camera'" class="camera-wrapper">
-
       <div id="cameraPreview" class="camera-preview"></div>
 
       <!-- TOP -->
-      <div class="top-bar row items-center justify-between q-px-md">
+      <!-- <div class="top-bar row items-center justify-between q-px-md">
         <q-btn flat round icon="close" @click="$router.back()" />
         <div class="text-weight-bold">Mode Darurat</div>
         <div style="width: 40px"></div>
+      </div> -->
+
+      <div class="top-bar row items-center justify-between q-px-md">
+        <q-btn flat round icon="close" @click="$router.back()" />
+
+        <div class="text-weight-bold">Mode Darurat</div>
+
+        <!-- 🔄 SWITCH CAMERA -->
+        <q-btn flat round icon="flip_camera_android" @click="switchCamera" />
       </div>
 
       <!-- BOTTOM -->
@@ -30,10 +38,9 @@
 
         </div>
       </div>
-
     </div>
 
-    <!-- PREVIEW MODE -->
+    <!-- 🟡 PREVIEW MODE -->
     <div v-else class="camera-wrapper">
 
       <img :src="capturedImage" class="camera-preview" />
@@ -47,7 +54,6 @@
 
       <!-- FORM -->
       <div class="bottom-bar column">
-
         <q-input
           v-model="uraian"
           dark
@@ -62,9 +68,7 @@
           :loading="isSending"
           @click="sendEmergency"
         />
-
       </div>
-
     </div>
 
   </q-page>
@@ -87,6 +91,7 @@ export default {
   data() {
     return {
       mode: 'camera',
+      cameraPosition: 'rear', // 'rear' | 'front'
 
       capturedImage: null,
       capturedFile: null,
@@ -104,10 +109,9 @@ export default {
   },
 
   async mounted() {
-    const allowed = await this.checkPermissions()
+    const allowed = await this.initPermissions()
     if (!allowed) return
 
-    await this.getLocation()
     await this.startCamera()
   },
 
@@ -117,21 +121,72 @@ export default {
 
   methods: {
 
-    // 🔥 START CAMERA
+    // 🔥 INIT PERMISSION FLOW
+    async initPermissions() {
+      // CAMERA
+      const cam = await Camera.requestPermissions()
+      if (cam.camera !== 'granted') {
+        this.openSettingDialog('Kamera dibutuhkan')
+        return false
+      }
+
+      // LOCATION
+      const loc = await Geolocation.requestPermissions()
+      if (loc.location !== 'granted') {
+        this.openSettingDialog('Lokasi dibutuhkan')
+        return false
+      }
+
+      const pos = await Geolocation.getCurrentPosition()
+      this.lat = pos.coords.latitude
+      this.lng = pos.coords.longitude
+
+      return true
+    },
+
+    openSettingDialog(message) {
+      this.$q.dialog({
+        title: 'Izin Dibutuhkan',
+        message,
+        ok: 'Buka Pengaturan',
+        cancel: true
+      }).onOk(() => {
+        App.openSettings()
+      })
+    },
+
+    // 🔥 START CAMERA (LIVE)
     async startCamera() {
       await CameraPreview.start({
         parent: 'cameraPreview',
         className: 'camera-preview',
-        position: 'rear',
+        position: this.cameraPosition,
         width: window.innerWidth,
         height: window.innerHeight,
         toBack: false
       })
     },
 
-    // 🔥 TAKE PHOTO
+    async switchCamera() {
+      try {
+        this.cameraPosition = this.cameraPosition === 'rear' ? 'front' : 'rear'
+
+        await CameraPreview.stop()
+        await this.startCamera()
+
+      } catch (err) {
+        console.error('Switch camera error:', err)
+      }
+    },
+
+    // 🔥 CAPTURE
     async takePicture() {
       try {
+        // 🔥 ensure GPS first
+        if (!this.lat || !this.lng) {
+          await this.getLocation()
+        }
+
         const result = await CameraPreview.capture({ quality: 80 })
 
         const dataUrl = 'data:image/jpeg;base64,' + result.value
@@ -146,7 +201,6 @@ export default {
         })
 
         await CameraPreview.stop()
-
         this.mode = 'preview'
 
       } catch (err) {
@@ -228,34 +282,7 @@ export default {
       }
     },
 
-    // 🔥 PERMISSIONS
-    async checkPermissions() {
-      const perm = await Camera.requestPermissions()
-
-      if (perm.camera !== 'granted') {
-        this.$q.dialog({
-          title: 'Izin Kamera',
-          message: 'Izinkan kamera',
-          ok: 'Buka Setting'
-        }).onOk(() => App.openSettings())
-
-        return false
-      }
-
-      return true
-    },
-
-    async getLocation() {
-      try {
-        const pos = await Geolocation.getCurrentPosition()
-        this.lat = pos.coords.latitude
-        this.lng = pos.coords.longitude
-      } catch (err) {
-        console.warn('No location')
-      }
-    },
-
-    // 🔥 UTIL
+    // 🔧 UTIL
     dataURLtoBlob(dataurl) {
       const arr = dataurl.split(',')
       const mime = arr[0].match(/:(.*?);/)[1]
@@ -281,6 +308,7 @@ export default {
           let w = img.width
           let h = img.height
 
+          // 🔥 resize
           if (w > maxWidth) {
             h = (h * maxWidth) / w
             w = maxWidth
@@ -291,10 +319,36 @@ export default {
 
           ctx.drawImage(img, 0, 0, w, h)
 
-          resolve(canvas.toDataURL('image/jpeg', quality))
+          // =========================
+          // 🔥 WATERMARK
+          // =========================
+
+          const now = new Date()
+          const time = now.toLocaleString()
+
+          const gps = (this.lat && this.lng)
+            ? `${this.lat.toFixed(5)}, ${this.lng.toFixed(5)}`
+            : 'No GPS'
+
+          const text = `${time} | ${gps}`
+
+          // background box
+          ctx.fillStyle = 'rgba(0,0,0,0.6)'
+          ctx.fillRect(0, h - 50, w, 50)
+
+          // text
+          ctx.fillStyle = '#fff'
+          ctx.font = 'bold 14px Arial'
+          ctx.fillText(text, 10, h - 20)
+
+          // =========================
+
+          const final = canvas.toDataURL('image/jpeg', quality)
+          resolve(final)
         }
       })
     }
+
   }
 }
 </script>
