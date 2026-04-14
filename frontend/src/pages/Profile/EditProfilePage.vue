@@ -1,7 +1,7 @@
 <template>
   <q-page class="page-container bg-white">
     <!-- Header (Sticky) — mengikuti gaya NewsPage.vue -->
-    <div class="header-section">
+    <div class="sticky-header">
       <div class="header-inner q-px-md">
         <div class="row items-center header-title">
           <q-btn
@@ -399,23 +399,20 @@ export default {
   overflow: hidden;
 }
 
-.header-section {
+.sticky-header {
   flex-shrink: 0;
   background-color: #ffffff;
   z-index: 10;
-}
-
-.header-inner {
+  border-bottom: 1px solid #e0e0e0;
   padding-top: 16px;
 }
 
+.header-inner {
+  padding-top: 0px;
+}
+
 .header-title {
-  border-bottom: 1px solid #e0e0e0;
   padding-bottom: 12px;
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
 .content-wrapper {
@@ -494,7 +491,7 @@ export default {
 
 /* ===== Max-width Container: Tablet (≥600px) ===== */
 @media (min-width: 600px) {
-  .header-inner,
+  /* .header-inner, */
   .content-wrapper {
     max-width: 90%;
     margin: 0 auto;

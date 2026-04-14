@@ -32,7 +32,7 @@
         <div class="section-title q-mb-sm text-grey-9 text-weight-medium">Preferensi</div>
         <q-card class="menu-card q-mb-lg no-shadow rounded-box">
           <q-list class="rounded-borders">
-            <q-item clickable v-ripple class="q-py-md">
+            <q-item clickable v-ripple class="q-py-md" @click="$router.push('/account_settings')">
               <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
                 <q-icon name="security" size="24px" color="grey-9" />
               </q-item-section>
