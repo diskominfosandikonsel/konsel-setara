@@ -1,14 +1,28 @@
 <template>
   <q-page class="">
     <div class="app-header q-pa-md">
-      <div class="row items-center justify-between relative-position" style="min-height: 50px;">
-        <q-btn flat round icon="arrow_back" color="white" @click="$router.back()" />
-        <div class="absolute-center row items-center q-gutter-sm logo-wrapper">
+      <div class="row items-center justify-between no-wrap" style="min-height: 50px;">
+        
+        <div class="col-auto">
+          <q-btn flat round icon="arrow_back" color="white" @click="$router.back()" />
+        </div>
+
+        <div class="col-auto row items-center q-gutter-x-sm">
           <div class="logo-image-container">
             <img src="/icons/sippadu/logo_konsel.png" class="header-logo" alt="Logo Konsel" />
           </div>
+          <div class="text-white text-weight-bolder text-h6 mulish tracking-tight">
+            PERAK
+          </div>
+        </div>
+        <div class="col-auto">
+          <q-btn flat round color="white">
+            <q-avatar size="32px">
+              <img src="/icons/sippadu/logo_konsel.png"> </q-avatar>
+          </q-btn>
         </div>
       </div>
+
       <div class="q-mt-md flex flex-center">
         <img src="/img/perak/contactUs.png" alt="" class="banner-main">
       </div>
