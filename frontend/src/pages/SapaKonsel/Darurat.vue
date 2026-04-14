@@ -58,7 +58,9 @@
 </template>
 
 <script>
+import { App } from '@capacitor/app'
 import { Camera } from '@capacitor/camera'
+import { Geolocation } from '@capacitor/geolocation'
 import { SapaService } from 'src/services/sapa.service'
 import { useSapaStore } from 'stores/sapa'
 import { useAuthStore } from 'stores/auth'
@@ -85,8 +87,10 @@ export default {
 
   methods: {
     async takePicture() {
+      const allowed = await this.checkPermissions()
+      if (!allowed) return
+
       try {
-        // 📍 get GPS FIRST
         await this.getLocation()
 
         const image = await Camera.getPhoto({
@@ -115,6 +119,33 @@ export default {
       } catch (err) {
         console.error(err)
       }
+    },
+
+    async checkPermissions() {
+      const permissions = await Camera.checkPermissions()
+
+      if (permissions.camera !== 'granted') {
+        const request = await Camera.requestPermissions({
+          permissions: ['camera', 'photos']
+        })
+
+        if (request.camera !== 'granted') {
+
+          // 🚨 SHOW DIALOG HERE
+          this.$q.dialog({
+            title: 'Izin Dibutuhkan',
+            message: 'Aplikasi butuh kamera untuk laporan darurat',
+            ok: 'Buka Pengaturan',
+            cancel: true
+          }).onOk(() => {
+            App.openSettings() // 🔥 OPEN ANDROID SETTINGS
+          })
+
+          return false
+        }
+      }
+
+      return true
     },
 
     async pickFromGallery() {
@@ -146,26 +177,36 @@ export default {
     },
 
     async getLocation() {
-      return new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            this.lat = pos.coords.latitude
-            this.lng = pos.coords.longitude
-            resolve(true)
-          },
-          () => {
-            this.$q.notify({
-              color: 'warning',
-              message: 'Lokasi tidak tersedia'
-            })
-            resolve(false)
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000
-          }
-        )
-      })
+      try {
+        const permission = await Geolocation.requestPermissions()
+
+        if (permission.location !== 'granted') {
+
+          this.$q.dialog({
+            title: 'Izin Lokasi Dibutuhkan',
+            message: 'Aktifkan lokasi untuk mengirim laporan',
+            ok: 'Buka Pengaturan',
+            cancel: true
+          }).onOk(() => {
+            App.openSettings()
+          })
+
+          return false
+        }
+
+        const pos = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true
+        })
+
+        this.lat = pos.coords.latitude
+        this.lng = pos.coords.longitude
+
+        return true
+
+      } catch (err) {
+        console.error(err)
+        return false
+      }
     },
 
     async sendEmergency() {
