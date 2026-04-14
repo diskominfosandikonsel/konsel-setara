@@ -34,14 +34,14 @@ export const useAuthStore = defineStore('auth', {
         console.log('LOGIN RESPONSE:', res.data)
 
         // 🔥 adjust based on your backend response
-        const { token, profile } = res.data
+        const { token, user } = res.data
 
         console.log('====================================');
-        console.log(token,profile);
+        console.log(token,user);
         console.log('====================================');
 
         this.token = token
-        this.user = profile
+        this.user = user
 
         // save to localStorage
         localStorage.token = this.token

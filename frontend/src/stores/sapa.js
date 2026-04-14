@@ -12,13 +12,43 @@ export const useSapaStore = defineStore('sapa', {
   actions: {
 
     // 🔐 LAPORAN (WITH TOKEN)
-    async fetchLaporan(payload) {
-      this.loading = true
-      Loading.show()
+    async fetchLaporan(payload = {}, reset = false) {
+      if (reset) {
+        this.page = 1
+        this.laporan = []
+        this.lastPage = 1
+      }
 
+      if (this.page > this.lastPage) return
+
+      this.loading = true
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
       try {
-        const res = await SapaService.getLaporan(payload)
-        this.laporan = res.data.data || res.data
+        const res = await SapaService.getLaporan({
+          data_ke: this.page,
+          cari_value: this.cari,
+          userId: user._id,
+          ...payload
+        })
+
+        console.log('====================================');
+        console.log(res);
+        console.log('====================================');
+
+        const dataBaru = res.data.data || []
+        
+
+        // ✅ append + prevent duplicate
+        this.laporan = [
+          ...new Map(
+            [...this.laporan, ...dataBaru]
+              .map(item => [item.id, item])
+          ).values()
+        ]
+
+        this.lastPage = res.data.jml_data || 1
+        this.page++
+
       } catch (err) {
         Notify.create({
           message: 'Gagal ambil laporan',
@@ -26,7 +56,6 @@ export const useSapaStore = defineStore('sapa', {
         })
       } finally {
         this.loading = false
-        Loading.hide()
       }
     },
 

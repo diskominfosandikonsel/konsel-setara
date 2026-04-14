@@ -18,14 +18,14 @@
         <div class="text-weight-bold">Laporan Darurat</div>
 
         <!-- 🔄 SWITCH CAMERA -->
-        <q-btn flat round icon="flip_camera_android" @click="switchCamera" />
+        <div style="width: 40px"></div>
       </div>
 
       <!-- BOTTOM -->
       <div class="bottom-bar">
         <div class="row items-center justify-around">
 
-          <q-btn flat round icon="photo_library" @click="pickFromGallery" />
+          <q-btn flat round size="20px" icon="photo_library" @click="pickFromGallery" />
 
           <div class="capture-wrapper" @click="takePicture">
             <div class="capture-ring">
@@ -33,7 +33,7 @@
             </div>
           </div>
 
-          <div style="width: 40px"></div>
+          <q-btn flat round size="20px" icon="flip_camera_android" @click="switchCamera" />
 
         </div>
       </div>
@@ -57,16 +57,18 @@
         <q-input
           v-model="uraian"
           dark
-          filled
-          placeholder="Apa yang terjadi?"
-          class="q-mb-md"
+          borderless
+          placeholder="Tambahkan keterangan (opsional)"
+          class="q-mb-sm"
         />
 
         <q-btn
+          round="20px"
           color="primary"
           label="Kirim Laporan"
           :loading="isSending"
           @click="sendEmergency"
+          class="q-mb-md"
         />
       </div>
     </div>
@@ -80,7 +82,6 @@ import { CameraPreview } from '@capacitor-community/camera-preview'
 import { Geolocation } from '@capacitor/geolocation'
 import { App } from '@capacitor/app'
 
-import { SapaService } from 'src/services/sapa.service'
 import { useSapaStore } from 'stores/sapa'
 import { useAuthStore } from 'stores/auth'
 import { useQuasar } from 'quasar'
@@ -430,19 +431,25 @@ body, html {
 }
 
 .top-bar {
-  position: absolute;
-  z-index: 9999;
+  position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
-  padding-top: 20px;
+  z-index: 9999;
+  padding: 12px 16px;
+  padding-top: calc(env(safe-area-inset-top) + 12px);
 }
 
 .bottom-bar {
-  position: absolute;
-  z-index: 9999;
+  position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
+  z-index: 9999;
+
   padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+
   background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
 }
 
@@ -465,10 +472,8 @@ body, html {
   z-index: 0;
 }
 
-.top-bar,
-.bottom-bar,
-.capture-wrapper {
-  z-index: 9999 !important;
-  position: relative;
+.bottom-bar .row {
+  max-width: 400px;
+  /* margin: 0 auto; */
 }
 </style>
