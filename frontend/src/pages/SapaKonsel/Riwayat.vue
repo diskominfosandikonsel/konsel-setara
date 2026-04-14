@@ -31,7 +31,7 @@
               <q-card
                 class="bg-white full-width no-shadow cursor-pointer"
                 style="border-radius: 10px; opacity: 0.85;"
-                @click="detail(item)"
+                @click="goDetail(item.id)"
               >
                 <q-card-section>
                   <div class="row">
@@ -121,10 +121,10 @@ export default {
       this.$router.back()
     },
 
-    detail (item) {
+    goDetail(id) {
       this.$router.push({
-        path: '/sapa_detail',
-        query: { id: item.id }
+        name: 'detail-riwayat',
+        params: { id }
       })
     },
 

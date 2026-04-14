@@ -22,8 +22,22 @@
     <!-- PAGE -->
     <q-page class="bg-white">
 
-      <!-- CONTENT -->
-      <div v-if="news" class="q-px-md q-pb-xl">
+      <!-- 🟡 SKELETON -->
+      <div v-if="loading" class="q-px-md q-pb-xl">
+
+        <q-skeleton type="text" width="90%" class="q-mt-md" />
+        <q-skeleton type="text" width="70%" class="q-mb-sm" />
+
+        <q-skeleton type="text" width="40%" class="q-mb-xs" />
+        <q-skeleton type="text" width="30%" class="q-mb-md" />
+
+        <q-skeleton height="200px" class="q-mb-md" />
+
+        <q-skeleton v-for="n in 6" :key="n" type="text" class="q-mb-xs" />
+      </div>
+
+      <!-- 🟢 CONTENT -->
+      <div v-else-if="news" class="q-px-md q-pb-xl">
 
         <!-- TITLE -->
         <div class="news-title q-mt-md q-mb-sm">
@@ -38,29 +52,13 @@
 
         <!-- IMAGE -->
         <q-img
-  :src="news.img"
-  style="height: 200px"
-  class="news-cover-img q-mb-md"
-/>
+          :src="news.img"
+          style="height: 200px"
+          class="news-cover-img q-mb-md"
+        />
 
         <!-- CONTENT -->
         <div class="news-body" v-html="news.content"></div>
-
-      </div>
-
-      <!-- SKELETON -->
-      <div v-else class="q-px-md q-pb-xl">
-
-        <q-skeleton type="text" width="90%" class="q-mt-md" />
-        <q-skeleton type="text" width="70%" class="q-mb-sm" />
-
-        <q-skeleton type="text" width="40%" class="q-mb-xs" />
-        <q-skeleton type="text" width="30%" class="q-mb-md" />
-
-        <q-skeleton height="200px" class="q-mb-md" />
-
-        <q-skeleton v-for="n in 6" :key="n" type="text" class="q-mb-xs" />
-
       </div>
 
     </q-page>
@@ -69,9 +67,7 @@
 </template>
 
 <script>
-import { SapaService } from 'src/services/sapa.service'
-
-// 🔥 pakai helper kamu
+import { useSapaStore } from 'stores/sapa'
 import { formatDate, getImageUrl } from 'src/utils/helper'
 
 export default {
@@ -79,7 +75,9 @@ export default {
 
   data() {
     return {
-      news: null
+      news: null,
+      loading: true,
+      sapa: useSapaStore()
     }
   },
 
@@ -88,14 +86,11 @@ export default {
       this.$router.back()
     },
 
-    async fetchDetail(id) {
-      try {
-        const res = await SapaService.getEdukasi({
-          data_ke: 1,
-          cari_value: ''
-        })
+    async loadData() {
+      this.loading = true
 
-        const item = res.data.data?.find(i => i.id == id)
+      try {
+        const item = await this.sapa.fetchDetailEdukasi(this.$route.params.id)
 
         if (!item) return
 
@@ -108,11 +103,8 @@ export default {
           content: item.isi
         }
 
-        console.log(this.news.img);
-        
-
-      } catch (err) {
-        console.error('Gagal fetch detail', err)
+      } finally {
+        this.loading = false
       }
     },
 
@@ -126,25 +118,15 @@ export default {
     }
   },
 
-  async mounted() {
-    const id = this.$route.params.id
-    // const state = window.history.state
+  mounted() {
+    this.loadData()
+  },
 
-    // // ⚡ tampil cepat dari list
-    // // if (state?.img) {
-    // //   this.news = {
-    // //     id,
-    // //     title: state.title || '...',
-    // //     date: state.date || '',
-    // //     author: state.author || '',
-    // //     img: state.img,
-    // //     content: ''
-    // //   }
-    // // }
-
-    // 🔥 fetch real data
-    await this.fetchDetail(id)
+  watch: {
+  '$route.params.id'() {
+    this.loadData()
   }
+}
 }
 </script>
 

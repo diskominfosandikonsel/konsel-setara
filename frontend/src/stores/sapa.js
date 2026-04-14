@@ -11,86 +11,6 @@ export const useSapaStore = defineStore('sapa', {
 
   actions: {
 
-    // 🔐 LAPORAN (WITH TOKEN)
-    async fetchLaporan(payload = {}, reset = false) {
-      if (reset) {
-        this.page = 1
-        this.laporan = []
-        this.lastPage = 1
-      }
-
-      if (this.page > this.lastPage) return
-
-      this.loading = true
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
-      try {
-        const res = await SapaService.getLaporan({
-          data_ke: this.page,
-          cari_value: this.cari,
-          userId: user._id,
-          ...payload
-        })
-
-        console.log('====================================');
-        console.log(res);
-        console.log('====================================');
-
-        const dataBaru = res.data.data || []
-        
-
-        // ✅ append + prevent duplicate
-        this.laporan = [
-          ...new Map(
-            [...this.laporan, ...dataBaru]
-              .map(item => [item.id, item])
-          ).values()
-        ]
-
-        this.lastPage = res.data.jml_data || 1
-        this.page++
-
-      } catch (err) {
-        Notify.create({
-          message: 'Gagal ambil laporan',
-          color: 'negative'
-        })
-      } finally {
-        this.loading = false
-      }
-    },
-
-    // 🌐 PENGGUNA (NO TOKEN)
-    async fetchPengguna(payload = {}) {
-      this.loading = true
-      Loading.show()
-
-      try {
-        const res = await SapaService.getPengguna(payload)
-        this.pengguna = res.data.data || res.data
-      } catch (err) {
-        Notify.create({
-          message: 'Gagal ambil pengguna',
-          color: 'negative'
-        })
-      } finally {
-        this.loading = false
-        Loading.hide()
-      }
-    },
-
-    async fetchEdukasi(payload = {}) {
-      this.loading = true
-
-      try {
-        const res = await SapaService.getEdukasi(payload)
-        return res.data // ⬅️ return full response
-      } catch (err) {
-        return { data: [], jml_data: 1 }
-      } finally {
-        this.loading = false
-      }
-    },
-
     async sendLaporan(payload, file) {
       this.loading = true
       Loading.show()
@@ -98,15 +18,12 @@ export const useSapaStore = defineStore('sapa', {
       try {
         const formData = new FormData()
 
-        // 📷 FILE
         formData.append('file', file)
 
-        // 🧾 PAYLOAD
         Object.keys(payload).forEach(key => {
           formData.append(key, payload[key])
         })
 
-        // 🚀 SINGLE REQUEST
         await SapaService.uploadEmergency(formData)
 
         Notify.create({
@@ -168,24 +85,96 @@ export const useSapaStore = defineStore('sapa', {
       localStorage.setItem('laporan_queue', JSON.stringify(newQueue))
     },
 
-    async fetchDetail(id) {
+
+    async fetchEdukasi(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await SapaService.getEdukasi(payload)
+        return res.data
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchDetailEdukasi(id) {
+      try {
+        const res = await SapaService.getDetailEdukasi({ id })
+        return res.data?.[0] || null
+      } catch (err) {
+        return null
+      }
+    },
+
+    async fetchPengguna(payload = {}) {
       this.loading = true
       Loading.show()
 
       try {
-        const res = await SapaService.getDetail({ id })
-        return res.data?.[0] || null
+        const res = await SapaService.getPengguna(payload)
+        this.pengguna = res.data.data || res.data
       } catch (err) {
         Notify.create({
-          message: 'Gagal ambil detail',
+          message: 'Gagal ambil pengguna',
           color: 'negative'
         })
-        return null
       } finally {
         this.loading = false
         Loading.hide()
       }
-    }
+    },
+
+    async fetchLaporan(payload = {}, reset = false) {
+      if (reset) {
+        this.page = 1
+        this.laporan = []
+        this.lastPage = 1
+      }
+
+      if (this.page > this.lastPage) return
+
+      this.loading = true
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      try {
+        const res = await SapaService.getLaporan({
+          data_ke: this.page,
+          cari_value: this.cari,
+          userId: user._id,
+          ...payload
+        })
+
+        const dataBaru = res.data.data || []
+        
+        this.laporan = [
+          ...new Map(
+            [...this.laporan, ...dataBaru]
+              .map(item => [item.id, item])
+          ).values()
+        ]
+
+        this.lastPage = res.data.jml_data || 1
+        this.page++
+
+      } catch (err) {
+        Notify.create({
+          message: 'Gagal ambil laporan',
+          color: 'negative'
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchDetailLaporan(id) {
+      try {
+        const res = await SapaService.getDetailLaporan({ id })
+        return res.data?.[0] || null
+      } catch (err) {
+        return null
+      }
+    },
 
   }
 })

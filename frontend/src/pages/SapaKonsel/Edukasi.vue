@@ -47,7 +47,7 @@
         v-for="(news, idx) in newsList"
         :key="idx"
         class="row q-mb-md news-item items-start clickable-item"
-        @click="$router.push({ path: `/sapa_edukasi/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date } })"
+        @click="goDetail(news.id)"
       >
         <div class="col-4">
           <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
@@ -115,6 +115,13 @@ export default {
       this.$router.back()
     },
 
+    goDetail(id) {
+      this.$router.push({
+        name: 'detail-edukasi',
+        params: { id }
+      })
+    },
+    
     generateCacheKey() {
       return `edukasi_${this.cari}`
     },

@@ -100,7 +100,7 @@ const routes = [
       {
         path: 'sapa_darurat',
         component: () => import('pages/SapaKonsel/Darurat.vue'),
-        meta: { showBottomNav: false }
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'sapa_edukasi',
@@ -109,23 +109,25 @@ const routes = [
       },
       {
         path: 'sapa_edukasi/:id',
+        name: 'detail-edukasi',
         component: () => import('pages/SapaKonsel/DetailEdukasi.vue'),
         meta: { showBottomNav: false }
       },
       {
         path: 'sapa_riwayat',
         component: () => import('pages/SapaKonsel/Riwayat.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
-        path: 'sapa_detail',
+        path: 'sapa_riwayat/:id',
+        name: 'detail-riwayat',
         component: () => import('pages/SapaKonsel/DetailRiwayat.vue'),
         meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'sapa_satgas',
         component: () => import('pages/SapaKonsel/Satgas.vue'),
-        meta: { showBottomNav: false }
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'erida_dashboard',

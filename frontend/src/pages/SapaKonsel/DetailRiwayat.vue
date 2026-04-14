@@ -18,65 +18,103 @@
       <q-page class="q-pa-md" style="background-color: #F6F6F6;">
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-card class="bg-white mulish full-width no-shadow" style="border-radius: 10px; opacity: 0.85;">
-              <q-card-section>
-                <div class="row q-pb-md q-mb-lg" style="border-bottom: #BEBEBE 0.5px solid;">
-                  <div class="col-6" style="font-size: 12px; color: #5D5C5D; font-weight: 600;">
-                  Status Laporan
-                  </div>
-                  <div class="col-6 text-right">
-                    <span  style="font-size: 12px; color: #EFBE24; border-radius: 12px; background-color: #FFFCE0; padding: 4px 8px;">
-                      Proses
-                    </span>
-                  </div>
-                </div>
-                <div class="row q-mb-lg">
-                  <div class="col-2">
-                    <img src="~src/assets/sapa/process.png" width="44px" style="display: block;" />
+
+            <div v-if="loading">
+              <q-skeleton height="20px" width="50%" class="q-mb-md" />
+              <q-skeleton height="80px" class="q-mb-md" />
+              <q-skeleton height="60px" class="q-mb-md" />
+              <q-skeleton height="120px" class="q-mb-md" />
+              <q-skeleton height="200px" />
+            </div>
+
+            <div v-else-if="laporan">
+
+              <q-card class="bg-white mulish full-width no-shadow" style="border-radius: 10px; opacity: 0.85;">
+                
+                <q-card-section>
+
+                  <!-- STATUS -->
+                  <div class="row q-pb-md q-mb-lg" style="border-bottom: #BEBEBE 0.5px solid;">
+                    <div class="col-6 text-grey-7 text-weight-medium text-caption">
+                      Status Laporan
+                    </div>
+                    <div class="col-6 text-right">
+                      <span style="font-size: 12px; border-radius: 12px; padding: 4px 8px; background:#FFFCE0;">
+                        {{ getStatusLabel(laporan.status) }}
+                      </span>
+                    </div>
                   </div>
 
-                  <div class="col-8 q-pl-sm">
-                    <div style="font-size: 16px; font-weight: 600; color: #152C07;">Kekerasan Perempuan</div>
-                    <div style="font-size: 14px; color: #5D5C5D;">Kekerasan Fisik</div>
-                  </div>
-                  <div class="col-2 text-right">
-                    <div style="font-size: 12px; color: #BEBEBE;">29.11.25</div>
-                    <div style="font-size: 12px; color: #BEBEBE;">13.00</div>
-                  </div>
-                </div>
-                <div class="q-pb-sm" style="font-size: 14px; font-weight: 600; color: #152C07;">
-                  Pelapor
-                </div>
-                <div class="row q-mb-md" style="border: #BEBEBE 0.5px solid; border-radius: 8px; padding: 6px 12px;">
-                  <div class="col-2">
-                    <img src="~src/assets/sapa/profil.png" width="44px" style="display: block;" />
+                  <!-- HEADER -->
+                  <div class="row q-mb-lg">
+
+                    <div class="col-2">
+                      <img :src="getIcon(laporan.status)" width="44px" />
+                    </div>
+
+                    <div class="col-8 q-pl-sm">
+                      <div class="text-weight-bold text-dark">
+                        {{ laporan.jenis }}
+                      </div>
+                      <div class="text-grey">
+                        {{ laporan.kecamatan }}
+                      </div>
+                    </div>
+
+                    <div class="col-2 text-right text-grey-5 text-caption">
+                      {{ laporan.date }}
+                    </div>
+
                   </div>
 
-                  <div class="col-10 q-pl-sm">
-                    <div style="font-size: 16px; color: #5D5C5D; font-weight: 600;">Iksan Sinatra</div>
-                    <div style="font-size: 12px; color: #BEBEBE; font-weight: 600;">082290374843</div>
+                  <!-- PELAPOR -->
+                  <div class="text-weight-bold q-mb-sm">Pelapor</div>
+
+                  <div class="row q-mb-md" style="border: #BEBEBE 0.5px solid; border-radius: 8px; padding: 6px 12px;">
+                    <div class="col-2">
+                      <img src="~src/assets/sapa/profil.png" width="44px" />
+                    </div>
+
+                    <div class="col-10 q-pl-sm">
+                      <div class="text-weight-bold text-grey-7">
+                        {{ laporan.nama }}
+                      </div>
+                      <div class="text-grey-5 text-caption">
+                        {{ laporan.hp }}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div class="q-pb-sm" style="font-size: 14px; font-weight: 600; color: #152C07;">
-                  Keterangan
-                </div>
-                <div class="q-mb-lg" style="font-size: 12px; font-weight: bold; color: #5D5C5D; padding: 16px; background-color: #FBFBFB; border-radius: 10px;">
-                  Telah terjadi kekerasan terhadap perempuan yang terjadi dikecamatan andoolo desa andoolo, pelaku merupakan kerabat dekat korban, harap segera ditindak lanjuti
-                </div>
-                <div class="row" style="font-size: 14px; font-weight: 600; color: #152C07;">
-                  <div class="col-6">
-                    Lokasi Laporan
+
+                  <!-- KETERANGAN -->
+                  <div class="text-weight-bold q-mb-sm">Keterangan</div>
+
+                  <div class="q-mb-lg text-grey-7" style="padding:16px; background:#FBFBFB; border-radius:10px;">
+                    {{ laporan.uraian }}
                   </div>
-                  <div class="col-6 text-right">
-                    <q-icon name="r_keyboard_arrow_down" size="16px" color="#5D5C5D" class="cursor-pointer" @click="goBack" />
+
+                  <!-- LOKASI -->
+                  <div class="row text-weight-bold">
+                    <div class="col-6">Lokasi Laporan</div>
+                    <div class="col-6 text-right text-grey">
+                      {{ laporan.kecamatan }}
+                    </div>
                   </div>
+
+                </q-card-section>
+
+                <!-- IMAGE -->
+                <div class="q-px-md q-pb-md">
+                  <div class="text-weight-bold q-mb-sm">Dokumentasi Laporan</div>
+
+                  <q-img
+                    :src="laporan.img || 'https://via.placeholder.com/300'"
+                    style="border-radius:10px;"
+                  />
                 </div>
-              </q-card-section>
-              <div class="row q-pb-sm q-px-md" style="font-size: 14px; font-weight: 600; color: #152C07;">
-                    Dokumentasi Laporan
-                </div>
-              <img src="https://m.media-amazon.com/images/M/MV5BZTNjOWI0ZTAtOGY1OS00ZGU0LWEyOWYtMjhkYjdlYmVjMDk2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" />
-            </q-card>
+
+              </q-card>
+
+            </div>
           </div>
         </div>
       </q-page>
@@ -86,20 +124,76 @@
 </template>
 
 <script>
+import { useSapaStore } from 'stores/sapa'
 import done from 'src/assets/sapa/done.png'
 import process from 'src/assets/sapa/process.png'
 import cancel from 'src/assets/sapa/cancel.png'
 
+import { formatDate, getImageUrl } from 'src/utils/helper'
+
 export default {
-  name: 'SapaRiwayat',
+  name: 'DetailRiwayat',
+
   data () {
     return {
-      icons: [ done, process, cancel, done ]
+      laporan: null,
+      loading: true,
+      sapa: useSapaStore()
     }
   },
+
   methods: {
     goBack () {
       this.$router.back()
+    },
+
+    getIcon (status) {
+      if (status === 'selesai') return done
+      if (status === 'proses') return process
+      return cancel
+    },
+
+    getStatusLabel (status) {
+      if (status === 'selesai') return 'Selesai'
+      if (status === 'proses') return 'Proses'
+      return 'Ditolak'
+    },
+
+    async loadData () {
+      this.loading = true
+
+      try {
+        const item = await this.sapa.fetchDetailLaporan(this.$route.params.id)
+
+        if (!item) return
+
+        this.laporan = {
+          id: item.id,
+          jenis: item.jenis_uraian,
+          uraian: item.uraian,
+          status: item.status,
+          date: formatDate(item.createAt),
+          nama: item.nama_pelapor || 'Anonim',
+          hp: item.hp_pelapor || '-',
+          kecamatan: item.kecamatan_nama,
+          img: getImageUrl(item.file)
+        }
+
+      } catch (err) {
+        console.error('Gagal fetch detail', err)
+      } finally {
+        this.loading = false
+      }
+    }
+  },
+
+  mounted () {
+    this.loadData()
+  },
+
+  watch: {
+    '$route.params.id' () {
+      this.loadData()
     }
   }
 }

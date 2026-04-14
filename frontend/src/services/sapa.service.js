@@ -1,28 +1,29 @@
 import { apiSapa } from '../api/sapakonsel'
 
 export const SapaService = {
-
-  // 🔐 NEED TOKEN
-  getLaporan(payload) {
-    return apiSapa.post('publish_laporan/view', payload)
-  },
-
-  // 🌐 NO TOKEN
-  getPengguna(payload) {
-    return apiSapa.post('server_pengguna/view', payload)
+  
+  async uploadEmergency(formData) {
+    return apiSapa.post('publish_laporan/uploadEmergency', formData)
   },
 
   getEdukasi(payload) {
     return apiSapa.post('client_artikel/view', payload)
   },
 
-  async uploadEmergency(formData) {
-    return apiSapa.post('publish_laporan/uploadEmergency', formData)
+  getDetailEdukasi(payload) {
+    return apiSapa.post('client_artikel/isi_berita', payload)
   },
 
-  // 🔍 DETAIL LAPORAN
-  getDetail(payload) {
+  getPengguna(payload) {
+    return apiSapa.post('server_pengguna/view', payload)
+  },
+
+  getLaporan(payload) {
+    return apiSapa.post('publish_laporan/view', payload)
+  },
+
+  getDetailLaporan(payload) {
     return apiSapa.post('publish_laporan/isi_laporan', payload)
-  }
+  },
 
 }
