@@ -37,13 +37,25 @@ export const FiretapService = {
   },
 
   // Upload foto kasus (octet-stream)
-  uploadFoto(fileBlob, fileName) {
-    return apiFiretap.post('api/v1/publishKasus/uploadImage', fileBlob, {
+  async uploadFoto(fileBlob, fileName) {
+    const token = localStorage.token
+    const url = 'https://server-firetap.konaweselatankab.go.id/api/v1/publishKasus/uploadImage'
+    const res = await fetch(url, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream',
-        'File-Name': fileName
-      }
+        'File-Name': fileName,
+        ...(token ? { 'Authorization': 'xxx ' + token } : {})
+      },
+      body: fileBlob
     })
+    
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(`Fetch failed ${res.status}: ${errText}`)
+    }
+    
+    return { data: 'OK' }
   },
 
   // Update lokasi user

@@ -4,6 +4,9 @@
   "webDir": "dist/spa",
   "bundledWebRuntime": false,
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "SplashScreen": {
       "launchShowDuration": 0,
       "launchAutoHide": false,

@@ -150,8 +150,7 @@
     </div>
 
     <!-- HIDDEN CAMERA INPUT -->
-    <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
-      @change="onCameraCapture" />
+    <input type="file" accept="image/*" ref="cameraInput" style="display: none" @change="onCameraCapture" />
 
   </q-page>
 </template>
@@ -163,6 +162,7 @@ import { useQuasar } from 'quasar'
 import { useSippaduStore } from 'stores/sippadu'
 import { useAuthStore } from 'stores/auth'
 import { SippaduService } from 'src/services/sippadu.service'
+import { Geolocation } from '@capacitor/geolocation'
 
 const route = useRoute()
 const router = useRouter()
@@ -243,40 +243,50 @@ const onCameraCapture = (event) => {
 
 // Cek permission sebelum request GPS — mencegah OS-level error (kCLErrorLocationUnknown)
 const checkAndGetLocation = async () => {
-  if (!navigator.geolocation) return
-
   try {
-    const perm = await navigator.permissions.query({ name: 'geolocation' })
-    if (perm.state === 'granted') {
+    const permStatus = await Geolocation.checkPermissions()
+    if (permStatus.location === 'granted') {
       doGetLocation()
     }
-    // 'prompt' atau 'denied' → tidak auto-request, tunggu user tap
-  } catch (_e) {
-    // Permissions API tidak tersedia — tidak auto-request
+  } catch (e) {
+    console.warn('Geolocation plugin permissions check failed', e)
   }
 }
 
 // Eksekusi GPS — hanya dipanggil saat user tap
 let isGettingLocation = false
-const doGetLocation = () => {
+const doGetLocation = async () => {
   if (isGettingLocation || hasLocation.value) return
   isGettingLocation = true
   loadingLocation.value = true
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      form.value.lat = pos.coords.latitude
-      form.value.lng = pos.coords.longitude
-      form.value.lokasi = `${pos.coords.latitude},${pos.coords.longitude}`
+  try {
+    // Meminta izin lokasi secara eksplisit melalui Capacitor
+    const perm = await Geolocation.requestPermissions()
+    if (perm.location !== 'granted' && perm.coarseLocation !== 'granted') {
+      $q.notify({ color: 'warning', message: 'Izin lokasi tidak diberikan', icon: 'warning' })
       loadingLocation.value = false
       isGettingLocation = false
-    },
-    () => {
-      loadingLocation.value = false
-      isGettingLocation = false
-    },
-    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
-  )
+      return
+    }
+
+    const pos = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000
+    })
+
+    form.value.lat = pos.coords.latitude
+    form.value.lng = pos.coords.longitude
+    form.value.lokasi = `${pos.coords.latitude},${pos.coords.longitude}`
+
+  } catch (err) {
+    console.error('Error getting location', err)
+    $q.notify({ color: 'negative', message: 'Gagal mendapatkan lokasi. Pastikan GPS aktif.', icon: 'location_off' })
+  } finally {
+    loadingLocation.value = false
+    isGettingLocation = false
+  }
 }
 
 // Tombol retry — panggil manual (akan memunculkan dialog permission jika belum diizinkan)
@@ -302,7 +312,12 @@ const handleKirim = async () => {
   uploading.value = true
   uploadPercent.value = 0
 
-  const fileName = capturedFile.value.name
+  let baseName = capturedFile.value.name || 'image'
+  let cleanName = baseName.replace(/[^a-zA-Z0-9.]/g, '_')
+  if (!cleanName.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+    cleanName += '.jpg'
+  }
+  const fileName = `aduan-${Date.now()}-${cleanName}`
 
   // Progress simulasi
   const progressInterval = setInterval(() => {

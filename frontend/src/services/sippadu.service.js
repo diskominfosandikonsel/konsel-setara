@@ -26,12 +26,24 @@ export const SippaduService = {
   // 📸 UPLOAD FOTO LAPORAN
   // Server mengharapkan raw binary (octet-stream) dengan header File-Name
   // Endpoint: /api/v1/laporan (lihat uploadImage.js di server referensi)
-  uploadFile(fileBlob, fileName) {
-    return apiSippadu.post('laporan', fileBlob, {
+  async uploadFile(fileBlob, fileName) {
+    const token = localStorage.token
+    const url = 'https://server-sippadu.konaweselatankab.go.id/api/v1/laporan'
+    const res = await fetch(url, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream',
-        'File-Name': fileName
-      }
+        'File-Name': fileName,
+        ...(token ? { 'Authorization': 'kikensbatara ' + token } : {})
+      },
+      body: fileBlob
     })
+    
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(`Fetch failed ${res.status}: ${errText}`)
+    }
+    
+    return { data: 'OK' }
   }
 }

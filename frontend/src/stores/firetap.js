@@ -233,7 +233,13 @@ export const useFiretapStore = defineStore('firetap', {
         try {
           await FiretapService.uploadFoto(fotoFile, namaFile)
         } catch (uploadErr) {
-          console.warn('Upload foto gagal (lanjut):', uploadErr?.message)
+          console.warn('Upload foto gagal:', uploadErr?.message || uploadErr)
+          Notify.create({
+            message: 'Upload Foto Gagal: ' + (uploadErr?.response?.data || uploadErr?.message || 'Server penuh/error'),
+            color: 'negative',
+            timeout: 5000
+          })
+          return false; // Jangan lanjut simpan report jika foto gagal!
         }
 
         // Step 2: Simpan data kasus

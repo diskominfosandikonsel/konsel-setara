@@ -144,7 +144,7 @@
     </div>
 
     <!-- HIDDEN CAMERA INPUT -->
-    <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
+    <input type="file" accept="image/*" ref="cameraInput" style="display: none"
       @change="onCameraCapture" />
 
   </q-page>
@@ -156,6 +156,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useFiretapStore } from 'stores/firetap'
 import { useAuthStore } from 'stores/auth'
+import { Geolocation } from '@capacitor/geolocation'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -221,25 +222,36 @@ const onCameraCapture = (event) => {
 }
 
 let isGettingLocation = false
-const doGetLocation = () => {
+const doGetLocation = async () => {
   if (isGettingLocation || hasLocation.value) return
   isGettingLocation = true
   loadingLocation.value = true
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      form.value.latitude = pos.coords.latitude
-      form.value.longitude = pos.coords.longitude
+  try {
+    const perm = await Geolocation.requestPermissions()
+    if (perm.location !== 'granted' && perm.coarseLocation !== 'granted') {
+      $q.notify({ color: 'warning', message: 'Izin lokasi tidak diberikan', icon: 'warning' })
       loadingLocation.value = false
       isGettingLocation = false
-    },
-    () => {
-      loadingLocation.value = false
-      isGettingLocation = false
-      $q.notify({ color: 'negative', message: 'Gagal mendapatkan lokasi. Pastikan GPS aktif.', icon: 'location_off' })
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-  )
+      return
+    }
+
+    const pos = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000
+    })
+
+    form.value.latitude = pos.coords.latitude
+    form.value.longitude = pos.coords.longitude
+    
+  } catch (err) {
+    console.error('Error getting location', err)
+    $q.notify({ color: 'negative', message: 'Gagal mendapatkan lokasi. Pastikan GPS aktif.', icon: 'location_off' })
+  } finally {
+    loadingLocation.value = false
+    isGettingLocation = false
+  }
 }
 
 const getLocation = () => doGetLocation()
@@ -264,9 +276,13 @@ const handleKirim = async () => {
   uploading.value = true
   uploadPercent.value = 0
 
-  // Generate nama file unik
-  const ext = capturedFile.value.name.split('.').pop()
-  const namaFile = `upload-${Date.now()}-${capturedFile.value.name}`
+  // Bersihkan spasi dan pastikan berakhiran .jpg
+  let baseName = capturedFile.value.name || 'image'
+  let cleanName = baseName.replace(/[^a-zA-Z0-9.]/g, '_')
+  if (!cleanName.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+    cleanName += '.jpg'
+  }
+  const namaFile = `upload-${Date.now()}-${cleanName}`
 
   const progressInterval = setInterval(() => {
     if (uploadPercent.value < 80) uploadPercent.value += 15
