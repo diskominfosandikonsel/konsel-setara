@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+): override splash screen agar tidak tampilkan ikon app -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <!-- Background putih agar tidak kelihatan batas transisi -->
+        <item name="android:windowSplashScreenBackground">#ffffff</item>
+        <!-- Icon transparan agar logo tidak muncul -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_transparent</item>
+        <!-- Background lingkaran icon juga putih agar tidak ada outline -->
+        <item name="android:windowSplashScreenIconBackgroundColor">#ffffff</item>
+        <!-- Setelah splash selesai, pakai theme normal -->
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

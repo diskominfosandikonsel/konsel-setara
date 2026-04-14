@@ -19,10 +19,15 @@
         </q-btn>
       </div>
 
-      <div class="column flex-center q-pb-xl relative-position z-top">
-        <img src="/icons/sippadu/banner-lapor.png" class="hero-banner" alt="Sippadu" />
+      <div class="column flex-center q-pb-xl relative-position z-top" style="margin-top: 40px;">
         <div class="app-title">SIPPADU</div>
-        <div class="app-subtitle">Sistem Informasi Pengaduan Terpadu</div>
+        <div class="app-subtitle text-center q-px-md">
+          Sistem Informasi Pengaduan Terpadu
+          <div class="q-mt-sm badge-satpol q-mx-auto">
+            <q-icon name="security" size="14px" class="q-mr-xs" />
+            SATPOL PP KONAWE SELATAN
+          </div>
+        </div>
       </div>
     </div>
 
@@ -34,7 +39,8 @@
       <!-- MENU GRID -->
       <div class="menu-grid q-mb-lg">
         <div class="section-header q-mb-md">
-          <div class="text-weight-bold text-dark" style="font-size: 16px; letter-spacing: 0.5px;">Layanan Pengaduan</div>
+          <div class="text-weight-bold text-dark" style="font-size: 16px; letter-spacing: 0.5px;">Layanan Pengaduan
+          </div>
         </div>
 
         <div class="row q-col-gutter-md">
@@ -141,8 +147,8 @@ const goPerkadaInfo = () => router.push('/Perkada')
 /* ─── HEADER ─── */
 .header-premium {
   position: relative;
-  background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&auto=format&fit=crop') center top;
-  background-size: cover;
+  background: url('../../assets/sippadu/bg_satpol.jpeg') center bottom;
+  background-size: 160% auto;
   min-height: 280px;
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
@@ -152,7 +158,7 @@ const goPerkadaInfo = () => router.push('/Perkada')
 .header-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(59, 130, 246, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.65) 0%, rgba(30, 64, 175, 0.5) 100%);
 }
 
 .logo-badge {
@@ -181,34 +187,47 @@ const goPerkadaInfo = () => router.push('/Perkada')
   font-weight: 800;
 }
 
-.hero-banner {
-  max-width: 180px;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
-}
-
 .app-title {
   font-size: 28px;
   font-weight: 900;
   color: white;
   letter-spacing: 4px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .app-subtitle {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.badge-satpol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* ─── CONTENT ─── */
 .main-content {
-  margin-top: -30px;
+  margin-top: 20px;
   padding: 0 20px;
 }
 
 .premium-card {
   background: white;
-  border-radius: 24px;
-  padding: 24px 16px;
+  border-radius: 18px;
+  padding: 18px 12px;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
   position: relative;
@@ -221,9 +240,9 @@ const goPerkadaInfo = () => router.push('/Perkada')
 }
 
 .card-icon {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 12px;
+  width: 45px;
+  height: 45px;
+  margin: 0 auto 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,30 +254,30 @@ const goPerkadaInfo = () => router.push('/Perkada')
 }
 
 .card-label {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   color: #1e3a8a;
 }
 
 .card-hint {
-  font-size: 10px;
+  font-size: 9px;
   color: #94a3b8;
   line-height: 1.2;
 }
 
 .card-plus {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 24px;
-  height: 24px;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
   background: #eff6ff;
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #3b82f6;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .ripple {
@@ -336,9 +355,11 @@ const goPerkadaInfo = () => router.push('/Perkada')
 
 .card-glow {
   position: absolute;
-  top: -50%; right: -50%;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
   pointer-events: none;
 }
 
