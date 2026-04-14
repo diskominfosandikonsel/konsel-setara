@@ -7,14 +7,17 @@
 
 
     <div class="containerOne ">
-      <div class="itemsContainer">
-        <div>
-          <p class="text-white">Eleanor Pena</p>
-        </div>
-        <div>
-          <img src="~assets/simcard/FotoProfile.png" alt="">
-        </div>
-      </div>
+        <div class="itemsContainer">
+            <div>
+                <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
+            </div>
+            <div>
+                <p class="text-white text-right">{{ simcard.nama}}</p>
+            </div>
+            <div>
+                <img src="~assets/simcard/FotoProfile.png" alt="" style="height: 40px; width: 40px;">
+            </div>
+        </div> 
     </div>
 
     <div class="containerOne" style="padding-top:0px !important;">
@@ -35,16 +38,17 @@
 
         <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
         <div class="row items-center no-wrap" style="justify-content: space-between; padding: 0 10px;">
-          <input type="text" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
+          <input type="text" v-model="cari_value" @input="debounceSearch" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
           <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" style="margin-top: 16px;">
             <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
           </q-btn>
         </div>
 
-        <!-- <input type="text"> -->
-
-        <div style="padding:10px 10px 0px 10px; border-bottom: 1.5px solid #D9D9D9;" v-for="(item, index) in list_data"
-          :key="index">
+        <!-- INFINITE SCROLL LIST -->
+        <q-infinite-scroll @load="onLoadMore" :offset="150" ref="infiniteScrollRef" style="padding: 10px;">
+          <div style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;" 
+          v-for="(item, index) in list_data"
+            :key="index">
           <div class="row items-center no-wrap">
 
             <div v-if="item.KK1.status === 0" style="color:#6C7278;">
@@ -145,6 +149,21 @@
             </div>
           </div>
         </div>
+
+          <!-- Empty State -->
+          <div v-if="list_data.length === 0" style="text-align: center; padding: 40px; color: #999;">
+            <q-icon name="inbox" size="64px" style="opacity: 0.3; display: block; margin-bottom: 16px;" />
+            <p style="font-size: 16px; font-weight: 500;">Tidak ada data permohonan</p>
+            <p style="font-size: 12px;">Silakan tambah permohonan baru dengan klik tombol (+)</p>
+          </div>
+
+          <!-- Loading Template -->
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+              <q-spinner-dots color="primary" size="40px" />
+            </div>
+          </template>
+        </q-infinite-scroll>
 
 
 
@@ -2009,7 +2028,10 @@ export default {
       page_first: 1,
       page_limit: 10,
       cari_value: '',
-      user: 'w8moqrskn1bgzpm',
+      totalPage: 1,
+      allDataLoaded: false,
+      searchTimeout: null,
+      // user: 'w8moqrskn1bgzpm',
       info: null,
 
 
@@ -2038,17 +2060,79 @@ export default {
       this.form.file_lampiran = newFile
     },
 
-    async getview() {
-      console.log("result getview = ====================");
-      var payload = {
+    // 🔄 DEBOUNCE SEARCH
+    debounceSearch() {
+      // Clear previous timeout
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout)
+      }
+
+      // Set new timeout untuk delay search 500ms
+      this.searchTimeout = setTimeout(() => {
+        this.resetAndLoadData()
+      }, 500)
+    },
+
+    // 🔄 RESET DATA DAN LOAD ULANG
+    resetAndLoadData() {
+      this.page_first = 1
+      this.list_data = []
+      this.allDataLoaded = false
+      this.$refs.infiniteScrollRef?.reset()
+      this.loadData()
+    },
+
+    // 📥 LOAD DATA - dipanggil saat pertama kali dan saat infinite scroll
+    async loadData() {
+      if (this.allDataLoaded) return
+
+      const payload = {
         data_ke: this.page_first,
         page_limit: this.page_limit,
         cari_value: this.cari_value,
-        // createdBy: this.user
         createdBy: this.form.createdBy
       }
-      var result = await this.simcard.getView(payload)
-      this.list_data = result.data.data; 
+
+      try {
+        const result = await this.simcard.getView(payload)
+        const data = result.data.data || []
+        const totalPage = result.data.jml_halaman || 1
+
+        this.totalPage = totalPage
+
+        if (data.length > 0) {
+          // Push data baru ke list
+          this.list_data.push(...data)
+
+          // Check apakah sudah semua data
+          if (this.page_first >= this.totalPage) {
+            this.allDataLoaded = true
+          }
+        } else {
+          this.allDataLoaded = true
+        }
+      } catch (error) {
+        console.error('Error loading data:', error)
+        this.allDataLoaded = true
+      }
+    },
+
+    // ♾️ INFINITE SCROLL CALLBACK
+    async onLoadMore(index, done) {
+      if (this.allDataLoaded) {
+        done(true) // true = stop loading
+        return
+      }
+
+      this.page_first++
+      await this.loadData()
+
+      this.allDataLoaded ? done(true) : done()
+    },
+
+    async getview() {
+      console.log("result getview = ====================");
+      this.resetAndLoadData()
     },
 
     addData() {
@@ -2946,6 +3030,7 @@ export default {
     this.getmasterData()
 
     console.log(this.form.createdBy);
+    console.log(this.simcard.getUser());
     // this.form.createdBy     = this.user; 
   },
 

@@ -17,6 +17,8 @@ export const useSimcardStore = defineStore('simcard', {
     data: null,
     list_data: [],
 
+    nama:'kosong',
+
 
     url: {
       URL_APP: URL,
@@ -79,7 +81,7 @@ export const useSimcardStore = defineStore('simcard', {
   actions: {
 
     getUser(){
-      console.log(localStorage.user);
+      // console.log(localStorage.user);
       // return this.user = localStorage.user
     },
 
@@ -281,48 +283,14 @@ export const useSimcardStore = defineStore('simcard', {
         tgl : tglku,
         time : time
     };
-}
-// async agama  ()  {
-//   fetch(store.state.url.URL_MASTER_AGAMA + "list1", {
-//     method: "GET",
-//     headers: {
-//       "content-type": "application/json",
-//       authorization: "kikensbatara " + localStorage.token
-//     }
-//   })
-//     .then(res => res.json())
-//     .then(res_data => { 
-//       store.state.listAgama = res_data
-//     });
-// }
+    },
 
-// async pendidikan  ()  {
-//   fetch(store.state.url.URL_MASTER_PENDIDIKAN + "list", {
-//     method: "GET",
-//     headers: {
-//       "content-type": "application/json",
-//       authorization: "kikensbatara " + localStorage.token
-//     }
-//   })
-//     .then(res => res.json())
-//     .then(res_data => { 
-//       store.state.listPendidikan = res_data
-//     });
-// }
-// async shdk  ()  {
-//   fetch(store.state.url.URL_MASTER_SHDK + "list", {
-//     method: "GET",
-//     headers: {
-//       "content-type": "application/json",
-//       authorization: "kikensbatara " + localStorage.token
-//     }
-//   })
-//     .then(res => res.json())
-//     .then(res_data => { 
-//       store.state.listShdk = res_data
-//       console.log('aaaa', res_data);
-//     });
-// }
+    getUser(){
+        var user = JSON.parse(localStorage.getItem('user') || '')
+        var profile = user.profile
+        console.log(profile);
+        this.nama  = profile.nama || 'Nama User'; 
+    },
 
 
   }
