@@ -2,6 +2,12 @@ import MainLayout from 'layouts/MainLayout.vue'
 
 const routes = [
   {
+    path: '/splash',
+    component: () => import('pages/SplashPage.vue'),
+    meta: { showBottomNav: false }
+  },
+
+  {
     path: '/',
     component: MainLayout,
     children: [
@@ -40,39 +46,39 @@ const routes = [
       {
         path: 'account_settings',
         component: () => import('pages/Profile/AccountSettingsPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'delete_account',
         component: () => import('pages/Profile/DeleteAccountPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'change_email',
         component: () => import('pages/Profile/ChangeEmailPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'change_password',
         component: () => import('pages/Profile/ChangePasswordPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       // PROFILE END
       //Legal Start
       {
         path: 'user_guide',
         component: () => import('pages/Legal/GuidePage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'privacy_policy',
         component: () => import('pages/Legal/PrivacyPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       {
         path: 'terms_conditions',
         component: () => import('pages/Legal/TermsPage.vue'),
-        meta: { showBottomNav: false , requiresAuth: true}
+        meta: { showBottomNav: false, requiresAuth: true }
       },
       // Route baru (tanpa requiresAuth agar bisa dibuka dari Play Store link)
       {
@@ -191,87 +197,87 @@ const routes = [
       {
         path: 'perak_dashboard',
         component: () => import('pages/PerakKonsel/Dashboard.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'biodata',
         component: () => import('pages/PerakKonsel/biodata.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'tambahBiodata',
         component: () => import('pages/PerakKonsel/tambahBiodata.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'editBiodata',
         component: () => import('pages/PerakKonsel/editBiodata.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'pendidikanFormal',
         component: () => import('pages/PerakKonsel/PendidikanFormal.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'detilePendidikan',
         component: () => import('src/pages/PerakKonsel/DetilePendidikan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'tambahPendidikan',
         component: () => import('src/pages/PerakKonsel/TambahPendidikan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'editPendidikan',
         component: () => import('src/pages/PerakKonsel/EditPendidikan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'pengalamanKerja',
         component: () => import('src/pages/PerakKonsel/PengalamanKerja.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'tambahPengalaman',
         component: () => import('src/pages/PerakKonsel/TambahPengalaman.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'editPengalaman',
         component: () => import('src/pages/PerakKonsel/EditPengalaman.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'jabatan',
         component: () => import('src/pages/PerakKonsel/Jabatan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'tambahJabatan',
         component: () => import('src/pages/PerakKonsel/TambahJabatan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'editJabatan',
         component: () => import('src/pages/PerakKonsel/EditJabatan.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'lampiran',
         component: () => import('src/pages/PerakKonsel/Lampiran.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'tambahLampiran',
         component: () => import('src/pages/PerakKonsel/TambahLampiran.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'editLampiran',
         component: () => import('src/pages/PerakKonsel/EditLampiran.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
 
       // SIMCARD
