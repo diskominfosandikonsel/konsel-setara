@@ -15,7 +15,7 @@
       <div class="top-bar row items-center justify-between q-px-md">
         <q-btn flat round icon="close" @click="$router.back()" />
 
-        <div class="text-weight-bold">Mode Darurat</div>
+        <div class="text-weight-bold">Laporan Darurat</div>
 
         <!-- 🔄 SWITCH CAMERA -->
         <q-btn flat round icon="flip_camera_android" @click="switchCamera" />
@@ -43,7 +43,7 @@
     <div v-else class="camera-wrapper">
       <div v-if="flash" class="flash"></div>
 
-      <img :src="capturedImage" class="camera-preview" />
+      <img :src="capturedImage" :key="capturedImage" class="camera-preview" />
 
       <!-- TOP -->
       <div class="top-bar row items-center justify-between q-px-md">
@@ -164,14 +164,16 @@ export default {
         position: this.cameraPosition,
         width: window.innerWidth,
         height: window.innerHeight,
-        toBack: true
+        toBack: true,
+        enableOpacity: true,
+        storeToFile: false
       })
 
       // 🎥 fade-in effect
-      setTimeout(() => {
-        const el = document.getElementById('cameraPreview')
-        if (el) el.style.opacity = 1
-      }, 100)
+      // setTimeout(() => {
+      //   const el = document.getElementById('cameraPreview')
+      //   if (el) el.style.opacity = 1
+      // }, 100)
     },
 
     async switchCamera() {
@@ -189,20 +191,15 @@ export default {
     // 🔥 CAPTURE
     async takePicture() {
       try {
-        // ⚡ FLASH EFFECT
         this.flash = true
         setTimeout(() => (this.flash = false), 120)
 
-        if (!this.lat || !this.lng) {
-          await this.getLocation()
-        }
-
         const result = await CameraPreview.capture({ quality: 80 })
-
         const dataUrl = 'data:image/jpeg;base64,' + result.value
 
         const compressed = await this.compressImage(dataUrl)
 
+        // ✅ SET IMAGE FIRST
         this.capturedImage = compressed
 
         const blob = this.dataURLtoBlob(compressed)
@@ -210,8 +207,10 @@ export default {
           type: 'image/jpeg'
         })
 
-        await CameraPreview.stop()
+        // ✅ STOP CAMERA AFTER IMAGE READY
         this.mode = 'preview'
+        await this.$nextTick()
+        await CameraPreview.stop()
 
       } catch (err) {
         console.error(err)
@@ -231,14 +230,16 @@ export default {
 
       this.capturedImage = compressed
 
+      console.log('IMAGE:', this.capturedImage?.substring(0, 50))
+
       const blob = this.dataURLtoBlob(compressed)
       this.capturedFile = new File([blob], `img_${Date.now()}.jpg`, {
         type: 'image/jpeg'
       })
 
-      await CameraPreview.stop()
-
       this.mode = 'preview'
+      await this.$nextTick()
+      await CameraPreview.stop()
     },
 
     // 🔥 RETAKE
@@ -258,35 +259,30 @@ export default {
       this.isSending = true
 
       try {
-        const fileName = this.capturedFile.name
-
-        await SapaService.uploadFile(this.capturedFile, fileName)
-
         const payload = {
           uraian: this.uraian || 'Laporan darurat',
           lat: this.lat,
           lng: this.lng,
           lokasi: `${this.lat},${this.lng}`,
-          file: `image-${fileName}`,
-
           jenis: 1,
           objek: 0,
           status: 'baru',
           keterangan: this.uraian || '-',
-
           nama: this.authStore.user?.nama || '',
           hp: this.authStore.user?.hp || ''
         }
 
-        const success = await this.sapaStore.addData(payload)
+        const success = await this.sapaStore.sendLaporan(
+          payload,
+          this.capturedFile
+        )
 
         if (success) {
-          this.$q.notify({ color: 'positive', message: 'Terkirim' })
           this.$router.replace('/sapa_riwayat')
         }
 
       } catch (err) {
-        this.$q.notify({ color: 'negative', message: 'Gagal kirim' })
+        console.error(err)
       } finally {
         this.isSending = false
       }
@@ -364,16 +360,13 @@ export default {
 </script>
 
 <style scoped>
-.camera-wrapper {
-  position: relative;
-  height: 100vh;
-  background: transparent; /* 🔥 IMPORTANT */
-}
 
 .camera-preview {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 5;
+  pointer-events: none;
   opacity: 0; /* start hidden */
   transition: opacity 0.4s ease-in-out;
 }
@@ -382,6 +375,7 @@ export default {
 .capture-wrapper {
   width: 90px;
   height: 90px;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -395,11 +389,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.1s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .capture-ring:active {
-  transform: scale(0.9);
+  transform: scale(0.85);
+  box-shadow: 0 0 20px rgba(255,255,255,0.5);
 }
 
 .capture-inner {
@@ -431,7 +426,7 @@ export default {
 
 .top-bar {
   position: absolute;
-  z-index: 10;
+  z-index: 9999;
   top: 0;
   width: 100%;
   padding-top: 20px;
@@ -439,7 +434,7 @@ export default {
 
 .bottom-bar {
   position: absolute;
-  z-index: 10;
+  z-index: 9999;
   bottom: 0;
   width: 100%;
   padding: 16px;
@@ -450,5 +445,25 @@ export default {
   width: 70px;
   height: 70px;
   background: white;
+}
+
+.camera-wrapper {
+  position: relative;
+  height: 100vh;
+  z-index: 0;
+}
+
+#cameraPreview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.top-bar,
+.bottom-bar,
+.capture-wrapper {
+  z-index: 9999 !important;
+  position: relative;
 }
 </style>

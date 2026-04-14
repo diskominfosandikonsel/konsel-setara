@@ -62,16 +62,23 @@ export const useSapaStore = defineStore('sapa', {
       }
     },
 
-    async sendLaporan(payload, file, fileName) {
+    async sendLaporan(payload, file) {
       this.loading = true
       Loading.show()
 
       try {
-        // 1. upload file
-        await SapaService.uploadFile(file, fileName)
+        const formData = new FormData()
 
-        // 2. send data
-        await SapaService.addLaporan(payload)
+        // 📷 FILE
+        formData.append('file', file)
+
+        // 🧾 PAYLOAD
+        Object.keys(payload).forEach(key => {
+          formData.append(key, payload[key])
+        })
+
+        // 🚀 SINGLE REQUEST
+        await SapaService.uploadEmergency(formData)
 
         Notify.create({
           message: 'Laporan berhasil dikirim',
@@ -98,7 +105,6 @@ export const useSapaStore = defineStore('sapa', {
 
     async retryQueue() {
       const queue = JSON.parse(localStorage.getItem('laporan_queue') || '[]')
-
       if (!queue.length) return
 
       const newQueue = []
@@ -109,14 +115,20 @@ export const useSapaStore = defineStore('sapa', {
 
           const file = new File(
             [blob],
-            item.payload.file.replace('image-', ''),
+            'retry.jpg',
             { type: 'image/jpeg' }
           )
 
-          await SapaService.uploadFile(file, file.name)
-          await SapaService.addLaporan(item.payload)
+          const formData = new FormData()
 
-          // delay biar server ga ke spam
+          formData.append('file', file)
+
+          Object.keys(item.payload).forEach(key => {
+            formData.append(key, item.payload[key])
+          })
+
+          await SapaService.uploadEmergency(formData)
+
           await new Promise(r => setTimeout(r, 1000))
 
         } catch (err) {

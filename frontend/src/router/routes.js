@@ -100,7 +100,7 @@ const routes = [
       {
         path: 'sapa_darurat',
         component: () => import('pages/SapaKonsel/Emergency.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: false }
       },
       {
         path: 'sapa_edukasi',
