@@ -27,12 +27,11 @@
 
           <q-btn flat round icon="photo_library" @click="pickFromGallery" />
 
-          <q-btn
-            round
-            size="lg"
-            class="capture-btn"
-            @click="takePicture"
-          />
+          <div class="capture-wrapper" @click="takePicture">
+            <div class="capture-ring">
+              <div class="capture-inner"></div>
+            </div>
+          </div>
 
           <div style="width: 40px"></div>
 
@@ -42,6 +41,7 @@
 
     <!-- 🟡 PREVIEW MODE -->
     <div v-else class="camera-wrapper">
+      <div v-if="flash" class="flash"></div>
 
       <img :src="capturedImage" class="camera-preview" />
 
@@ -101,6 +101,7 @@ export default {
       lng: null,
 
       isSending: false,
+      flash: false,
 
       sapaStore: useSapaStore(),
       authStore: useAuthStore(),
@@ -163,8 +164,14 @@ export default {
         position: this.cameraPosition,
         width: window.innerWidth,
         height: window.innerHeight,
-        toBack: false
+        toBack: true
       })
+
+      // 🎥 fade-in effect
+      setTimeout(() => {
+        const el = document.getElementById('cameraPreview')
+        if (el) el.style.opacity = 1
+      }, 100)
     },
 
     async switchCamera() {
@@ -182,7 +189,10 @@ export default {
     // 🔥 CAPTURE
     async takePicture() {
       try {
-        // 🔥 ensure GPS first
+        // ⚡ FLASH EFFECT
+        this.flash = true
+        setTimeout(() => (this.flash = false), 120)
+
         if (!this.lat || !this.lng) {
           await this.getLocation()
         }
@@ -357,17 +367,71 @@ export default {
 .camera-wrapper {
   position: relative;
   height: 100vh;
+  background: transparent; /* 🔥 IMPORTANT */
 }
 
 .camera-preview {
   position: absolute;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  opacity: 0; /* start hidden */
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* 🔘 CAPTURE BUTTON */
+.capture-wrapper {
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-ring {
+  width: 80px;
+  height: 80px;
+  border: 4px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+}
+
+.capture-ring:active {
+  transform: scale(0.9);
+}
+
+.capture-inner {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* ⚡ FLASH EFFECT */
+.flash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 20;
+  opacity: 0.8;
+  animation: flashAnim 0.15s ease-out;
+}
+
+@keyframes flashAnim {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
+
+.q-page {
+  background: transparent !important; /* 🔥 IMPORTANT */
 }
 
 .top-bar {
   position: absolute;
+  z-index: 10;
   top: 0;
   width: 100%;
   padding-top: 20px;
@@ -375,6 +439,7 @@ export default {
 
 .bottom-bar {
   position: absolute;
+  z-index: 10;
   bottom: 0;
   width: 100%;
   padding: 16px;
