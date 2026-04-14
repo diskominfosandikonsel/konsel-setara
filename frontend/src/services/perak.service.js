@@ -13,17 +13,35 @@ export const PerakService = {
   getAgama() {
     return apiPerak.post('dm_agama/list')
   },
+  getPendidikan() {
+    return apiPerak.post('dm_master_pendidikan/list')
+  },
+  getJurusan(id) {
+    return apiPerak.post('dm_master_jurusan/list', { pendidikan_id: id })
+  },
   getBiodata(payload = {}) {
     return apiPerak.post('keterangan_umum/view', payload)
   },
   addBiodata(payload) {
     return apiPerak.post('keterangan_umum/addData', payload)
   },
-  editData(payload) {
+  editBiodata(payload) {
     return apiPerak.post('keterangan_umum/editData', payload)
   },
-  removeData(payload) {
+  removeBiodata(payload) {
     return apiPerak.post('keterangan_umum/removeData', payload)
+  },
+  getPendidikanFormal(payload = {}) {
+    return apiPerak.post('pendidikan_formal/view', payload)
+  },
+  addPendidikan(payload) {
+    return apiPerak.post('pendidikan_formal/addData', payload)
+  },
+  editPendidikan(payload) {
+    return apiPerak.post('pendidikan_formal/editData', payload)
+  },
+  removePendidikan(payload) {
+    return apiPerak.post('pendidikan_formal/removeData', payload)
   },
 
 

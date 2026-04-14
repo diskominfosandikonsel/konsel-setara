@@ -233,7 +233,7 @@ export default {
       }).onOk(async () => {
         const data = this.perak.biodata[0]
         // Langsung panggil action hapus di Pinia
-        await this.perak.removeData(data.id, data.file)
+        await this.perak.removeBiodata(data.id, data.file)
       })
     },
     tglConvert(tgl) {

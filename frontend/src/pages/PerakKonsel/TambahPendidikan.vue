@@ -15,22 +15,41 @@
             <q-page class="q-pa-md">
                 <div class="row" style="margin-top: 30px">
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Nama Pendidikan" class="formInput" />
+                        <q-input v-model="form.nama_pendidikan" outlined placeholder="Nama Pendidikan" class="formInput" />
                     </div>
                     <div class="col-6 col-md-6 frame">
-                        <q-input outlined placeholder="Pendidikan" class="formInput" />
+                        <q-select
+                            v-model="form.pendidikan_id"
+                            :options="perak.list_pendidikan"
+                            option-value="id"
+                            option-label="uraian"
+                            label="Pendidikan"
+                            class="formInput"
+                            outlined emit-value map-options
+                            @update:model-value="onPendidikanChange"
+                        />
                     </div>
                     <div class="col-6 col-md-6 frame">
-                        <q-input outlined placeholder="Jurusan" class="formInput" />
+                        <q-select
+                            v-model="form.jurusan_id"
+                            :options="perak.list_jurusan"
+                            option-value="id"
+                            option-label="uraian"
+                            label="Jurusan"
+                            class="formInput"
+                            outlined emit-value map-options
+                            :loading="perak.loading"
+                            :disable="!form.pendidikan_id"
+                        />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Tahun Tamat" type="number" class="formInput" />
+                        <q-input v-model="form.tahun_tamat" outlined placeholder="Tahun Tamat" type="number" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Nilai" class="formInput" />
+                        <q-input v-model="form.nem_ipk" outlined placeholder="Nilai" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="saveData" />
+                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="addData" />
                     </div>
                 </div>
             </q-page>
@@ -39,46 +58,72 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'TambahPendidikan',
     data() {
         return {
-            prov: 'Sulawesi Tenggara',
-            kab: 'Konawe Selatan',
-            nik: '7405182106060001',
-            nama: 'Muh. Risal Al-Ihram',
-            tmpLahir: 'Konawe Selatan',
-            tanggalLahir: '21 Mei 2001',
-            jenisKelamin: 'Laki-Laki',
-            alamat: 'Dusun III Desa Ranooha, Kecamatan Ranomeeto',
-            dusun: 'III',
-            rt_rw: '003/001',
-            kec: 'Ranomeeto',
-            kel: 'Ranooha',
-            no: '082236027854',
-            email: 'muhrisalihram@gmail.com',
-            perkawinan: 'Kawin',
-            agama: 'Islam',
-            tinggi_bdn: '175',
-            berat_bdn: '70',
-            file: null
+            form : {
+                id : '',
+                biodata_id : this.$route.query.b_id,
+                pendidikan_id : '',
+                tahun_tamat : '',
+                nem_ipk : '',
+                jurusan_id : '',
+                pendidikan_formal : '',
+                tipe_nilai : '',
+            },
         }
+    },
+    computed: {
+        perak() {
+            return usePerakStore()
+        },
     },
     methods: {
         goBack() {
             this.$router.back()
         },
-        saveData() {
-            this.$q.notify({
-                message: 'Data Berhasil Ditambahkan!',
-                color: 'positive',
-                icon: 'check_circle',
-                position: 'top', // Bisa 'top', 'bottom', 'center'
-                timeout: 2000,   // Hilang dalam 2 detik
-                actions: [{ label: 'Tutup', color: 'white', handler: () => { /* ... */ } }]
-            })
+        async addData() {
+            if (!this.form.biodata_id) {
+                this.$q.notify({
+                    message: 'ID Biodata tidak ditemukan, silahkan muat ulang halaman',
+                    color: 'negative'
+                });
+                return;
+            }
+            this.loading = true;
+
+            console.log("Data yang akan dikirim:", this.form);
+            try {
+                await this.perak.addPendidikan(this.form);
+                this.$q.notify({
+                    message: 'Data Berhasil Disimpan!',
+                    color: 'positive',
+                    icon: 'check_circle',
+                    position: 'top'
+                });
+                this.$router.push('/pendidikanFormal');
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async onPendidikanChange(val) {
+            this.form.jurusan_id = null
+            if (val) {
+                await this.perak.fetchJurusan(val)
+            }
+        },
+        async initData() {
+            await this.perak.fetchPendidikan()
         }
+    },
+    mounted() {
+        this.initData()
     }
 }
 </script>
