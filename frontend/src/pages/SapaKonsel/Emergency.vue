@@ -43,7 +43,7 @@
     <div v-else class="camera-wrapper">
       <div v-if="flash" class="flash"></div>
 
-      <img :src="capturedImage" :key="capturedImage" class="camera-preview" />
+      <img :src="capturedImage" :key="capturedImage" class="preview-image" />
 
       <!-- TOP -->
       <div class="top-bar row items-center justify-between q-px-md">
@@ -117,7 +117,9 @@ export default {
   },
 
   beforeUnmount() {
-    CameraPreview.stop()
+    try {
+      CameraPreview.stop()
+    } catch (e) {}
   },
 
   methods: {
@@ -158,22 +160,16 @@ export default {
 
     // 🔥 START CAMERA (LIVE)
     async startCamera() {
+      await this.$nextTick()
+
       await CameraPreview.start({
         parent: 'cameraPreview',
         className: 'camera-preview',
         position: this.cameraPosition,
         width: window.innerWidth,
         height: window.innerHeight,
-        toBack: true,
-        enableOpacity: true,
-        storeToFile: false
+        toBack: true
       })
-
-      // 🎥 fade-in effect
-      // setTimeout(() => {
-      //   const el = document.getElementById('cameraPreview')
-      //   if (el) el.style.opacity = 1
-      // }, 100)
     },
 
     async switchCamera() {
@@ -361,14 +357,15 @@ export default {
 
 <style scoped>
 
+body, html {
+  background: transparent !important;
+}
+
 .camera-preview {
   position: absolute;
   width: 100%;
   height: 100%;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 0; /* start hidden */
-  transition: opacity 0.4s ease-in-out;
+  z-index: 0;
 }
 
 /* 🔘 CAPTURE BUTTON */
@@ -379,6 +376,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.preview-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
 }
 
 .capture-ring {
