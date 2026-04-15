@@ -9,7 +9,7 @@
             @click="$router.back()"
           />
         </q-avatar>
-        <span class="sapa_title">Edukasi PPA</span>
+        <span class="sapa_title">Panduan Konsel Setara</span>
       </q-toolbar-title>
     </q-toolbar>
   </q-header>
@@ -26,8 +26,8 @@
 </template>
 
 <script>
-import * as pdfjsLib from 'pdfjs-dist'
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker?url'
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
+import pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url'
 
 // ✅ set worker (IMPORTANT)
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker

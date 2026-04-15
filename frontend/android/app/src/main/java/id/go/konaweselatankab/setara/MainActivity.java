@@ -1,4 +1,4 @@
-package go.id.konaweselatankab;
+package id.go.konaweselatankab.setara;
 
 import com.getcapacitor.BridgeActivity;
 

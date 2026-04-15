@@ -7,7 +7,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "go.id.konaweselatankab"
+    namespace = "id.go.konaweselatankab.setara"
     compileSdk = rootProject.ext.compileSdkVersion
 
     signingConfigs {
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "go.id.konaweselatankab"
+        applicationId "id.go.konaweselatankab.setara"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
