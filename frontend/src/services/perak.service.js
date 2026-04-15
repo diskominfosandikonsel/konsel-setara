@@ -1,5 +1,15 @@
 import { apiPerak } from '../api/apiPerak'
 
+// Fungsi pembantu untuk ambil user dari localStorage secara aman
+const getActiveUser = () => {
+  try {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  } catch (e) {
+    return null
+  }
+}
+
 export const PerakService = {
   getKecamatan() {
     return apiPerak.post('m_kecamatan/list')
@@ -19,6 +29,8 @@ export const PerakService = {
   getJurusan(id) {
     return apiPerak.post('dm_master_jurusan/list', { pendidikan_id: id })
   },
+
+
   getBiodata(payload = {}) {
     return apiPerak.post('keterangan_umum/view', payload)
   },
@@ -42,6 +54,19 @@ export const PerakService = {
   },
   removePendidikan(payload) {
     return apiPerak.post('pendidikan_formal/removeData', payload)
+  },
+
+  getPengalaman(payload = {}) {
+    return apiPerak.post('pengalaman_kerja/view', payload)
+  },
+  addPengalaman(payload) {
+    return apiPerak.post('pengalaman_kerja/addData', payload)
+  },
+  editPengalaman(payload) {
+    return apiPerak.post('pengalaman_kerja/editData', payload)
+  },
+  removePengalaman(payload) {
+    return apiPerak.post('pengalaman_kerja/removeData', payload)
   },
 
 

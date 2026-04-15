@@ -14,48 +14,60 @@
 
         <q-page-container>
             <q-page class="q-pa-md" style="background-color: #FFFFFF;">
+                <div v-if="loading" class="flex flex-center q-pa-xl">
+                    <q-spinner-dots color="primary" size="40px" />
+                </div>
                 <q-list class="mulish q-pa-md">
-                    <q-card v-for="(kerja, index) in listPengalamanKerja" :key="index" class="q-mb-md cardPengalaman q-pa-md">
-                        <div class="row no-wrap items-start justify-between">
-                            <div class="col">
-                                <div class="text-weight-bold textPrimary">{{ kerja.jabatan }}</div>
-                                <div class="text-caption text-weight-bold q-mb-sm text-grey-7">{{ kerja.pemberi_kerja }}</div>
+                    <template v-if="perak.pengalaman">
+                        <q-card v-for="(data, index) in perak.pengalaman" :key="index" class="q-mb-md cardPengalaman q-pa-md">
+                            <div class="row no-wrap items-start justify-between">
+                                <div class="col">
+                                    <div class="text-weight-bold textPrimary">{{ data.jabatan }}</div>
+                                    <div class="text-caption text-weight-bold q-mb-sm text-grey-7">{{ data.pemberian_pengguna }}</div>
+                                </div>
+                                <div class="col-auto">
+                                <q-btn flat round color="grey-7" icon="r_settings" size="12px">
+                                    <q-menu auto-close transition-show="scale" transition-hide="scale" class="menu-setting">
+                                        <q-list style="min-width: 120px">
+                                            <q-item clickable @click="goEdit(data)">
+                                                <q-item-section avatar>
+                                                    <q-icon name="r_edit" color="warning" size="20px" />
+                                                </q-item-section>
+                                                <q-item-section class="text-weight-medium">Edit</q-item-section>
+                                            </q-item>
+
+                                            <q-separator />
+
+                                            <q-item clickable @click="confirmDelete(data)">
+                                                <q-item-section avatar>
+                                                    <q-icon name="r_delete" color="negative" size="20px" />
+                                                </q-item-section>
+                                                <q-item-section class="text-weight-medium">Hapus</q-item-section>
+                                            </q-item>
+
+                                        </q-list>
+                                    </q-menu>
+                                </q-btn>
                             </div>
-                            <div class="col-auto">
-                            <q-btn flat round color="grey-7" icon="r_settings" size="14px">
-                                <q-menu auto-close transition-show="scale" transition-hide="scale" class="menu-setting">
-                                    <q-list style="min-width: 120px">
-                                        <q-item clickable @click="goEdit">
-                                            <q-item-section avatar>
-                                                <q-icon name="r_edit" color="warning" size="20px" />
-                                            </q-item-section>
-                                            <q-item-section class="text-weight-medium">Edit</q-item-section>
-                                        </q-item>
-
-                                        <q-separator />
-
-                                        <q-item clickable>
-                                            <q-item-section avatar>
-                                                <q-icon name="r_delete" color="negative" size="20px" />
-                                            </q-item-section>
-                                            <q-item-section class="text-weight-medium">Hapus</q-item-section>
-                                        </q-item>
-
-                                    </q-list>
-                                </q-menu>
-                            </q-btn>
+                            </div>
+                            <q-separator q-mb-sm />
+                            <div class="row q-col-gutter-xs q-mt-xs">
+                                <div class="col-4 text-caption text-grey-8">Masa Kerja:</div>
+                                <div class="col-8 text-caption">{{ data.lama_kerja }}</div>
+                                <div class="col-4 text-caption text-grey-8">Uraian:</div>
+                                <div class="col-8 text-caption">{{ data.pemberian_pengguna }}</div>
+                                <div class="col-4 text-caption text-grey-8">Catatan:</div>
+                                <div class="col-8 text-caption">{{ data.catatan }}</div>
+                            </div>
+                        </q-card>
+                    </template>
+                    <template v-else>
+                        <div class="column flex-center q-pa-xl" style="min-height: 400px;">
+                            <q-img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 120px; opacity: 0.5;" />
+                            <div class="text-h6 text-grey-5 q-mt-md">Data Belum Ada</div>
+                            <div class="text-caption text-grey-4">Klik tombol + untuk menambah riwayat pendidikan</div>
                         </div>
-                        </div>
-                        <q-separator q-mb-sm />
-                        <div class="row q-col-gutter-xs q-mt-xs">
-                            <div class="col-4 text-caption text-grey-8">Masa Kerja:</div>
-                            <div class="col-8 text-caption">{{ kerja.lama_kerja }}</div>
-                            <div class="col-4 text-caption text-grey-8">Uraian:</div>
-                            <div class="col-8 text-caption">{{ kerja.uraian }}</div>
-                            <div class="col-4 text-caption text-grey-8">Catatan:</div>
-                            <div class="col-8 text-caption">{{ kerja.catatan_pengantar }}</div>
-                        </div>
-                    </q-card>
+                    </template>
                 </q-list>
                 <div class="divBtn flex flex-center" @click="goAdd">
                     <q-icon name="r_add" color="white" size="40px" />
@@ -66,11 +78,17 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'PengalamanKerja',
     data() {
         return {
+            loading: false,
+            page_first: 1,
+            cari_value: '',
+            page_limit: 10,
+
             listPengalamanKerja: [
                 {
                     jabatan: 'Senior Full Stack Developer',
@@ -103,16 +121,68 @@ export default {
             ]
         }
     },
+    computed: {
+        perak() {
+            return usePerakStore()
+        },
+    },
     methods: {
         goBack() {
             this.$router.back()
         },
         goAdd() {
-            this.$router.push('/tambahPengalaman');
+            if (this.perak.biodata.length > 0) {
+                const id = this.perak.biodata[0].id
+                this.$router.push({
+                    path: '/tambahPengalaman',
+                    query: { b_id: id }
+                });
+            }
         },
-        goEdit() {
+        goEdit(item) {
+            this.perak.selectData(item) 
             this.$router.push('/editPengalaman');
-        }
+        },
+
+        async loadData() {
+            const payloadBio = {
+                data_ke: this.page_first,
+                cari_value: this.cari_value,
+            }
+            await this.perak.fetchBiodata(payloadBio);
+
+            const payloadPengalaman = {
+                biodata_id: this.perak.biodata[0].id,
+                data_ke: this.page_first,
+                cari_value: this.cari_value,
+                limit: this.page_limit
+            }
+            await this.perak.fetchPengalaman(payloadPengalaman);
+        },
+
+        confirmDelete(data) {
+            this.$q.dialog({
+                title: 'Konfirmasi Hapus',
+                message: 'Apakah Anda yakin ingin menghapus data?',
+                cancel: {
+                    color: 'grey',
+                    label: 'Batal',
+                    flat: true
+                },
+                ok: {
+                    color: 'negative',
+                    label: 'Hapus',
+                    unelevated: true
+                },
+                persistent: true
+            }).onOk(async () => {
+                await this.perak.removePengalaman(data.id);
+                this.loadData();
+            })
+        },
+    },
+    mounted() {
+        this.loadData()
     }
 }
 </script>

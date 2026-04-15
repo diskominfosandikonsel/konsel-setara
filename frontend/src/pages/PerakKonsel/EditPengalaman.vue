@@ -16,19 +16,19 @@
             <q-page class="q-pa-md">
                 <div class="row" style="margin-top: 30px">
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Jabatan" class="formInput" />
+                        <q-input v-model="form.jabatan" outlined placeholder="Jabatan" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Uraian Tugas" class="formInput" />
+                        <q-input v-model="form.uraian_tugas" outlined placeholder="Uraian Tugas" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Lama Kerja" class="formInput" />
+                        <q-input v-model="form.lama_kerja" outlined placeholder="Lama Kerja" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Pemberian/Pengguna" class="formInput" />
+                        <q-input v-model="form.pemberian_pengguna" outlined placeholder="Pemberian/Pengguna" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Catatan Pengantar Kerja" class="formInput" />
+                        <q-input v-model="form.catatan" outlined placeholder="Catatan Pengantar Kerja" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
                         <q-btn label="Edit" class="btnEdit bg-warning full-width" unelevated no-caps @click="editData" />
@@ -40,44 +40,56 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'EditPengalaman',
     data() {
         return {
-            prov: 'Sulawesi Tenggara',
-            kab: 'Konawe Selatan',
-            nik: '7405182106060001',
-            nama: 'Muh. Risal Al-Ihram',
-            tmpLahir: 'Konawe Selatan',
-            tanggalLahir: '21 Mei 2001',
-            jenisKelamin: 'Laki-Laki',
-            alamat: 'Dusun III Desa Ranooha, Kecamatan Ranomeeto',
-            dusun: 'III',
-            rt_rw: '003/001',
-            kec: 'Ranomeeto',
-            kel: 'Ranooha',
-            no: '082236027854',
-            email: 'muhrisalihram@gmail.com',
-            perkawinan: 'Kawin',
-            agama: 'Islam',
-            tinggi_bdn: '175',
-            berat_bdn: '70',
+            form: {
+                id : '',
+                biodata_id : '',
+                jabatan : '',
+                uraian_tugas : '',
+                lama_kerja : '',
+                pemberian_pengguna : '',
+                catatan : '',
+            },
         }
+    },
+    computed: {
+        perak() {
+            return usePerakStore()
+        },
     },
     methods: {
         goBack() {
             this.$router.back()
         },
-        editData() {
-            this.$q.notify({
-                message: 'Data Berhasil Diedit!',
-                color: 'warning',
-                icon: 'check_circle',
-                position: 'top', // Bisa 'top', 'bottom', 'center'
-                timeout: 2000,   // Hilang dalam 2 detik
-                actions: [{ label: 'Tutup', color: 'white', handler: () => { /* ... */ } }]
-            })
+        async editData() {
+            const success = await this.perak.editPengalaman(this.form)
+            if (success) {
+                this.$router.push('/pengalamanKerja');
+            }
+        },
+        async initData() {
+            await this.perak.fetchPendidikan()
+        },
+    },
+    mounted(){
+        this.initData()
+
+        console.log("EDIT PENGALAMAN KERJA");
+        if (this.perak.dataEdit) {
+            const data = this.perak.dataEdit;
+            // console.log(data);
+            this.form.id = data.id;
+            this.form.biodata_id = data.biodata_id;
+            this.form.jabatan = data.jabatan;
+            this.form.uraian_tugas = data.uraian_tugas;
+            this.form.lama_kerja = data.lama_kerja;
+            this.form.pemberian_pengguna = data.pemberian_pengguna;
+            this.form.catatan = data.catatan;
         }
     }
 }

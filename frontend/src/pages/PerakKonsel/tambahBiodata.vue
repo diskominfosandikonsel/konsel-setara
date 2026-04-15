@@ -4,8 +4,7 @@
             <q-toolbar>
                 <q-toolbar-title>
                     <q-avatar>
-                        <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer"
-                            @click="goBack" />
+                        <q-icon name="r_chevron_left" size="35px" color="black" class="cursor-pointer" @click="goBack" />
                     </q-avatar>
                     <span class="headerText">Tambah Data</span>
                 </q-toolbar-title>
@@ -205,9 +204,10 @@ export default {
         if (localStorage.user) {
             try {
                 const get_profile = JSON.parse(localStorage.user);
-                this.form.nama = get_profile.profile.nama || '';
-                this.form.hp = get_profile.profile.hp || '';
-                this.form.email = get_profile.profile.email || '';
+                console.log(get_profile);
+                this.form.nama = get_profile.nama;
+                this.form.hp = get_profile.hp;
+                this.form.email = get_profile.email;
             } catch (e) {
                 console.error("Gagal parse profile dari localStorage", e);
             }
