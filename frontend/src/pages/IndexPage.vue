@@ -5,7 +5,7 @@
       :space-between="12" :loop="true" :autoplay="{ delay: 4000, disableOnInteraction: false }" @swiper="onSwiper"
       @slideChange="onSlideChange" class="q-mt-sm main-swiper">
       <swiper-slide v-for="(item, idx) in displayCarouselItems" :key="'slide-' + idx">
-        <img :src="item.img" class="slide-img shadow-2" />
+        <img :src="item.img" class="slide-img shadow-2 cursor-pointer" @click="openVideoLink(item.link)" />
       </swiper-slide>
     </swiper>
 
@@ -210,10 +210,10 @@ export default {
 
         // DUMMY DATA SEMENTARA (Hapus bagian ini jika API sudah terpasang)
         carouselItems.value = [
-          { img: 'img/card1.png' },
-          { img: 'img/card2.png' },
-          { img: 'img/card3.png' },
-          { img: 'img/card4.png' }
+          { img: 'img/card1.png', link: '' },
+          { img: 'img/card2.png', link: 'https://appkonsel.konaweselatankab.go.id/' },
+          { img: 'img/card3.png', link: '' },
+          { img: 'img/card4.png', link: 'https://play.google.com/store/apps/details?id=com.warga_bicara_mobile&pcampaignid=web_share' }
         ]
       } catch (error) {
         console.error('Gagal mengambil gambar carousel:', error)

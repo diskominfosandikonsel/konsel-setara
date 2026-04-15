@@ -85,6 +85,16 @@ export const PerakService = {
     return apiPerak.post('jabatan/removeData', payload)
   },
 
+  getLampiran(payload = {}) {
+    return apiPerak.post('lampiran_biodata/view', payload)
+  },
+  addLampiran(payload) {
+    return apiPerak.post('lampiran_biodata/addData', payload)
+  },
+  removeLampiran(payload) {
+    return apiPerak.post('lampiran_biodata/removeData', payload)
+  },
+
 
   // 📸 UPLOAD FOTO LAPORAN
   // Endpoint: /api/v1/laporan (lihat uploadImage.js di server referensi)

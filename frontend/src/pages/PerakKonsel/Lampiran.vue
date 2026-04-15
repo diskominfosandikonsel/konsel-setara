@@ -12,79 +12,81 @@
         </q-header>
         <q-page-container>
             <q-page class="q-pa-md" style="background-color: #FFFFFF;">
+                <div v-if="loading" class="flex flex-center q-pa-xl">
+                    <q-spinner-dots color="primary" size="40px" />
+                </div>
                 <q-list class="mulish q-pa-md">
-                    <q-card v-for="(file, index) in listLampiran" :key="index" class="q-mb-md cardPengalaman q-pa-md">
-                        <div class="row items-center no-wrap">
-                            <div class="col-auto q-mr-md">
-                                <q-avatar 
-                                    v-if="file.format.toLowerCase() === 'pdf'" 
-                                    size="40px" 
-                                    color="red-1" 
-                                    text-color="negative" 
-                                    icon="r_picture_as_pdf" 
-                                />
-                                
-                                <q-avatar 
-                                    v-else-if="['jpg', 'jpeg', 'png'].includes(file.format.toLowerCase())" 
-                                    size="40px" 
-                                    color="blue-1" 
-                                    text-color="primary" 
-                                    icon="r_image" 
-                                />
-                                
-                                <q-avatar 
-                                    v-else 
-                                    size="40px" 
-                                    color="grey-2" 
-                                    text-color="grey-7" 
-                                    icon="r_insert_drive_file" 
-                                />
-                            </div>
-                            <div class="col">
-                                <div class="text-weight-bold text-grey-9 ellipsis" style="font-size: 13px;">
-                                    {{ file.nama_dokumen }}
-                                </div>
-                                <div class="text-caption text-grey-6">
-                                    {{ file.ukuran }} • {{ file.format }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <q-btn flat round color="grey-7" icon="r_settings" size="13px">
-                                    <q-menu auto-close transition-show="scale" transition-hide="scale" class="menu-setting">
-                                        <q-list style="min-width: 100px">
-                                            <q-item clickable @click="previewFile(file)">
-                                                <q-item-section avatar>
-                                                    <q-icon name="r_visibility" color="primary" size="20px" />
-                                                </q-item-section>
-                                                <q-item-section>Lihat</q-item-section>
-                                            </q-item>
-                                            <q-separator />
-                                            <q-item clickable @click="goEdit">
-                                                <q-item-section avatar>
-                                                    <q-icon name="r_edit" color="warning" size="20px" />
-                                                </q-item-section>
-                                                <q-item-section class="text-weight-medium">Edit</q-item-section>
-                                            </q-item>
+                    <template v-if="perak.lampiran && perak.lampiran.length > 0">
+                        <q-card v-for="(data, index) in perak.lampiran" :key="index" class="q-mb-md cardPengalaman q-pa-md">
+                            <div class="row items-center no-wrap">
+                                <div class="col-auto q-mr-md">
+                                    <q-avatar 
+                                        v-if="data.file_type === 'application/pdf'" 
+                                        size="40px" 
+                                        color="red-1" 
+                                        text-color="negative" 
+                                        icon="r_picture_as_pdf" 
+                                    />
 
-                                            <q-separator />
-                                            <q-item clickable @click="hapusFile(index)">
-                                                <q-item-section avatar>
-                                                    <q-icon name="r_delete" color="negative" size="20px" />
-                                                </q-item-section>
-                                                <q-item-section class="text-negative">Hapus</q-item-section>
-                                            </q-item>
-                                        </q-list>
-                                    </q-menu>
-                                </q-btn>
+                                    <q-avatar 
+                                        v-else-if="data.file_type == 'image/png' || data.file_type == 'image/jpeg' || data.file_type == 'image/jpg' "
+                                        size="40px" 
+                                        color="blue-1" 
+                                        text-color="primary" 
+                                        icon="r_image" 
+                                    />
+
+                                </div>
+                                <div class="col">
+                                    <div class="text-weight-bold text-grey-9 ellipsis" style="font-size: 13px;">
+                                        {{ data.uraian }}
+                                    </div>
+                                    <div class="text-caption text-grey-6">
+                                        {{ data.file }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <q-btn flat round color="grey-7" icon="r_settings" size="13px">
+                                        <q-menu auto-close transition-show="scale" transition-hide="scale" class="menu-setting">
+                                            <q-list style="min-width: 100px">
+                                                <q-item clickable @click="previewFile(data)">
+                                                    <q-item-section avatar>
+                                                        <q-icon name="r_visibility" color="primary" size="20px" />
+                                                    </q-item-section>
+                                                    <q-item-section>Lihat</q-item-section>
+                                                </q-item>
+                                                <q-separator />
+                                                <q-item clickable @click="confirmDelete(data)">
+                                                    <q-item-section avatar>
+                                                        <q-icon name="r_delete" color="negative" size="20px" />
+                                                    </q-item-section>
+                                                    <q-item-section class="text-negative">Hapus</q-item-section>
+                                                </q-item>
+                                            </q-list>
+                                        </q-menu>
+                                    </q-btn>
+                                </div>
+                            </div>
+                        </q-card>
+                    </template>
+
+                    <template v-else>
+                        <div class="column justify-center items-center q-pa-xl" style="min-height: 70vh;">
+                            <q-img
+                                src="/img/no_data.png"
+                                fit="contain"
+                                style="width: 120px; height: 120px;"
+                                no-spinner
+                            />
+                            <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
+                                Tidak ada data ditemukan
+                            </div>
+                            <div class="divBtn flex flex-center" @click="goAdd">
+                                <q-icon name="r_add" color="white" size="40px" />
                             </div>
                         </div>
-                    </q-card>
-
-                    <div v-if="listLampiran.length === 0" class="text-center q-pa-xl text-grey-6">
-                        <q-icon name="r_cloud_off" size="50px" class="q-mb-sm" />
-                        <div>Belum ada lampiran yang diunggah</div>
-                    </div>
-                    </q-list>
+                    </template>
+                </q-list>
                 <div class="divBtn flex flex-center" @click="goAdd">
                     <q-icon name="r_add" color="white" size="40px" />
                 </div>
@@ -94,57 +96,85 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'Lampiran',
     data() {
         return {
-            listLampiran: [
-                { 
-                    nama_dokumen: 'KTP_Muhammad_Hidayat.pdf', 
-                    ukuran: '450 KB', 
-                    format: 'PDF',
-                    url: '#' 
-                },
-                { 
-                    nama_dokumen: 'Ijazah_S1_Teknik_Informatika.pdf', 
-                    ukuran: '1.2 MB', 
-                    format: 'PDF',
-                    url: '#' 
-                },
-                { 
-                    nama_dokumen: 'Sertifikat_Fullstack_Dev.jpg', 
-                    ukuran: '800 KB', 
-                    format: 'JPG',
-                    url: '#' 
-                }
-            ]
+            showPreview: false,
+            selectedFile: null,
+
+            loading: false,
+            page_first: 1,
+            cari_value: '',
+            page_limit: 10,
         }
+    },
+    computed: {
+        perak() {
+            return usePerakStore()
+        },
     },
     methods: {
         goBack() {
             this.$router.back()
         },
         goAdd() {
-            this.$router.push('/tambahLampiran');
+            if (this.perak.biodata.length > 0) {
+                const id = this.perak.biodata[0].id
+                this.$router.push({
+                    path: '/tambahLampiran',
+                    query: { b_id: id }
+                });
+            }
         },
-        goEdit() {
-            this.$router.push('/editLampiran');
+        async loadData() {
+            const payloadBio = {
+                data_ke: this.page_first,
+                cari_value: this.cari_value,
+            }
+            await this.perak.fetchBiodata(payloadBio);
+
+            const payloadLampiran = {
+                biodata_id: this.perak.biodata[0].id,
+                data_ke: this.page_first,
+                cari_value: this.cari_value,
+                limit: this.page_limit
+            }
+            await this.perak.fetchLampiran(payloadLampiran);
         },
-        previewFile(file) {
-            // Logika untuk membuka file
-            window.open(file.url, '_blank')
-        },
-        hapusFile(index) {
+
+        confirmDelete(data) {
             this.$q.dialog({
-            title: 'Hapus Lampiran',
-            message: 'Yakin ingin menghapus dokumen ini?',
-            cancel: true,
-            persistent: true
-            }).onOk(() => {
-            this.listLampiran.splice(index, 1)
+                title: 'Konfirmasi Hapus',
+                message: 'Apakah Anda yakin ingin menghapus data?',
+                cancel: {
+                    color: 'grey',
+                    label: 'Batal',
+                    flat: true
+                },
+                ok: {
+                    color: 'negative',
+                    label: 'Hapus',
+                    unelevated: true
+                },
+                persistent: true
+            }).onOk(async () => {
+                await this.perak.removeLampiran(data.id, data.file);
+                this.loadData();
             })
+        },
+
+        previewFile(data) {
+            const baseUrl = 'https://serverperak.konaweselatankab.go.id/uploads/';
+            const fullUrl = baseUrl + data.file;
+            
+            window.open(fullUrl, '_blank');
         }
+    },
+    mounted() {
+        this.loadData()
     }
 }
 </script>
