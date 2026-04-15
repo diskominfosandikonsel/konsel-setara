@@ -3,7 +3,8 @@ import { Loading, Notify } from 'quasar'
 import { SimcardService } from 'src/services/simcardService'
 import axios from 'axios'
 
-var URL = 'http://server-simcard.konaweselatankab.go.id/'
+var URL = 'https://server-simcard.konaweselatankab.go.id/'
+// var URL = 'http://server-simcard.konaweselatankab.go.id/'
 // var URL = 'http://10.91.178.2:5012/'
 
 export const useSimcardStore = defineStore('simcard', {
@@ -14,10 +15,9 @@ export const useSimcardStore = defineStore('simcard', {
     loading: false,
     cari: '',
     user: '',
+    nama: null,
     data: null,
     list_data: [],
-
-    nama:'kosong',
 
 
     url: {
@@ -82,7 +82,7 @@ export const useSimcardStore = defineStore('simcard', {
 
     getUser(){
       // console.log(localStorage.user);
-      // return this.user = localStorage.user
+      return this.user = localStorage.user
     },
 
     async getView(payload) {
@@ -111,12 +111,12 @@ export const useSimcardStore = defineStore('simcard', {
         Loading.show()
 
         try {
-            console.log('Haloooooooooooooooooooooooooooooooooooo')
+            // console.log('Haloooooooooooooooooooooooooooooooooooo')
             
             const res = await SimcardService.cekAuth()
-            console.log('Haloooooooooooooooooooooooooooooooooooo')
+            // console.log('Haloooooooooooooooooooooooooooooooooooo')
 
-            console.log('Simcard:', res)
+            // console.log('Simcard:', res)
 
 
         } catch (err) {
@@ -146,7 +146,7 @@ export const useSimcardStore = defineStore('simcard', {
         // Simpan ke state 
         this.listPekerjaan = result.data || []
         
-        console.log('✓ Master Pekerjaan loaded:', this.listPekerjaan.length, 'items')
+        // console.log('✓ Master Pekerjaan loaded:', this.listPekerjaan.length, 'items')
         return this.listPekerjaan
         
       } catch (err) {
@@ -176,7 +176,7 @@ export const useSimcardStore = defineStore('simcard', {
         // Simpan ke state 
         this.listAgama = result.data || []
 
-        console.log('✓ Master Agama loaded:', this.listAgama.length, 'items')
+        // console.log('✓ Master Agama loaded:', this.listAgama.length, 'items')
         return this.listAgama
 
       } catch (err) {
@@ -206,7 +206,7 @@ export const useSimcardStore = defineStore('simcard', {
         // Simpan ke state 
         this.listPendidikan = result.data || []
 
-        console.log('✓ Master Pendidikan loaded:', this.listPendidikan.length, 'items')
+        // console.log('✓ Master Pendidikan loaded:', this.listPendidikan.length, 'items')
         return this.listPendidikan
 
       } catch (err) {
@@ -236,7 +236,7 @@ export const useSimcardStore = defineStore('simcard', {
         // Simpan ke state 
         this.listShdk = result.data || []
 
-        console.log('✓ Master SHDK loaded:', this.listShdk.length, 'items')
+        // console.log('✓ Master SHDK loaded:', this.listShdk.length, 'items')
         return this.listShdk
 
       } catch (err) {
@@ -283,14 +283,24 @@ export const useSimcardStore = defineStore('simcard', {
         tgl : tglku,
         time : time
     };
-    },
+},
 
-    getUser(){
-        var user = JSON.parse(localStorage.getItem('user') || '')
-        var profile = user.profile
-        console.log(profile);
-        this.nama  = profile.nama || 'Nama User'; 
-    },
+async getnama(){
+
+  try{
+
+    var data = await JSON.parse(localStorage.user)
+    this.nama = data.profile
+    // return data
+  }catch(err){
+    // console.error('✗ Error getting nama:', err)
+    this.nama = 'tidak di temukan'
+    // return 'tidak di temukan'
+  }
+
+}
+
+ 
 
 
   }

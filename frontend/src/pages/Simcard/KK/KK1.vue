@@ -1,10 +1,6 @@
 <template>
   <q-page class="dashboard-page">
-
-
-
-
-
+    
 
     <div class="containerOne ">
         <div class="itemsContainer">
@@ -12,7 +8,8 @@
                 <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
             </div>
             <div>
-                <p class="text-white text-right">{{ simcard.nama}}</p>
+                <p class="text-white text-right">{{ nama}}</p>
+                <pre>{{nama}}</pre>
             </div>
             <div>
                 <img src="~assets/simcard/FotoProfile.png" alt="" style="height: 40px; width: 40px;">
@@ -38,117 +35,115 @@
 
         <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
         <div class="row items-center no-wrap" style="justify-content: space-between; padding: 0 10px;">
-          <input type="text" v-model="cari_value" @input="debounceSearch" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
+          <input type="text" v-model="cari_value" @input="getview" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
           <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" style="margin-top: 16px;">
             <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
           </q-btn>
         </div>
 
-        <!-- INFINITE SCROLL LIST -->
-        <q-infinite-scroll @load="onLoadMore" :offset="150" ref="infiniteScrollRef" style="padding: 10px;">
-          <div style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;" 
-          v-for="(item, index) in list_data"
-            :key="index">
-          <div class="row items-center no-wrap">
+        <!-- DAFTAR PERMOHONAN -->
+        <div style="margin-left: 10px; margin-right: 10px;">
+          <div v-for="(item, index) in list_data" :key="index" style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;">
+            <div class="row items-center no-wrap">
 
-            <div v-if="item.KK1.status === 0" style="color:#6C7278;">
-              <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
-            </div>
-
-            <div v-if="item.KK1.status === 1" style="color:#6C7278;">
-              <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
-            </div>
-
-            <div v-if="item.KK1.status === 2" style="color:#6C7278;">
-              <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
-            </div>
-
-            <div class="flex-break col self-center" style="margin-left: 11px;">
-              <div v-if="item.KK1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
-                Mohon bersabar, data masih diverifikasi
+              <div v-if="item.KK1.status === 0" style="color:#6C7278;">
+                <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
               </div>
-              <div v-if="item.KK1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
-                Permohonan Diterima
+
+              <div v-if="item.KK1.status === 1" style="color:#6C7278;">
+                <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
               </div>
-              <div v-if="item.KK1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
-                Permohonan Dikembalikan
+
+              <div v-if="item.KK1.status === 2" style="color:#6C7278;">
+                <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
               </div>
-              <div style="color:#6C7278;font-size: 11px;">
-                Nama pemohon : {{ item.KK1.nama }}
+
+              <div class="flex-break col self-center" style="margin-left: 11px;">
+                <div v-if="item.KK1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  Mohon bersabar, data masih diverifikasi
+                </div>
+                <div v-if="item.KK1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  Permohonan Diterima
+                </div>
+                <div v-if="item.KK1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  Permohonan Dikembalikan
+                </div>
+                <div style="color:#6C7278;font-size: 11px;">
+                  Nama pemohon : {{ item.KK1.nama }}
+                </div>
               </div>
-            </div>
-            <div class="" style="margin-left: 11px;">
+              <div class="" style="margin-left: 11px;">
 
-              <div class="text-right" style="margin: 0px 0px 0px 0px ;">
+                <div class="text-right" style="margin: 0px 0px 0px 0px ;">
 
-                <!-- Button Icon -->
-                <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
-                  <q-menu>
-                    <q-list>
-                      <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
-                        <q-item-section avatar>
-                          <q-icon name="source" color="primary" />
-                        </q-item-section>
-                        <q-item-section>Lihat Hasil Permohonan</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
-                        <q-item-section avatar>
-                          <q-icon name="remove_red_eye" color="primary" />
-                        </q-item-section>
-                        <q-item-section>Detail</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
-                        <q-item-section avatar>
-                          <q-icon name="timeline" color="primary" />
-                        </q-item-section>
-                        <q-item-section>Alur Permohonan</q-item-section>
-                      </q-item>
+                  <!-- Button Icon -->
+                  <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
+                    <q-menu>
+                      <q-list>
+                        <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
+                          <q-item-section avatar>
+                            <q-icon name="source" color="primary" />
+                          </q-item-section>
+                          <q-item-section>Lihat Hasil Permohonan</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
+                          <q-item-section avatar>
+                            <q-icon name="remove_red_eye" color="primary" />
+                          </q-item-section>
+                          <q-item-section>Detail</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                          <q-item-section avatar>
+                            <q-icon name="timeline" color="primary" />
+                          </q-item-section>
+                          <q-item-section>Alur Permohonan</q-item-section>
+                        </q-item>
 
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
 
-                <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
-                  <q-menu>
-                    <q-list>
-                      <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
-                        <q-item-section avatar>
-                          <q-icon name="remove_red_eye" color="primary" />
-                        </q-item-section>
-                        <q-item-section>Detail</q-item-section>
-                      </q-item>
-                      <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
-                        <q-item-section avatar>
-                          <q-icon name="circle_notifications" color="red" />
-                        </q-item-section>
-                        <q-item-section>Alasan Pengembalian</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
-                        <q-item-section avatar>
-                          <q-icon name="timeline" color="primary" />
-                        </q-item-section>
-                        <q-item-section>Alur Permohonan</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_edit = true ">
-                        <q-item-section avatar>
-                          <q-icon name="edit" color="warning" />
-                        </q-item-section>
-                        <q-item-section>Edit</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_delete = true ">
-                        <q-item-section avatar>
-                          <q-icon name="delete" color="negative" />
-                        </q-item-section>
-                        <q-item-section>delete</q-item-section>
-                      </q-item> 
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                  <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
+                    <q-menu>
+                      <q-list>
+                        <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
+                          <q-item-section avatar>
+                            <q-icon name="remove_red_eye" color="primary" />
+                          </q-item-section>
+                          <q-item-section>Detail</q-item-section>
+                        </q-item>
+                        <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
+                          <q-item-section avatar>
+                            <q-icon name="circle_notifications" color="red" />
+                          </q-item-section>
+                          <q-item-section>Alasan Pengembalian</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                          <q-item-section avatar>
+                            <q-icon name="timeline" color="primary" />
+                          </q-item-section>
+                          <q-item-section>Alur Permohonan</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_edit = true ">
+                          <q-item-section avatar>
+                            <q-icon name="edit" color="warning" />
+                          </q-item-section>
+                          <q-item-section>Edit</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_delete = true ">
+                          <q-item-section avatar>
+                            <q-icon name="delete" color="negative" />
+                          </q-item-section>
+                          <q-item-section>delete</q-item-section>
+                        </q-item> 
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
 
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
           <!-- Empty State -->
           <div v-if="list_data.length === 0" style="text-align: center; padding: 40px; color: #999;">
@@ -156,14 +151,7 @@
             <p style="font-size: 16px; font-weight: 500;">Tidak ada data permohonan</p>
             <p style="font-size: 12px;">Silakan tambah permohonan baru dengan klik tombol (+)</p>
           </div>
-
-          <!-- Loading Template -->
-          <template v-slot:loading>
-            <div class="row justify-center q-my-md">
-              <q-spinner-dots color="primary" size="40px" />
-            </div>
-          </template>
-        </q-infinite-scroll>
+        </div>
 
 
 
@@ -1607,7 +1595,7 @@
                 <h5 style="margin: 0 0 16px 0; color: #00897B; border-bottom: 2px solid #00897B; padding-bottom: 8px;">
                   📎 File Lampiran
                 </h5>
-                <div style="background-color: #E0F2F1; padding: 12px; border-radius: 8px; border-left: 4px solid #00897B;">
+                <div @click="bukaLink(form.file_lampiranOld)" style="background-color: #E0F2F1; padding: 12px; border-radius: 8px; border-left: 4px solid #00897B;">
                   <div style="font-size: 14px; color: #2d3748;">{{ form.file_lampiranOld }}</div>
                 </div>
               </div>
@@ -1850,6 +1838,7 @@ export default {
   name: 'KK1_list',
   data() {
     return {
+      nama:'',
       step: 1,
       modal_lihat   : false,
       modal_add   : false,
@@ -1859,30 +1848,10 @@ export default {
       modal_syarat  : false,
       loading: false,
       isLoadingData: false, // Flag untuk menandai apakah sedang load data dari edit
-      slide: 1,
       file_lampiran_new: null, // State untuk file baru
-      images: [
-        'https://cdn.quasar.dev/img/mountains.jpg',
-        'https://cdn.quasar.dev/img/parallax1.jpg',
-        'https://cdn.quasar.dev/img/parallax2.jpg',
-        'https://cdn.quasar.dev/img/quasar.jpg'
-      ],
-      model: null,
       options: [],
       options2: [],
- 
-
- 
       token: localStorage.getItem('token') || '',
- 
-      listProvinsi: [],
-      listKabupaten: [],
-      listKecamatan: [],
-      listDesaKelurahan: [],
-      filtered1: [],
-      filtered2: [],
-      filtered3: [],
-      filtered4: [],
 
             form: {
               id:'',
@@ -2029,13 +1998,9 @@ export default {
       page_limit: 10,
       cari_value: '',
       totalPage: 1,
+      totalData: 0,
       allDataLoaded: false,
       searchTimeout: null,
-      // user: 'w8moqrskn1bgzpm',
-      info: null,
-
-
-      list_data: [],
     }
   },
   computed: {
@@ -2059,33 +2024,13 @@ export default {
       // Set file baru ke form.file_lampiran
       this.form.file_lampiran = newFile
     },
+ 
 
-    // 🔄 DEBOUNCE SEARCH
-    debounceSearch() {
-      // Clear previous timeout
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout)
-      }
+ 
 
-      // Set new timeout untuk delay search 500ms
-      this.searchTimeout = setTimeout(() => {
-        this.resetAndLoadData()
-      }, 500)
-    },
-
-    // 🔄 RESET DATA DAN LOAD ULANG
-    resetAndLoadData() {
-      this.page_first = 1
-      this.list_data = []
-      this.allDataLoaded = false
-      this.$refs.infiniteScrollRef?.reset()
-      this.loadData()
-    },
-
-    // 📥 LOAD DATA - dipanggil saat pertama kali dan saat infinite scroll
-    async loadData() {
-      if (this.allDataLoaded) return
-
+ 
+    async getview() {
+ 
       const payload = {
         data_ke: this.page_first,
         page_limit: this.page_limit,
@@ -2095,44 +2040,14 @@ export default {
 
       try {
         const result = await this.simcard.getView(payload)
-        const data = result.data.data || []
-        const totalPage = result.data.jml_halaman || 1
+        this.list_data = result.data.data || []
+        this.page_last = result.data.jmlData || 1
 
-        this.totalPage = totalPage
-
-        if (data.length > 0) {
-          // Push data baru ke list
-          this.list_data.push(...data)
-
-          // Check apakah sudah semua data
-          if (this.page_first >= this.totalPage) {
-            this.allDataLoaded = true
-          }
-        } else {
-          this.allDataLoaded = true
-        }
       } catch (error) {
-        console.error('Error loading data:', error)
-        this.allDataLoaded = true
-      }
-    },
-
-    // ♾️ INFINITE SCROLL CALLBACK
-    async onLoadMore(index, done) {
-      if (this.allDataLoaded) {
-        done(true) // true = stop loading
-        return
+        console.error('❌ Error loading data:', error)
       }
 
-      this.page_first++
-      await this.loadData()
 
-      this.allDataLoaded ? done(true) : done()
-    },
-
-    async getview() {
-      console.log("result getview = ====================");
-      this.resetAndLoadData()
     },
 
     addData() {
@@ -2237,7 +2152,7 @@ export default {
       };
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_KK_BARU + "removeData",
+        this.simcard.url.URL_PERMOHONAN_KK_BARU + "removeData_mobile",
         body,
         {
           headers: {
@@ -2446,10 +2361,10 @@ export default {
         // Reset flag setelah loading selesai
         this.isLoadingData = false
         
-        console.log('Alamat Data Loaded:')
-        console.log('Kabupaten2:', this.list_data_kabupaten2.length, 'items')
-        console.log('Kecamatan2:', this.list_data_kecamatan2.length, 'items')
-        console.log('Desa Kelurahan2:', this.list_data_desa_kelurahan2.length, 'items')
+        // console.log('Alamat Data Loaded:')
+        // console.log('Kabupaten2:', this.list_data_kabupaten2.length, 'items')
+        // console.log('Kecamatan2:', this.list_data_kecamatan2.length, 'items')
+        // console.log('Desa Kelurahan2:', this.list_data_desa_kelurahan2.length, 'items')
       })
 
     },    
@@ -2474,7 +2389,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Provinsi response:', response)
+          // console.log('Provinsi response:', response)
           // Simpan original data
           this.list_data_provinsi = response.data || []
           this.options = response.data || []
@@ -2502,7 +2417,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kabupaten response:', response)
+          // console.log('Kabupaten response:', response)
           // Simpan original data
           this.list_data_kabupaten = response.data || []
           this.options = response.data || []
@@ -2530,7 +2445,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kecamatan response:', response)
+          // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_kecamatan = response.data || []
           this.options = response.data || []
@@ -2558,7 +2473,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kecamatan response:', response)
+          // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_desa_kelurahan = response.data || []
           this.options = response.data || []
@@ -2586,7 +2501,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Provinsi response:', response)
+          // console.log('Provinsi response:', response)
           // Simpan original data
           this.list_data_provinsi2 = response.data || []
           this.options2 = response.data || []
@@ -2614,7 +2529,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kabupaten response:', response)
+          // console.log('Kabupaten response:', response)
           // Simpan original data
           this.list_data_kabupaten2 = response.data || []
           this.options2 = response.data || []
@@ -2642,7 +2557,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kecamatan response:', response)
+          // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_kecamatan2 = response.data || []
           this.options2 = response.data || []
@@ -2670,7 +2585,7 @@ export default {
           }
         })
         .then(response => {
-          console.log('Kecamatan response:', response)
+          // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_desa_kelurahan2 = response.data || []
           this.options2 = response.data || []
@@ -2888,7 +2803,7 @@ export default {
         // Set data ke state yang sesuai
         const stateKey = `list_data_${dataKey}`
         this[stateKey] = response.data || []
-        console.log(`✓ Initial ${dataKey} loaded:`, this[stateKey].length, 'items')
+        // console.log(`✓ Initial ${dataKey} loaded:`, this[stateKey].length, 'items')
       } catch (error) {
         console.error(`✗ Error loading initial ${dataKey}:`, error)
       }
@@ -3024,13 +2939,16 @@ export default {
     this.form.emailPemohon  = profile.email;
     this.form.email_from    = profile.email;
     this.form.createdBy     = user._id; 
+    this.nama  = profile.nama;
+
+    
 
     this.getview()
     this.loadfilter()
     this.getmasterData()
 
     console.log(this.form.createdBy);
-    console.log(this.simcard.getUser());
+    // console.log(this.simcard.getUser());
     // this.form.createdBy     = this.user; 
   },
 
