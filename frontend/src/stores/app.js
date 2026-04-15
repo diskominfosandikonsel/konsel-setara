@@ -15,7 +15,6 @@ export const useAppStore = defineStore('app', {
 
       try {
         const res = await api.get('api/v1/checkAuth') 
-        // console.log('API RESULT:', data) // 🔥 debug
 
         this.list_cek = res.data
 
