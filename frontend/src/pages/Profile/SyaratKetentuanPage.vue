@@ -9,6 +9,11 @@
     <!-- CONTENT -->
     <div class="legal-content q-px-md q-pb-xl">
 
+      <div class="effective-date">
+        <q-icon name="r_event" size="14px" class="q-mr-xs" />
+        Terakhir diperbarui: 15 April 2026
+      </div>
+
       <div class="legal-card">
         <div class="section-header">
           <q-icon name="r_info" size="18px" class="q-mr-sm" />
@@ -143,6 +148,19 @@ export default {
 
 .legal-content {
   padding-top: 16px;
+}
+
+.effective-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #1565C0;
+  background: #e3f2fd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  font-weight: 600;
 }
 
 .legal-card {
