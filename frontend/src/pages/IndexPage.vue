@@ -318,7 +318,7 @@ export default {
       search: ref(''),
       menuItems: [
         { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
-        { label: 'SapaKonsel', img: 'src/assets/sapa/logo.svg', route: '/sapa_dashboard' },
+        { label: 'SapaKonsel', img: 'icons/sapa.svg', route: '/sapa_dashboard' },
         { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
         { label: 'PPID', img: 'icons/Ppid.png', route: '' },
         { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },

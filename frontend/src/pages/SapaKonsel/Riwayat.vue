@@ -17,12 +17,10 @@
     <q-page-container>
       <q-page class="q-pa-md mulish" style="background-color: #F6F6F6;">
 
-        <!-- 🟡 SKELETON -->
         <div v-if="skeletonLoading">
           <q-skeleton v-for="n in 4" :key="n" height="80px" class="q-mb-sm" />
         </div>
 
-        <!-- 🟢 DATA -->
         <div v-else-if="laporanList.length">
 
           <div class="row q-col-gutter-sm">
@@ -61,7 +59,6 @@
             </div>
           </div>
 
-          <!-- ♾ INFINITE SCROLL -->
           <q-infinite-scroll
             @load="onLoad"
             :offset="100"
@@ -76,7 +73,6 @@
 
         </div>
 
-        <!-- 🔴 EMPTY -->
         <div v-else class="column flex-center" style="height: 75vh;">
           <div>
             <img class="q-pb-md" src="~src/assets/sapa/searching.png" width="200">
@@ -135,7 +131,10 @@ export default {
     },
 
     generateCacheKey () {
-      return `riwayat_${this.cari}`
+      const user = JSON.parse(localStorage.user || '{}')
+      const userId = user._id || 'guest'
+
+      return `riwayat_${userId}_${this.cari}`
     },
 
     async loadData (reset = false) {
@@ -163,7 +162,6 @@ export default {
         // karena store sudah append, kita cukup assign
         this.laporanList = [...this.sapa.laporan]
 
-        // 🧠 CACHE
         localStorage.setItem(this.cacheKey, JSON.stringify({
           page: this.page,
           data: this.laporanList,

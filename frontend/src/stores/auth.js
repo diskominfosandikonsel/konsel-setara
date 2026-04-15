@@ -27,18 +27,9 @@ export const useAuthStore = defineStore('auth', {
       Loading.show()
 
       try {
-        console.log('LOGIN PAYLOAD:', form)
-
         const res = await AuthService.login(form)
 
-        console.log('LOGIN RESPONSE:', res.data)
-
-        // 🔥 adjust based on your backend response
         const { token, user } = res.data
-
-        console.log('====================================');
-        console.log(token,user);
-        console.log('====================================');
 
         this.token = token
         this.user = user
