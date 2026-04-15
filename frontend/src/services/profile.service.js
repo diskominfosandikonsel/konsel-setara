@@ -9,5 +9,8 @@ export const ProfileService = {
   },
   changePassword(data) {
     return api.put('api/v1/profile/password', data)
+  },
+  deleteAccount() {
+    return api.delete('api/v1/profile')
   }
 }

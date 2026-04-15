@@ -218,19 +218,24 @@ export default {
 
     const fetchVideoBerita = async () => {
       try {
+        const payload = {
+          data_ke: 1,
+          cari_value: "",
+          kategori_id: "" // WAJIB DIHADIRKAN agar tidak terbaca undefined di SQL Backend
+        }
+        
+        const response = await beritaStore.fetchVideo(payload)
+        const dataApi = response?.data || []
+        
+        // Pemetaan struktur balikan Video dari tabel gallery_video (web_konsel)
+        const mappedVideo = dataApi.map(item => ({
+          title: item.keterangan || 'Video Konsel',
+          // Menangkap embel-embel huruf besar/kecil 'link', 'url', 'tautan'
+          link: item.isi || 'https://www.youtube.com/watch?v=gGAv8Xyo2Ro',
+        }))
 
-        // DUMMY DATA SEMENTARA
-        const dummyData = [
-          { title: 'FULL TAUSIYAH Ustadz Prof. H. Abdul Somad HALAL BIHALAL', link: 'https://www.youtube.com/watch?v=ZjKHf-lENnc' },
-          { title: 'Presensi ASN Konawe Selatan akan beralih ke teknologi canggih dengan Face Recognition!', link: 'https://www.tiktok.com/@diskominfo.konsel/video/7598871375364836626' },
-          { title: 'Pak Bupati Irham Kalenggo arahkan pejabat dukung UMKM kuliner lokal', link: 'https://www.tiktok.com/@diskominfo.konsel/video/7602798528351554824' },
-          { title: 'SHOLAT IDUL FITRI 1447 H / 2026 M', link: 'https://www.youtube.com/watch?v=0oz4yDGfiCU' },
-          { title: 'Launching Sistem Digital Unggulan "Warga Bicara" dan Layanan Darurat 112', link: 'https://www.youtube.com/watch?v=ORvEs3q1wig' },
-          { title: 'Penyerahan SK #CPNS dan #PPPK Kabupaten', link: 'https://www.youtube.com/watch?v=lbIja4U1H5M' }
-        ]
-
-        // Membatasi hanya 5 video saja yang tampil
-        const slicedData = dummyData.slice(0, 5)
+        // Membatasi hanya 5 video saja yang tampil di layar depan
+        const slicedData = mappedVideo.slice(0, 8)
         videoBerita.value = slicedData
 
         // Fetch Tiktok thumbnail secara asinkron menggunakan TikWM API langsung
@@ -282,7 +287,7 @@ export default {
         }))
 
         // Membatasi hanya 5 berita saja yang tampil
-        beritaTerbaru.value = mappedBerita.slice(0, 5)
+        beritaTerbaru.value = mappedBerita.slice(0, 6)
       } catch (error) {
         console.error('Gagal mengambil data berita:', error)
       }

@@ -118,6 +118,8 @@
 import { defineComponent, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
+import { ProfileService } from 'src/services/profile.service'
+import { useAuthStore } from 'src/stores/auth'
 
 export default defineComponent({
   name: 'DeleteAccountPage',
@@ -125,43 +127,54 @@ export default defineComponent({
   setup() {
     const $q = useQuasar()
     const router = useRouter()
+    const auth = useAuthStore()
 
     const isAgreed = ref(false)
     const showConfirmDialog = ref(false)
 
     /**
      * Menangani proses penghapusan akun.
-     * Menampilkan loading selama 2 detik, lalu membersihkan sesi lokal
-     * dan mengarahkan pengguna ke halaman login.
+     * Memanggil API DELETE /api/v1/profile untuk menghapus akun dari database,
+     * lalu membersihkan sesi lokal dan mengarahkan ke halaman login.
      */
     const handleDeleteAccount = async () => {
       showConfirmDialog.value = false
       $q.loading.show({ message: 'Menghapus akun...' })
 
-      // TODO: Integrasi API Delete Account di sini menggunakan Axios
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      try {
+        const res = await ProfileService.deleteAccount()
 
-      $q.loading.hide()
+        if (res.data?.success) {
+          // Bersihkan state auth (token + user) via store
+          auth.logout()
 
-      performLogout()
+          $q.notify({
+            type: 'positive',
+            message: 'Akun berhasil dihapus.',
+            position: 'top',
+            timeout: 2500,
+          })
 
-      $q.notify({
-        type: 'positive',
-        message: 'Akun berhasil dihapus.',
-        position: 'top',
-        timeout: 2500,
-      })
-
-      router.replace('/login')
-    }
-
-    /**
-     * Membersihkan token dan data user dari local storage.
-     */
-    const performLogout = () => {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('auth')
+          router.replace('/login')
+        } else {
+          $q.notify({
+            type: 'negative',
+            message: res.data?.message || 'Gagal menghapus akun.',
+            position: 'top',
+            timeout: 3000,
+          })
+        }
+      } catch (err) {
+        console.error('❌ DELETE ACCOUNT ERROR:', err)
+        $q.notify({
+          type: 'negative',
+          message: err.response?.data?.message || 'Gagal menghapus akun. Silakan coba lagi.',
+          position: 'top',
+          timeout: 3000,
+        })
+      } finally {
+        $q.loading.hide()
+      }
     }
 
     return {

@@ -31,13 +31,9 @@ function respondError422(res, text) {
 
 router.post('/login', (req, res) => {
 
-  console.log('===== LOGIN REQUEST =====')
-  console.log('BODY:', req.body)
-
   const result = loginSchema.validate(req.body)
 
   if (result.error) {
-    console.log('❌ VALIDATION ERROR:', result.error.details)
     return respondError422(res, "Gagal Login, periksa username/password")
   }
 
@@ -46,35 +42,24 @@ router.post('/login', (req, res) => {
     WHERE username = ?
   `
 
-  console.log('➡️ QUERY:', sql)
-  console.log('➡️ PARAM:', req.body.username)
-
   db.query(sql, [req.body.username], async (err, rows) => {
 
     if (err) {
-      console.error('❌ DB ERROR:', err)
+      console.error(err)
       return res.status(500).json({ message: 'Database error' })
     }
 
-    console.log('✅ DB RESULT:', rows)
-
     if (!rows || rows.length === 0) {
-      console.log('❌ USER NOT FOUND')
       return respondError422(res, "Username Salah")
     }
 
     const user = rows[0]
-    console.log('👤 USER FOUND:', user.username)
 
     try {
-      console.log('🔐 CHECKING PASSWORD...')
 
       const match = await bcrypt.compare(req.body.password, user.password)
 
-      console.log('🔐 PASSWORD MATCH:', match)
-
       if (!match) {
-        console.log('❌ WRONG PASSWORD')
         return respondError422(res, "Password salah")
       }
 
@@ -87,16 +72,11 @@ router.post('/login', (req, res) => {
         menu_klp: user.menu_klp
       }
 
-      console.log('📦 PAYLOAD:', payload)
-
       jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
         if (err) {
-          console.error('❌ JWT ERROR:', err)
+          console.error(err)
           return respondError422(res, "Gagal membuat token")
         }
-
-        console.log('✅ LOGIN SUCCESS')
-        console.log('🔑 TOKEN:', token)
 
         return res.json({
           token,
@@ -105,7 +85,7 @@ router.post('/login', (req, res) => {
       })
 
     } catch (e) {
-      console.error('❌ BCRYPT ERROR:', e)
+      console.error(e)
       return res.status(500).json({ message: 'Auth error' })
     }
 
@@ -113,8 +93,6 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/register', async (req, res) => {
-
-  console.log('REGISTER BODY:', req.body)
 
   const result = schema.validate(req.body)
 
@@ -161,13 +139,10 @@ router.post('/register', async (req, res) => {
       ], (err, result) => {
 
         if (err) {
-          console.error('❌ UMUM INSERT ERROR:', err)
+          console.error(err)
           return res.status(500).json({ message: 'Insert gagal (umum)' })
         }
 
-        console.log('✅ INSERT UMUM SUCCESS')
-
-        // ✅ INSERT TO ERIDA
         const insertErida = `
           INSERT INTO user 
           (id, username, nama, hp, email, password, id_pengguna, createAt)
@@ -185,16 +160,12 @@ router.post('/register', async (req, res) => {
         ], (err2, result2) => {
 
           if (err2) {
-            console.error('❌ ERIDA INSERT ERROR:', err2)
-
-            // ⚠️ OPTIONAL: still return success
+            console.error(err2)
             return res.json({
               success: true,
               message: 'Registrasi berhasil (umum), gagal sync erida'
             })
           }
-
-          console.log('✅ INSERT ERIDA SUCCESS')
 
           return res.json({
             success: true,
