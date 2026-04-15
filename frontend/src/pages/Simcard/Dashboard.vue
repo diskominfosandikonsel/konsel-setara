@@ -250,6 +250,10 @@ export default {
     async cekUser(){
       this.hasil = await this.auth.cekAuth()
       console.log(this.hasil);
+      var user = JSON.parse(localStorage.getItem('user') || '')
+      var profile = user
+      console.log(profile);
+      this.nama  = user.nama;
     },
     goBack(){
       this.$router.back()
@@ -257,14 +261,14 @@ export default {
     pindahKe(halaman){
       this.$router.push(halaman)
     },
+    
   },
+
+
   mounted() {
     this.cekUser()
-    var user = JSON.parse(localStorage.getItem('user') || '')
-    var profile = user.profile
-    console.log(profile);
     
-    this.nama  = profile.nama;
+    
     // this.form.email_from    = profile.email;
     // this.form.createdBy     = user._id; 
   },
