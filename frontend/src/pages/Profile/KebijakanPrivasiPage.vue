@@ -3,11 +3,17 @@
     <!-- HEADER -->
     <div class="row items-center q-px-sm q-py-md bg-white border-bottom sticky-header">
       <q-btn flat round dense icon="chevron_left" color="dark" size="18px" @click="$router.back()" />
-      <div class="text-h6 text-weight-regular q-ml-sm text-uppercase text-dark" style="letter-spacing: 1.5px;">Kebijakan Privasi</div>
+      <div class="text-h6 text-weight-regular q-ml-sm text-uppercase text-dark" style="letter-spacing: 1.5px;">Kebijakan
+        Privasi</div>
     </div>
 
     <!-- CONTENT -->
     <div class="legal-content q-px-md q-pb-xl">
+
+      <div class="effective-date">
+        <q-icon name="r_event" size="14px" class="q-mr-xs" />
+        Terakhir diperbarui: 15 April 2026
+      </div>
 
       <div class="legal-card">
         <div class="section-header">
@@ -15,7 +21,9 @@
           Pendahuluan
         </div>
         <div class="section-body">
-          Pemerintah Kabupaten Konawe Selatan menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda berikan melalui aplikasi <strong>Konsel Setara</strong>. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi Anda.
+          Pemerintah Kabupaten Konawe Selatan menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi
+          yang Anda berikan melalui aplikasi <strong>Konsel Setara</strong>. Kebijakan Privasi ini menjelaskan bagaimana
+          kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi Anda.
         </div>
       </div>
 
@@ -35,11 +43,15 @@
           </div>
           <div class="legal-point">
             <span class="point-num">3.</span>
-            <span><strong>Data Lokasi:</strong> Koordinat GPS saat pengiriman laporan (hanya jika diizinkan oleh pengguna).</span>
+            <span><strong>Data Lokasi:</strong> Koordinat GPS saat pengiriman laporan (hanya jika diizinkan oleh
+              pengguna).</span>
           </div>
           <div class="legal-point">
             <span class="point-num">4.</span>
-            <span><strong>Data Laporan:</strong> Foto, deskripsi, dan informasi lain yang Anda input saat menggunakan layanan pelaporan.</span>
+            <span><strong>Data Laporan:</strong> Foto, deskripsi, dan informasi lain yang Anda input saat menggunakan
+              layanan pelaporan. Foto yang diambil melalui kamera digunakan secara khusus untuk melengkapi laporan
+              pengaduan, pengambilan foto dokumen identitas (KTP/KK), serta keperluan verifikasi layanan. Foto tidak
+              digunakan untuk tujuan lain di luar konteks layanan.</span>
           </div>
           <div class="legal-point">
             <span class="point-num">5.</span>
@@ -83,7 +95,22 @@
           Keamanan Data
         </div>
         <div class="section-body">
-          Kami menerapkan langkah-langkah teknis dan organisasi yang wajar untuk melindungi data pribadi Anda dari akses yang tidak sah, pengungkapan, perubahan, atau penghancuran. Data disimpan di server yang aman dan hanya dapat diakses oleh pihak yang berwenang.
+          Kami menerapkan langkah-langkah teknis dan organisasi yang wajar untuk melindungi data pribadi Anda dari akses
+          yang tidak sah, pengungkapan, perubahan, atau penghancuran. Data disimpan di server yang aman dan hanya dapat
+          diakses oleh pihak yang berwenang.
+        </div>
+      </div>
+
+      <div class="legal-card">
+        <div class="section-header">
+          <q-icon name="r_schedule" size="18px" class="q-mr-sm" />
+          Penyimpanan Data
+        </div>
+        <div class="section-body">
+          Data pribadi Anda akan disimpan selama akun Anda aktif dan diperlukan untuk penyediaan layanan. Setelah
+          penghapusan akun, data pribadi Anda akan dihapus dalam waktu 30 (tiga puluh) hari kerja, kecuali data yang
+          wajib diarsipkan sesuai peraturan perundang-undangan yang berlaku di Republik Indonesia. Data laporan yang
+          telah diproses dapat disimpan dalam bentuk anonim untuk keperluan statistik dan peningkatan layanan.
         </div>
       </div>
 
@@ -93,7 +120,8 @@
           Berbagi Data dengan Pihak Ketiga
         </div>
         <div class="section-body">
-          Kami tidak menjual, menyewakan, atau memperdagangkan data pribadi Anda kepada pihak ketiga. Data hanya dapat dibagikan kepada:
+          Kami tidak menjual, menyewakan, atau memperdagangkan data pribadi Anda kepada pihak ketiga. Data hanya dapat
+          dibagikan kepada:
           <div class="legal-point q-mt-sm">
             <span class="point-num">•</span>
             <span>Instansi pemerintah terkait dalam rangka penyelenggaraan layanan publik.</span>
@@ -117,12 +145,25 @@
           </div>
           <div class="legal-point">
             <span class="point-num">2.</span>
-            <span>Anda dapat meminta penghapusan akun dan data pribadi Anda melalui fitur "Hapus Akun".</span>
+            <span>Anda dapat meminta penghapusan akun dan data pribadi Anda melalui fitur "Hapus Akun" yang tersedia di
+              halaman pengaturan akun aplikasi, atau dengan menghubungi kami melalui email.</span>
           </div>
           <div class="legal-point">
             <span class="point-num">3.</span>
-            <span>Anda dapat mencabut izin lokasi kapan saja melalui pengaturan perangkat Anda.</span>
+            <span>Anda dapat mencabut izin lokasi dan kamera kapan saja melalui pengaturan perangkat Anda.</span>
           </div>
+        </div>
+      </div>
+
+      <div class="legal-card">
+        <div class="section-header">
+          <q-icon name="r_child_care" size="18px" class="q-mr-sm" />
+          Batasan Usia
+        </div>
+        <div class="section-body">
+          Aplikasi ini tidak ditujukan untuk pengguna di bawah usia 17 tahun. Kami tidak secara sengaja mengumpulkan
+          data pribadi dari anak di bawah umur. Apabila kami mengetahui bahwa data dari pengguna di bawah usia 17 tahun
+          telah terkumpul tanpa persetujuan wali, kami akan segera menghapus data tersebut dari sistem kami.
         </div>
       </div>
 
@@ -182,11 +223,24 @@ export default {
   padding-top: 16px;
 }
 
+.effective-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #1565C0;
+  background: #e3f2fd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
 .legal-card {
   background: #fff;
   border-radius: 14px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
