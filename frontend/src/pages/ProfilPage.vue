@@ -8,18 +8,18 @@
       </div>
 
       <div class="content-wrapper q-px-md q-pt-md q-pb-xl">
-        <!-- Profile Card -->
+        <!-- Profile Card — tanpa foto, pakai inisial -->
         <q-card class="profile-card q-mb-lg no-shadow rounded-box q-pa-md cursor-pointer" @click="$router.push('/edit_profile')">
           <div class="row items-center justify-between">
             <div class="row items-center">
-              <q-avatar size="60px" class="q-mr-md bg-grey-3">
-                <!-- Using standard picsum or placeholder for avatar -->
-                <img src="https://picsum.photos/200/200?random=10" />
-              </q-avatar>
+              <div class="profile-initial q-mr-md">
+                {{ userInitial }}
+              </div>
               <div class="column">
-                <div class="text-subtitle1 text-weight-bold text-black" style="line-height: 1.2;">Abram</div>
-                <div class="text-caption text-grey-7" style="line-height: 1.2; margin-bottom: 2px;">user_ifoid@gmail.com</div>
-                <div class="text-caption text-grey-7" style="line-height: 1.2;">+6281080709012</div>
+                <div class="text-subtitle1 text-weight-bold text-black" style="line-height: 1.2;">{{ userName }}</div>
+                <div class="text-caption text-grey-6" style="line-height: 1.2; margin-top: 2px;">@{{ userUsername }}</div>
+                <div class="text-caption text-grey-7" style="line-height: 1.2; margin-top: 4px;">{{ userEmail }}</div>
+                <div class="text-caption text-grey-7" style="line-height: 1.2; margin-top: 2px;">{{ userHp }}</div>
               </div>
             </div>
             <div>
@@ -112,17 +112,42 @@
   </q-page>
 </template>
 
-<script >
+<script>
 import { useAuthStore } from 'src/stores/auth';
-import { Notify, Dialog } from 'quasar';
+import { Dialog } from 'quasar';
 
 export default {
-    name : 'ProfilPage',
+    name: 'ProfilPage',
+
+    computed: {
+      auth() {
+        return useAuthStore()
+      },
+      userName() {
+        const u = this.auth.user
+        return u?.nama || u?.name || u?.full_name || '-'
+      },
+      userUsername() {
+        const u = this.auth.user
+        return u?.username || '-'
+      },
+      userEmail() {
+        const u = this.auth.user
+        return u?.email || '-'
+      },
+      userHp() {
+        const u = this.auth.user
+        return u?.hp || u?.phone || u?.no_hp || u?.no_telp || '-'
+      },
+      userInitial() {
+        const name = this.userName
+        if (!name || name === '-') return '?'
+        return name.charAt(0).toUpperCase()
+      }
+    },
 
     methods: {
         async handleLogout() {
-          const auth = useAuthStore()
-          
           Dialog.create({
             title: 'Konfirmasi Keluar',
             message: 'Apakah Anda yakin ingin keluar dari akun ini?',
@@ -138,7 +163,7 @@ export default {
             },
             persistent: true
           }).onOk(async () => {
-            const success = await auth.logout()
+            const success = await this.auth.logout()
             console.log('Logging out...')
             
             if (success) {
@@ -152,7 +177,7 @@ export default {
 
 <style scoped>
 .profile-page {
-  background-color: #f2eeeb; /* Matches the slightly warm greyish background in the image */
+  background-color: #f2eeeb;
   min-height: 100vh;
 }
 
@@ -172,6 +197,22 @@ export default {
   background-color: #f5f5f5;
 }
 
+/* ─── INISIAL AVATAR ─── */
+.profile-initial {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 .section-title {
   font-size: 1.05rem;
   margin-left: 4px;
@@ -186,19 +227,19 @@ export default {
   .page-container {
     max-width: 600px;
     margin: 0 auto;
-    /* Memberi jarak/bayangan tipis sebagai layout "Mobile inside Tablet" */
     background: transparent;
   }
   
   .content-wrapper {
-    padding-top: 10px; /* Menyesuaikan agar tidak terlalu longgar */
+    padding-top: 10px;
   }
 
-  /* ----- UPSCALING ELEMENT UNTUK TABLET ----- */
-  /* Profile Card Header */
-  .profile-card .q-avatar {
-    font-size: 80px !important; /* Standarnya 60px */
+  .profile-initial {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
   }
+
   .profile-card .text-subtitle1 {
     font-size: 22px !important;
     margin-bottom: 2px;
@@ -207,51 +248,47 @@ export default {
     font-size: 15px !important;
   }
   .profile-card .q-icon {
-    font-size: 28px !important; /* Standar 22px */
+    font-size: 28px !important;
   }
 
-  /* Judul Section (Preferensi, Lainnya) */
   .section-title {
     font-size: 1.25rem;
     margin-bottom: 12px;
   }
 
-  /* Baris Menu */
   .menu-card .q-item {
     padding-top: 18px !important;
     padding-bottom: 18px !important;
   }
   
-  /* Ikon pada Menu */
   .menu-card .q-icon {
-    font-size: 28px !important; /* Standar 24px */
+    font-size: 28px !important;
   }
   
-  /* Teks pada Menu */
   .menu-card .text-weight-medium {
     font-size: 17px !important;
   }
   
-  /* Jarak ikon dan teks menu */
   .menu-card .q-item__section--avatar {
-    min-width: 50px !important; /* Melebarkan inline style bawaan */
+    min-width: 50px !important;
   }
 }
 
-/* Desktop / Tablet Landscape Responsive */
 @media (min-width: 900px) {
   .page-container {
-    max-width: 800px; /* Melebarkan kontainer utama di atas 900px */
+    max-width: 800px;
   }
 
   .content-wrapper {
     padding-top: 24px; 
   }
 
-  /* Profile Card Header Extra Besar */
-  .profile-card .q-avatar {
-    font-size: 100px !important; /* Standarnya 60px -> Tablet 80px */
+  .profile-initial {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
   }
+
   .profile-card .text-subtitle1 {
     font-size: 26px !important;
   }
@@ -262,18 +299,15 @@ export default {
     font-size: 32px !important;
   }
 
-  /* Baris Menu */
   .menu-card .q-item {
     padding-top: 22px !important;
     padding-bottom: 22px !important;
   }
   
-  /* Ikon pada Menu */
   .menu-card .q-icon {
     font-size: 32px !important; 
   }
   
-  /* Teks pada Menu */
   .menu-card .text-weight-medium {
     font-size: 19px !important;
   }

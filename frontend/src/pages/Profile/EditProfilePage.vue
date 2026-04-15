@@ -1,6 +1,6 @@
 <template>
   <q-page class="page-container bg-white">
-    <!-- Header (Sticky) — mengikuti gaya NewsPage.vue -->
+    <!-- Header (Sticky) -->
     <div class="sticky-header">
       <div class="header-inner q-px-md">
         <div class="row items-center header-title">
@@ -13,58 +13,68 @@
             @click="$router.back()"
             class="q-mr-sm"
           />
-          <div class="text-h5 text-weight-regular text-black">Ubah profile</div>
+          <div class="text-h5 text-weight-regular text-black">Ubah Profil</div>
         </div>
       </div>
     </div>
 
     <!-- Konten utama (Scrollable) -->
     <div class="content-wrapper q-pa-md">
-      <!-- ===== FOTO PROFIL ===== -->
-      <div class="row items-start q-mb-sm q-pt-md">
-        <q-avatar size="63px" class="q-mr-md">
-          <img :src="profilePicture" alt="Foto profil" />
-        </q-avatar>
-        <div class="col column justify-center" style="padding-top: 4px">
-          <div class="text-grey-7" style="font-size: 13px; line-height: 1.4">
-            Pasang foto anda ! semua orang, bakal bisa lihat
-          </div>
+
+      <!-- ===== INISIAL AVATAR ===== -->
+      <div class="row items-center q-mb-lg q-pt-md">
+        <div class="profile-initial q-mr-md">
+          {{ userInitial }}
+        </div>
+        <div class="col column justify-center">
+          <div class="text-subtitle1 text-weight-bold text-black" style="line-height: 1.3;">{{ form.nama || '-' }}</div>
+          <div class="text-caption text-grey-6" style="line-height: 1.3;">@{{ form.username || '-' }}</div>
         </div>
       </div>
 
-      <div
-        class="text-primary text-weight-medium q-mb-lg cursor-pointer"
-        style="font-size: 14px"
-        @click="onTambahFoto"
-      >
-        Tambah foto
-      </div>
-
-      <!-- ===== FORM DATA PROFIL (Pair-based Grouping) ===== -->
+      <!-- ===== FORM DATA PROFIL ===== -->
       <div class="row q-col-gutter-md">
-        <!-- Nama (full-width) -->
+
+        <!-- Username -->
         <div class="col-12">
-          <div class="field-label">Nama <span class="text-red">*</span></div>
+          <div class="field-label">Username <span class="text-red">*</span></div>
+          <q-input
+            v-model="form.username"
+            borderless
+            dense
+            hide-bottom-space
+            placeholder="username"
+            class="field-input"
+          />
+        </div>
+
+        <!-- Nama -->
+        <div class="col-12">
+          <div class="field-label">Nama Lengkap <span class="text-red">*</span></div>
           <q-input
             v-model="form.nama"
             borderless
             dense
             hide-bottom-space
+            placeholder="Nama lengkap"
             class="field-input"
           />
         </div>
 
-        <!-- Pair: Nomor HP + Email -->
+        <!-- Nomor HP -->
         <div class="col-12 col-sm-6">
           <div class="field-label">Nomor HP <span class="text-red">*</span></div>
           <q-input
-            v-model="form.nomorHp"
+            v-model="form.hp"
             borderless
             dense
             hide-bottom-space
+            placeholder="08xxxxxxxxxx"
             class="field-input"
           />
         </div>
+
+        <!-- Email -->
         <div class="col-12 col-sm-6">
           <div class="field-label">Email <span class="text-red">*</span></div>
           <q-input
@@ -73,133 +83,14 @@
             borderless
             dense
             hide-bottom-space
+            placeholder="email@contoh.com"
             class="field-input"
           />
         </div>
 
-        <!-- Pair: NIK + NIP -->
-        <div class="col-12 col-sm-6">
-          <div class="field-label">NIK <span class="text-red">*</span></div>
-          <q-input
-            v-model="form.nik"
-            borderless
-            dense
-            hide-bottom-space
-            class="field-input"
-          />
-        </div>
-        <div class="col-12 col-sm-6">
-          <div class="field-label">NIP</div>
-          <q-input
-            v-model="form.nip"
-            borderless
-            dense
-            hide-bottom-space
-            placeholder="-"
-            class="field-input"
-          />
-        </div>
-
-        <!-- Pair: Tanggal Lahir + Tempat Lahir -->
-        <div class="col-12 col-sm-6">
-          <div class="field-label-highlight">Tanggal lahir</div>
-          <q-input
-            v-model="form.tanggalLahir"
-            borderless
-            dense
-            hide-bottom-space
-            readonly
-            class="highlight-input"
-          >
-            <template #append>
-              <img
-                :src="calendarIcon"
-                alt="Calendar"
-                class="calendar-icon cursor-pointer"
-              />
-              <q-popup-proxy transition-show="scale" transition-hide="scale">
-                <q-date v-model="form.tanggalLahir" mask="DD/MM/YYYY" />
-              </q-popup-proxy>
-            </template>
-          </q-input>
-        </div>
-        <div class="col-12 col-sm-6">
-          <div class="field-label">Tempat lahir</div>
-          <q-input
-            v-model="form.tempatLahir"
-            borderless
-            dense
-            hide-bottom-space
-            class="field-input"
-          />
-        </div>
-
-        <!-- Pair: Jenis Kelamin + Agama -->
-        <div class="col-12 col-sm-6">
-          <div class="field-label-highlight">Jenis kelamin</div>
-          <q-select
-            v-model="form.jenisKelamin"
-            :options="jenisKelaminOptions"
-            borderless
-            dense
-            hide-bottom-space
-            dropdown-icon="keyboard_arrow_down"
-            class="highlight-input"
-          />
-        </div>
-        <div class="col-12 col-sm-6">
-          <div class="field-label-highlight">Agama</div>
-          <q-select
-            v-model="form.agama"
-            :options="agamaOptions"
-            borderless
-            dense
-            hide-bottom-space
-            dropdown-icon="keyboard_arrow_down"
-            class="highlight-input"
-          />
-        </div>
-
-        <!-- Alamat Lengkap (full-width) -->
-        <div class="col-12">
-          <div class="field-label">Alamat lengkap</div>
-          <q-input
-            v-model="form.alamatLengkap"
-            borderless
-            dense
-            hide-bottom-space
-            class="field-input"
-          />
-        </div>
-
-        <!-- Pair: Kota/Kabupaten + Kecamatan -->
-        <div class="col-12 col-sm-6">
-          <div class="field-label-highlight">Kecamatan</div>
-          <q-select
-            v-model="form.kecamatan"
-            :options="kecamatanOptions"
-            borderless
-            dense
-            hide-bottom-space
-            dropdown-icon="keyboard_arrow_down"
-            class="highlight-input"
-          />
-        </div>
-        <div class="col-12 col-sm-6">
-          <div class="field-label-highlight">Desa/ Kelurahan</div>
-          <q-select
-            v-model="form.desa"
-            :options="desaOptions"
-            borderless
-            dense
-            hide-bottom-space
-            dropdown-icon="keyboard_arrow_down"
-            class="highlight-input"
-          />
-        </div>
       </div>
 
-      <!-- ===== TOMBOL SIMPAN (bawah kanan) ===== -->
+      <!-- ===== TOMBOL SIMPAN ===== -->
       <div class="row justify-end q-mt-xl q-mb-md">
         <q-btn
           label="Simpan"
@@ -215,9 +106,6 @@
 </template>
 
 <script>
-import profilePicture from "src/assets/profile/profile-picture.jpg";
-import calendarIcon from "src/assets/profile/calendar.png";
-
 /**
  * ============================================================================
  * DOKUMENTASI API — Edit Profil
@@ -226,9 +114,6 @@ import calendarIcon from "src/assets/profile/calendar.png";
  * 1. MENGAMBIL DATA PROFIL (mounted)
  * -----------------------------------
  * Endpoint  : GET /api/user/profile
- * Deskripsi : Mengambil data profil pengguna yang sedang login
- *             untuk ditampilkan pada form.
- *
  * Headers:
  *   Authorization: Bearer <token>
  *
@@ -236,73 +121,26 @@ import calendarIcon from "src/assets/profile/calendar.png";
  *   {
  *     "success": true,
  *     "data": {
- *       "nama": "John Doe",
- *       "nomor_hp": "0808880808",
- *       "email": "user_ifoid@gmail.com",
- *       "nik": "3603081211020003",
- *       "nip": "-",
- *       "tanggal_lahir": "11/12/2002",
- *       "tempat_lahir": "Konawe Selatan",
- *       "jenis_kelamin": "Laki-laki",
- *       "agama": "Islam",
- *       "alamat_lengkap": "Jl. Potoro, Rt 003/002, Ds. Potoro",
- *       "kota": "Kabupaten Konawe Selatan",
- *       "kecamatan": "Andoolo",
- *       "foto_url": "https://..."
- *     }
- *   }
- *
- * Contoh Implementasi:
- *   import { api } from 'src/boot/axios';
- *
- *   async mounted() {
- *     try {
- *       const response = await api.get('/api/user/profile');
- *       if (response.data.success) {
- *         const d = response.data.data;
- *         this.form = {
- *           nama: d.nama,
- *           nomorHp: d.nomor_hp,
- *           email: d.email,
- *           nik: d.nik,
- *           nip: d.nip,
- *           tanggalLahir: d.tanggal_lahir,
- *           tempatLahir: d.tempat_lahir,
- *           jenisKelamin: d.jenis_kelamin,
- *           agama: d.agama,
- *           alamatLengkap: d.alamat_lengkap,
- *           kota: d.kota,
- *           kecamatan: d.kecamatan,
- *         };
- *       }
- *     } catch (error) {
- *       this.$q.notify({ type: 'negative', message: 'Gagal memuat data profil' });
+ *       "username": "andi123",
+ *       "nama": "Andi",
+ *       "email": "andi@gmail.com",
+ *       "hp": "081212145607"
  *     }
  *   }
  *
  * 2. MENYIMPAN DATA PROFIL (simpanProfile)
  * -----------------------------------------
  * Endpoint  : PUT /api/user/profile
- * Deskripsi : Mengirim data profil yang telah diubah ke server.
- *
  * Headers:
  *   Authorization: Bearer <token>
  *   Content-Type: application/json
  *
  * Request Body:
  *   {
- *     "nama": "John Doe",
- *     "nomor_hp": "0808880808",
- *     "email": "user_ifoid@gmail.com",
- *     "nik": "3603081211020003",
- *     "nip": "-",
- *     "tanggal_lahir": "11/12/2002",
- *     "tempat_lahir": "Konawe Selatan",
- *     "jenis_kelamin": "Laki-laki",
- *     "agama": "Islam",
- *     "alamat_lengkap": "Jl. Potoro, Rt 003/002, Ds. Potoro",
- *     "kota": "Kabupaten Konawe Selatan",
- *     "kecamatan": "Andoolo"
+ *     "username": "andi123",
+ *     "nama": "Andi",
+ *     "email": "andi@gmail.com",
+ *     "hp": "081212145607"
  *   }
  *
  * Response Sukses (200):
@@ -310,89 +148,146 @@ import calendarIcon from "src/assets/profile/calendar.png";
  *     "success": true,
  *     "message": "Profil berhasil diperbarui"
  *   }
- *
- * Contoh Implementasi:
- *   async simpanProfile() {
- *     try {
- *       this.loading = true;
- *       const response = await api.put('/api/user/profile', {
- *         nama: this.form.nama,
- *         nomor_hp: this.form.nomorHp,
- *         email: this.form.email,
- *         nik: this.form.nik,
- *         nip: this.form.nip,
- *         tanggal_lahir: this.form.tanggalLahir,
- *         tempat_lahir: this.form.tempatLahir,
- *         jenis_kelamin: this.form.jenisKelamin,
- *         agama: this.form.agama,
- *         alamat_lengkap: this.form.alamatLengkap,
- *         kota: this.form.kota,
- *         kecamatan: this.form.kecamatan,
- *       });
- *
- *       if (response.data.success) {
- *         this.$q.notify({ type: 'positive', message: response.data.message });
- *         this.$router.back();
- *       }
- *     } catch (error) {
- *       this.$q.notify({ type: 'negative', message: 'Gagal menyimpan profil' });
- *     } finally {
- *       this.loading = false;
- *     }
- *   }
  * ============================================================================
  */
+
+import { useAuthStore } from 'src/stores/auth';
+import { ProfileService } from 'src/services/profile.service';
 
 export default {
   name: "EditProfilePage",
 
   data() {
     return {
-      profilePicture,
-      calendarIcon,
       loading: false,
-
+      originalUsername: "",
       form: {
+        username: "",
         nama: "",
-        nomorHp: "0808880808",
-        email: "user_ifoid@gmail.com",
-        nik: "3603081211020003",
-        nip: "-",
-        tanggalLahir: "11/12/2002",
-        tempatLahir: "Konawe Selatan",
-        jenisKelamin: "Laki-laki",
-        agama: "Islam",
-        alamatLengkap: "Jl. Potoro, Rt 003/002, Ds. Potoro",
-        kecamatan: "Andoolo",
-        desa: "Potoro",
+        hp: "",
+        email: "",
       },
-
-      jenisKelaminOptions: ["Laki-laki", "Perempuan"],
-
-      agamaOptions: [
-        "Islam",
-        "Kristen",
-        "Katolik",
-        "Hindu",
-        "Buddha",
-        "Konghucu",
-      ],
-
-      kecamatanOptions: ["Andoolo"],
-
-      desaOptions: ["Potoro"],
     };
   },
 
-  methods: {
-    onTambahFoto() {
-      // TODO: Implementasi upload foto profil
-      console.log("Tambah foto diklik");
+  computed: {
+    auth() {
+      return useAuthStore()
     },
+    userInitial() {
+      const name = this.form.nama
+      if (!name) return '?'
+      return name.charAt(0).toUpperCase()
+    }
+  },
 
-    simpanProfile() {
-      // TODO: Implementasi pemanggilan API simpan profil (lihat dokumentasi di atas)
-      console.log("Simpan profil:", this.form);
+  async mounted() {
+    // Ambil data profil dari backend
+    try {
+      const res = await ProfileService.getProfile()
+      if (res.data?.success && res.data?.data) {
+        const d = res.data.data
+        this.form.username = d.username || ''
+        this.form.nama = d.nama || ''
+        this.form.hp = d.hp || ''
+        this.form.email = d.email || ''
+        this.originalUsername = d.username || ''
+      }
+    } catch (err) {
+      console.warn('Gagal ambil profil dari server, pakai data lokal:', err?.message)
+      // Fallback: prefill dari data user di auth store
+      const u = this.auth.user
+      if (u) {
+        this.form.username = u.username || ''
+        this.form.nama = u.nama || u.name || u.full_name || ''
+        this.form.hp = u.hp || u.phone || u.no_hp || u.no_telp || ''
+        this.form.email = u.email || ''
+        this.originalUsername = u.username || ''
+      }
+    }
+  },
+
+  methods: {
+    async simpanProfile() {
+      // Validasi dasar
+      if (!this.form.username || !this.form.nama || !this.form.hp || !this.form.email) {
+        return this.$q.notify({
+          message: 'Semua field wajib diisi',
+          color: 'negative',
+          icon: 'warning'
+        })
+      }
+
+      this.loading = true
+
+      try {
+        const res = await ProfileService.updateProfile({
+          username: this.form.username,
+          nama: this.form.nama,
+          hp: this.form.hp,
+          email: this.form.email
+        })
+
+        if (res.data?.success) {
+          // Update data di auth store dan localStorage
+          const updatedUser = {
+            ...this.auth.user,
+            username: this.form.username,
+            nama: this.form.nama,
+            hp: this.form.hp,
+            email: this.form.email
+          }
+          this.auth.user = updatedUser
+          localStorage.setItem('user', JSON.stringify(updatedUser))
+
+          this.$q.notify({
+            message: res.data.message || 'Profil berhasil diperbarui',
+            color: 'positive',
+            icon: 'check_circle'
+          })
+
+          // Jika username berubah, logout karena token sudah tidak valid
+          if (this.form.username !== this.originalUsername) {
+            this.$q.notify({
+              message: 'Username berubah. Silakan login ulang.',
+              color: 'info',
+              icon: 'info',
+              timeout: 2000
+            })
+            setTimeout(() => {
+              this.auth.logout()
+              this.$router.replace('/')
+            }, 1500)
+          } else {
+            // Update data di auth store dan localStorage
+            const updatedUser = {
+              ...this.auth.user,
+              username: this.form.username,
+              nama: this.form.nama,
+              hp: this.form.hp,
+              email: this.form.email
+            }
+            this.auth.user = updatedUser
+            localStorage.setItem('user', JSON.stringify(updatedUser))
+            this.$router.back()
+          }
+        } else {
+          this.$q.notify({
+            message: res.data?.message || 'Gagal menyimpan profil',
+            color: 'negative',
+            icon: 'error'
+          })
+        }
+      } catch (err) {
+        console.error('Simpan profil error:', err)
+        this.$q.notify({
+          message: err.response?.data?.message || 'Terjadi kesalahan saat menyimpan profil',
+          color: 'negative',
+          icon: 'error'
+        })
+      } finally {
+        this.loading = false
+      }
     },
   },
 };
@@ -428,7 +323,23 @@ export default {
   overflow-y: auto;
 }
 
-/* Tombol Simpan: #114EA4, 95x31, radius 8 */
+/* ─── INISIAL AVATAR ─── */
+.profile-initial {
+  width: 63px;
+  height: 63px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Tombol Simpan */
 .btn-simpan {
   background-color: #114ea4;
   color: #ffffff;
@@ -463,64 +374,17 @@ export default {
   color: #000000;
 }
 
-.field-label-highlight {
-  font-family: "Poppins", sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #9e9e9e;
-  margin-bottom: 6px;
-}
-
-.highlight-input {
-  background-color: #fcfbfc;
-  border-radius: 8px;
-  padding: 4px 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.highlight-input :deep(.q-field__control) {
-  padding: 0;
-}
-
-.highlight-input :deep(input),
-.highlight-input :deep(.q-field__native) {
-  font-family: "Poppins", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #000000;
-}
-
-.calendar-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  opacity: 0.6;
-}
-
-/* ===== Max-width Container: Tablet (≥600px) ===== */
+/* ===== Responsive ===== */
 @media (min-width: 600px) {
-  /* .header-inner, */
   .content-wrapper {
     max-width: 95%;
     margin: 0 auto;
-  }
-
-  .header-title {
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .content-wrapper {
     padding-top: 24px;
     padding-left: 32px;
     padding-right: 32px;
   }
 
-  .field-input :deep(input),
-  .highlight-input :deep(input),
-  .highlight-input :deep(.q-field__native) {
+  .field-input :deep(input) {
     font-size: 17px;
   }
 }
