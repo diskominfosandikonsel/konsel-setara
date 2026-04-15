@@ -11,6 +11,7 @@ export const usePerakStore = defineStore('perak', {
         pendidikan: [],
         pengalaman: [],
         jabatan: [],
+        lampiran: [],
         list_kecamatan: [],
         list_des_kel: [],
         list_perkawinan: [],
@@ -117,7 +118,7 @@ export const usePerakStore = defineStore('perak', {
             this.loading = true;
             try {
                 const res = await PerakService.getBiodata(payload)
-                console.log("Response Backend:", res.data.data)
+                // console.log("Response Backend:", res.data.data)
                 this.biodata = res.data.data
                 this.jml_data = res.data.jml_data
             } catch (err) {
@@ -340,7 +341,7 @@ export const usePerakStore = defineStore('perak', {
             this.loading = true;
             try {
                 const res = await PerakService.getPengalaman(payload)
-                console.log("Response Backend:", res.data.data)
+                // console.log("Response Backend:", res.data.data)
                 this.pengalaman = res.data.data
                 this.jml_data = res.data.jml_data
             } catch (err) {
@@ -443,7 +444,7 @@ export const usePerakStore = defineStore('perak', {
             this.loading = true;
             try {
                 const res = await PerakService.getJabatan(payload)
-                console.log("Response Backend:", res.data.data)
+                // console.log("Response Backend:", res.data.data)
                 this.jabatan = res.data.data
                 this.jml_data = res.data.jml_data
             } catch (err) {
@@ -534,6 +535,71 @@ export const usePerakStore = defineStore('perak', {
                         });
                     }
                     return true;
+                }
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        },
+
+        async fetchLampiran(payload = {}) {
+            console.log("LAMPIRAN TERPANGGIL");
+            this.loading = true;
+            try {
+                const res = await PerakService.getLampiran(payload)
+                console.log("Response Backend:", res.data.data)
+                this.lampiran = res.data.data
+                this.jml_data = res.data.jml_data
+            } catch (err) {
+                Notify.create({
+                    message: 'Gagal ambil data',
+                    color: 'negative'
+                })
+            } finally {
+                this.loading = false
+                Loading.hide()
+            }
+        },
+        async addLampiran(payload) {
+            console.log("ADD LAMPIRAN DIPANGGIL", payload);
+            Loading.show({ message: 'Proses menyimpan ke sistem...' });
+
+            try {
+                const formData = new FormData();
+
+                formData.append("biodata_id", payload.biodata_id);
+                formData.append("uraian", payload.uraian);
+                formData.append("file", payload.file);
+                formData.append("file_type", payload.file_type);
+
+                const res = await PerakService.addLampiran(formData);
+                
+                if (res) {
+                    Notify.create({
+                        message: 'Sukses Menambah Data',
+                        color: 'primary',
+                        icon: 'check_circle_outline'
+                    });
+                    await this.fetchLampiran();
+                    return true;
+                }
+            } catch (err) {
+                console.error("Error FrontEnd:", err);
+                Notify.create({ message: 'Gagal menambah data', color: 'negative' });
+                return false;
+            }
+        },
+        async removeLampiran(idnya, filenya) {
+            try {
+                const res = await PerakService.removeLampiran({ id: idnya, file: filenya });
+                if (res) {
+                Notify.create({
+                    message: 'Sukses Menghapus Data',
+                    color: 'negative',
+                    icon: 'check_circle_outline'
+                });
+                await this.fetchLampiran();
+                return true;
                 }
             } catch (err) {
                 console.error(err);

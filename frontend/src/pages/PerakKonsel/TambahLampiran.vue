@@ -15,17 +15,17 @@
             <q-page class="q-pa-md">
                 <div class="row" style="margin-top: 30px">
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Uraian" class="formInput" />
+                        <q-input v-model="form.uraian" outlined placeholder="Uraian" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-file v-model="file" outlined class="formInput">
+                        <q-file v-model="form.file" outlined class="formInput">
                             <template v-slot:prepend>
                                 <q-icon name="attach_file" />
                             </template>
                         </q-file>
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="saveData" />
+                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="addData" />
                     </div>
                 </div>
             </q-page>
@@ -34,40 +34,49 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'TambahLampiran',
     data() {
         return {
-            lokasi_pilihan: null,
-            upah: null,
-
-            optionsLokasi: [
-                { label: 'Dalam Negeri', value: 1 },
-                { label: 'Luar Negeri', value: 2 }
-            ],
-            optionsUpah: [
-                { label: '< Rp. 1.000.000', value: 1 },
-                { label: 'Rp. 1.000.000 - Rp. 2.500.000', value: 2 },
-                { label: 'Rp. 2.500.000 - Rp. 5.000.000', value: 3 },
-                { label: '> Rp. 5.000.000', value: 4 }
-            ]
+            form : {
+                id : '',
+                biodata_id : this.$route.query.b_id,
+                uraian : '',
+                file : null,
+                file_type : ''
+            },
+        }
+    },
+    computed: {
+        perak() {
+            return usePerakStore()
         }
     },
     methods: {
         goBack() {
             this.$router.back()
         },
-        saveData() {
-            this.$q.notify({
-                message: 'Data Berhasil Ditambahkan!',
-                color: 'positive',
-                icon: 'check_circle',
-                position: 'top', // Bisa 'top', 'bottom', 'center'
-                timeout: 2000,   // Hilang dalam 2 detik
-                actions: [{ label: 'Tutup', color: 'white', handler: () => { /* ... */ } }]
-            })
-        }
+        async addData() {
+            this.loading = true;
+            try {
+                await this.perak.addLampiran(this.form);
+                
+                this.$q.notify({
+                    message: 'Data Berhasil Disimpan!',
+                    color: 'positive',
+                    icon: 'check_circle',
+                    position: 'top'
+                });
+
+                this.$router.push('/lampiran');
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 }
 </script>
