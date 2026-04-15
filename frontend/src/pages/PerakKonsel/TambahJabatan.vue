@@ -15,36 +15,36 @@
             <q-page class="q-pa-md">
                 <div class="row" style="margin-top: 30px">
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Ditujukan Ke Perusahaan/Kementrian/Lainnya" class="formInput" />
+                        <q-input v-model="form.ditujukan" outlined placeholder="Ditujukan Ke Perusahaan/Kementrian/Lainnya" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Jabatan Yang Dinginkan" class="formInput" />
-                    </div>
-                    <div class="col-12 col-md-12">
-                        <q-select
-                            v-model="lokasi_pilihan"
-                            :options="optionsLokasi"
-                            option-value="value"
-                            option-label="label"
-                            outlined class="formInput"
-                            emit-value map-options
-                        />
-                    </div>
-                    <div class="col-12 col-md-12">
-                        <q-input outlined placeholder="Lokasi Tempat Tinggal/Wilayah Lain" class="formInput" />
+                        <q-input v-model="form.jabatan" outlined placeholder="Jabatan Yang Dinginkan" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
                         <q-select
-                            v-model="upah"
-                            :options="optionsUpah"
-                            option-value="value"
-                            option-label="label"
-                            outlined class="formInput"
-                            emit-value map-options
+                            v-model="form.lokasi"
+                            :options="perak.opsiLokasi"
+                            emit-value map-options outlined
+                            label="Lokasi"
+                            class="formInput"
                         />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="saveData" />
+                        <q-input v-model="form.lokasi_wilayah" outlined placeholder="Lokasi Tempat Tinggal/Wilayah Lain" class="formInput" />
+                    </div>
+                    <div class="col-12 col-md-12">
+                        <q-select
+                            v-model="form.besaran_upah_id"
+                            :options="perak.list_upah"
+                            option-value="id"
+                            option-label="uraian"
+                            class="formInput"
+                            label="Besaran Upah yang Diinginkan"
+                            outlined emit-value map-options
+                        />
+                    </div>
+                    <div class="col-12 col-md-12">
+                        <q-btn label="Tambah" class="btnSimpan full-width" unelevated no-caps @click="addData" />
                     </div>
                 </div>
             </q-page>
@@ -53,40 +53,59 @@
 </template>
 
 <script>
+import { usePerakStore } from 'stores/perak'
 
 export default {
     name: 'TambahJabatan',
     data() {
         return {
+            form: {
+                id : '',
+                biodata_id : this.$route.query.b_id,
+                ditujukan : '',
+                jabatan : '',
+                lokasi : '',
+                lokasi_wilayah : '',
+                besaran_upah_id : '',
+            },
             lokasi_pilihan: null,
             upah: null,
-
-            optionsLokasi: [
-                { label: 'Dalam Negeri', value: 1 },
-                { label: 'Luar Negeri', value: 2 }
-            ],
-            optionsUpah: [
-                { label: '< Rp. 1.000.000', value: 1 },
-                { label: 'Rp. 1.000.000 - Rp. 2.500.000', value: 2 },
-                { label: 'Rp. 2.500.000 - Rp. 5.000.000', value: 3 },
-                { label: '> Rp. 5.000.000', value: 4 }
-            ]
         }
+    },
+    computed: {
+        perak() {
+            return usePerakStore()
+        },
     },
     methods: {
         goBack() {
             this.$router.back()
         },
-        saveData() {
-            this.$q.notify({
-                message: 'Data Berhasil Ditambahkan!',
-                color: 'positive',
-                icon: 'check_circle',
-                position: 'top', // Bisa 'top', 'bottom', 'center'
-                timeout: 2000,   // Hilang dalam 2 detik
-                actions: [{ label: 'Tutup', color: 'white', handler: () => { /* ... */ } }]
-            })
+        async addData() {
+            if (!this.form.biodata_id) {
+                this.$q.notify({
+                    message: 'ID Biodata tidak ditemukan, silahkan muat ulang halaman',
+                    color: 'negative'
+                });
+                return;
+            }
+            this.loading = true;
+            console.log("Data yang akan dikirim:", this.form);
+            try {
+                await this.perak.addJabatan(this.form);
+                this.$router.push('/jabatan');
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async initData() {
+            await this.perak.fetchUpah()
         }
+    },
+    mounted() {
+        this.initData()
     }
 }
 </script>

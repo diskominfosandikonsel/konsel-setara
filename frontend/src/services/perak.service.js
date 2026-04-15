@@ -29,6 +29,9 @@ export const PerakService = {
   getJurusan(id) {
     return apiPerak.post('dm_master_jurusan/list', { pendidikan_id: id })
   },
+  getUpah() {
+    return apiPerak.post('dm_master_besaran_upah/list')
+  },
 
 
   getBiodata(payload = {}) {
@@ -67,6 +70,19 @@ export const PerakService = {
   },
   removePengalaman(payload) {
     return apiPerak.post('pengalaman_kerja/removeData', payload)
+  },
+
+  getJabatan(payload = {}) {
+    return apiPerak.post('jabatan/view', payload)
+  },
+  addJabatan(payload) {
+    return apiPerak.post('jabatan/addData', payload)
+  },
+  editJabatan(payload) {
+    return apiPerak.post('jabatan/editData', payload)
+  },
+  removeJabatan(payload) {
+    return apiPerak.post('jabatan/removeData', payload)
   },
 
 

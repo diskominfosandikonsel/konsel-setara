@@ -56,6 +56,15 @@
     margin-top: 3px;
 }
 
+.judulx {
+    color: #364151;
+    font-size: 12px;
+    font-weight: 500;
+    width: 100%;
+    display: block;
+    margin-top: 3px;
+}
+
 .cardx {
     background: linear-gradient(180deg, #bbdefb 0%, #90caf9 100%);
     width: 55px;

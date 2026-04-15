@@ -18,7 +18,7 @@
                     <q-spinner-dots color="primary" size="40px" />
                 </div>
                 <q-list class="mulish q-pa-md">
-                    <template v-if="perak.pengalaman">
+                    <template v-if="perak.pengalaman && perak.pengalaman.length > 0">
                         <q-card v-for="(data, index) in perak.pengalaman" :key="index" class="q-mb-md cardPengalaman q-pa-md">
                             <div class="row no-wrap items-start justify-between">
                                 <div class="col">
@@ -62,10 +62,19 @@
                         </q-card>
                     </template>
                     <template v-else>
-                        <div class="column flex-center q-pa-xl" style="min-height: 400px;">
-                            <q-img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 120px; opacity: 0.5;" />
-                            <div class="text-h6 text-grey-5 q-mt-md">Data Belum Ada</div>
-                            <div class="text-caption text-grey-4">Klik tombol + untuk menambah riwayat pendidikan</div>
+                        <div class="column justify-center items-center q-pa-xl" style="min-height: 70vh;">
+                            <q-img
+                                src="/img/no_data.png"
+                                fit="contain"
+                                style="width: 120px; height: 120px;"
+                                no-spinner
+                            />
+                            <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
+                                Tidak ada data ditemukan
+                            </div>
+                            <div class="divBtn flex flex-center" @click="goAdd">
+                                <q-icon name="r_add" color="white" size="40px" />
+                            </div>
                         </div>
                     </template>
                 </q-list>
@@ -88,37 +97,6 @@ export default {
             page_first: 1,
             cari_value: '',
             page_limit: 10,
-
-            listPengalamanKerja: [
-                {
-                    jabatan: 'Senior Full Stack Developer',
-                    uraian: 'Bertanggung jawab dalam pengembangan dan pemeliharaan aplikasi pelaporan publik (Lapor Bupati) serta integrasi sistem API antar dinas.',
-                    lama_kerja: '2 Tahun 4 Bulan',
-                    pemberi_kerja: 'Dinas Komunikasi dan Informatika (Kominfo)',
-                    catatan_pengantar: 'Memiliki kemampuan adaptasi tinggi terhadap infrastruktur PDN dan mampu bekerja di bawah tekanan tenggat waktu proyek strategis daerah.'
-                },
-                {
-                    jabatan: 'Mobile Developer',
-                    uraian: 'Mengembangkan aplikasi absensi berbasis pengenalan wajah (Face Recognition) dan mengoptimalkan performa aplikasi pada perangkat Android low-end.',
-                    lama_kerja: '1 Tahun 8 Bulan',
-                    pemberi_kerja: 'Badan Kepegawaian Daerah (BKD)',
-                    catatan_pengantar: 'Sangat teliti dalam keamanan data biometrik dan memiliki pemahaman mendalam mengenai limitasi hardware perangkat mobile.'
-                },
-                {
-                    jabatan: 'Backend Engineer',
-                    uraian: 'Membangun arsitektur database untuk sistem manajemen aset daerah (e-Aset) sesuai dengan standar regulasi Permendagri.',
-                    lama_kerja: '1 Tahun 2 Bulan',
-                    pemberi_kerja: 'Sekretariat Daerah (SETDA)',
-                    catatan_pengantar: 'Mampu menerjemahkan regulasi teknis pemerintahan ke dalam skema database yang efisien dan terstruktur.'
-                },
-                {
-                    jabatan: 'System Administrator',
-                    uraian: 'Mengelola server Nginx, konfigurasi Docker, dan melakukan migrasi database SQL Server untuk sistem keuangan desa (Siskeudes).',
-                    lama_kerja: '3 Tahun',
-                    pemberi_kerja: 'Dinas Pemberdayaan Masyarakat Desa (DPMD)',
-                    catatan_pengantar: 'Ahli dalam troubleshooting server pada kondisi jaringan terbatas di area pelosok/pedesaan.'
-                }
-            ]
         }
     },
     computed: {

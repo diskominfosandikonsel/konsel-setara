@@ -10,15 +10,21 @@ export const usePerakStore = defineStore('perak', {
         biodata: [],
         pendidikan: [],
         pengalaman: [],
+        jabatan: [],
         list_kecamatan: [],
         list_des_kel: [],
         list_perkawinan: [],
         list_agama: [],
         list_pendidikan: [],
         list_jurusan: [],
+        list_upah: [],
         opsiJenkel: [
             { id: 1, label: 'Laki-laki', value: 'Laki-laki' },
             { id: 2, label: 'Perempuan', value: 'Perempuan' }
+        ],
+        opsiLokasi: [
+            { id: 1, label: 'Dalam Negeri', value: 'Dalam Negeri' },
+            { id: 2, label: 'Luar Negeri', value: 'Luar Negeri' }
         ],
 
         jml_data: 0,
@@ -92,6 +98,15 @@ export const usePerakStore = defineStore('perak', {
                 console.error("Gagal load jurusan", err)
             } finally {
                 this.loading = false
+            }
+        },
+        async fetchUpah() {
+            try {
+                const res = await PerakService.getUpah()
+                console.log(res.data);
+                this.list_upah = res.data
+            } catch (err) {
+                console.error("Gagal load upah", err)
             }
         },
 
@@ -216,10 +231,6 @@ export const usePerakStore = defineStore('perak', {
                 return false;
             }
         },
-        selectData(data) {
-            this.dataEdit = { ...data };
-        },
-
 
         async fetchPendidikanFormal(payload = {}) {
             console.log("PENDIDIKAN FORMAL TERPANGGIL");
@@ -425,6 +436,114 @@ export const usePerakStore = defineStore('perak', {
                 console.error(err);
                 return false;
             }
+        },
+
+        async fetchJabatan(payload = {}) {
+            console.log("JABATAN TERPANGGIL");
+            this.loading = true;
+            try {
+                const res = await PerakService.getJabatan(payload)
+                console.log("Response Backend:", res.data.data)
+                this.jabatan = res.data.data
+                this.jml_data = res.data.jml_data
+            } catch (err) {
+                Notify.create({
+                    message: 'Gagal ambil data',
+                    color: 'negative'
+                })
+            } finally {
+                this.loading = false
+                Loading.hide()
+            }
+        },
+        async addJabatan(payload) {
+            console.log("ADD PENGALAMAN KERJA DIPANGGIL", payload);
+            Loading.show({ message: 'Proses menyimpan ke sistem...' });
+
+            try {
+                const formData = new FormData();
+
+                formData.append("biodata_id", payload.biodata_id);
+                formData.append("ditujukan", payload.ditujukan);
+                formData.append("jabatan", payload.jabatan);
+                formData.append("lokasi", payload.lokasi);
+                formData.append("lokasi_wilayah", payload.lokasi_wilayah);
+                formData.append("besaran_upah_id", payload.besaran_upah_id);
+
+                const res = await PerakService.addJabatan(formData);
+                
+                if (res) {
+                Notify.create({
+                    message: 'Sukses Menambah Data',
+                    color: 'primary',
+                    icon: 'check_circle_outline'
+                });
+                await this.fetchJabatan();
+                return true;
+                }
+            } catch (err) {
+                console.error("Error FrontEnd:", err);
+                Notify.create({ message: 'Gagal menambah data', color: 'negative' });
+                return false;
+            }
+        },
+        async editJabatan(payload) {
+            console.log("EDIT JABATAN DIPANGGIL", payload);
+            Loading.show({ message: 'Proses menyimpan ke sistem...' });
+
+            try {
+                const formData = new FormData();
+
+                formData.append("id", payload.id);
+                formData.append("biodata_id", payload.biodata_id);
+                formData.append("ditujukan", payload.ditujukan);
+                formData.append("jabatan", payload.jabatan);
+                formData.append("lokasi", payload.lokasi);
+                formData.append("lokasi_wilayah", payload.lokasi_wilayah);
+                formData.append("besaran_upah_id", payload.besaran_upah_id);
+
+                const res = await PerakService.editJabatan(formData);
+                
+                if (res) {
+                    Notify.create({
+                        message: 'Sukses Merubah Data',
+                        color: 'warning',
+                        icon: 'check_circle_outline'
+                    });
+                    await this.fetchJabatan();
+                    return true;
+                }
+            } catch (err) {
+                console.error("Error FrontEnd:", err);
+                Notify.create({ message: 'Gagal mengedit data', color: 'negative' });
+                return false;
+            }
+        },
+        async removeJabatan(payload) {
+            try {
+                const res = await PerakService.removeJabatan({id: payload});
+                if (res) {
+                    Notify.create({
+                        message: 'Data Berhasil Dihapus',
+                        color: 'negative',
+                        icon: 'delete'
+                    });
+                    if (this.biodata.length > 0) {
+                        await this.fetchJabatan({ 
+                            biodata_id: this.biodata[0].id 
+                        });
+                    }
+                    return true;
+                }
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        },
+
+
+        selectData(data) {
+            this.dataEdit = { ...data };
         },
     },
 })

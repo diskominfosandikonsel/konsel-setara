@@ -18,7 +18,7 @@
                     <q-spinner-dots color="primary" size="40px" />
                 </div>
                 <q-list class="mulish q-pa-md">
-                    <template v-if="perak.pendidikan">
+                    <template v-if="perak.pendidikan && perak.pendidikan.length > 0">
                         <q-card v-for="(data) in perak.pendidikan" :key="data.id" class="q-mb-md cardPendidikan shadow-2">
                             <q-card-section class="q-pa-md">
                                 <div class="row no-wrap items-start justify-between">
@@ -74,10 +74,19 @@
                     </template>
 
                     <template v-else>
-                        <div class="column flex-center q-pa-xl" style="min-height: 400px;">
-                            <q-img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 120px; opacity: 0.5;" />
-                            <div class="text-h6 text-grey-5 q-mt-md">Data Belum Ada</div>
-                            <div class="text-caption text-grey-4">Klik tombol + untuk menambah riwayat pendidikan</div>
+                        <div class="column justify-center items-center q-pa-xl" style="min-height: 70vh;">
+                            <q-img
+                                src="/img/no_data.png"
+                                fit="contain"
+                                style="width: 120px; height: 120px;"
+                                no-spinner
+                            />
+                            <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
+                                Tidak ada data ditemukan
+                            </div>
+                            <div class="divBtn flex flex-center" @click="goAdd">
+                                <q-icon name="r_add" color="white" size="40px" />
+                            </div>
                         </div>
                     </template>
                 </q-list>
