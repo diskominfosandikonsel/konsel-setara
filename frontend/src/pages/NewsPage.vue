@@ -1,20 +1,48 @@
 <template>
   <q-page class="q-pa-md bg-white pb-xl">
     <!-- Header Berita -->
-    <div class="row items-center q-mb-lg header-title">
+    <div class="row items-center q-mb-md header-title">
       <q-btn flat round dense icon="keyboard_arrow_left" size="18px" @click="$router.back()" class="q-mr-sm" />
       <div class="text-h5 text-weight-regular text-black">Berita</div>
+    </div>
+
+    <!-- Kolom Pencarian -->
+    <div class="q-mb-md">
+      <q-input
+        outlined
+        dense
+        v-model="searchQuery"
+        placeholder="Cari berita terkini..."
+        bg-color="grey-1"
+        color="primary"
+        debounce="600"
+        @update:model-value="onSearch"
+      >
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+        <template v-slot:append v-if="searchQuery">
+          <q-icon name="close" @click="searchQuery = ''; onSearch()" class="cursor-pointer" />
+        </template>
+      </q-input>
     </div>
 
     <!-- Infinite Scroll Container -->
     <!-- :offset="150" berarti load triggger ketika pengguna mencapai 150px dari bawah -->
     <q-infinite-scroll @load="onLoad" :offset="150" ref="infiniteScrollRef">
+      
+      <!-- Empty State Pencarian -->
+      <div v-if="newsList.length === 0 && allDataLoaded" class="text-center q-py-xl">
+        <q-icon name="search_off" size="48px" color="grey-4" class="q-mb-sm" />
+        <div class="text-body2 text-grey-6">Berita tidak ditemukan</div>
+      </div>
+
       <!-- List Berita -->
       <div
         v-for="(news, idx) in newsList"
         :key="idx"
         class="row q-mb-md news-item items-start clickable-item"
-        @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date } })"
+        @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date, content: news.content } })"
       >
         <div class="col-4">
           <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
@@ -54,56 +82,78 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useBeritaStore } from 'src/stores/berita'
+import { getImageBerita, formatDate } from 'src/utils/helper'
+
+const beritaStore = useBeritaStore()
 
 const newsList = ref([])
 const allDataLoaded = ref(false)
+const infiniteScrollRef = ref(null)
 
-// Fungsi mock panggilan API
-// limit = 10 berarti default ambil 10 berita sesuai permintaan
-const fetchNews = async (page, limit = 10) => {
-  
-  // GANTI BAGIAN INI DENGAN FUNGSI API DARI DATABASE ASLI ANDA
-  // Contoh: 
-  // const response = await api.get(`/endpoint-berita?page=${page}&limit=${limit}`)
-  // return response.data
-  
-  return new Promise((resolve) => {
-    // Simulasi delay pemuatan data 1,5 detik
-    setTimeout(() => {
-      const dbHalaman = []
-      // Menghasilkan dummy data
-      for(let i = 1; i <= limit; i++) {
-        const id = ((page - 1) * limit) + i
-        dbHalaman.push({
-          id,
-          title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-          author: 'Pemkab Konawe Selatan',
-          date: '1 Years ago',
-          img: `https://picsum.photos/300/300?random=${id}`
-        })
-      }
-      resolve(dbHalaman)
-    }, 1000)
-  })
+const searchQuery = ref('')
+const page = ref(1)
+const lastPage = ref(1)
+
+const onSearch = () => {
+  newsList.value = []
+  allDataLoaded.value = false
+  page.value = 1
+  if (infiniteScrollRef.value) {
+    infiniteScrollRef.value.reset() // reset halaman kembali ke 1
+    infiniteScrollRef.value.resume()
+    infiniteScrollRef.value.trigger()
+  }
+}
+
+// Fungsi panggilan API Web menggunakan Store
+const fetchNews = async () => {
+  try {
+    const payload = {
+      data_ke: page.value,
+      cari_value: searchQuery.value || ""
+    }
+    
+    const res = await beritaStore.fetchBerita(payload)
+    
+    // Sesuaikan format balikan object API -> { data, jml_data }
+    const dataApi = res?.data || []
+    lastPage.value = res?.jml_data || 1
+    
+    return dataApi.map((item) => ({
+      id: item.id,
+      title: item.judul || 'Tanpa Judul',
+      author: item.createBy || 'Pemkab Konsel',
+      date: formatDate(item.createAt) || 'Waktu tak diketahui',
+      img: getImageBerita(item.foto),
+      content: item.isi || 'Tidak Ada Konten'
+    }))
+  } catch (error) {
+    console.error('Error memuat berita:', error)
+    return []
+  }
 }
 
 // Handler Infinite Scroll dari API Quasar
 const onLoad = async (index, done) => {
   try {
-    // index bernilai urutan per-halaman yang langsung dikasih Quasar secara matematis (1, 2, 3...)
-    const dataBatch = await fetchNews(index, 10)
+    if (allDataLoaded.value) {
+      done(true)
+      return
+    }
+
+    const dataBatch = await fetchNews()
     
     // Jika data tidak kosong, masukkan
     if (dataBatch && dataBatch.length > 0) {
       newsList.value.push(...dataBatch)
       
-      // Simulasi batasan total database (Misal hanya ada 30 data berita)
-      // Hal ini agar animasi load berhenti ketika seluruh berita habis di database.
-      if (newsList.value.length >= 25) {
+      if (page.value >= lastPage.value) {
         allDataLoaded.value = true
         done(true) // parameter true = henti pencarian data bawah
       } else {
-        done() // teruskan pemantauan scorll untuk load API part selanjutnya
+        page.value++ // lanjut ke page berikutnya next pass
+        done() 
       }
     } else {
       // Tidak ada data kembali

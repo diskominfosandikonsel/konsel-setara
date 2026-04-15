@@ -17,7 +17,7 @@
 
       <!-- Meta: tanggal & penulis -->
       <div class="news-meta q-mb-md">
-        <div>Writen on {{ news.date }}</div>
+        <div>Dibuat Pada {{ news.date }}</div>
         <div>{{ news.author }}</div>
       </div>
 
@@ -29,10 +29,8 @@
         fit="cover"
       />
 
-      <!-- Isi Artikel -->
-      <div class="news-body">
-        {{ news.content }}
-      </div>
+      <!-- Isi Artikel berformat HTML (Membutuhkan v-html) -->
+      <div class="news-body" v-html="news.content"></div>
 
     </div>
 
@@ -47,6 +45,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { BeritaService } from 'src/services/berita.service'
+import { getImageBerita, formatDate } from 'src/utils/helper'
 
 const route = useRoute()
 const news = ref(null)
@@ -58,35 +58,37 @@ onMounted(async () => {
   const state = window.history.state
 
   if (state?.img) {
-    // Data sudah ada dari list — tampilkan segera sambil fetch konten lengkap
+    // Data sudah ada dari list — tampilkan segera
     news.value = {
       id,
       title: state.title || 'Memuat judul...',
       date: state.date || '',
       author: state.author || '',
       img: state.img,
-      content: ''
+      content: state.content || ''
     }
   }
 
-  // TODO: Ganti dengan panggilan API nyata untuk mengambil konten lengkap
-  // Contoh: const response = await api.get(`/berita/${id}`)
-  // news.value = response.data
-
-  await new Promise(resolve => setTimeout(resolve, 600))
-
-  // Update dengan data lengkap dari API (termasuk konten artikel)
-  news.value = {
-    id,
-    title: state?.title || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-    date: state?.date || 'December 22, 2025',
-    author: state?.author || 'Admin',
-    img: state?.img || `https://picsum.photos/800/450?random=1`,
-    content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`
+  // Jika detail konten tidak ada dalam memory (misal dibuka langsung dari link)
+  if (!state?.img || !state?.content) {
+    try {
+      const response = await BeritaService.getBerita()
+      const dataApi = response.data?.data || response.data || []
+      
+      const item = dataApi.find(n => n.id == id)
+      if (item) {
+        news.value = {
+          id,
+          title: item.judul || 'Tanpa Judul',
+          author: item.createBy || 'Admin',
+          date: formatDate(item.createAt) || 'Waktu tak diketahui',
+          img: getImageBerita(item.foto),
+          content: item.isi || 'Tidak ada konten.'
+        }
+      }
+    } catch (e) {
+      console.error("Gagal mendapatkan rincian API:", e)
+    }
   }
 })
 </script>
@@ -125,9 +127,13 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 .news-body {
   font-size: 0.93rem;
   color: #333333;
-  line-height: 1.75;
+  line-height: 1.4;
   text-align: justify;
-  white-space: pre-line;
+}
+
+/* Mengatur spesifik jarak bawaan tag <p> dari v-html */
+:deep(.news-body p) {
+  margin-bottom: 1rem;
 }
 
 
