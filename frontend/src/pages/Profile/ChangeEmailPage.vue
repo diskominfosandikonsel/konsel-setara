@@ -1,28 +1,7 @@
 <!--
-  ============================================================================
   ChangeEmailPage.vue
-  ============================================================================
-  Deskripsi:
-    Halaman Ganti Email — menampilkan form untuk memverifikasi email
-    pengguna sebelum melakukan perubahan alamat email.
-
-  Struktur Komponen:
-    - Header       : Tombol kembali + judul "Ganti email"
-    - Ikon dekoratif: Ilustrasi email (Mail-Send.png, 62px)
-    - Form         : Input email terdaftar + tombol Verifikasi
-
-  Alur Pengguna:
-    1. Pengguna melihat email terdaftar saat ini
-    2. Pengguna memasukkan/mengedit email aktif
-    3. Klik tombol "Verifikasi" untuk memulai proses verifikasi
-
-  Aset Ikon (dari folder src/assets/profile/):
-    - Mail-Send.png : ikon ilustrasi email besar (dekoratif)
-
-  Desain Responsif:
-    - Mobile  : tampilan penuh (default)
-    - Tablet/Desktop (>=600px) : konten dibatasi max-width 600px, rata tengah
-  ============================================================================
+  Halaman Ganti Email — form verifikasi email pengguna.
+  Responsif menggunakan konsep Max-width Container & Pair-based Grouping.
 -->
 
 <template>
@@ -42,14 +21,10 @@
     </div>
 
     <!-- Konten utama -->
-    <div class="content-wrapper q-pa-md">
+    <div class="page-container q-pa-md">
       <!-- Ikon dekoratif email -->
       <div class="q-mb-md">
-        <img
-          :src="mailSendIcon"
-          alt="Mail icon"
-          class="decorative-icon"
-        />
+        <img :src="mailSendIcon" alt="Mail icon" class="decorative-icon" />
       </div>
 
       <!-- Judul dan instruksi -->
@@ -60,9 +35,8 @@
         Silakan masukan email aktif anda
       </div>
 
-      <!-- Form input email -->
+      <!-- Pair-based Grouping: label + input email -->
       <div class="q-mb-lg">
-        <!-- Label terpisah di atas input -->
         <div class="input-label q-mb-xs">
           Email terdaftar <span class="text-red">*</span>
         </div>
@@ -94,9 +68,6 @@
 </template>
 
 <script>
-/**
- * Import aset ikon dekoratif dari folder src/assets/profile/
- */
 import mailSendIcon from "src/assets/profile/Mail-Send.png";
 
 /**
@@ -108,9 +79,12 @@ import mailSendIcon from "src/assets/profile/Mail-Send.png";
  * Deskripsi : Mengirim kode verifikasi ke alamat email yang dimasukkan
  *             pengguna untuk memulai proses perubahan email.
  *
+ * Headers:
+ *   Authorization: Bearer <token>
+ *
  * Request Body:
  *   {
- *     "email": "user@example.com"   // Email aktif yang akan diverifikasi
+ *     "email": "user@example.com"
  *   }
  *
  * Response Sukses (200):
@@ -151,14 +125,7 @@ import mailSendIcon from "src/assets/profile/Mail-Send.png";
 export default {
   name: "ChangeEmailPage",
 
-  /**
-   * data()
-   * State reaktif komponen:
-   * - mailSendIcon : path ikon dekoratif email
-   * - email        : nilai input email pengguna (v-model)
-   * - loading      : status loading saat proses verifikasi berjalan
-   * - submitted    : penanda apakah form sudah pernah di-submit (untuk validasi)
-   */
+  // State form verifikasi email.
   data() {
     return {
       mailSendIcon,
@@ -169,22 +136,13 @@ export default {
   },
 
   computed: {
-    /**
-     * isEmailValid
-     * Memvalidasi format email menggunakan regex sederhana.
-     * Mengecek keberadaan karakter @, domain, dan TLD.
-     * @returns {boolean} true jika format email valid
-     */
+    // Validasi format email dengan regex sederhana.
     isEmailValid() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(this.email);
     },
 
-    /**
-     * emailErrorMessage
-     * Mengembalikan pesan error yang sesuai berdasarkan kondisi input.
-     * @returns {string} pesan error validasi
-     */
+    // Pesan error validasi input email.
     emailErrorMessage() {
       if (!this.email) return "Email wajib diisi";
       if (!this.isEmailValid) return "Format email tidak valid";
@@ -193,21 +151,12 @@ export default {
   },
 
   methods: {
-    /**
-     * onVerifikasi()
-     * Handler ketika tombol "Verifikasi" diklik.
-     * Melakukan validasi format email terlebih dahulu,
-     * kemudian memanggil API verifikasi email.
-     *
-     * TODO: Ganti logic di bawah dengan pemanggilan API sesungguhnya
-     *       menggunakan axios.post (lihat dokumentasi API di atas).
-     */
+    // Handler tombol Verifikasi: validasi lalu panggil API.
     onVerifikasi() {
       this.submitted = true;
-
       if (!this.isEmailValid) return;
 
-      // TODO: Implementasi pemanggilan API verifikasi email di sini
+      // TODO: POST /api/user/verify-email { email }
       console.log("Verifikasi email:", this.email);
     },
   },
@@ -215,11 +164,7 @@ export default {
 </script>
 
 <style scoped>
-/*
- * ===== HEADER =====
- * Garis bawah pada header dengan trik margin negatif
- * agar border tembus hingga pinggir layar.
- */
+/* Header halaman — border tembus hingga pinggir layar */
 .header-title {
   border-bottom: 1px solid #e0e0e0;
   padding-bottom: 12px;
@@ -229,21 +174,19 @@ export default {
   padding-right: 16px;
 }
 
-/*
- * ===== IKON DEKORATIF =====
- * Ilustrasi email berukuran 62px di bagian atas konten.
- */
+/* Max-width Container — membatasi lebar konten di tablet/desktop */
+.page-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .decorative-icon {
   width: 62px;
   height: 62px;
   object-fit: contain;
 }
 
-/*
- * ===== LABEL INPUT =====
- * Label "Email terdaftar *" dipisahkan di atas input
- * untuk menjaga presisi desain sesuai Figma.
- */
 .input-label {
   font-family: "Poppins", sans-serif;
   font-size: 14px;
@@ -251,10 +194,6 @@ export default {
   color: #000000;
 }
 
-/*
- * ===== INPUT EMAIL =====
- * Input borderless dengan garis bawah manual warna #C1C1C1.
- */
 .email-input {
   border-bottom: 1px solid #c1c1c1;
 }
@@ -269,10 +208,6 @@ export default {
   color: #000000;
 }
 
-/*
- * ===== TOMBOL VERIFIKASI =====
- * Background #114EA4, teks putih, tinggi 53px, border-radius 10px.
- */
 .btn-verifikasi {
   background-color: #114ea4;
   color: #ffffff;
@@ -283,17 +218,10 @@ export default {
   font-weight: 600;
 }
 
-/*
- * ===== RESPONSIF: TABLET / DESKTOP =====
- * Pada layar >= 600px, konten dibatasi max-width 600px
- * dan diposisikan rata tengah.
- */
+/* Responsif tablet/desktop */
 @media (min-width: 600px) {
-  .content-wrapper {
-    max-width: 600px;
-    margin: 0 auto;
+  .page-container {
     padding-top: 24px;
   }
 }
 </style>
-  

@@ -90,7 +90,7 @@
 
         <template v-if="beritaTerbaru.length > 0">
           <div v-for="(news, idx) in beritaTerbaru" :key="'news' + idx" class="row q-mb-md news-item news-clickable"
-            @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date } })">
+            @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date, content: news.content } })">
             <div class="col-4">
               <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
             </div>
@@ -140,6 +140,8 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { Autoplay } from 'swiper/modules'
 import { api } from 'src/api/api'
+import { useBeritaStore } from 'src/stores/berita'
+import { getImageBerita, formatDate } from 'src/utils/helper'
 
 export default {
   name: 'IndexPage',
@@ -149,6 +151,7 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const beritaStore = useBeritaStore()
     const swiperRef = ref(null)
     const activeIndex = ref(0)
 
@@ -261,19 +264,25 @@ export default {
 
     const fetchBeritaTerbaru = async () => {
       try {
-
-        // DUMMY DATA SEMENTARA
-        const dummyBerita = [
-          { id: 1, title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', author: 'Pemkab Konawe Selatan', date: '1 Years ago', img: 'https://picsum.photos/200/200?random=1' },
-          { id: 2, title: 'Perubahan Jadwal Pelayanan Masyarakat Selama Bulan Suci', author: 'Sekretariat Daerah', date: '2 Days ago', img: 'https://picsum.photos/200/200?random=2' },
-          { id: 3, title: 'Pengembangan Infrastruktur Jembatan Antar Desa', author: 'Dinas PU', date: '5 Days ago', img: 'https://picsum.photos/200/200?random=3' },
-          { id: 4, title: 'Rapat Kerja Tahunan Kabupaten Konawe Selatan', author: 'Humas Konsel', date: '1 Week ago', img: 'https://picsum.photos/200/200?random=4' },
-          { id: 5, title: 'Pembagian Sembako Gratis di Tiga Kecamatan', author: 'Dinas Sosial', date: '2 Weeks ago', img: 'https://picsum.photos/200/200?random=5' },
-          { id: 6, title: 'Berita Ke-6 Yang Tidak Boleh Tampil', author: 'Admin', date: 'Today', img: 'https://picsum.photos/200/200?random=6' }
-        ]
+        const payload = {
+          data_ke: 1,
+          cari_value: ""
+        }
+        
+        const response = await beritaStore.fetchBerita(payload)
+        const dataApi = response?.data || []
+        
+        const mappedBerita = dataApi.map((item) => ({
+          id: item.id,
+          title: item.judul || 'Tanpa Judul',
+          author: item.createBy || 'Admin',
+          date: formatDate(item.createAt) || 'Waktu Tidak Diketahui',
+          img: getImageBerita(item.foto),
+          content: item.isi || 'Tidak Ada Konten'
+        }))
 
         // Membatasi hanya 5 berita saja yang tampil
-        beritaTerbaru.value = dummyBerita.slice(0, 5)
+        beritaTerbaru.value = mappedBerita.slice(0, 5)
       } catch (error) {
         console.error('Gagal mengambil data berita:', error)
       }

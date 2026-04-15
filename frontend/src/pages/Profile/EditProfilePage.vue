@@ -174,23 +174,27 @@
 
         <!-- Pair: Kota/Kabupaten + Kecamatan -->
         <div class="col-12 col-sm-6">
-          <div class="field-label">Kota/ Kabupaten</div>
-          <q-input
-            v-model="form.kota"
+          <div class="field-label-highlight">Kecamatan</div>
+          <q-select
+            v-model="form.kecamatan"
+            :options="kecamatanOptions"
             borderless
             dense
             hide-bottom-space
-            class="field-input"
+            dropdown-icon="keyboard_arrow_down"
+            class="highlight-input"
           />
         </div>
         <div class="col-12 col-sm-6">
-          <div class="field-label">Kecamatan</div>
-          <q-input
-            v-model="form.kecamatan"
+          <div class="field-label-highlight">Desa/ Kelurahan</div>
+          <q-select
+            v-model="form.desa"
+            :options="desaOptions"
             borderless
             dense
             hide-bottom-space
-            class="field-input"
+            dropdown-icon="keyboard_arrow_down"
+            class="highlight-input"
           />
         </div>
       </div>
@@ -359,8 +363,8 @@ export default {
         jenisKelamin: "Laki-laki",
         agama: "Islam",
         alamatLengkap: "Jl. Potoro, Rt 003/002, Ds. Potoro",
-        kota: "Kabupaten Konawe Selatan",
         kecamatan: "Andoolo",
+        desa: "Potoro",
       },
 
       jenisKelaminOptions: ["Laki-laki", "Perempuan"],
@@ -373,6 +377,10 @@ export default {
         "Buddha",
         "Konghucu",
       ],
+
+      kecamatanOptions: ["Andoolo"],
+
+      desaOptions: ["Potoro"],
     };
   },
 
@@ -493,7 +501,7 @@ export default {
 @media (min-width: 600px) {
   /* .header-inner, */
   .content-wrapper {
-    max-width: 90%;
+    max-width: 95%;
     margin: 0 auto;
   }
 

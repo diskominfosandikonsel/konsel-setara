@@ -5,6 +5,13 @@ export const getImageUrl = (file) => {
     : 'https://via.placeholder.com/300x300?text=No+Image'
 }
 
+export const getImageBerita = (file) => {
+  const BASE_URL = 'https://server-web.konaweselatankab.go.id/'
+  return file
+    ? BASE_URL + 'uploads/' + file
+    : 'https://via.placeholder.com/300x300?text=No+Image'
+}
+
 export const formatDate = (dateString) => {
   if (!dateString) return ''
 

@@ -1,167 +1,191 @@
 <template>
-  <q-page class="lapor-bg">
+  <q-page class="bg-black text-white">
 
-    <!-- ══════════════════════════════ -->
-    <!-- HEADER                         -->
-    <!-- ══════════════════════════════ -->
-    <div class="lapor-header">
-      <div class="header-overlay"></div>
-      <div class="row items-center q-px-md q-pt-md relative-position z-top">
-        <q-btn flat round dense icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
-        <div class="header-title q-ml-sm">🔥 LAPOR KEJADIAN</div>
+    <!-- 🔥 CAMERA MODE -->
+    <div v-if="mode === 'camera'" class="camera-wrapper">
+      <div id="firetapCameraPreview" class="camera-preview"></div>
+
+      <!-- TOP BAR -->
+      <div class="top-bar row items-center justify-between q-px-md">
+        <q-btn flat round icon="close" color="white" @click="$router.back()" />
+        <div class="text-weight-bold">🔥 LAPOR KEJADIAN</div>
+        <div style="width: 40px"></div>
       </div>
 
-      <!-- PHOTO AREA -->
-      <div class="photo-zone column flex-center q-pb-lg relative-position z-top" @click="triggerCamera">
-        <transition name="fade" mode="out-in">
-          <div v-if="capturedImage" key="preview" class="photo-preview-wrapper">
+      <!-- BOTTOM BAR -->
+      <div class="bottom-bar">
+        <div class="row items-center justify-around">
+          <!-- Gallery -->
+          <q-btn flat round size="20px" icon="photo_library" color="white" @click="pickFromGallery" />
+
+          <!-- Capture -->
+          <div class="capture-wrapper" @click="takePicture">
+            <div class="capture-ring fire-ring">
+              <div class="capture-inner"></div>
+            </div>
+          </div>
+
+          <!-- Switch Camera -->
+          <q-btn flat round size="20px" icon="flip_camera_android" color="white" @click="switchCamera" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 🟡 FORM MODE (setelah foto diambil) -->
+    <div v-else class="form-mode">
+
+      <!-- HEADER with photo preview -->
+      <div class="lapor-header">
+        <div class="header-overlay"></div>
+        <div class="row items-center q-px-md q-pt-md relative-position z-top">
+          <q-btn flat round dense icon="arrow_back" color="white" class="glass-btn" @click="retakePhoto" />
+          <div class="header-title q-ml-sm">🔥 LAPOR KEJADIAN</div>
+        </div>
+
+        <!-- PHOTO PREVIEW AREA -->
+        <div class="photo-zone column flex-center q-pb-lg relative-position z-top" @click="retakePhoto">
+          <div class="photo-preview-wrapper">
             <img :src="capturedImage" class="photo-preview" />
             <div class="change-photo-hint">
               <q-icon name="camera_alt" size="16px" class="q-mr-xs" />
               Ganti Foto
             </div>
           </div>
-          <div v-else key="empty" class="photo-empty column flex-center">
-            <div class="camera-icon-ring">
-              <q-icon name="add_a_photo" size="40px" color="white" />
-            </div>
-            <div class="camera-hint q-mt-md">TAP UNTUK AMBIL FOTO KEJADIAN</div>
+        </div>
+      </div>
+
+      <!-- FORM AREA -->
+      <div class="form-area">
+
+        <!-- KATEGORI ADUAN -->
+        <div class="form-card q-mb-md">
+          <div class="form-card-head">
+            <q-icon name="local_fire_department" color="deep-orange" size="20px" />
+            <span>Kategori Aduan</span>
           </div>
-        </transition>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════ -->
-    <!-- FORM AREA                      -->
-    <!-- ══════════════════════════════ -->
-    <div class="form-area">
-
-      <!-- KATEGORI ADUAN — Field tambahan khusus Firetap -->
-      <div class="form-card q-mb-md">
-        <div class="form-card-head">
-          <q-icon name="local_fire_department" color="deep-orange" size="20px" />
-          <span>Kategori Aduan</span>
-        </div>
-        <div class="form-card-body">
-          <div class="row q-gutter-sm">
-            <div v-for="(kat, i) in kategoriList" :key="i" class="kategori-chip-btn"
-              :class="{ 'kat-active': form.jenis_kasus === i }" @click="form.jenis_kasus = i">
-              <span class="kat-icon">{{ kat.icon }}</span>
-              <span class="kat-label">{{ kat.label }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- JUDUL KASUS -->
-      <div class="form-card q-mb-md">
-        <div class="form-card-head">
-          <q-icon name="title" color="deep-orange" size="20px" />
-          <span>Judul Laporan</span>
-        </div>
-        <div class="form-card-body">
-          <q-input v-model="form.judul_kasus" outlined placeholder="Contoh: Kebakaran rumah di Jl. Merdeka"
-            bg-color="white" color="deep-orange" />
-        </div>
-      </div>
-
-      <!-- KETERANGAN -->
-      <div class="form-card q-mb-md">
-        <div class="form-card-head">
-          <q-icon name="edit_note" color="deep-orange" size="20px" />
-          <span>Catatan / Keterangan</span>
-        </div>
-        <div class="form-card-body">
-          <q-input v-model="form.catatan_kasus" type="textarea" outlined
-            placeholder="Jelaskan secara rinci situasi dan kondisi kejadian..." rows="3" bg-color="white"
-            color="deep-orange" />
-        </div>
-      </div>
-
-      <!-- LOKASI -->
-      <div class="form-card q-mb-xl">
-        <div class="form-card-head">
-          <q-icon name="place" color="deep-orange" size="20px" />
-          <span>Lokasi Kejadian</span>
-        </div>
-        <div class="form-card-body">
-          <div v-if="!hasLocation && !loadingLocation" class="loc-tap-box" @click="getLocation">
-            <div class="loc-tap-icon">
-              <q-icon name="my_location" size="28px" color="deep-orange" />
-            </div>
-            <div class="q-ml-md">
-              <div class="text-weight-bold" style="font-size: 14px; color: #c2410c">Tap untuk Ambil Lokasi</div>
-              <div class="text-caption text-grey-6">Izinkan akses lokasi di browser Anda</div>
-            </div>
-            <q-icon name="chevron_right" color="grey-4" class="q-ml-auto" />
-          </div>
-
-          <div v-else-if="loadingLocation" class="location-status">
-            <div class="row items-center q-gutter-sm">
-              <q-spinner-dots color="deep-orange" size="22px" />
-              <div>
-                <div class="text-weight-bold" style="font-size: 13px">Mendeteksi lokasi...</div>
-                <div class="text-caption text-grey-6">Mohon tunggu sebentar</div>
+          <div class="form-card-body">
+            <div class="row q-gutter-sm">
+              <div v-for="(kat, i) in kategoriList" :key="i" class="kategori-chip-btn"
+                :class="{ 'kat-active': form.jenis_kasus === i }" @click="form.jenis_kasus = i">
+                <span class="kat-icon">{{ kat.icon }}</span>
+                <span class="kat-label">{{ kat.label }}</span>
               </div>
             </div>
           </div>
+        </div>
 
-          <div v-else class="location-status active">
-            <div class="row items-center no-wrap">
-              <div class="loc-dot dot-active"></div>
-              <div class="q-ml-sm col">
-                <div class="text-weight-bold" style="font-size: 13px">Lokasi Terdeteksi ✓</div>
-                <div class="text-caption text-grey-6">{{ locationLabel }}</div>
+        <!-- JUDUL KASUS -->
+        <div class="form-card q-mb-md">
+          <div class="form-card-head">
+            <q-icon name="title" color="deep-orange" size="20px" />
+            <span>Judul Laporan</span>
+          </div>
+          <div class="form-card-body">
+            <q-input v-model="form.judul_kasus" outlined placeholder="Contoh: Kebakaran rumah di Jl. Merdeka"
+              bg-color="white" color="deep-orange" />
+          </div>
+        </div>
+
+        <!-- KETERANGAN -->
+        <div class="form-card q-mb-md">
+          <div class="form-card-head">
+            <q-icon name="edit_note" color="deep-orange" size="20px" />
+            <span>Catatan / Keterangan</span>
+          </div>
+          <div class="form-card-body">
+            <q-input v-model="form.catatan_kasus" type="textarea" outlined
+              placeholder="Jelaskan secara rinci situasi dan kondisi kejadian..." rows="3" bg-color="white"
+              color="deep-orange" />
+          </div>
+        </div>
+
+        <!-- LOKASI -->
+        <div class="form-card q-mb-xl">
+          <div class="form-card-head">
+            <q-icon name="place" color="deep-orange" size="20px" />
+            <span>Lokasi Kejadian</span>
+          </div>
+          <div class="form-card-body">
+            <div v-if="!hasLocation && !loadingLocation" class="loc-tap-box" @click="getLocation">
+              <div class="loc-tap-icon">
+                <q-icon name="my_location" size="28px" color="deep-orange" />
               </div>
-              <q-btn flat round dense icon="refresh" color="grey-5" size="sm" @click="resetLocation">
-                <q-tooltip>Perbarui lokasi</q-tooltip>
-              </q-btn>
+              <div class="q-ml-md">
+                <div class="text-weight-bold" style="font-size: 14px; color: #c2410c">Tap untuk Ambil Lokasi</div>
+                <div class="text-caption text-grey-6">Izinkan akses lokasi di browser Anda</div>
+              </div>
+              <q-icon name="chevron_right" color="grey-4" class="q-ml-auto" />
+            </div>
+
+            <div v-else-if="loadingLocation" class="location-status">
+              <div class="row items-center q-gutter-sm">
+                <q-spinner-dots color="deep-orange" size="22px" />
+                <div>
+                  <div class="text-weight-bold" style="font-size: 13px">Mendeteksi lokasi...</div>
+                  <div class="text-caption text-grey-6">Mohon tunggu sebentar</div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="location-status active">
+              <div class="row items-center no-wrap">
+                <div class="loc-dot dot-active"></div>
+                <div class="q-ml-sm col">
+                  <div class="text-weight-bold" style="font-size: 13px">Lokasi Terdeteksi ✓</div>
+                  <div class="text-caption text-grey-6">{{ locationLabel }}</div>
+                </div>
+                <q-btn flat round dense icon="refresh" color="grey-5" size="sm" @click="resetLocation">
+                  <q-tooltip>Perbarui lokasi</q-tooltip>
+                </q-btn>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- UPLOAD PROGRESS -->
-      <div v-if="uploading" class="upload-progress-area q-mb-md">
-        <div class="row items-center justify-between q-mb-xs">
-          <span class="text-caption text-grey-7">Mengunggah foto...</span>
-          <span class="text-caption text-deep-orange text-weight-bold">{{ uploadPercent }}%</span>
+        <!-- UPLOAD PROGRESS -->
+        <div v-if="uploading" class="upload-progress-area q-mb-md">
+          <div class="row items-center justify-between q-mb-xs">
+            <span class="text-caption text-grey-7">Mengunggah foto...</span>
+            <span class="text-caption text-deep-orange text-weight-bold">{{ uploadPercent }}%</span>
+          </div>
+          <q-linear-progress :value="uploadPercent / 100" color="deep-orange" rounded size="8px" animation-speed="200" />
         </div>
-        <q-linear-progress :value="uploadPercent / 100" color="deep-orange" rounded size="8px" animation-speed="200" />
-      </div>
 
-      <!-- SUBMIT BUTTON -->
-      <q-btn unelevated class="submit-btn full-width" no-caps :loading="isSending" :disable="!canSubmit"
-        @click="handleKirim">
-        <q-icon name="send" class="q-mr-sm" />
-        KIRIM LAPORAN DARURAT
-        <div class="btn-shine"></div>
-      </q-btn>
+        <!-- SUBMIT BUTTON -->
+        <q-btn unelevated class="submit-btn full-width" no-caps :loading="isSending" :disable="!canSubmit"
+          @click="handleKirim">
+          <q-icon name="send" class="q-mr-sm" />
+          KIRIM LAPORAN DARURAT
+          <div class="btn-shine"></div>
+        </q-btn>
 
-      <div class="text-center text-caption text-grey-5 q-mt-md q-mb-xl">
-        Laporan akan langsung diterima oleh petugas pemadam kebakaran
+        <div class="text-center text-caption text-grey-5 q-mt-md q-mb-xl">
+          Laporan akan langsung diterima oleh petugas pemadam kebakaran
+        </div>
       </div>
     </div>
-
-    <!-- HIDDEN CAMERA INPUT -->
-    <input type="file" accept="image/*" ref="cameraInput" style="display: none"
-      @change="onCameraCapture" />
 
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useFiretapStore } from 'stores/firetap'
 import { useAuthStore } from 'stores/auth'
 import { Geolocation } from '@capacitor/geolocation'
+import { Camera } from '@capacitor/camera'
+import { CameraPreview } from '@capacitor-community/camera-preview'
 
 const router = useRouter()
 const $q = useQuasar()
 const firetapStore = useFiretapStore()
 const authStore = useAuthStore()
+
+// Mode: 'camera' or 'form'
+const mode = ref('camera')
+const cameraPosition = ref('rear')
 
 // Form
 const form = ref({
@@ -187,9 +211,9 @@ const kategoriList = [
 ]
 
 // Camera & photo
-const cameraInput = ref(null)
 const capturedImage = ref(null)
 const capturedFile = ref(null)
+const flash = ref(false)
 
 // Location
 const loadingLocation = ref(false)
@@ -209,17 +233,185 @@ const canSubmit = computed(() =>
   !!capturedFile.value && form.value.judul_kasus.trim().length > 2 && form.value.jenis_kasus !== null
 )
 
-const triggerCamera = () => {
-  if (cameraInput.value) cameraInput.value.click()
+// ═══════════════════════════════════
+// CAMERA METHODS
+// ═══════════════════════════════════
+
+const initPermissions = async () => {
+  try {
+    const cam = await Camera.requestPermissions()
+    if (cam.camera !== 'granted') {
+      $q.dialog({
+        title: 'Izin Dibutuhkan',
+        message: 'Kamera dibutuhkan untuk mengambil foto kejadian',
+        ok: 'Buka Pengaturan',
+        cancel: true
+      })
+      return false
+    }
+  } catch (e) {
+    console.warn('Camera permission check failed', e)
+  }
+
+  // Get location in background
+  try {
+    const loc = await Geolocation.requestPermissions()
+    if (loc.location === 'granted' || loc.coarseLocation === 'granted') {
+      const pos = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      })
+      form.value.latitude = pos.coords.latitude
+      form.value.longitude = pos.coords.longitude
+    }
+  } catch (e) {
+    console.warn('Location permission/get failed', e)
+  }
+
+  return true
 }
 
-const onCameraCapture = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-  capturedFile.value = file
-  capturedImage.value = URL.createObjectURL(file)
-  event.target.value = ''
+const startCamera = async () => {
+  await nextTick()
+  try {
+    await CameraPreview.start({
+      parent: 'firetapCameraPreview',
+      className: 'camera-preview',
+      position: cameraPosition.value,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      toBack: true
+    })
+  } catch (e) {
+    console.error('Start camera error:', e)
+  }
 }
+
+const switchCamera = async () => {
+  try {
+    cameraPosition.value = cameraPosition.value === 'rear' ? 'front' : 'rear'
+    await CameraPreview.stop()
+    await startCamera()
+  } catch (err) {
+    console.error('Switch camera error:', err)
+  }
+}
+
+const takePicture = async () => {
+  try {
+    flash.value = true
+    setTimeout(() => (flash.value = false), 120)
+
+    const result = await CameraPreview.capture({ quality: 80 })
+    const dataUrl = 'data:image/jpeg;base64,' + result.value
+
+    const compressed = await compressImage(dataUrl)
+    capturedImage.value = compressed
+
+    const blob = dataURLtoBlob(compressed)
+    capturedFile.value = new File([blob], `img_${Date.now()}.jpg`, {
+      type: 'image/jpeg'
+    })
+
+    mode.value = 'form'
+    await nextTick()
+    await CameraPreview.stop()
+  } catch (err) {
+    console.error('Capture error:', err)
+  }
+}
+
+const pickFromGallery = async () => {
+  try {
+    const image = await Camera.getPhoto({
+      resultType: 'dataUrl',
+      source: 'photos'
+    })
+
+    if (!image?.dataUrl) return
+
+    const compressed = await compressImage(image.dataUrl)
+    capturedImage.value = compressed
+
+    const blob = dataURLtoBlob(compressed)
+    capturedFile.value = new File([blob], `img_${Date.now()}.jpg`, {
+      type: 'image/jpeg'
+    })
+
+    mode.value = 'form'
+    await nextTick()
+    await CameraPreview.stop()
+  } catch (err) {
+    console.error('Gallery pick error:', err)
+  }
+}
+
+const retakePhoto = async () => {
+  mode.value = 'camera'
+  capturedImage.value = null
+  capturedFile.value = null
+  await startCamera()
+}
+
+// ═══════════════════════════════════
+// UTILS
+// ═══════════════════════════════════
+
+const dataURLtoBlob = (dataurl) => {
+  const arr = dataurl.split(',')
+  const mime = arr[0].match(/:(.*?);/)[1]
+  const bstr = atob(arr[1])
+  const u8arr = new Uint8Array(bstr.length)
+  for (let i = 0; i < bstr.length; i++) {
+    u8arr[i] = bstr.charCodeAt(i)
+  }
+  return new Blob([u8arr], { type: mime })
+}
+
+const compressImage = (dataUrl, quality = 0.6, maxWidth = 1280) => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.src = dataUrl
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+
+      let w = img.width
+      let h = img.height
+
+      if (w > maxWidth) {
+        h = (h * maxWidth) / w
+        w = maxWidth
+      }
+
+      canvas.width = w
+      canvas.height = h
+      ctx.drawImage(img, 0, 0, w, h)
+
+      // Watermark
+      const now = new Date()
+      const time = now.toLocaleString()
+      const gps = (form.value.latitude && form.value.longitude)
+        ? `${form.value.latitude.toFixed(5)}, ${form.value.longitude.toFixed(5)}`
+        : 'No GPS'
+      const text = `${time} | ${gps}`
+
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'
+      ctx.fillRect(0, h - 50, w, 50)
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 14px Arial'
+      ctx.fillText(text, 10, h - 20)
+
+      const final = canvas.toDataURL('image/jpeg', quality)
+      resolve(final)
+    }
+  })
+}
+
+// ═══════════════════════════════════
+// LOCATION
+// ═══════════════════════════════════
 
 let isGettingLocation = false
 const doGetLocation = async () => {
@@ -244,7 +436,7 @@ const doGetLocation = async () => {
 
     form.value.latitude = pos.coords.latitude
     form.value.longitude = pos.coords.longitude
-    
+
   } catch (err) {
     console.error('Error getting location', err)
     $q.notify({ color: 'negative', message: 'Gagal mendapatkan lokasi. Pastikan GPS aktif.', icon: 'location_off' })
@@ -260,6 +452,10 @@ const resetLocation = () => {
   form.value.longitude = 0
   isGettingLocation = false
 }
+
+// ═══════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════
 
 const handleKirim = async () => {
   if (form.value.jenis_kasus === null) {
@@ -345,15 +541,135 @@ const handleKirim = async () => {
     uploadPercent.value = 0
   }
 }
+
+// ═══════════════════════════════════
+// LIFECYCLE
+// ═══════════════════════════════════
+
+onMounted(async () => {
+  const allowed = await initPermissions()
+  if (!allowed) return
+  await startCamera()
+})
+
+onBeforeUnmount(() => {
+  try {
+    CameraPreview.stop()
+  } catch (e) {}
+})
 </script>
 
 <style scoped>
-.lapor-bg {
+/* ─── CAMERA MODE ─── */
+.camera-wrapper {
+  position: relative;
+  height: 100vh;
+  z-index: 0;
+}
+
+#firetapCameraPreview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.camera-preview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.q-page {
+  background: transparent !important;
+}
+
+body, html {
+  background: transparent !important;
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  padding: 12px 16px;
+  padding-top: calc(env(safe-area-inset-top) + 12px);
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+/* 🔘 CAPTURE BUTTON */
+.capture-wrapper {
+  width: 90px;
+  height: 90px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-ring {
+  width: 80px;
+  height: 80px;
+  border: 4px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.capture-ring.fire-ring {
+  border-color: #f97316;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+}
+
+.capture-ring:active {
+  transform: scale(0.85);
+  box-shadow: 0 0 30px rgba(255,255,255,0.5);
+}
+
+.capture-inner {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* ⚡ FLASH */
+.flash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 20;
+  opacity: 0.8;
+  animation: flashAnim 0.15s ease-out;
+}
+
+@keyframes flashAnim {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
+
+/* ─── FORM MODE ─── */
+.form-mode {
   background: #fff7f0;
   min-height: 100vh;
 }
 
-/* ─── HEADER ─── */
 .lapor-header {
   position: relative;
   min-height: 300px;
@@ -416,49 +732,6 @@ const handleKirim = async () => {
   padding: 12px;
   display: flex;
   align-items: center;
-}
-
-.camera-icon-ring {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  border: 3px dashed rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(8px);
-  animation: pulse-border 2s infinite;
-}
-
-@keyframes pulse-border {
-
-  0%,
-  100% {
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-
-  50% {
-    border-color: rgba(255, 255, 255, 0.9);
-  }
-}
-
-.camera-hint {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-}
-
-/* ─── TRANSITION ─── */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 
 /* ─── FORM AREA ─── */
@@ -585,15 +858,8 @@ const handleKirim = async () => {
 }
 
 @keyframes blink {
-
-  0%,
-  100% {
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
-  }
-
-  50% {
-    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
 }
 
 /* ─── UPLOAD PROGRESS ─── */
@@ -634,16 +900,8 @@ const handleKirim = async () => {
 }
 
 @keyframes shine {
-  0% {
-    left: -100%;
-  }
-
-  40% {
-    left: 150%;
-  }
-
-  100% {
-    left: 150%;
-  }
+  0% { left: -100%; }
+  40% { left: 150%; }
+  100% { left: 150%; }
 }
 </style>

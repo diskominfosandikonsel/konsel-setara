@@ -1,29 +1,7 @@
 <!--
-  ============================================================================
   ChangePasswordPage.vue
-  ============================================================================
-  Deskripsi:
-    Halaman Ganti Password — menampilkan form untuk mengubah password
-    pengguna dengan input password baru dan konfirmasi password.
-
-  Struktur Komponen:
-    - Header         : Tombol kembali + judul "Ganti password"
-    - Ikon dekoratif : Ilustrasi gembok (Password-Lock.png, 62px)
-    - Form           : Input Password Baru, Konfirmasi Password Baru
-    - Tombol         : "Verifikasi" untuk submit perubahan password
-
-  Validasi:
-    1. Password baru wajib diisi
-    2. Konfirmasi password wajib diisi
-    3. Konfirmasi password harus sama dengan password baru
-
-  Aset Ikon (dari folder src/assets/profile/):
-    - Password-Lock.png : ikon ilustrasi gembok besar (dekoratif)
-
-  Desain Responsif:
-    - Mobile  : tampilan penuh (default)
-    - Tablet/Desktop (>=600px) : konten dibatasi max-width 600px, rata tengah
-  ============================================================================
+  Halaman Ganti Password — form input password baru & konfirmasi.
+  Responsif menggunakan konsep Max-width Container & Pair-based Grouping.
 -->
 
 <template>
@@ -43,7 +21,7 @@
     </div>
 
     <!-- Konten utama -->
-    <div class="content-wrapper q-pa-md">
+    <div class="page-container q-pa-md">
       <!-- Ikon dekoratif gembok -->
       <div class="q-mb-md">
         <img
@@ -61,7 +39,7 @@
         Silakan masukan Password Baru anda
       </div>
 
-      <!-- Input Password Baru -->
+      <!-- Pair-based Grouping: label + input password baru -->
       <div class="q-mb-md">
         <div class="input-label q-mb-xs">
           Password Baru <span class="text-red">*</span>
@@ -88,7 +66,7 @@
         </q-input>
       </div>
 
-      <!-- Input Konfirmasi Password Baru -->
+      <!-- Pair-based Grouping: label + input konfirmasi password -->
       <div class="q-mb-lg">
         <div class="input-label q-mb-xs">
           Konfirmasi Password Baru <span class="text-red">*</span>
@@ -129,9 +107,6 @@
 </template>
 
 <script>
-/**
- * Import aset ikon dekoratif dari folder src/assets/profile/
- */
 import passwordLockIcon from "src/assets/profile/Password-Lock.png";
 
 /**
@@ -191,17 +166,7 @@ import passwordLockIcon from "src/assets/profile/Password-Lock.png";
 export default {
   name: "ChangePasswordPage",
 
-  /**
-   * data()
-   * State reaktif komponen:
-   * - passwordLockIcon   : path ikon dekoratif gembok
-   * - password           : nilai input password baru (v-model)
-   * - confirmPassword    : nilai input konfirmasi password (v-model)
-   * - showPassword       : toggle visibilitas password baru
-   * - showConfirmPassword: toggle visibilitas konfirmasi password
-   * - loading            : status loading saat proses verifikasi
-   * - submitted          : penanda apakah form sudah pernah di-submit
-   */
+  // State form ganti password.
   data() {
     return {
       passwordLockIcon,
@@ -215,14 +180,7 @@ export default {
   },
 
   computed: {
-    /**
-     * confirmPasswordError
-     * Mengembalikan pesan error untuk input konfirmasi password.
-     * - Kosong jika belum di-submit atau sudah valid
-     * - "Konfirmasi password wajib diisi" jika kosong
-     * - "Konfirmasi password tidak cocok" jika tidak sama
-     * @returns {string} pesan error validasi
-     */
+    // Pesan error validasi konfirmasi password.
     confirmPasswordError() {
       if (!this.submitted) return "";
       if (!this.confirmPassword) return "Konfirmasi password wajib diisi";
@@ -233,23 +191,12 @@ export default {
   },
 
   methods: {
-    /**
-     * onVerifikasi()
-     * Handler ketika tombol "Verifikasi" diklik.
-     * Melakukan validasi:
-     *   1. Password baru tidak boleh kosong
-     *   2. Konfirmasi password tidak boleh kosong
-     *   3. Konfirmasi password harus sama dengan password baru
-     *
-     * TODO: Ganti logic di bawah dengan pemanggilan API sesungguhnya
-     *       menggunakan axios.post (lihat dokumentasi API di atas).
-     */
+    // Handler tombol Verifikasi: validasi lalu panggil API.
     onVerifikasi() {
       this.submitted = true;
-
       if (!this.password || this.confirmPasswordError) return;
 
-      // TODO: Implementasi pemanggilan API ganti password di sini
+      // TODO: POST /api/user/change-password
       console.log("Verifikasi ganti password");
     },
   },
@@ -257,11 +204,7 @@ export default {
 </script>
 
 <style scoped>
-/*
- * ===== HEADER =====
- * Garis bawah pada header dengan trik margin negatif
- * agar border tembus hingga pinggir layar.
- */
+/* Header halaman — border tembus hingga pinggir layar */
 .header-title {
   border-bottom: 1px solid #e0e0e0;
   padding-bottom: 12px;
@@ -271,21 +214,19 @@ export default {
   padding-right: 16px;
 }
 
-/*
- * ===== IKON DEKORATIF =====
- * Ilustrasi gembok berukuran 62px di bagian atas konten.
- */
+/* Max-width Container — membatasi lebar konten di tablet/desktop */
+.page-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .decorative-icon {
   width: 62px;
   height: 62px;
   object-fit: contain;
 }
 
-/*
- * ===== LABEL INPUT =====
- * Label dipisahkan di atas input untuk presisi desain Figma.
- * Font Poppins 14px medium, warna hitam.
- */
 .input-label {
   font-family: "Poppins", sans-serif;
   font-size: 14px;
@@ -293,10 +234,6 @@ export default {
   color: #000000;
 }
 
-/*
- * ===== INPUT PASSWORD =====
- * Input borderless dengan garis bawah manual warna #C1C1C1.
- */
 .password-input {
   border-bottom: 1px solid #c1c1c1;
 }
@@ -311,19 +248,11 @@ export default {
   color: #000000;
 }
 
-/*
- * ===== TOGGLE IKON MATA =====
- * Ikon visibility untuk toggle tampil/sembunyikan password.
- */
 .toggle-icon {
   color: #9e9e9e;
   font-size: 20px;
 }
 
-/*
- * ===== TOMBOL VERIFIKASI =====
- * Background #114EA4, teks putih, tinggi 53px, border-radius 8px.
- */
 .btn-verifikasi {
   background-color: #114ea4;
   color: #ffffff;
@@ -334,17 +263,10 @@ export default {
   font-weight: 600;
 }
 
-/*
- * ===== RESPONSIF: TABLET / DESKTOP =====
- * Pada layar >= 600px, konten dibatasi max-width 600px
- * dan diposisikan rata tengah.
- */
+/* Responsif tablet/desktop */
 @media (min-width: 600px) {
-  .content-wrapper {
-    max-width: 600px;
-    margin: 0 auto;
+  .page-container {
     padding-top: 24px;
   }
 }
 </style>
-  
