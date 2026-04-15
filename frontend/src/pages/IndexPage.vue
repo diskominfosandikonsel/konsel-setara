@@ -59,7 +59,12 @@
 
       <!-- Video Berita -->
       <div class="q-mb-lg">
-        <div class="text-subtitle1 text-weight-bold q-mb-sm text-grey-9">Video Berita</div>
+        <div class="row items-center justify-between q-mb-sm">
+          <div class="text-subtitle1 text-weight-bold text-grey-9">Video Berita</div>
+          <div class="text-caption text-primary cursor-pointer text-weight-bold" @click="showVideoSocials = true">
+            Video lainnya <q-icon name="chevron_right" />
+          </div>
+        </div>
         <div class="video-scroll-container">
           <!-- Render videos dynamically or show skeleton/dummy -->
           <template v-if="videoBerita.length > 0">
@@ -83,6 +88,29 @@
           </template>
         </div>
       </div>
+
+      <!-- Modal Pilihan Sosial Media Video -->
+      <q-dialog v-model="showVideoSocials" position="bottom">
+        <q-card class="q-pa-md q-pb-xl rounded-borders-top" style="width: 100%; border-radius: 24px 24px 0 0;">
+          <div class="text-h6 text-center text-weight-bold q-mb-md text-grey-9">Kunjungi Channel Kami</div>
+          <div class="row justify-center q-gutter-x-xl q-mt-md">
+            <!-- Pilihan YouTube -->
+            <div class="column items-center cursor-pointer" @click="openSocialLink('youtube')">
+              <q-avatar size="64px" class="bg-red-1 q-mb-sm shadow-2">
+                <q-icon name="fab fa-youtube" color="red" size="32px"/>
+              </q-avatar>
+              <div class="text-caption text-weight-bold text-grey-8">YouTube</div>
+            </div>
+            <!-- Pilihan TikTok -->
+            <div class="column items-center cursor-pointer" @click="openSocialLink('tiktok')">
+              <q-avatar size="64px" class="bg-grey-2 q-mb-sm shadow-2">
+                <q-icon name="fab fa-tiktok" color="dark" size="32px"/>
+              </q-avatar>
+              <div class="text-caption text-weight-bold text-grey-8">TikTok</div>
+            </div>
+          </div>
+        </q-card>
+      </q-dialog>
 
       <!-- Berita Terbaru -->
       <div class="q-mb-sm">
@@ -306,6 +334,17 @@ export default {
       }
     }
 
+    const showVideoSocials = ref(false)
+
+    const openSocialLink = (platform) => {
+      if (platform === 'youtube') {
+        window.open('https://www.youtube.com/@diskominfokonsel', '_blank')
+      } else if (platform === 'tiktok') {
+        window.open('https://www.tiktok.com/@diskominfo.konsel', '_blank')
+      }
+      showVideoSocials.value = false
+    }
+
     return {
       modules: [Autoplay],
       swiperRef,
@@ -320,6 +359,8 @@ export default {
       beritaTerbaru,
       getThumbnail,
       openVideoLink,
+      showVideoSocials,
+      openSocialLink,
       search: ref(''),
       menuItems: [
         { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
