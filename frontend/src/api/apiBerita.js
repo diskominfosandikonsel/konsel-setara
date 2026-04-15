@@ -7,6 +7,11 @@ export const apiBerita = axios.create({
 // Web API Publik Konsel tidak membutuhkan token SapaKonsel/kikensbatara, 
 // justru token tersebut menyebabkan CORS Block karena header terlarang.
 apiBerita.interceptors.request.use((config) => {
-  // Hanya pakai form-data untuk mencegah preflight strict di server CI
+  const token = localStorage.token
+
+  if (token) {
+    config.headers.Authorization = 'kikensbatara ' + token
+  }
+
   return config
 })
