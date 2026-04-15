@@ -67,7 +67,7 @@ const routes = [
       //Legal Start
       {
         path: 'user_guide',
-        component: () => import('pages/Legal/GuidePage.vue'),
+        component: () => import('pages/Profile/GuidePage.vue'),
         meta: { showBottomNav: false, requiresAuth: true }
       },
       {

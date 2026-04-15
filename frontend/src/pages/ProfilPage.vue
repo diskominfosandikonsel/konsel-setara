@@ -51,7 +51,7 @@
         <q-card class="menu-card q-mb-lg no-shadow rounded-box">
           <q-list class="rounded-borders">
             <!-- Panduan Konsel Digital -->
-            <q-item clickable v-ripple class="q-py-md item-bordered">
+            <q-item clickable v-ripple class="q-py-md item-bordered" @click="$router.push('/user_guide')">
               <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
                 <q-icon name="book" size="24px" color="grey-9" />
               </q-item-section>
