@@ -9,7 +9,7 @@ export const BeritaService = {
 
   async getVideo(payload = {}) {
 
-    const response = await apiBerita.post('web_video/view', payload)
+    const response = await apiBerita.post('web_publish_video/view', payload)
     return response
   }
 

@@ -226,12 +226,7 @@ export default {
         
         const response = await beritaStore.fetchVideo(payload)
         const dataApi = response?.data || []
-
-        // KITA MUNCULKAN LOG DATA MENTAH DARI SERVER KE CONSOLE PERAMBAN ANDA:
-        // console.log("================================")
-        // console.log("ISI MENTAH DATA VIDEO DARI SERVER:", dataApi)
-        // console.log("================================")
-
+        
         // Pemetaan struktur balikan Video dari tabel gallery_video (web_konsel)
         const mappedVideo = dataApi.map(item => ({
           title: item.keterangan || 'Video Konsel',
@@ -292,7 +287,7 @@ export default {
         }))
 
         // Membatasi hanya 5 berita saja yang tampil
-        beritaTerbaru.value = mappedBerita.slice(0, 5)
+        beritaTerbaru.value = mappedBerita.slice(0, 6)
       } catch (error) {
         console.error('Gagal mengambil data berita:', error)
       }
