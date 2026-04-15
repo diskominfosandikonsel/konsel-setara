@@ -11,20 +11,38 @@
         </div> -->
 
         <!-- Illustration Content -->
-        <div class="illustration-section">
-            <img src="/img/Loginpage.png" alt="Login Illustration" class="illustration">
+        <div class="illustration-section" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 50px;">
+            <img src="/img/logokonsel.png" alt="Logo Konsel" class="illustration" style="width: 135px; margin-bottom: 8px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));">
+            
+            <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: #ffffff; letter-spacing: 3px; line-height: 1; text-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                   #KONSEL
+                </div>
+                <div style="font-size: 1.7rem; font-weight: 700; color: #ffca28; letter-spacing: 12px; line-height: 1.2; margin-top: 6px; margin-right: -12px; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                    SETARA
+                </div>
+            </div>
         </div>
 
         <!-- Form Section -->
-        <div class="form-section">
+        <div class="form-section" style="position: relative; padding-bottom: 60px;">
             <p class="instruction-text">Silakan login menggunakan akun anda</p>
 
-            <div class="input-group">
-                <input type="email" placeholder="user_ifoid@gmail.com" v-model="form.username" class="custom-input">
+            <div class="input-group" style="text-align: left;">
+                <label class="input-label">Username</label>
+                <input type="email" placeholder="Ketikkan username Anda" v-model="form.username" class="custom-input w-100" style="width: 100%;">
             </div>
 
-            <div class="input-group">
-                <input type="password" placeholder="**********" v-model="form.password" class="custom-input">
+            <div class="input-group" style="text-align: left;">
+                <label class="input-label">Password</label>
+                <div class="relative-position">
+                    <input :type="showPassword ? 'text' : 'password'" placeholder="Ketikkan password Anda" v-model="form.password" class="custom-input w-100" style="width: 100%; padding-right: 52px;">
+                    <q-icon 
+                        :name="showPassword ? 'visibility_off' : 'visibility'" 
+                        class="cursor-pointer pwd-toggle" 
+                        @click="showPassword = !showPassword"
+                    />
+                </div>
             </div>
 
             <div class="links-section">
@@ -34,6 +52,11 @@
             <div class="button-group">
                 <button class="btn btn-primary" @click="doLogin">Masuk</button>
                 <button class="btn btn-outline" @click="$router.push('/register')">Daftar</button>
+            </div>
+
+            <!-- Footer Aplikasi -->
+            <div style="position: absolute; bottom: 15px; left: 0; width: 100%; font-size: 0.8rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; text-align: center;">
+                @copyright : DiskominfoSandi Konawe Selatan 2026
             </div>
         </div>
     </div>
@@ -50,7 +73,8 @@ export default {
         form: {
             username: '',
             password: ''
-        }
+        },
+        showPassword: false
         }
     },
     methods: {
@@ -69,4 +93,24 @@ export default {
 }
 </script>
 
+<style scoped>
+.pwd-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    color: #5485d3;
+    transition: color 0.2s ease;
+}
+.pwd-toggle:hover {
+    color: var(--auth-bg);
+}
 
+@media (min-width: 900px) {
+    .pwd-toggle {
+        right: 24px;
+        font-size: 28px;
+    }
+}
+</style>
