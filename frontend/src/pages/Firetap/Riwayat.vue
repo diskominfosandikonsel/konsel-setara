@@ -74,28 +74,6 @@
         >
           <div class="card-status-bar" :class="`bar-${item.status_kasus}`"></div>
 
-          <!-- Foto Thumbnail (Bukti Penanganan jika Selesai, Batal, dll) -->
-          <q-img
-            v-if="item.status_kasus == 3 && item.bukti_kasus"
-            :src="firetapStore.fileUrl + item.bukti_kasus"
-            height="140px"
-            fit="cover"
-            class="card-photo"
-          >
-            <div class="absolute-bottom text-center text-subtitle2 bg-green shadow-up-2 q-py-xs" style="font-size: 11px; font-weight: 700;">
-              <q-icon name="check_circle" size="14px" class="q-mr-xs" /> FOTO PENANGANAN
-            </div>
-          </q-img>
-
-          <!-- Foto Thumbnail (Laporan awal) -->
-          <q-img
-            v-else-if="item.foto_kasus"
-            :src="firetapStore.fileUrl + item.foto_kasus"
-            height="140px"
-            fit="cover"
-            class="card-photo"
-          />
-
           <q-card-section class="q-pa-md">
             <div class="row items-center justify-between q-mb-sm">
               <div class="row items-center">
@@ -221,8 +199,6 @@ onMounted(() => loadRiwayat())
 .bar-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
 .bar-2 { background: linear-gradient(90deg, #ef4444, #f87171); }
 .bar-3 { background: linear-gradient(90deg, #10b981, #34d399); }
-
-.card-photo { display: block; }
 
 /* ─── KATEGORI DOT ─── */
 .kategori-dot {

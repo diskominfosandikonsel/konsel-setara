@@ -100,7 +100,7 @@ router.post('/login', (req, res) => {
 
         return res.json({
           token,
-          user : payload,
+          user: payload
         })
       })
 

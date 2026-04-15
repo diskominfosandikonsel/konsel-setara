@@ -2935,11 +2935,11 @@ export default {
 
   mounted() {
     var user = JSON.parse(localStorage.getItem('user') || '')
-    var profile = user.profile
-    this.form.emailPemohon  = profile.email;
-    this.form.email_from    = profile.email;
+    // var profile = user
+    this.form.emailPemohon  = user.email;
+    this.form.email_from    = user.email;
     this.form.createdBy     = user._id; 
-    this.nama  = profile.nama;
+    this.nama  = user.nama;
 
     
 

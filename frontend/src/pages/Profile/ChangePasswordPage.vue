@@ -39,7 +39,34 @@
         Silakan masukan Password Baru anda
       </div>
 
-      <!-- Pair-based Grouping: label + input password baru -->
+      <!-- Password Lama -->
+      <div class="q-mb-md">
+        <div class="input-label q-mb-xs">
+          Password Lama <span class="text-red">*</span>
+        </div>
+
+        <q-input
+          v-model="currentPassword"
+          :type="showCurrentPassword ? 'text' : 'password'"
+          borderless
+          dense
+          placeholder="Masukkan password lama"
+          class="password-input"
+          :error="submitted && !currentPassword"
+          error-message="Password lama wajib diisi"
+          hide-bottom-space
+        >
+          <template #append>
+            <q-icon
+              :name="showCurrentPassword ? 'visibility' : 'visibility_off'"
+              class="cursor-pointer toggle-icon"
+              @click="showCurrentPassword = !showCurrentPassword"
+            />
+          </template>
+        </q-input>
+      </div>
+
+      <!-- Password Baru -->
       <div class="q-mb-md">
         <div class="input-label q-mb-xs">
           Password Baru <span class="text-red">*</span>
@@ -66,7 +93,7 @@
         </q-input>
       </div>
 
-      <!-- Pair-based Grouping: label + input konfirmasi password -->
+      <!-- Konfirmasi Password Baru -->
       <div class="q-mb-lg">
         <div class="input-label q-mb-xs">
           Konfirmasi Password Baru <span class="text-red">*</span>
@@ -108,70 +135,19 @@
 
 <script>
 import passwordLockIcon from "src/assets/profile/Password-Lock.png";
-
-/**
- * ============================================================================
- * DOKUMENTASI API — Ganti Password
- * ============================================================================
- *
- * Endpoint  : POST /api/user/change-password
- * Deskripsi : Mengubah password pengguna dengan password baru
- *             setelah validasi konfirmasi password berhasil.
- *
- * Headers:
- *   Authorization: Bearer <token>
- *
- * Request Body:
- *   {
- *     "password": "newPassword123",
- *     "password_confirmation": "newPassword123"
- *   }
- *
- * Response Sukses (200):
- *   {
- *     "success": true,
- *     "message": "Password berhasil diubah"
- *   }
- *
- * Response Gagal (422):
- *   {
- *     "success": false,
- *     "message": "Konfirmasi password tidak cocok"
- *   }
- *
- * Contoh Implementasi:
- *   import { api } from 'src/boot/axios';
- *
- *   async onVerifikasi() {
- *     try {
- *       this.loading = true;
- *       const response = await api.post('/api/user/change-password', {
- *         password: this.password,
- *         password_confirmation: this.confirmPassword,
- *       });
- *
- *       if (response.data.success) {
- *         this.$q.notify({ type: 'positive', message: response.data.message });
- *         this.$router.push('/account_settings');
- *       }
- *     } catch (error) {
- *       this.$q.notify({ type: 'negative', message: 'Gagal mengubah password' });
- *     } finally {
- *       this.loading = false;
- *     }
- *   }
- * ============================================================================
- */
+import { ProfileService } from 'src/services/profile.service';
+import { useAuthStore } from 'src/stores/auth';
 
 export default {
   name: "ChangePasswordPage",
 
-  // State form ganti password.
   data() {
     return {
       passwordLockIcon,
+      currentPassword: "",
       password: "",
       confirmPassword: "",
+      showCurrentPassword: false,
       showPassword: false,
       showConfirmPassword: false,
       loading: false,
@@ -180,7 +156,6 @@ export default {
   },
 
   computed: {
-    // Pesan error validasi konfirmasi password.
     confirmPasswordError() {
       if (!this.submitted) return "";
       if (!this.confirmPassword) return "Konfirmasi password wajib diisi";
@@ -191,13 +166,56 @@ export default {
   },
 
   methods: {
-    // Handler tombol Verifikasi: validasi lalu panggil API.
-    onVerifikasi() {
+    async onVerifikasi() {
       this.submitted = true;
-      if (!this.password || this.confirmPasswordError) return;
+      if (!this.currentPassword || !this.password || this.confirmPasswordError) return;
 
-      // TODO: POST /api/user/change-password
-      console.log("Verifikasi ganti password");
+      if (this.password.length < 6) {
+        return this.$q.notify({
+          message: 'Password baru minimal 6 karakter',
+          color: 'negative',
+          icon: 'warning'
+        })
+      }
+
+      this.loading = true;
+
+      try {
+        const res = await ProfileService.changePassword({
+          currentPassword: this.currentPassword,
+          newPassword: this.password
+        })
+
+        if (res.data?.success) {
+          this.$q.notify({
+            message: 'Password berhasil diubah. Silakan login ulang.',
+            color: 'positive',
+            icon: 'check_circle',
+            timeout: 2000
+          })
+          // Logout setelah ganti password
+          setTimeout(() => {
+            const auth = useAuthStore()
+            auth.logout()
+            this.$router.replace('/')
+          }, 1500)
+        } else {
+          this.$q.notify({
+            message: res.data?.message || 'Gagal mengubah password',
+            color: 'negative',
+            icon: 'error'
+          })
+        }
+      } catch (err) {
+        console.error('Change password error:', err)
+        this.$q.notify({
+          message: err.response?.data?.message || 'Terjadi kesalahan saat mengubah password',
+          color: 'negative',
+          icon: 'error'
+        })
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
