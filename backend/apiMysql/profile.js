@@ -180,4 +180,35 @@ router.put('/password', middleware.isLoggedIn, (req, res) => {
   })
 })
 
+// ═══════════════════════════════════════════════
+// DELETE /api/v1/profile — Hapus akun user
+// ═══════════════════════════════════════════════
+router.delete('/', middleware.isLoggedIn, (req, res) => {
+  const userId = req.user._id
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'User tidak terautentikasi' })
+  }
+
+  const sql = `DELETE FROM users WHERE id = ?`
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('❌ DELETE ACCOUNT DB ERROR:', err)
+      return res.status(500).json({ success: false, message: 'Gagal menghapus akun' })
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan' })
+    }
+
+    console.log('✅ ACCOUNT DELETED for user ID:', userId)
+
+    return res.json({
+      success: true,
+      message: 'Akun berhasil dihapus'
+    })
+  })
+})
+
 module.exports = router;

@@ -1,7 +1,7 @@
 <!--
   AccountSettingsPage.vue
-  Halaman Pengaturan Akun — daftar menu navigasi (ganti email,
-  ganti password, hapus akun). Responsif menggunakan konsep
+  Halaman Pengaturan Akun — daftar menu navigasi (ganti password,
+  hapus akun). Responsif menggunakan konsep
   Max-width Container & Pair-based Grouping.
 -->
 
@@ -50,7 +50,6 @@
 </template>
 
 <script>
-import mailIcon from "src/assets/profile/mail.png";
 import lockIcon from "src/assets/profile/lock.png";
 import trashIcon from "src/assets/profile/trash-2.png";
 import chevronRight from "src/assets/profile/chevron-right.png";
@@ -63,7 +62,6 @@ export default {
     return {
       chevronRight,
       menuItems: [
-        { label: "Ganti email", iconLeft: mailIcon, route: "/change_email" },
         { label: "Ganti Password", iconLeft: lockIcon, route: "/change_password" },
         { label: "Hapus Akun", iconLeft: trashIcon, route: "/delete_account" },
       ],
