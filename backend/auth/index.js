@@ -81,13 +81,10 @@ router.post('/login', (req, res) => {
       const payload = {
         _id: user.id,
         username: user.username,
-        profile: {
-          username: user.username,
-          nama: user.nama,
-          hp: user.hp,
-          email: user.email,
-          menu_klp: user.menu_klp
-        }
+        nama: user.nama,
+        hp: user.hp,
+        email: user.email,
+        menu_klp: user.menu_klp
       }
 
       console.log('📦 PAYLOAD:', payload)
@@ -103,7 +100,7 @@ router.post('/login', (req, res) => {
 
         return res.json({
           token,
-          profile: payload
+          user : payload,
         })
       })
 
