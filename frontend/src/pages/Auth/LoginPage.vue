@@ -11,37 +11,40 @@
         </div> -->
 
         <!-- Illustration Content -->
-        <div class="illustration-section" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 50px;">
-            <img src="/img/logokonsel.png" alt="Logo Konsel" class="illustration" style="width: 135px; margin-bottom: 8px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));">
-            
+        <div class="illustration-section"
+            style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 50px;">
+            <img src="/img/logokonsel.png" alt="Logo Konsel" class="illustration"
+                style="width: 135px; margin-bottom: 8px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));">
+
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-                <div style="font-size: 1.8rem; font-weight: 900; color: #ffffff; letter-spacing: 3px; line-height: 1; text-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                   #KONSEL
+                <div
+                    style="font-size: 1.8rem; font-weight: 900; color: #ffffff; letter-spacing: 3px; line-height: 1; text-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    #KONSEL
                 </div>
-                <div style="font-size: 1.7rem; font-weight: 700; color: #ffca28; letter-spacing: 12px; line-height: 1.2; margin-top: 6px; margin-right: -12px; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                <div
+                    style="font-size: 1.7rem; font-weight: 700; color: #ffca28; letter-spacing: 12px; line-height: 1.2; margin-top: 6px; margin-right: -12px; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">
                     SETARA
                 </div>
             </div>
         </div>
 
         <!-- Form Section -->
-        <div class="form-section" style="position: relative; padding-bottom: 60px;">
+        <div class="form-section" style="position: relative; padding-bottom: 80px;">
             <p class="instruction-text">Silakan login menggunakan akun anda</p>
 
             <div class="input-group" style="text-align: left;">
                 <label class="input-label">Username</label>
-                <input type="email" placeholder="Ketikkan username Anda" v-model="form.username" class="custom-input w-100" style="width: 100%;">
+                <input type="email" placeholder="Ketikkan username Anda" v-model="form.username"
+                    class="custom-input w-100" style="width: 100%;">
             </div>
 
             <div class="input-group" style="text-align: left;">
                 <label class="input-label">Password</label>
                 <div class="relative-position">
-                    <input :type="showPassword ? 'text' : 'password'" placeholder="Ketikkan password Anda" v-model="form.password" class="custom-input w-100" style="width: 100%; padding-right: 52px;">
-                    <q-icon 
-                        :name="showPassword ? 'visibility_off' : 'visibility'" 
-                        class="cursor-pointer pwd-toggle" 
-                        @click="showPassword = !showPassword"
-                    />
+                    <input :type="showPassword ? 'text' : 'password'" placeholder="Ketikkan password Anda"
+                        v-model="form.password" class="custom-input w-100" style="width: 100%; padding-right: 52px;">
+                    <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer pwd-toggle"
+                        @click="showPassword = !showPassword" />
                 </div>
             </div>
 
@@ -55,39 +58,42 @@
             </div>
 
             <!-- Footer Aplikasi -->
-            <div style="position: absolute; bottom: 15px; left: 0; width: 100%; font-size: 0.8rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; text-align: center;">
-                @copyright : DiskominfoSandi Konawe Selatan 2026
+            <div
+                style="position: absolute; bottom: 15px; left: 0; width: 100%; font-size: 0.8rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+                <div>@copyright : DiskominfoSandi Konawe Selatan 2026</div>
+                <img src="/img/setara.png" alt="Logo Setara"
+                    style="height: 36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
             </div>
         </div>
     </div>
 </template>
 
-<script >
+<script>
 import { useAuthStore } from 'src/stores/auth';
 
 export default {
-    name : 'LoginPage',
+    name: 'LoginPage',
 
     data() {
         return {
-        form: {
-            username: '',
-            password: ''
-        },
-        showPassword: false
+            form: {
+                username: '',
+                password: ''
+            },
+            showPassword: false
         }
     },
     methods: {
         async doLogin() {
-          const auth = useAuthStore()
-          const success = await auth.login(this.form)
+            const auth = useAuthStore()
+            const success = await auth.login(this.form)
 
-          if (success) {
-            // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
-            setTimeout(() => {
-              this.$router.push('/')
-            }, 50)
-          }
+            if (success) {
+                // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
+                setTimeout(() => {
+                    this.$router.push('/')
+                }, 50)
+            }
         }
     }
 }
@@ -103,6 +109,7 @@ export default {
     color: #5485d3;
     transition: color 0.2s ease;
 }
+
 .pwd-toggle:hover {
     color: var(--auth-bg);
 }
