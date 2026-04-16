@@ -38,6 +38,12 @@ export const useAuthStore = defineStore('auth', {
         localStorage.token = this.token
         localStorage.user = JSON.stringify(this.user)
 
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('riwayat_')) {
+            localStorage.removeItem(key)
+          }
+        })
+
         Notify.create({
           message: 'Login berhasil',
           color: 'positive'

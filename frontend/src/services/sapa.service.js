@@ -2,6 +2,10 @@ import { apiSapa } from '../api/sapakonsel'
 
 export const SapaService = {
   
+  getInfografis() {
+    return apiSapa.get('publish_beranda/infografis')
+  },
+
   async uploadEmergency(formData) {
     return apiSapa.post('publish_laporan/uploadEmergency', formData)
   },

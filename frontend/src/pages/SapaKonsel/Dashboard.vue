@@ -12,28 +12,27 @@
       <div class="col-4 text-white text-right">
       </div>
     </div>
-      <q-carousel
-        v-model="slide"
-        :arrows="false"
-        animated
-        infinite
-        swipeable
-        :autoplay="7500"
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        height="175px"
-        class="mobile-carousel bg-transparent"
-        @touchstart="autoplay = false"
-        @touchend="autoplay = true"
+    <div v-if="skeletonLoading" class="q-px-md row no-wrap overflow-hidden">
+      <div v-for="n in 2" :key="n" class="shimmer-card q-mr-sm" style="min-width: 80%;"></div>
+    </div>
+
+    <!-- ✅ SWIPER -->
+    <div v-else class="swiper-full">
+      <swiper
+        :modules="modules"
+        :slides-per-view="1.18"
+        :space-between="12"
+        :centered-slides="true"
+        :loop="true"
+        :autoplay="{ delay: 5000, disableOnInteraction: false }"
       >
-        <q-carousel-slide
-          v-for="n in 4"
-          :key="n"
-          :name="n"
-          :img-src="images[n - 1]"
-          class="carousel-slide"
-        />
-      </q-carousel>
+        <swiper-slide v-for="item in images" :key="item.id">
+          <div class="swiper-card">
+            <img :src="item.img" class="swiper-img" />
+          </div>
+        </swiper-slide>
+      </swiper>
+    </div>
     <div class="q-pa-md">
           <div class="text-center title">Selamat Datang di Sahabat<br/>Perempuan & Anak Konawe Selatan</div>
           <div class="text-center q-mt-xs sub-title">
@@ -81,36 +80,64 @@
 </template>
 
 <script>
+import { useSapaStore } from 'stores/sapa'
+import { getImageUrl } from 'src/utils/helper'
+
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/autoplay'
+
 export default {
   name: 'SapaDashboard',
+  components: {
+    Swiper,
+    SwiperSlide
+  },
   data () {
     return {
-      slide: 1,
-      images: [
-        'https://cdn.quasar.dev/img/mountains.jpg',
-        'https://cdn.quasar.dev/img/parallax1.jpg',
-        'https://cdn.quasar.dev/img/parallax2.jpg',
-        'https://cdn.quasar.dev/img/quasar.jpg'
-      ]
+      sapa: useSapaStore(),
+      modules: [Autoplay],
+      skeletonLoading: true,
+      images: []
     }
   },
   methods: {
-  goBack () {
-    this.$router.back()
+    goBack () {
+      this.$router.back()
+    },
+    async loadInfografis () {
+      this.skeletonLoading = true
+
+      await this.sapa.fetchInfografis()
+
+      const data = this.sapa.infografis || []
+
+      if (data.length > 0) {
+        this.images = data.map(item => ({
+          id: item.id,
+          img: getImageUrl(item.foto)
+        }))
+      }
+
+      this.skeletonLoading = false
+    },
+    darurat () {
+      this.$router.push('/sapa_darurat')
+    },
+    satgas () {
+      this.$router.push('/sapa_satgas')
+    },
+    riwayat () {
+      this.$router.push('/sapa_riwayat')
+    },
+    edukasi () {
+      this.$router.push('/sapa_edukasi')
+    }
   },
-  darurat () {
-    this.$router.push('/sapa_darurat')
-  },
-  satgas () {
-    this.$router.push('/sapa_satgas')
-  },
-  riwayat () {
-    this.$router.push('/sapa_riwayat')
-  },
-  edukasi () {
-    this.$router.push('/sapa_edukasi')
+  mounted () {
+    this.loadInfografis()
   }
-}
 }
 </script>
 
@@ -131,14 +158,45 @@ export default {
           drop-shadow(0 0 5px #fff);
 }
 
-.mobile-carousel {
-  padding: 0 20px;
+.swiper-card {
+  border-radius: 20px;
+  overflow: hidden;
+  height: 175px;
+  margin: 0; /* 👈 no margin */
 }
 
-.carousel-slide {
-  border-radius: 25px;
-  overflow: hidden;
-  transition: transform 0.35s ease;
+.swiper-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* full bleed container */
+.swiper-full {
+  width: 100%;
+  overflow: visible; /* 👈 allow peek */
+}
+
+/* allow slides to overflow screen */
+.swiper {
+  overflow: visible !important;
+}
+
+/* slide behavior */
+.swiper-slide {
+  transition: transform 0.3s ease;
+}
+
+/* center focus effect */
+.swiper-slide-active {
+  transform: scale(1);
+  z-index: 2;
+}
+
+.swiper-slide-next,
+.swiper-slide-prev {
+  transform: scale(0.92);
+  opacity: 0.8;
 }
 
 .title {
@@ -152,5 +210,48 @@ export default {
   font-weight: 250;
   color: #000000;
 } 
+
+.shimmer-card {
+  height: 175px;
+  border-radius: 25px;
+  position: relative;
+  overflow: hidden;
+  background: #e0e0e0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* shimmer animation */
+.shimmer-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.5) 50%,
+    rgba(255,255,255,0) 100%
+  );
+
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 150%;
+  }
+}
 
 </style>

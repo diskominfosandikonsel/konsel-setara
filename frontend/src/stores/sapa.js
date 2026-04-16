@@ -4,12 +4,31 @@ import { SapaService } from 'src/services/sapa.service'
 
 export const useSapaStore = defineStore('sapa', {
   state: () => ({
-    laporan: [],
+    infografis: [],
     pengguna: [],
+    laporan: [],
     loading: false
   }),
 
   actions: {
+
+    async fetchInfografis(payload = {}) {
+      this.loading = true
+      Loading.show()
+
+      try {
+        const res = await SapaService.getInfografis(payload)
+        this.infografis = res.data.data || res.data
+      } catch (err) {
+        Notify.create({
+          message: 'Gagal ambil data',
+          color: 'negative'
+        })
+      } finally {
+        this.loading = false
+        Loading.hide()
+      }
+    },
 
     async sendLaporan(payload, file) {
       this.loading = true

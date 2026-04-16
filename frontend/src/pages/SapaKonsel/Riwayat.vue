@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh lpR fFf" style="background-color: #F6F6F6;">
 
     <q-header bordered class="bg-white text-black">
       <q-toolbar>
@@ -15,7 +15,7 @@
     </q-header>
 
     <q-page-container>
-      <q-page class="q-pa-md mulish" style="background-color: #F6F6F6;">
+      <q-page class="q-pa-md mulish">
 
         <div v-if="skeletonLoading">
           <q-skeleton v-for="n in 4" :key="n" height="80px" class="q-mb-sm" />
@@ -39,16 +39,16 @@
                     </div>
 
                     <div class="col-10 q-pl-md">
-                      <div style="font-size: 16px; font-weight: bold; color: #152C07;">
-                        {{ item.jenis_uraian }}
-                      </div>
-
-                      <div class="two_line" style="font-size: 12px; color: #5D5C5D;">
+                      <div class="two_line" style="font-size: 16px; font-weight: bold; color: #152C07;">
                         {{ item.uraian }}
                       </div>
 
+                      <!-- <div class="two_line" style="font-size: 12px; color: #5D5C5D;">
+                        {{ item.uraian }}
+                      </div> -->
+
                       <div style="font-size: 12px; color: #BEBEBE;">
-                        {{ item.createAt }}
+                        {{ formatDate(item.createAt) }}
                       </div>
                     </div>
 
@@ -91,6 +91,7 @@
 
 <script>
 import { useSapaStore } from 'stores/sapa'
+import { formatDate } from 'src/utils/helper'
 import done from 'src/assets/sapa/done.png'
 import process from 'src/assets/sapa/process.png'
 import cancel from 'src/assets/sapa/cancel.png'
@@ -108,7 +109,9 @@ export default {
       allDataLoaded: false,
       cari: '',
       skeletonLoading: true,
-      cacheKey: ''
+      cacheKey: '',
+
+      formatDate : formatDate
     }
   },
 
@@ -132,7 +135,10 @@ export default {
 
     generateCacheKey () {
       const user = JSON.parse(localStorage.user || '{}')
-      const userId = user._id || 'guest'
+      const userId = user._id || user.id || user.username || 'guest'
+
+      console.log('CACHE KEY:', this.cacheKey)
+      console.log('USER:', JSON.parse(localStorage.user || '{}'))
 
       return `riwayat_${userId}_${this.cari}`
     },
@@ -144,6 +150,9 @@ export default {
         this.page = 1
         this.laporanList = []
         this.allDataLoaded = false
+
+        // 🔥 clear store data too
+        this.sapa.laporan = []
       }
 
       const payload = {

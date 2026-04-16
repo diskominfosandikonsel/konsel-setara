@@ -78,7 +78,7 @@
       </template>
 
       <!-- Teks indikator habisa data (jika database sudah tersedot semua) -->
-      <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-clack-5 q-py-md text-caption">
+      <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-black-5 q-py-md text-caption">
         Tidak ada data terbaru.
       </div>
     </q-infinite-scroll>
@@ -250,8 +250,8 @@ export default {
 }
 .line-clamp-2 {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

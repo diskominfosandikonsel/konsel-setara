@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh lpR fFf" style="background-color: #F6F6F6;">
 
     <q-header bordered class="bg-white text-black">
       <q-toolbar>
@@ -15,7 +15,7 @@
     </q-header>
 
     <q-page-container>
-      <q-page class="q-pa-md" style="background-color: #F6F6F6;">
+      <q-page class="q-pa-md">
         <div class="row q-col-gutter-md">
           <div class="col-12">
 
@@ -35,13 +35,21 @@
 
                   <!-- STATUS -->
                   <div class="row q-pb-md q-mb-lg" style="border-bottom: #BEBEBE 0.5px solid;">
-                    <div class="col-6 text-grey-7 text-weight-medium text-caption">
+                    <div class="col-6 text-grey-8 text-weight-medium text-caption">
                       Status Laporan
                     </div>
                     <div class="col-6 text-right">
-                      <span style="font-size: 12px; border-radius: 12px; padding: 4px 8px; background:#FFFCE0;">
-                        {{ getStatusLabel(laporan.status) }}
-                      </span>
+                      <span
+                      :style="{
+                        ...getStatusStyle(laporan.status),
+                        fontSize: '12px',
+                        borderRadius: '12px',
+                        padding: '5px 10px',
+                        fontWeight: '800'
+                      }"
+                    >
+                      {{ getStatusLabel(laporan.status) }}
+                    </span>
                     </div>
                   </div>
 
@@ -52,7 +60,7 @@
                       <img :src="getIcon(laporan.status)" width="44px" />
                     </div>
 
-                    <div class="col-8 q-pl-sm">
+                    <div class="col-6 q-pl-sm">
                       <div class="text-weight-bold text-dark">
                         {{ laporan.jenis }}
                       </div>
@@ -61,8 +69,19 @@
                       </div>
                     </div>
 
-                    <div class="col-2 text-right text-grey-5 text-caption">
-                      {{ laporan.date }}
+                    <div class="col-4 text-right text-grey-8 text-caption" style="line-height: 1.2;">
+  
+                      <div v-if="laporan.dateMeta.type === 'relative'">
+                        {{ laporan.date.text }}
+                      </div>
+
+                      <div v-else-if="laporan.dateMeta.type === 'full'">
+                        <div>{{ laporan.date.date }}</div>
+                        <div style="font-size: 11px; color: #9E9E9E;">
+                          {{ laporan.date.time }}
+                        </div>
+                      </div>
+
                     </div>
 
                   </div>
@@ -76,10 +95,10 @@
                     </div>
 
                     <div class="col-10 q-pl-sm">
-                      <div class="text-weight-bold text-grey-7">
+                      <div class="text-weight-bold text-grey-8">
                         {{ laporan.nama }}
                       </div>
-                      <div class="text-grey-5 text-caption">
+                      <div class="text-grey-6 text-caption">
                         {{ laporan.hp }}
                       </div>
                     </div>
@@ -88,7 +107,7 @@
                   <!-- KETERANGAN -->
                   <div class="text-weight-bold q-mb-sm">Keterangan</div>
 
-                  <div class="q-mb-lg text-grey-7" style="padding:16px; background:#FBFBFB; border-radius:10px;">
+                  <div class="q-mb-lg text-grey-8" style="padding:16px; background:#FBFBFB; border-radius:10px;">
                     {{ laporan.uraian }}
                   </div>
 
@@ -129,7 +148,7 @@ import done from 'src/assets/sapa/done.png'
 import process from 'src/assets/sapa/process.png'
 import cancel from 'src/assets/sapa/cancel.png'
 
-import { formatDate, getImageUrl } from 'src/utils/helper'
+import { formatDateTime, getImageUrl } from 'src/utils/helper'
 
 export default {
   name: 'DetailRiwayat',
@@ -159,6 +178,27 @@ export default {
       return 'Ditolak'
     },
 
+    getStatusStyle (status) {
+      if (status === 'selesai') {
+        return {
+          background: '#E0FFF0',
+          color: '#5EDE99'
+        }
+      }
+
+      if (status === 'proses') {
+        return {
+          background: '#FFFCE0',
+          color: '#EFBE24'
+        }
+      }
+
+      return {
+        background: '#FFE0E0',
+        color: '#F26666'
+      }
+    },
+
     async loadData () {
       this.loading = true
 
@@ -167,12 +207,14 @@ export default {
 
         if (!item) return
 
+        const formatted = formatDateTime(item.createAt)
+
         this.laporan = {
           id: item.id,
           jenis: item.jenis_uraian,
           uraian: item.uraian,
           status: item.status,
-          date: formatDate(item.createAt),
+          dateMeta: formatted,
           nama: item.nama_pelapor || 'Anonim',
           hp: item.hp_pelapor || '-',
           kecamatan: item.kecamatan_nama,
