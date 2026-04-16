@@ -21,7 +21,7 @@
                                 placeholder="Cari data..." 
                                 class="search-input"
                                 bg-color="grey-1"
-                                @update:model-value="loadData"
+                                @keyup="cari_data()"
                             >
                                 <template v-slot:prepend>
                                     <q-icon name="search" size="20px" />
@@ -76,17 +76,19 @@
                         </template>
                     </q-infinite-scroll>
 
-                    <div v-if="jdih.dokumen.length === 0" class="justify-center items-center q-pa-md empty-container">
-                        <q-img
-                            src="/img/no_data.png"
-                            fit="contain"
-                            style="width: 120px; height: 120px;"
-                            no-spinner
-                        />
-                        <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
-                            Tidak ada data ditemukan
+                    <template v-if="jdih.dokumen.length === 0">
+                        <div class="column justify-center items-center q-pa-xl" style="min-height: 70vh;">
+                            <q-img
+                                src="/img/no_data.png"
+                                fit="contain"
+                                style="width: 120px; height: 120px;"
+                                no-spinner
+                            />
+                            <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
+                                Tidak ada data ditemukan
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </q-list>
             </q-page>
         </q-page-container>
@@ -111,9 +113,6 @@ export default {
             return useJdihStore()
         },
     },
-    watch: {
-        cari_value() { this.loadData() },
-    },
     methods: {
         goBack() {
             this.$router.back()
@@ -134,7 +133,10 @@ export default {
             // console.log("Data dikirim:", payload);
             await this.jdih.fetchDokumen(payload)
         },
-
+        cari_data : function(){
+            this.page_first = 1;
+            this.loadData();
+        },
         async onLoad(done){
             if (this.page_first >= this.jdih.jml_data) {
                 done();

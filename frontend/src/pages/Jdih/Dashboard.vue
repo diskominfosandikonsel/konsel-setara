@@ -96,7 +96,7 @@
                 <div class="text-subtitle2 text-weight-bold text-grey-9">Dokumen</div>
                 <div class="row q-col-gutter-xs">
                     <div class="col-3">
-                        <div>
+                        <div @click="goSk">
                             <q-card-section class="menuSection">
                                 <div class="cardx flex flex-center">
                                     <q-img src="/img/jdih/dokumen.png" class="card-icon" />
@@ -116,7 +116,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div>
+                        <div @click="goPutusan">
                             <q-card-section class="menuSection">
                                 <div class="cardx">
                                     <q-img src="/img/jdih/putusan.png" class="card-icon" />
@@ -197,6 +197,9 @@ export default {
         },
         goSk() {
             this.$router.push('/sk');
+        },
+        goPutusan() {
+            this.$router.push('/putusan');
         },
         goSop() {
             this.$router.push('/sop');
