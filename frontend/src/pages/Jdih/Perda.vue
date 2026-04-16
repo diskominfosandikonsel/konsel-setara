@@ -21,7 +21,7 @@
                                 placeholder="Cari data..." 
                                 class="search-input"
                                 bg-color="grey-1"
-                                @update:model-value="loadData"
+                                @keyup="cari_data()"
                             >
                                 <template v-slot:prepend>
                                     <q-icon name="search" size="20px" />
@@ -40,7 +40,7 @@
                                 bg-color="grey-1"
                                 emit-value map-options
                                 class="filter-year"
-                                @update:model-value="loadData"
+                                @update:model-value="cari_data()"
                             />
                         </div>
                     </div>
@@ -89,18 +89,20 @@
                             </div>
                         </template>
                     </q-infinite-scroll>
-
-                    <div v-if="jdih.produkHukum.length === 0" class="justify-center items-center q-pa-md empty-container">
-                        <q-img
-                            src="/img/no_data.png"
-                            fit="contain"
-                            style="width: 120px; height: 120px;"
-                            no-spinner
-                        />
-                        <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
-                            Tidak ada data ditemukan
+                    
+                    <template v-if="jdih.produkHukum.length === 0">
+                        <div class="column justify-center items-center q-pa-xl" style="min-height: 70vh;">
+                            <q-img
+                                src="/img/no_data.png"
+                                fit="contain"
+                                style="width: 120px; height: 120px;"
+                                no-spinner
+                            />
+                            <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
+                                Tidak ada data ditemukan
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </q-list>
             </q-page>
         </q-page-container>
@@ -151,10 +153,6 @@ export default {
             return useJdihStore()
         },
     },
-    watch: {
-        cari_value() { this.loadData() },
-        tahun_dipilih() { this.loadData() }
-    },
     methods: {
         goBack() {
             this.$router.back()
@@ -165,10 +163,13 @@ export default {
                 query: { id: id }
             });
         },
-
+        cari_data : function(){
+            this.page_first = 1;
+            this.loadData();
+        },
         async loadData() {
             const payload = {
-                data_ke: parseInt(this.page_first) || 1,
+                data_ke: this.page_first,
                 cari_value: this.cari_value,
                 cari_jenis: this.jenis,
                 cari_tahun: this.pilih_tahun || '',
@@ -176,7 +177,6 @@ export default {
             // console.log("Data dikirim:", payload);
             await this.jdih.fetchProdukHukum(payload)
         },
-
         async onLoad(index, done){
             if (this.page_first >= this.jdih.jml_data) {
                 done();

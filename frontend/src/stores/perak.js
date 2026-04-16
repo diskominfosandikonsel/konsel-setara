@@ -118,7 +118,7 @@ export const usePerakStore = defineStore('perak', {
             this.loading = true;
             try {
                 const res = await PerakService.getBiodata(payload)
-                // console.log("Response Backend:", res.data.data)
+                console.log("Response Backend:", res.data.data)
                 this.biodata = res.data.data
                 this.jml_data = res.data.jml_data
             } catch (err) {
@@ -238,7 +238,7 @@ export const usePerakStore = defineStore('perak', {
             this.loading = true;
             try {
                 const res = await PerakService.getPendidikanFormal(payload)
-                // console.log("Response Backend:", res.data.data)
+                console.log("Response Backend:", res.data.data)
                 this.pendidikan = res.data.data
                 this.jml_data = res.data.jml_data
             } catch (err) {
