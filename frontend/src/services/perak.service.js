@@ -35,7 +35,10 @@ export const PerakService = {
   getListKeterampilan(payload) {
     return apiPerak.post('dm_master_keterampilan/list1', payload)
   },
-
+  getListBahasa() {
+    return apiPerak.post('dm_bahasa_asing/list')
+  },
+  
 
   getBiodata(payload = {}) {
     return apiPerak.post('keterangan_umum/view', payload)
@@ -106,6 +109,16 @@ export const PerakService = {
   },
   removeKeterampilan(payload) {
     return apiPerak.post('keterampilan/removeData', payload)
+  },
+
+  getBahasa(params = {}) {
+    return apiPerak.post('bahasa_asing/view', params)
+  },
+  addBahasa(payload) {
+    return apiPerak.post('bahasa_asing/addData', payload)
+  },
+  removeBahasa(payload) {
+    return apiPerak.post('bahasa_asing/removeData', payload)
   },
 
 
