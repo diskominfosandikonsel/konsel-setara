@@ -44,6 +44,12 @@ app.use('/api/v1/profile', profile);
 const sippaduBerita = require('./apiMysql/sippadu/berita');
 app.use('/api/v1/sippadu_berita', sippaduBerita);
 
+const notificationRoutes = require('./routes/notification')
+app.use('/notification', notificationRoutes)
+
+const fcmRoutes = require('./routes/fcm')
+app.use('/fcm', fcmRoutes)
+
 // STATIC LEGAL PAGES FOR PLAY STORE
 app.get('/kebijakan-privasi', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/html/kebijakan-privasi.html'));

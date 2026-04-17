@@ -152,3 +152,5 @@ docs/
 # Ignore icon generator script
 frontend/generate_icons.py
 generate_icons.py
+
+serviceAccountKey.json
