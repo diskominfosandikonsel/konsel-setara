@@ -148,3 +148,7 @@ docs/
 .DS_Store.quasar
 
 .DS_Store
+
+# Ignore icon generator script
+frontend/generate_icons.py
+generate_icons.py

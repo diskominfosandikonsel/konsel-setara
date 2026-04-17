@@ -141,7 +141,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .dashboard-page {
   min-height: 100vh;
   background: linear-gradient(
@@ -178,23 +178,23 @@ export default {
 }
 
 /* allow slides to overflow screen */
-.swiper {
+.swiper-full :deep(.swiper) {
   overflow: visible !important;
 }
 
 /* slide behavior */
-.swiper-slide {
+.swiper-full :deep(.swiper-slide) {
   transition: transform 0.3s ease;
 }
 
 /* center focus effect */
-.swiper-slide-active {
+.swiper-full :deep(.swiper-slide-active) {
   transform: scale(1);
   z-index: 2;
 }
 
-.swiper-slide-next,
-.swiper-slide-prev {
+.swiper-full :deep(.swiper-slide-next),
+.swiper-full :deep(.swiper-slide-prev) {
   transform: scale(0.92);
   opacity: 0.8;
 }
