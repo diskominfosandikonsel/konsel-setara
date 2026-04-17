@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1028286588749",
+    "project_id": "konsel-digital",
+    "storage_bucket": "konsel-digital.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028286588749:android:be9c066d3e2d81a32eb904",
+        "android_client_info": {
+          "package_name": "id.go.konaweselatankab.setara"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUVBCB04BHSXqfm3aqU3gP0UG0FJAsbS0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

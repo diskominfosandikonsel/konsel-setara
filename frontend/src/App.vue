@@ -18,47 +18,63 @@ export default {
       try {
         const result = await PushNotifications.requestPermissions()
 
-        if (result.receive === 'granted') {
-          await PushNotifications.register()
-        }
+        if (result.receive !== 'granted') return
 
-        // 🔥 Get FCM Token
+        // 🔥 IMPORTANT: create channel (FIX ANDROID SILENT ISSUE)
+        await PushNotifications.createChannel({
+          id: 'default',
+          name: 'Default Channel',
+          importance: 5
+        })
+
+        await PushNotifications.register()
+
+        // 📌 TOKEN RECEIVED
         PushNotifications.addListener('registration', async (token) => {
+          console.log('FCM TOKEN:', token.value)
+
           localStorage.setItem('fcm_token', token.value)
 
-          const user = JSON.parse(localStorage.getItem('user'))
+          const trySave = async () => {
+            const user = JSON.parse(localStorage.getItem('user'))
 
-          try {
-            // ⚠️ make sure user already logged in
-            if (!user || !user._id) {
-              console.warn('User not ready yet, skip sending token')
-              return
-            }
+            if (!user?._id) return false
 
-            const fcmToken = localStorage.getItem('fcm_token')
+            await api.post('/fcm/save-token', {
+              userId: user._id,
+              token: token.value,
+              device: 'android'
+            })
 
-            if (fcmToken) {
-              await api.post('/fcm/save-token', {
-                token: fcmToken,
-                device: 'android'
-              })
-            }
+            console.log('TOKEN SAVED')
+            return true
+          }
 
-            console.log('Token sent to backend ✅')
+          // try immediately
+          let saved = await trySave()
 
-          } catch (err) {
-            console.error('Failed to send token:', err.message)
+          // retry until login exists
+          if (!saved) {
+            const interval = setInterval(async () => {
+              saved = await trySave()
+              if (saved) clearInterval(interval)
+            }, 2000)
           }
         })
 
-        // 📩 Notification received (foreground)
+        // 📩 FOREGROUND NOTIFICATION
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
-          console.log('Notification received:', notification)
+          console.log('FOREGROUND:', notification)
+
+          this.$q.notify({
+            message: notification?.notification?.body || 'New Notification',
+            color: 'primary'
+          })
         })
 
-        // 👆 Notification clicked
+        // 👆 CLICK EVENT
         PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-          console.log('Notification clicked:', action)
+          console.log('CLICKED:', action)
         })
 
       } catch (err) {
