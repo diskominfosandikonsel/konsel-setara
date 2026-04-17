@@ -32,6 +32,9 @@ export const PerakService = {
   getUpah() {
     return apiPerak.post('dm_master_besaran_upah/list')
   },
+  getListKeterampilan(payload) {
+    return apiPerak.post('dm_master_keterampilan/list1', payload)
+  },
 
 
   getBiodata(payload = {}) {
@@ -93,6 +96,16 @@ export const PerakService = {
   },
   removeLampiran(payload) {
     return apiPerak.post('lampiran_biodata/removeData', payload)
+  },
+
+  getKeterampilan(params = {}) {
+    return apiPerak.post('keterampilan/view', params)
+  },
+  addKeterampilan(payload) {
+    return apiPerak.post('keterampilan/addData', payload)
+  },
+  removeKeterampilan(payload) {
+    return apiPerak.post('keterampilan/removeData', payload)
   },
 
 

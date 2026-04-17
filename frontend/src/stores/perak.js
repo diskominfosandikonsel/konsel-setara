@@ -12,6 +12,7 @@ export const usePerakStore = defineStore('perak', {
         pengalaman: [],
         jabatan: [],
         lampiran: [],
+        keterampilan: [],
         list_kecamatan: [],
         list_des_kel: [],
         list_perkawinan: [],
@@ -19,6 +20,7 @@ export const usePerakStore = defineStore('perak', {
         list_pendidikan: [],
         list_jurusan: [],
         list_upah: [],
+        list_keterampilan: [],
         opsiJenkel: [
             { id: 1, label: 'Laki-laki', value: 'Laki-laki' },
             { id: 2, label: 'Perempuan', value: 'Perempuan' }
@@ -108,6 +110,15 @@ export const usePerakStore = defineStore('perak', {
                 this.list_upah = res.data
             } catch (err) {
                 console.error("Gagal load upah", err)
+            }
+        },
+        async fetchListKeterampilan(val = '') {
+            try {
+                const res = await PerakService.getListKeterampilan({ val: val });
+                // console.log("Data Autocomplete:", res.data);
+                this.list_keterampilan = res.data;
+            } catch (err) {
+                console.error("Gagal load autocomplete keterampilan", err);
             }
         },
 
@@ -599,6 +610,70 @@ export const usePerakStore = defineStore('perak', {
                     icon: 'check_circle_outline'
                 });
                 await this.fetchLampiran();
+                return true;
+                }
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        },
+
+        async fetchKeterampilan(payload = {}) {
+            console.log("KETERAMPILAN TERPANGGIL");
+            this.loading = true;
+            try {
+                const res = await PerakService.getKeterampilan(payload)
+                console.log("Response Backend:", res.data.data)
+                this.keterampilan = res.data.data
+                this.jml_data = res.data.jml_data
+            } catch (err) {
+                Notify.create({
+                    message: 'Gagal ambil data',
+                    color: 'negative'
+                })
+            } finally {
+                this.loading = false
+                Loading.hide()
+            }
+        },
+        async addKeterampilan(payload) {
+            console.log("ADD KETERAMPILAN DIPANGGIL", payload);
+            Loading.show({ message: 'Proses menyimpan ke sistem...' });
+
+            try {
+                const formData = new FormData();
+
+                formData.append("biodata_id", payload.biodata_id);
+                formData.append("keterampilan_id", payload.keterampilan_id);
+                formData.append("tahun", payload.tahun);
+
+                const res = await PerakService.addKeterampilan(formData);
+                
+                if (res) {
+                    Notify.create({
+                        message: 'Sukses Menambah Data',
+                        color: 'primary',
+                        icon: 'check_circle_outline'
+                    });
+                    await this.fetchKeterampilan();
+                    return true;
+                }
+            } catch (err) {
+                console.error("Error FrontEnd:", err);
+                Notify.create({ message: 'Gagal menambah data', color: 'negative' });
+                return false;
+            }
+        },
+        async removeKeterampilan(id) {
+            try {
+                const res = await PerakService.removeKeterampilan({ id: id });
+                if (res) {
+                Notify.create({
+                    message: 'Sukses Menghapus Data',
+                    color: 'negative',
+                    icon: 'check_circle_outline'
+                });
+                await this.fetchKeterampilan();
                 return true;
                 }
             } catch (err) {

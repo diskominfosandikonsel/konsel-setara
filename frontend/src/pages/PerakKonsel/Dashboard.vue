@@ -49,6 +49,26 @@
         </div>
       </div>
       <div class="col-6">
+        <div class="card" @click="goKeterampilan">
+          <q-card-section>
+            <div class="card-inside">
+              <q-img src="/img/perak/pencil.png" class="card-icon" />
+            </div>
+            <div class="h1judul">Keterampilan</div>
+          </q-card-section>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card" @click="goBahasa">
+          <q-card-section>
+            <div class="card-inside">
+              <q-img src="/img/perak/translate.png" class="card-icon" />
+            </div>
+            <div class="h1judul">Bahasa Asing</div>
+          </q-card-section>
+        </div>
+      </div>
+      <div class="col-6">
         <div class="card" @click="goPengalaman">
           <q-card-section>
             <div class="card-inside">
@@ -106,6 +126,9 @@ export default {
     goLampiran(){
       this.$router.push('/lampiran');
     },
+    goKeterampilan(){
+      this.$router.push('/keterampilan');
+    }
   }
 }
 </script>

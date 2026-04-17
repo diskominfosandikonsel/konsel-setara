@@ -281,6 +281,16 @@ const routes = [
         component: () => import('src/pages/PerakKonsel/EditLampiran.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
       },
+      {
+        path: 'keterampilan',
+        component: () => import('src/pages/PerakKonsel/Keterampilan.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
+      {
+        path: 'tambahKeterampilan',
+        component: () => import('src/pages/PerakKonsel/TambahKeterampilan.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
 
       // SIMCARD
       {
