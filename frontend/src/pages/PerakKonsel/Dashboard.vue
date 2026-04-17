@@ -128,7 +128,10 @@ export default {
     },
     goKeterampilan(){
       this.$router.push('/keterampilan');
-    }
+    },
+    goBahasa(){
+      this.$router.push('/bahasa');
+    },
   }
 }
 </script>

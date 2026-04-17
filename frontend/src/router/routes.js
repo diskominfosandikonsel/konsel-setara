@@ -291,6 +291,16 @@ const routes = [
         component: () => import('src/pages/PerakKonsel/TambahKeterampilan.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
       },
+      {
+        path: 'bahasa',
+        component: () => import('src/pages/PerakKonsel/Bahasa.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
+      {
+        path: 'tambahBahasa',
+        component: () => import('src/pages/PerakKonsel/TambahBahasa.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
 
       // SIMCARD
       {
