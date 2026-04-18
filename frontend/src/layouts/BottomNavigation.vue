@@ -22,7 +22,14 @@
 
       <q-tab name="notifikasi" @click="go('/notifikasi')">
         <div class="pill" :class="{ active: tab === 'notifikasi' }">
-          <img src="~assets/icons/bell.svg" class="icon" :class="{ active: tab === 'notifikasi' }" />
+          <div class="icon-badge-wrap">
+            <img src="~assets/icons/bell.svg" class="icon" :class="{ active: tab === 'notifikasi' }" />
+            <transition name="badge-pop">
+              <span v-if="unreadCount > 0" class="notif-badge">
+                {{ unreadCount > 99 ? '99+' : unreadCount }}
+              </span>
+            </transition>
+          </div>
           <transition name="slide-fade">
             <span v-if="tab === 'notifikasi'">Notifikasi</span>
           </transition>
@@ -42,12 +49,21 @@
   </q-footer>
 </template>
 <script>
+import { useNotifikasiStore } from 'src/stores/notifikasi'
+
 export default {
   name: 'BottomNavigation',
 
   data () {
     return {
       tab: 'beranda'
+    }
+  },
+
+  computed: {
+    unreadCount () {
+      const store = useNotifikasiStore()
+      return store.unreadCount
     }
   },
 
@@ -93,7 +109,7 @@ export default {
   padding: 0 8px;
 
   border-radius: 18px;
-  overflow: hidden;
+  overflow: visible;
 
   transition:
     background 0.25s ease,
@@ -135,6 +151,51 @@ export default {
   white-space: nowrap;
 }
 
+/* ─── Badge ─── */
+.icon-badge-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 10;
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.4);
+}
+
+.badge-pop-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.badge-pop-leave-active {
+  transition: all 0.2s ease;
+}
+
+.badge-pop-enter-from {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.badge-pop-leave-to {
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* ─── Slide fade ─── */
 .slide-fade-enter-active {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -154,3 +215,4 @@ export default {
 }
 
 </style>
+

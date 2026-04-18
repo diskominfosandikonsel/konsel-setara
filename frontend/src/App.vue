@@ -5,6 +5,7 @@
 <script>
 import { PushNotifications } from '@capacitor/push-notifications'
 import { api } from 'src/api/api'
+import { useNotifikasiStore } from 'src/stores/notifikasi'
 
 export default {
   name: 'App',
@@ -73,51 +74,87 @@ export default {
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
           console.log('FOREGROUND:', notification)
 
+          // Simpan ke riwayat notifikasi
+          const notifStore = useNotifikasiStore()
+          const data = notification.data || {}
+          notifStore.add({
+            title: notification.title || 'Notifikasi',
+            body: notification.body || '',
+            type: data.type || '',
+            laporanId: data.laporanId || ''
+          })
+
+          // Tampilkan banner atas dengan aksi klik
           this.$q.notify({
-            message: notification?.notification?.body || 'New Notification',
-            color: 'primary'
+            message: notification.title || 'Notifikasi',
+            caption: notification.body || '',
+            color: 'primary',
+            icon: 'notifications',
+            position: 'top',
+            timeout: 5000,
+            actions: [
+              {
+                label: 'Lihat',
+                color: 'white',
+                handler: () => {
+                  this.navigateToDetail(data)
+                }
+              }
+            ]
           })
         })
 
-        // 👆 CLICK EVENT
+        // 👆 CLICK EVENT (dari background / cold start)
         PushNotifications.addListener('pushNotificationActionPerformed', async (action) => {
           console.log('CLICKED:', action)
 
-          const data = action.notification.data
+          // Simpan ke riwayat notifikasi
+          const notifStore = useNotifikasiStore()
+          const notif = action.notification
+          const data = notif.data || {}
+          notifStore.add({
+            title: notif.title || 'Notifikasi',
+            body: notif.body || '',
+            type: data.type || '',
+            laporanId: data.laporanId || ''
+          })
 
-          if (data && data.type) {
-
-            if (data.type === 'sippadu' && data.laporanId) {
-              const target = '/sippadu_detail/' + data.laporanId
-
-              // Selalu buat jembatan rute yang mulus dari asalnya (kapanpun diklik)
-              // Jika aplikasi dari background, kita buat rutenya tetap terjalin rapi
-              if (this.$route.path !== '/sippadu_riwayat' && this.$route.path !== target) {
-                await this.$router.replace('/')
-                await this.$router.push('/sippadu_riwayat')
-                await this.$router.push(target)
-              } else {
-                await this.$router.push(target)
-              }
-            }
-
-            else if (data.type === 'sapakonsel' && data.laporanId) {
-              const target = '/sapa_riwayat/' + data.laporanId
-
-              if (this.$route.path !== '/sapa_dashboard' && this.$route.path !== target) {
-                await this.$router.replace('/')
-                await this.$router.push('/sapa_dashboard')
-                await this.$router.push(target)
-              } else {
-                await this.$router.push(target)
-              }
-            }
-
-          }
+          await this.navigateToDetail(data)
         })
 
       } catch (err) {
         console.error('Push init error:', err)
+      }
+    },
+
+    /**
+     * Navigasi ke halaman detail berdasarkan data payload notifikasi
+     */
+    async navigateToDetail(data) {
+      if (!data || !data.type) return
+
+      if (data.type === 'sippadu' && data.laporanId) {
+        const target = '/sippadu_detail/' + data.laporanId
+
+        if (this.$route.path !== '/sippadu_riwayat' && this.$route.path !== target) {
+          await this.$router.replace('/')
+          await this.$router.push('/sippadu_riwayat')
+          await this.$router.push(target)
+        } else {
+          await this.$router.push(target)
+        }
+      }
+
+      else if (data.type === 'sapakonsel' && data.laporanId) {
+        const target = '/sapa_riwayat/' + data.laporanId
+
+        if (this.$route.path !== '/sapa_dashboard' && this.$route.path !== target) {
+          await this.$router.replace('/')
+          await this.$router.push('/sapa_dashboard')
+          await this.$router.push(target)
+        } else {
+          await this.$router.push(target)
+        }
       }
     }
   }
