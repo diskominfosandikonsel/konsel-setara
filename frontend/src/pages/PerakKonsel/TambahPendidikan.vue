@@ -98,12 +98,6 @@ export default {
             console.log("Data yang akan dikirim:", this.form);
             try {
                 await this.perak.addPendidikan(this.form);
-                this.$q.notify({
-                    message: 'Data Berhasil Disimpan!',
-                    color: 'positive',
-                    icon: 'check_circle',
-                    position: 'top'
-                });
                 this.$router.push('/pendidikanFormal');
             } catch (error) {
                 console.error("Error:", error);

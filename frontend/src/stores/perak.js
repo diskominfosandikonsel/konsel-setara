@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Loading, Notify } from 'quasar'
 import { PerakService } from 'src/services/perak.service'
+import { useAuthStore } from 'stores/auth'
 
 export const usePerakStore = defineStore('perak', {
     state: () => ({
@@ -182,7 +183,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                 Notify.create({
                     message: 'Sukses Menambah Data',
-                    color: 'primary',
+                    color: 'positive',
                     icon: 'check_circle_outline'
                 });
                 await this.fetchBiodata();
@@ -292,7 +293,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                 Notify.create({
                     message: 'Sukses Menambah Data',
-                    color: 'primary',
+                    color: 'positive',
                     icon: 'check_circle_outline'
                 });
                 await this.fetchPendidikan();
@@ -395,7 +396,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                 Notify.create({
                     message: 'Sukses Menambah Data',
-                    color: 'primary',
+                    color: 'positive',
                     icon: 'check_circle_outline'
                 });
                 await this.fetchPengalaman();
@@ -498,7 +499,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                 Notify.create({
                     message: 'Sukses Menambah Data',
-                    color: 'primary',
+                    color: 'positive',
                     icon: 'check_circle_outline'
                 });
                 await this.fetchJabatan();
@@ -599,7 +600,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                     Notify.create({
                         message: 'Sukses Menambah Data',
-                        color: 'primary',
+                        color: 'positive',
                         icon: 'check_circle_outline'
                     });
                     await this.fetchLampiran();
@@ -663,7 +664,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                     Notify.create({
                         message: 'Sukses Menambah Data',
-                        color: 'primary',
+                        color: 'positive',
                         icon: 'check_circle_outline'
                     });
                     await this.fetchKeterampilan();
@@ -728,7 +729,7 @@ export const usePerakStore = defineStore('perak', {
                 if (res) {
                     Notify.create({
                         message: 'Sukses Menambah Data',
-                        color: 'primary',
+                        color: 'positive',
                         icon: 'check_circle_outline'
                     });
                     await this.fetchBahasa();

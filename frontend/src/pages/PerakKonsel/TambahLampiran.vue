@@ -62,14 +62,6 @@ export default {
             this.loading = true;
             try {
                 await this.perak.addLampiran(this.form);
-                
-                this.$q.notify({
-                    message: 'Data Berhasil Disimpan!',
-                    color: 'positive',
-                    icon: 'check_circle',
-                    position: 'top'
-                });
-
                 this.$router.push('/lampiran');
             } catch (error) {
                 console.error("Error:", error);

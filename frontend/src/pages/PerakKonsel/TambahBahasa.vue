@@ -65,14 +65,6 @@ export default {
             this.loading = true;
             try {
                 await this.perak.addBahasa(this.form);
-                
-                this.$q.notify({
-                    message: 'Data Berhasil Disimpan!',
-                    color: 'positive',
-                    icon: 'check_circle',
-                    position: 'top'
-                });
-
                 this.$router.push('/bahasa');
             } catch (error) {
                 console.error("Error:", error);
