@@ -69,7 +69,10 @@ router.post('/login', (req, res) => {
         nama: user.nama,
         hp: user.hp,
         email: user.email,
-        menu_klp: user.menu_klp
+        menu_klp: user.menu_klp,
+        profile: {
+          menu_klp: user.menu_klp
+        }
       }
 
       jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
