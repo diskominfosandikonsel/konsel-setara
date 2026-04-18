@@ -56,7 +56,9 @@ function onVideoError() {
 }
 
 function goToHome() {
-  router.replace('/')
+  if (router.currentRoute.value.path === '/splash') {
+    router.replace('/')
+  }
 }
 </script>
 

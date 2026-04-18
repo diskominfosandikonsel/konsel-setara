@@ -36,18 +36,25 @@ export default {
           localStorage.setItem('fcm_token', token.value)
 
           const trySave = async () => {
-            const user = JSON.parse(localStorage.getItem('user'))
+            try {
+              const userStr = localStorage.getItem('user')
+              if (!userStr || userStr === 'undefined') return false
 
-            if (!user?._id) return false
+              const user = JSON.parse(userStr)
+              if (!user?._id) return false
 
-            await api.post('/fcm/save-token', {
-              userId: user._id,
-              token: token.value,
-              device: 'android'
-            })
+              await api.post('/fcm/save-token', {
+                userId: user._id,
+                token: token.value,
+                device: 'android'
+              })
 
-            console.log('TOKEN SAVED')
-            return true
+              console.log('TOKEN SAVED')
+              return true
+            } catch (err) {
+              console.error('Save token failed:', err)
+              return false
+            }
           }
 
           // try immediately
@@ -73,8 +80,40 @@ export default {
         })
 
         // 👆 CLICK EVENT
-        PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+        PushNotifications.addListener('pushNotificationActionPerformed', async (action) => {
           console.log('CLICKED:', action)
+
+          const data = action.notification.data
+
+          if (data && data.type) {
+
+            if (data.type === 'sippadu' && data.laporanId) {
+              const target = '/sippadu_detail/' + data.laporanId
+
+              // Selalu buat jembatan rute yang mulus dari asalnya (kapanpun diklik)
+              // Jika aplikasi dari background, kita buat rutenya tetap terjalin rapi
+              if (this.$route.path !== '/sippadu_riwayat' && this.$route.path !== target) {
+                await this.$router.replace('/')
+                await this.$router.push('/sippadu_riwayat')
+                await this.$router.push(target)
+              } else {
+                await this.$router.push(target)
+              }
+            }
+
+            else if (data.type === 'sapakonsel' && data.laporanId) {
+              const target = '/sapa_riwayat/' + data.laporanId
+
+              if (this.$route.path !== '/sapa_dashboard' && this.$route.path !== target) {
+                await this.$router.replace('/')
+                await this.$router.push('/sapa_dashboard')
+                await this.$router.push(target)
+              } else {
+                await this.$router.push(target)
+              }
+            }
+
+          }
         })
 
       } catch (err) {

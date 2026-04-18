@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { Notify, Loading } from 'quasar'
 import { AuthService } from 'src/services/auth.service'
+import { api } from 'src/api/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => {
@@ -43,6 +44,21 @@ export const useAuthStore = defineStore('auth', {
             localStorage.removeItem(key)
           }
         })
+
+        // 🔥 DAFTARKAN ULANG TOKEN FCM SAAT LOGIN
+        const fcmToken = localStorage.getItem('fcm_token')
+        if (fcmToken && this.user?._id) {
+          try {
+            // Tanpa await tidak apa-apa agar login tetap cepat
+            api.post('/fcm/save-token', {
+              userId: this.user._id,
+              token: fcmToken,
+              device: 'android'
+            }).catch(e => console.error('Gagal daftar FCM pasca login', e))
+          } catch (e) {
+            console.error('Error saat mencoba simpan token', e)
+          }
+        }
 
         Notify.create({
           message: 'Login berhasil',
@@ -94,7 +110,17 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    logout() {
+    async logout() {
+      // 🔥 Hapus token FCM dari server sebelum logout
+      const fcmToken = localStorage.getItem('fcm_token')
+      if (fcmToken) {
+        try {
+          await api.post('/fcm/remove-token', { token: fcmToken })
+        } catch (e) {
+          console.error('Gagal menghapus token FCM dari server:', e)
+        }
+      }
+
       this.token = null
       this.user = null
 
