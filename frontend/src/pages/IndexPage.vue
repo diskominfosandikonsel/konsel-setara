@@ -370,7 +370,7 @@ export default {
         { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
         { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
-        { label: 'E-Rida', img: 'icons/E-rida.png', route: '' },
+        { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
         // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
     }
