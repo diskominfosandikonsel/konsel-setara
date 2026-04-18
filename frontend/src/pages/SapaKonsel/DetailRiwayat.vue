@@ -72,13 +72,13 @@
                     <div class="col-4 text-right text-grey-8 text-caption" style="line-height: 1.2;">
   
                       <div v-if="laporan.dateMeta.type === 'relative'">
-                        {{ laporan.date.text }}
+                        {{ laporan.dateMeta.text }}
                       </div>
 
                       <div v-else-if="laporan.dateMeta.type === 'full'">
-                        <div>{{ laporan.date.date }}</div>
+                        <div>{{ laporan.dateMeta.date }}</div>
                         <div style="font-size: 11px; color: #9E9E9E;">
-                          {{ laporan.date.time }}
+                          {{ laporan.dateMeta.time }}
                         </div>
                       </div>
 
