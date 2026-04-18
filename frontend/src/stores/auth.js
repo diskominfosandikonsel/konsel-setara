@@ -126,6 +126,7 @@ export const useAuthStore = defineStore('auth', {
 
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('push_notifications')
 
       Notify.create({
         message: 'Anda Berhasil Keluar',
