@@ -144,7 +144,7 @@ const routes = [
       {
         path: 'sippadu_dashboard',
         component: () => import('pages/Sippadu/Dashboard.vue'),
-        meta: { showBottomNav: true }
+        meta: { showBottomNav: true, requiresAuth: true }
       },
       {
         path: 'Perda',
