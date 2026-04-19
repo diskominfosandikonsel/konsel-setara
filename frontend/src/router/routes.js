@@ -457,6 +457,12 @@ const routes = [
         component: () => import('pages/Jdih/DetilDokumen.vue'),
         meta: { showBottomNav: true }
       },
+      // ADMIN SECTION
+      {
+        path: 'admin/slider',
+        component: () => import('pages/Admin/CarouselPage.vue'),
+        meta: { showBottomNav: false, requiresAuth: true, adminOnly: true }
+      },
     ]
   },
 

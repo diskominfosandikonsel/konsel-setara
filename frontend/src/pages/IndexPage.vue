@@ -167,9 +167,10 @@ import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { Autoplay } from 'swiper/modules'
-import { api } from 'src/api/api'
 import { useBeritaStore } from 'src/stores/berita'
+import { useSliderStore } from 'src/stores/slider'
 import { getImageBerita, formatDate } from 'src/utils/helper'
+import { api } from 'src/api/api'
 
 export default {
   name: 'IndexPage',
@@ -180,6 +181,7 @@ export default {
   setup() {
     const router = useRouter()
     const beritaStore = useBeritaStore()
+    const sliderStore = useSliderStore()
     const swiperRef = ref(null)
     const activeIndex = ref(0)
 
@@ -207,16 +209,27 @@ export default {
 
     const fetchCarousel = async () => {
       try {
+        const res = await sliderStore.fetchSliders()
+        const data = res?.data || []
 
-        // DUMMY DATA SEMENTARA (Hapus bagian ini jika API sudah terpasang)
-        carouselItems.value = [
-          { img: 'img/card1.png', link: '' },
-          { img: 'img/card2.png', link: 'https://appkonsel.konaweselatankab.go.id/' },
-          { img: 'img/card3.png', link: '' },
-          { img: 'img/card4.png', link: 'https://play.google.com/store/apps/details?id=com.warga_bicara_mobile&pcampaignid=web_share' }
-        ]
+        if (data.length > 0) {
+          const baseUrl = api.defaults.baseURL.replace(/\/$/, '')
+          carouselItems.value = data.map(item => ({
+            img: item.img?.startsWith('http')
+              ? item.img
+              : `${baseUrl}/uploads/${item.img}`,
+            link: item.link || ''
+          }))
+        } else {
+          // Fallback jika database slider masih kosong
+          carouselItems.value = [
+            { img: 'img/card1.png', link: 'https://konaweselatankab.go.id' },
+            { img: 'img/card2.png', link: 'https://appkonsel.konaweselatankab.go.id/' },
+            { img: 'img/card4.png', link: 'https://play.google.com/store/apps/details?id=com.warga_bicara_mobile&pcampaignid=web_share' }
+          ]
+        }
       } catch (error) {
-        console.error('Gagal mengambil gambar carousel:', error)
+        console.error('Gagal mengambil gambar slider:', error)
       }
     }
 

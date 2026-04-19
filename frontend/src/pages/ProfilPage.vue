@@ -91,6 +91,27 @@
           </q-list>
         </q-card>
 
+        <!-- Panel Admin Section — hanya untuk menu_klp 1 -->
+        <template v-if="isAdmin">
+          <div class="section-title q-mb-sm text-grey-9 text-weight-medium">Panel Admin</div>
+          <q-card class="menu-card q-mb-lg no-shadow rounded-box" style="border-left: 4px solid #1976D2;">
+            <q-list class="rounded-borders">
+              <q-item clickable v-ripple class="q-py-md" @click="$router.push('/admin/slider')">
+                <q-item-section avatar class="q-pr-sm" style="min-width: 40px;">
+                  <q-icon name="view_carousel" size="24px" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <div class="text-weight-medium text-grey-9">Manajemen Slider</div>
+                  <div class="text-caption text-grey-6">Kelola gambar banner beranda</div>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="keyboard_arrow_right" size="24px" color="grey-7" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </template>
+
         <!-- Keluar Section -->
         <q-card class="menu-card q-mb-xl no-shadow rounded-box">
           <q-list class="rounded-borders">
@@ -143,6 +164,9 @@ export default {
         const name = this.userName
         if (!name || name === '-') return '?'
         return name.charAt(0).toUpperCase()
+      },
+      isAdmin() {
+        return this.auth.user?.menu_klp == 1
       }
     },
 
