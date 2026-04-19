@@ -56,6 +56,18 @@ export const useSliderStore = defineStore('slider', {
       } finally {
         this.loading = false
       }
+    },
+
+    async reorderSliders(orders) {
+      this.loading = true
+      try {
+        const res = await SliderService.reorder(orders)
+        return res.data
+      } catch (err) {
+        throw err
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

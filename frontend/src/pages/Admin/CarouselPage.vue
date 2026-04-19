@@ -18,71 +18,108 @@
       <p class="text-caption">Klik tombol "Upload" untuk menambahkan gambar slider baru.</p>
     </div>
 
-    <!-- Daftar Slider -->
-    <div v-else class="q-pa-md row q-col-gutter-md">
-      <div v-for="(item, index) in sliderStore.sliders" :key="item.id" class="col-12 col-sm-6">
-        <q-card class="no-shadow rounded-borders overflow-hidden" style="border: 1px solid #e0e0e0;">
-          <!-- Gambar Slider -->
-          <q-img
-            :src="getFullUrl(item.img)"
-            :ratio="16/9"
-            class="bg-grey-3"
-          >
-            <template #error>
-              <div class="absolute-full flex flex-center bg-grey-3 text-grey-6">
-                <div class="text-center">
-                  <q-icon name="broken_image" size="40px" />
-                  <div class="text-caption">Gagal memuat gambar</div>
+    <!-- Daftar Slider (Drag & Drop) -->
+    <div v-else class="q-pa-md">
+
+      <draggable
+        v-model="localSliders"
+        item-key="id"
+        class="row q-col-gutter-md"
+        handle=".drag-handle"
+        @change="onDragChange"
+      >
+        <template #item="{ element: item, index }">
+          <div class="col-12 col-sm-6">
+            <q-card class="no-shadow rounded-borders overflow-hidden" style="border: 1px solid #e0e0e0;">
+              <!-- Handle Drag & Gambar -->
+              <div class="relative-position">
+                <q-img
+                  :src="getFullUrl(item.img)"
+                  :ratio="16/9"
+                  class="bg-grey-3"
+                >
+                  <template #error>
+                    <div class="absolute-full flex flex-center bg-grey-3 text-grey-6">
+                      <div class="text-center">
+                        <q-icon name="broken_image" size="40px" />
+                        <div class="text-caption">Gagal memuat gambar</div>
+                      </div>
+                    </div>
+                  </template>
+                </q-img>
+                <!-- Drag Overlay Handle -->
+                <div class="absolute-top-right q-ma-sm drag-handle cursor-move shadow-2" style="background: rgba(255,255,255,0.8); border-radius: 4px; padding: 4px;">
+                  <q-icon name="open_with" size="24px" color="primary" />
                 </div>
               </div>
-            </template>
-          </q-img>
-          <!-- Info & Aksi -->
-          <q-card-section class="q-py-sm">
-            <div class="row items-center q-mb-xs">
-              <q-badge color="primary" rounded class="text-weight-bold q-mr-sm" style="font-size: 12px; padding: 3px 10px;">
-                No. {{ index + 1 }}
-              </q-badge>
-              <span class="text-overline text-grey-7">Slider</span>
-            </div>
-            <div class="text-body2 text-primary ellipsis" v-if="item.link">
-              {{ item.link }}
-            </div>
-            <div class="text-caption text-grey-5 italic" v-else>
-              Tanpa link tujuan
-            </div>
-            <div class="q-mt-sm row justify-end q-gutter-sm">
-              <q-btn
-                unelevated rounded
-                color="primary"
-                icon="edit"
-                label="Edit"
-                size="sm"
-                @click="openEdit(item)"
-              />
-              <q-btn
-                unelevated rounded
-                color="negative"
-                icon="delete"
-                label="Hapus"
-                size="sm"
-                @click="confirmDelete(item.id)"
-              />
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
+
+              <!-- Info & Aksi -->
+              <q-card-section class="q-py-sm">
+                <div class="row items-center q-mb-xs">
+                  <q-badge color="primary" rounded class="text-weight-bold q-mr-sm" style="font-size: 12px; padding: 3px 10px;">
+                    No. {{ index + 1 }}
+                  </q-badge>
+                  <span class="text-overline text-grey-7">Slider ID: {{ item.id }}</span>
+                </div>
+                <div class="text-body2 text-primary ellipsis" v-if="item.link">
+                  {{ item.link }}
+                </div>
+                <div class="text-caption text-grey-5 italic" v-else>
+                  Tanpa link tujuan
+                </div>
+                <div class="q-mt-sm row justify-end q-gutter-sm">
+                  <q-btn
+                    unelevated rounded
+                    color="primary"
+                    icon="edit"
+                    label="Edit"
+                    size="sm"
+                    @click="openEdit(item)"
+                  />
+                  <q-btn
+                    unelevated rounded
+                    color="negative"
+                    icon="delete"
+                    label="Hapus"
+                    size="sm"
+                    @click="confirmDelete(item.id)"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+        </template>
+      </draggable>
     </div>
 
-    <!-- FAB: Tombol Tambah Slider (Pojok Kanan Bawah) -->
+    <!-- FAB Group: Simpan & Tambah -->
     <q-page-sticky position="bottom-right" :offset="[24, 24]">
-      <q-btn
-        fab
-        icon="add"
-        color="primary"
-        @click="showAddDialog = true"
-        aria-label="Tambah Slider"
-      />
+      <div class="column q-gutter-y-md items-end">
+        <!-- Floating Save Button -->
+        <transition appear enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+          <q-btn
+            v-if="orderChanged"
+            fab
+            icon="save"
+            color="positive"
+            @click="saveNewOrder"
+            :loading="btnLoading"
+          >
+            <q-tooltip anchor="center left" self="center right">Simpan Urutan Baru</q-tooltip>
+          </q-btn>
+        </transition>
+
+        <!-- Floating Add Button -->
+        <q-btn
+          fab
+          icon="add"
+          color="primary"
+          @click="showAddDialog = true"
+          aria-label="Tambah Slider"
+        >
+          <q-tooltip anchor="center left" self="center right">Tambah Slider</q-tooltip>
+        </q-btn>
+      </div>
     </q-page-sticky>
 
     <!-- Dialog: Tambah Slider Baru -->
@@ -223,10 +260,13 @@ import { ref, watch, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useSliderStore } from 'src/stores/slider'
 import { api } from 'src/api/api'
+import draggable from 'vuedraggable'
 
 const $q = useQuasar()
 const sliderStore = useSliderStore()
 
+const localSliders = ref([])
+const orderChanged = ref(false)
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
 const btnLoading = ref(false)
@@ -248,6 +288,35 @@ watch(imageFile, (file) => {
 watch(editImageFile, (file) => {
   editPreviewUrl.value = file ? URL.createObjectURL(file) : null
 })
+
+// Update local sliders saat store sliders di-fetch
+watch(() => sliderStore.sliders, (newVal) => {
+  localSliders.value = [...newVal]
+}, { deep: true })
+
+const onDragChange = () => {
+  orderChanged.value = true
+}
+
+const saveNewOrder = async () => {
+  btnLoading.value = true
+  try {
+    // Siapkan data urutan baru (berdasarkan posisi array 1, 2, 3...)
+    const newOrderPayload = localSliders.value.map((item, index) => ({
+      id: item.id,
+      urutan: index + 1
+    }))
+
+    await sliderStore.reorderSliders(newOrderPayload)
+    $q.notify({ color: 'positive', message: 'Urutan terbaru berhasil disimpan!' })
+    orderChanged.value = false
+    await sliderStore.fetchSliders()
+  } catch (err) {
+    $q.notify({ color: 'negative', message: 'Gagal menyimpan urutan' })
+  } finally {
+    btnLoading.value = false
+  }
+}
 
 // Base URL gambar diambil dari config axios di api.js
 const IMG_BASE_URL = api.defaults.baseURL.replace(/\/$/, '')

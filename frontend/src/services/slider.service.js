@@ -23,5 +23,10 @@ export const SliderService = {
   // Hapus slider berdasarkan ID (Admin only)
   async remove(id) {
     return await apiSlider.delete(`slider/${id}`)
+  },
+
+  // Simpan urutan baru (Admin only)
+  async reorder(orders) {
+    return await apiSlider.post('slider/reorder', { orders })
   }
 }

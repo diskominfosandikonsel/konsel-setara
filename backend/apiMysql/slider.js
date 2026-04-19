@@ -10,25 +10,15 @@ const middleware = require('../auth/middlewares');
 // GET /api/v1/slider — Ambil semua data slider
 // ═══════════════════════════════════════════════
 router.get('/', (req, res) => {
-  const sql = `SELECT * FROM slider ORDER BY createdAt DESC`
+  const sql = `SELECT * FROM slider ORDER BY urutan ASC, createdAt DESC`
   db.query(sql, (err, rows) => {
-    if (err) {
-      console.error('❌ GET SLIDER DB ERROR:', err)
-      return res.status(500).json({ success: false, message: 'Database error' })
-    }
-
-    return res.json({
-      success: true,
-      data: rows
-    })
+    if (err) return res.status(500).json({ success: false, message: 'Database error' })
+    return res.json({ success: true, data: rows })
   })
 })
 
 // ═══════════════════════════════════════════════
 // POST /api/v1/slider — Tambah data slider (Admin Only)
-// ═══════════════════════════════════════════════
-// ═══════════════════════════════════════════════
-// POST /api/v1/slider — Tambah slider (Admin Only)
 // ═══════════════════════════════════════════════
 router.post('/',
   middleware.isLoggedIn,
@@ -39,35 +29,60 @@ router.post('/',
     });
   },
   (req, res) => {
-    if (req.user.menu_klp != 1) {
-      return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-    }
+    if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
 
     const { link } = req.body;
     const file = req.file;
+    if (!file) return res.status(422).json({ success: false, message: 'File gambar wajib diunggah' });
 
-    if (!file) {
-      return res.status(422).json({ success: false, message: 'File gambar wajib diunggah' });
-    }
-
-    const sql = `INSERT INTO slider (img, link, createdAt) VALUES (?, ?, NOW())`;
-    db.query(sql, [file.filename, link || ''], (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Gagal menyimpan data slider' });
+    // 🚀 LOGIKA: Letakkan di posisi paling atas (urutan terkecil)
+    db.query('SELECT MIN(urutan) as minUrutan FROM slider', (err, rows) => {
+      let nextUrutan = 0;
+      if (!err && rows.length > 0 && rows[0].minUrutan !== null) {
+        nextUrutan = rows[0].minUrutan - 1;
       }
 
-      return res.json({
-        success: true,
-        message: 'slider berhasil ditambahkan',
-        data: {
-          id: result.insertId,
-          img: file.filename,
-          link: link
-        }
+      const sql = `INSERT INTO slider (img, link, urutan, createdAt) VALUES (?, ?, ?, NOW())`;
+      db.query(sql, [file.filename, link || '', nextUrutan], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: 'Gagal menyimpan data slider' });
+
+        return res.json({
+          success: true,
+          message: 'slider berhasil ditambahkan di posisi pertama',
+          data: { id: result.insertId, img: file.filename, link: link, urutan: nextUrutan }
+        });
       });
     });
   }
 );
+
+// ═══════════════════════════════════════════════
+// POST /api/v1/slider/reorder — Simpan urutan baru
+// ═══════════════════════════════════════════════
+router.post('/reorder', middleware.isLoggedIn, (req, res) => {
+  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
+
+  const { orders } = req.body; // Array of {id, urutan}
+  if (!Array.isArray(orders)) return res.status(422).json({ success: false, message: 'Invalid data' });
+
+  // Update batch menggunakan multiple queries (pastikan connection mysql support multiple statements)
+  // Atau loop untuk update satu per satu
+  let completed = 0;
+  let hasError = false;
+
+  if (orders.length === 0) return res.json({ success: true, message: 'No items to reorder' });
+
+  orders.forEach(item => {
+    db.query('UPDATE slider SET urutan = ? WHERE id = ?', [item.urutan, item.id], (err) => {
+      if (err) hasError = true;
+      completed++;
+      if (completed === orders.length) {
+        if (hasError) return res.status(500).json({ success: false, message: 'Gagal memperbarui beberapa urutan' });
+        return res.json({ success: true, message: 'Urutan berhasil disimpan' });
+      }
+    });
+  });
+});
 
 // ═══════════════════════════════════════════════
 // DELETE /api/v1/slider/:id — Hapus slider (Admin Only)
