@@ -131,14 +131,45 @@ const routes = [
       },
       {
         path: 'erida_dashboard',
-        component: () => import('pages/Erida/Dashboard.vue'),
+        component: () => import('pages/Erida/Dash.vue'),
         meta: { showBottomNav: true }
       },
       {
-        path: 'erida_penelitian',
-        component: () => import('pages/Erida/Penelitian.vue'),
-        meta: { showBottomNav: false, requiresAuth: true }
+        path: '/erida_riset',
+        name: 'erida-riset',
+        component: () => import('pages/Erida/Riset.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
       },
+      // {
+      //   path: '/erida_krenova',
+      //   name: 'erida-krenova',
+      //   component: () => import('pages/Erida/Krenova.vue'),
+      //   meta: { showBottomNav: false, requiresAuth: false }
+      // },
+      // {
+      //   path: '/erida_aksi',
+      //   name: 'erida-aksi',
+      //   component: () => import('pages/Erida/Aksi.vue'),
+      //   meta: { showBottomNav: false, requiresAuth: false }
+      // },
+      // {
+      //   path: '/erida_teknologi',
+      //   name: 'erida-teknologi',
+      //   component: () => import('pages/Erida/Teknologi.vue'),
+      //   meta: { showBottomNav: false, requiresAuth: false }
+      // },
+      // {
+      //   path: '/erida_haki',
+      //   name: 'erida-haki',
+      //   component: () => import('pages/Erida/Haki.vue'),
+      //   meta: { showBottomNav: false, requiresAuth: false }
+      // },
+      // {
+      //   path: '/erida_penelitian',
+      //   name: 'erida-penelitian',
+      //   component: () => import('pages/Erida/Penelitian.vue'),
+      //   meta: { showBottomNav: false, requiresAuth: false }
+      // },
 
       // SIPPADU
       {
