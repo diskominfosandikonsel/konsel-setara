@@ -40,6 +40,10 @@ router.post('/send', (req, res) => {
       try {
         let response
 
+        const pushData = Object.assign({}, data);
+        if (title) pushData.title = String(title);
+        if (body) pushData.body = String(body);
+
         // 🚀 SINGLE DEVICE
         if (tokens.length === 1) {
           response = await admin.messaging().send({
@@ -48,7 +52,7 @@ router.post('/send', (req, res) => {
               title,
               body
             },
-            data: data || {}
+            data: pushData
           })
         }
 
@@ -60,7 +64,7 @@ router.post('/send', (req, res) => {
               title,
               body
             },
-            data: data || {}
+            data: pushData
           })
         }
 
