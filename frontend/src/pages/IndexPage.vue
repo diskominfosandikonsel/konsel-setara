@@ -341,8 +341,14 @@ export default {
     })
 
     const goToRoute = (route) => {
-      if (route) {
-        // Assume route doesn't have leading slash if it's named or path, let Vue Router handle resolution
+      if (!route) return
+      
+      // Cek apakah route adalah URL eksternal (dimulai dengan http:// atau https://)
+      if (route.startsWith('http://') || route.startsWith('https://')) {
+        // Buka di tab baru jika URL eksternal
+        window.open(route, '_blank')
+      } else {
+        // Gunakan Vue Router untuk route internal
         router.push(route)
       }
     }
@@ -379,7 +385,7 @@ export default {
         { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
         { label: 'SapaKonsel', img: 'icons/sapa.svg', route: '/sapa_dashboard' },
         { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
-        { label: 'PPID', img: 'icons/Ppid.png', route: '' },
+        { label: 'PPID', img: 'icons/Ppid.png', route: 'http://ppid.konaweselatankab.go.id' },
         { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
         { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },

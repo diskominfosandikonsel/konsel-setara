@@ -29,15 +29,19 @@
       </div>
     </div>
 
-    <div class="" style="padding-top:0px !important;">
+    <div class="containerOne" style="padding-top:0px !important;">
       <q-card class="text-white full-width" style="border-radius: 15px; background-color: #FFFFFF; opacity: 0.85;">
 
-        <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
-        <div class="row items-center no-wrap" style="justify-content: space-between; padding: 0 10px;">
-          <input type="text" v-model="cari_value" @input="getview" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
-          <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" style="margin-top: 16px;">
-            <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
-          </q-btn>
+        <div class="full-width row wrap justify-between items-center content-center" style="justify-content: space-between;">
+          <div class="col-10 self-center items-center" style="padding: 10px 10px 0px 20px;">
+            <input type="text" v-model="cari_value" @input="getview" style="width: 100%; padding: 10px 10px ;border-radius: 8px;border: 1px solid #C4C4C4;"  placeholder="Pencarian" />
+          </div>
+          <div class="col-2 self-center text-center items-center" style="margin-top: 10px;">
+            <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" >
+              <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
+            </q-btn>            
+          </div>
+
         </div>
 
         <!-- DAFTAR PERMOHONAN -->
@@ -1799,6 +1803,7 @@
                 <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
                   📋 Persyaratan Umum
                 </h5>
+
                 <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
                   <li>Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf</li>
                   <li>Kartu Tanda Penduduk (KTP) yang masih berlaku</li>
@@ -1807,6 +1812,7 @@
                   <li>Pas Foto 4x6 cm (hitam putih atau berwarna)</li>
                   <li>Surat Keterangan Domisili dari kelurahan setempat</li>
                 </ul>
+                
               </div>
 
             
@@ -1845,6 +1851,7 @@ export default {
   name: 'KK1_list',
   data() {
     return {
+      nama_form:'KK1',
       nama:'',
       step: 1,
       modal_lihat   : false,

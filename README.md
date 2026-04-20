@@ -62,8 +62,11 @@ quasar build
 
 ```bash
 npm run build
+#jika belum ada folder android
 npx cap add android
 npx cap sync
+# untuk di windows
+npx cap sync android
 npx cap open android
 ```
 

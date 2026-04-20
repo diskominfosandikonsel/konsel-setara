@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { Loading, Notify } from 'quasar'
 import { SimcardService } from 'src/services/simcardService'
 import axios from 'axios'
+import { list } from 'postcss'
 
 var URL = 'https://server-simcard.konaweselatankab.go.id/'
 // var URL = 'http://server-simcard.konaweselatankab.go.id/'
@@ -73,6 +74,119 @@ export const useSimcardStore = defineStore('simcard', {
     listAgama: [],
     listPendidikan: [],
     listShdk: [],
+
+    // Persyaratan untuk berbagai halaman/form
+    persyaratan: {
+      KK_BARU: {
+        judul: 'Persyaratan Permohonan Kartu Keluarga Baru',
+        umum: [
+          'Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf',
+          'Kartu Tanda Penduduk (KTP) yang masih berlaku',
+          'Surat Nikah (untuk yang sudah menikah)',
+          'Akta Kelahiran dari kantor pencatatan sipil',
+          'Pas Foto 4x6 cm (hitam putih atau berwarna)',
+          'Surat Keterangan Domisili dari kelurahan setempat',
+        ],
+        khusus: [],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      KK_WNI: {
+        judul: 'Persyaratan Permohonan Kartu Keluarga WNI',
+        umum: [
+          'Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf',
+          'Kartu Tanda Penduduk (KTP) yang masih berlaku',
+          'Surat Nikah (untuk yang sudah menikah)',
+          'Akta Kelahiran dari kantor pencatatan sipil',
+          'Pas Foto 4x6 cm (hitam putih atau berwarna)',
+          'Surat Keterangan Domisili dari kelurahan setempat',
+        ],
+        khusus: [
+          'Bukti Kewarganegaraan Republik Indonesia',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      KK_WNA: {
+        judul: 'Persyaratan Permohonan Kartu Keluarga WNA',
+        umum: [
+          'Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf',
+          'Paspor yang masih berlaku',
+          'Surat Izin Tinggal Terbatas (KITAS) atau Surat Izin Tinggal Tetap (KITAP)',
+          'Surat Nikah (untuk yang sudah menikah)',
+          'Pas Foto 4x6 cm (hitam putih atau berwarna)',
+          'Surat Keterangan Domisili dari kelurahan setempat',
+        ],
+        khusus: [
+          'Bukti sponsor atau pihak yang menanggung',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      KTP: {
+        judul: 'Persyaratan Permohonan KTP',
+        umum: [
+          'Kartu Keluarga (KK) asli atau fotokopi',
+          'Akta Kelahiran atau Surat Keterangan Lahir',
+          'Pas Foto 4x6 cm (hitam putih atau berwarna)',
+          'Surat Keterangan Domisili (jika berbeda dengan KK)',
+        ],
+        khusus: [
+          'Untuk perubahan data: bukti dokumen yang diperbarui',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      KELAHIRAN: {
+        judul: 'Persyaratan Permohonan Akta Kelahiran',
+        umum: [
+          'Surat Keterangan Lahir dari bidan atau tenaga kesehatan',
+          'KTP orang tua atau Kartu Keluarga',
+          'Pas Foto 2x3 cm orang tua (masing-masing 2 lembar)',
+          'Buku Nikah (untuk anak dari pernikahan yang sah)',
+        ],
+        khusus: [
+          'Untuk anak di luar nikah: Surat Pengakuan Anak',
+          'Untuk anak adopsi: Putusan Pengadilan tentang Adopsi',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      PPD1: {
+        judul: 'Persyaratan Duplikat Akta Kelahiran',
+        umum: [
+          'Kartu Identitas (KTP/Paspor/SIM) pemohon',
+          'Kartu Keluarga asli',
+          'Pas Foto 2x3 cm',
+          'Surat Permohonan Rangkap Akta',
+        ],
+        khusus: [
+          'Bila tidak sendiri membawa surat kuasa yang dilegalisir',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      PPD2: {
+        judul: 'Persyaratan Perubahan Data Akta Kelahiran',
+        umum: [
+          'Akta Kelahiran asli',
+          'Kartu Tanda Penduduk (KTP)',
+          'Kartu Keluarga (KK)',
+          'Surat Permohonan dari yang bersangkutan',
+        ],
+        khusus: [
+          'Bukti dokumen pendukung sesuai jenis perubahan data',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+      PPD3: {
+        judul: 'Persyaratan Penambahan Data Akta Kelahiran',
+        umum: [
+          'Akta Kelahiran asli',
+          'Kartu Tanda Penduduk (KTP)',
+          'Kartu Keluarga (KK)',
+          'Surat Permohonan dari yang bersangkutan',
+        ],
+        khusus: [
+          'Bukti dokumen pendukung untuk penambahan data',
+        ],
+        jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+      },
+    }
 
 
 
@@ -298,6 +412,30 @@ async getnama(){
     // return 'tidak di temukan'
   }
 
+},
+
+async getPersyaratan(tipe) {
+  // Mengembalikan persyaratan berdasarkan tipe permohonan secara async
+  // Jika tipe tidak ditemukan, kembalikan object kosong dengan struktur default
+  try {
+    const persyaratan = this.persyaratan[tipe] || {
+      judul: 'Persyaratan Permohonan',
+      umum: [],
+      khusus: [],
+      jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+    }
+    // Simulasi loading dengan delay minimal untuk memastikan data terupdate
+    await new Promise(resolve => setTimeout(resolve, 0))
+    return persyaratan
+  } catch (err) {
+    console.error('Error getting persyaratan:', err)
+    return {
+      judul: 'Persyaratan Permohonan',
+      umum: [],
+      khusus: [],
+      jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
+    }
+  }
 }
 
  
