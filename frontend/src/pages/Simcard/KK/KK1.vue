@@ -9,7 +9,6 @@
             </div>
             <div>
                 <p class="text-white text-right">{{ nama}}</p>
-                <pre>{{nama}}</pre>
             </div>
             <div>
                 <img src="~assets/simcard/FotoProfile.png" alt="" style="height: 40px; width: 40px;">
@@ -30,7 +29,7 @@
       </div>
     </div>
 
-    <div class="containerOne" style="padding-top:0px !important;">
+    <div class="" style="padding-top:0px !important;">
       <q-card class="text-white full-width" style="border-radius: 15px; background-color: #FFFFFF; opacity: 0.85;">
 
         <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
@@ -42,116 +41,124 @@
         </div>
 
         <!-- DAFTAR PERMOHONAN -->
-        <div style="margin-left: 10px; margin-right: 10px;">
-          <div v-for="(item, index) in list_data" :key="index" style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;">
-            <div class="row items-center no-wrap">
+        <div style="margin-left: 10px; margin-right: 10px;">  
+ 
+            <div v-for="(item, index) in list_data" :key="index" style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;">
+              <div class="row items-center no-wrap">
 
-              <div v-if="item.KK1.status === 0" style="color:#6C7278;">
-                <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
-              </div>
-
-              <div v-if="item.KK1.status === 1" style="color:#6C7278;">
-                <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
-              </div>
-
-              <div v-if="item.KK1.status === 2" style="color:#6C7278;">
-                <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
-              </div>
-
-              <div class="flex-break col self-center" style="margin-left: 11px;">
-                <div v-if="item.KK1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
-                  Mohon bersabar, data masih diverifikasi
+                <div v-if="item.KK1.status === 0" style="color:#6C7278;">
+                  <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
                 </div>
-                <div v-if="item.KK1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
-                  Permohonan Diterima
+
+                <div v-if="item.KK1.status === 1" style="color:#6C7278;">
+                  <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
                 </div>
-                <div v-if="item.KK1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
-                  Permohonan Dikembalikan
+
+                <div v-if="item.KK1.status === 2" style="color:#6C7278;">
+                  <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
                 </div>
-                <div style="color:#6C7278;font-size: 11px;">
-                  Nama pemohon : {{ item.KK1.nama }}
+
+                <div class="flex-break col self-center" style="margin-left: 11px;">
+                  <div v-if="item.KK1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
+                    Mohon bersabar, data masih diverifikasi
+                  </div>
+                  <div v-if="item.KK1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
+                    Permohonan Diterima
+                  </div>
+                  <div v-if="item.KK1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
+                    Permohonan Dikembalikan
+                  </div>
+                  <div style="color:#6C7278;font-size: 11px;">
+                    Nama pemohon : {{ item.KK1.nama }}
+                  </div>
                 </div>
-              </div>
-              <div class="" style="margin-left: 11px;">
+                <div class="" style="margin-left: 11px;">
 
-                <div class="text-right" style="margin: 0px 0px 0px 0px ;">
+                  <div class="text-right" style="margin: 0px 0px 0px 0px ;">
 
-                  <!-- Button Icon -->
-                  <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
-                    <q-menu>
-                      <q-list>
-                        <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
-                          <q-item-section avatar>
-                            <q-icon name="source" color="primary" />
-                          </q-item-section>
-                          <q-item-section>Lihat Hasil Permohonan</q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
-                          <q-item-section avatar>
-                            <q-icon name="remove_red_eye" color="primary" />
-                          </q-item-section>
-                          <q-item-section>Detail</q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
-                          <q-item-section avatar>
-                            <q-icon name="timeline" color="primary" />
-                          </q-item-section>
-                          <q-item-section>Alur Permohonan</q-item-section>
-                        </q-item>
+                    <!-- Button Icon -->
+                    <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
+                      <q-menu>
+                        <q-list>
+                          <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
+                            <q-item-section avatar>
+                              <q-icon name="source" color="primary" />
+                            </q-item-section>
+                            <q-item-section>Lihat Hasil Permohonan</q-item-section>
+                          </q-item>
+                          <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
+                            <q-item-section avatar>
+                              <q-icon name="remove_red_eye" color="primary" />
+                            </q-item-section>
+                            <q-item-section>Detail</q-item-section>
+                          </q-item>
+                          <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                            <q-item-section avatar>
+                              <q-icon name="timeline" color="primary" />
+                            </q-item-section>
+                            <q-item-section>Alur Permohonan</q-item-section>
+                          </q-item>
 
-                      </q-list>
-                    </q-menu>
-                  </q-btn>
+                        </q-list>
+                      </q-menu>
+                    </q-btn>
 
-                  <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
-                    <q-menu>
-                      <q-list>
-                        <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
-                          <q-item-section avatar>
-                            <q-icon name="remove_red_eye" color="primary" />
-                          </q-item-section>
-                          <q-item-section>Detail</q-item-section>
-                        </q-item>
-                        <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
-                          <q-item-section avatar>
-                            <q-icon name="circle_notifications" color="red" />
-                          </q-item-section>
-                          <q-item-section>Alasan Pengembalian</q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
-                          <q-item-section avatar>
-                            <q-icon name="timeline" color="primary" />
-                          </q-item-section>
-                          <q-item-section>Alur Permohonan</q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_edit = true ">
-                          <q-item-section avatar>
-                            <q-icon name="edit" color="warning" />
-                          </q-item-section>
-                          <q-item-section>Edit</q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_delete = true ">
-                          <q-item-section avatar>
-                            <q-icon name="delete" color="negative" />
-                          </q-item-section>
-                          <q-item-section>delete</q-item-section>
-                        </q-item> 
-                      </q-list>
-                    </q-menu>
-                  </q-btn>
+                    <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
+                      <q-menu>
+                        <q-list>
+                          <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
+                            <q-item-section avatar>
+                              <q-icon name="remove_red_eye" color="primary" />
+                            </q-item-section>
+                            <q-item-section>Detail</q-item-section>
+                          </q-item>
+                          <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
+                            <q-item-section avatar>
+                              <q-icon name="circle_notifications" color="red" />
+                            </q-item-section>
+                            <q-item-section>Alasan Pengembalian</q-item-section>
+                          </q-item>
+                          <q-item clickable v-close-popup @click="selectData(item), modal_alur = true ">
+                            <q-item-section avatar>
+                              <q-icon name="timeline" color="primary" />
+                            </q-item-section>
+                            <q-item-section>Alur Permohonan</q-item-section>
+                          </q-item>
+                          <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_edit = true ">
+                            <q-item-section avatar>
+                              <q-icon name="edit" color="warning" />
+                            </q-item-section>
+                            <q-item-section>Edit</q-item-section>
+                          </q-item>
+                          <q-item clickable v-close-popup v-bind:disable="cekButton_status_kecamatan(item)" @click="selectData(item), modal_delete = true ">
+                            <q-item-section avatar>
+                              <q-icon name="delete" color="negative" />
+                            </q-item-section>
+                            <q-item-section>delete</q-item-section>
+                          </q-item> 
+                        </q-list>
+                      </q-menu>
+                    </q-btn>
 
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+ 
 
-          <!-- Empty State -->
-          <div v-if="list_data.length === 0" style="text-align: center; padding: 40px; color: #999;">
-            <q-icon name="inbox" size="64px" style="opacity: 0.3; display: block; margin-bottom: 16px;" />
-            <p style="font-size: 16px; font-weight: 500;">Tidak ada data permohonan</p>
-            <p style="font-size: 12px;">Silakan tambah permohonan baru dengan klik tombol (+)</p>
-          </div>
+            <div class="q-pa-lg flex flex-center">
+              <q-pagination v-model="page_first"  :max="page_last" @update:model-value="getview" input/>
+            </div>
+        
+            <!-- Empty State -->
+            <div v-if="list_data.length === 0" style="text-align: center; padding: 40px; color: #999;">
+              <q-icon name="inbox" size="64px" style="opacity: 0.3; display: block; margin-bottom: 16px;" />
+              <p style="font-size: 16px; font-weight: 500;">Tidak ada data permohonan</p>
+              <p style="font-size: 12px;">Silakan tambah permohonan baru dengan klik tombol (+)</p>
+            </div>
+
         </div>
+        
 
 
 
@@ -2001,6 +2008,9 @@ export default {
       totalData: 0,
       allDataLoaded: false,
       searchTimeout: null,
+
+      itemsx : [{}, {}, {}, {}, {}, {}, {}]
+
     }
   },
   computed: {
@@ -2009,6 +2019,10 @@ export default {
     },
   },
   methods: {
+
+
+ 
+
 
     goBack() {
       this.$router.back()
@@ -2029,7 +2043,8 @@ export default {
  
 
  
-    async getview() {
+    getview() {
+      this.loading = true;
  
       const payload = {
         data_ke: this.page_first,
@@ -2038,14 +2053,25 @@ export default {
         createdBy: this.form.createdBy
       }
 
-      try {
-        const result = await this.simcard.getView(payload)
-        this.list_data = result.data.data || []
-        this.page_last = result.data.jmlData || 1
+ 
 
-      } catch (error) {
-        console.error('❌ Error loading data:', error)
-      }
+      axios.post(
+        this.simcard.url.URL_PERMOHONAN_KK_BARU + "view",
+        payload,
+        {
+          headers: {
+            authorization: "kikensbatara " + this.token
+          }
+        }
+      )
+      .then(response => {
+        this.list_data = response.data.data
+        this.page_last = response.data.jmlData
+        console.log('Response:', response)
+        this.loading = false;
+ 
+      })
+ 
 
 
     },
