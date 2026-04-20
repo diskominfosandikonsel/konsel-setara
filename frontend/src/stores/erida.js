@@ -5,7 +5,12 @@ export const useEridaStore = defineStore("erida", {
   state: () => ({
     swiperData: [],
     riset: [],
-    risetLastPage: 1,
+    krenova: [],
+    aksi: [],
+    teknologi: [],
+    haki: [],
+    penelitian: [],
+    dataLastPage: 1,
     loading: false,
   }),
 
@@ -195,10 +200,130 @@ export const useEridaStore = defineStore("erida", {
           this.riset = data;
         }
 
-        this.risetLastPage = lastPage;
+        this.dataLastPage = lastPage;
         this.lastFetchedCount = data.length; // 🔥 important
       } catch (err) {
-        console.error("RISSET ERROR:", err);
+        console.error("RISET ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchKrenova(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await eridaService.getDataKrenova(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.krenova = [...this.krenova, ...data];
+        } else {
+          this.krenova = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("KRENOVA ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchAksi(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await eridaService.getDataAksi(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.aksi = [...this.aksi, ...data];
+        } else {
+          this.aksi = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("AKSI ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchTeknologi(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await eridaService.getDataTeknologi(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.teknologi = [...this.teknologi, ...data];
+        } else {
+          this.teknologi = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("TEKNOLOGI ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchHaki(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await eridaService.getDataHaki(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.haki = [...this.haki, ...data];
+        } else {
+          this.haki = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("HAKI ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchPenelitian(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await eridaService.getDataPenelitian(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.penelitian = [...this.penelitian, ...data];
+        } else {
+          this.penelitian = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("PENELITIAN ERROR:", err);
       } finally {
         this.loading = false;
       }

@@ -147,6 +147,8 @@ docs/
 
 .DS_Store.quasar
 
+.vscode
+
 .DS_Store
 
 # Ignore icon generator script

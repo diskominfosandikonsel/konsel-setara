@@ -1,6 +1,5 @@
 <template>
-  <q-page class="bg-grey-2">
-
+  <q-page class="dashboard-page">
     <!-- HEADER -->
     <div class="row items-center justify-between q-pa-md">
       <div class="row items-center">
@@ -16,11 +15,7 @@
     <!-- SKELETON -->
     <!-- ========================= -->
     <div v-if="erida.loading" class="q-px-md row no-wrap overflow-hidden">
-      <div
-        v-for="n in 2"
-        :key="n"
-        class="shimmer-card q-mr-sm"
-      />
+      <div v-for="n in 2" :key="n" class="shimmer-card q-mr-sm" />
     </div>
 
     <!-- ========================= -->
@@ -29,50 +24,58 @@
     <div v-else class="swiper-full">
       <swiper
         :modules="modules"
-        :slides-per-view="1.1"
+        :slides-per-view="1.15"
         :centered-slides="true"
-        :slides-offset-before="15"
-        :slides-offset-after="15"
+        :slides-offset-before="16"
+        :slides-offset-after="16"
         :loop="true"
-        :looped-slides="erida.swiperData.length"
+        :looped-slides="erida.swiperData.length || 1"
         :autoplay="{
           delay: 10000,
-          disableOnInteraction: false
+          disableOnInteraction: false,
         }"
         :speed="750"
         :pagination="{ el: '.custom-pagination', clickable: true }"
         @slideChange="onSlideChange"
       >
-        <swiper-slide
-          v-for="(item, index) in erida.swiperData"
-          :key="item.id"
-        >
-          <div class="erida-card" @click="goDetail(item)">
-
+        <swiper-slide v-for="(item, index) in erida.swiperData" :key="item.id">
+          <div
+            class="erida-card"
+            :class="{ 'no-click': !item.route }"
+            @click="goDetail(item)"
+          >
             <!-- HEADER -->
             <div class="row justify-between items-center">
-              <div class="text-white text-caption">
+              <div class="text-caption text-grey-7">
                 {{ item.title }}
               </div>
-              <div class="chip"></div>
-            </div>
-
-            <!-- VALUE -->
-            <div class="text-white text-h5 q-mt-sm">
-              {{ item.value }}
+              <div class="text-caption text-grey-7">Detail</div>
             </div>
 
             <!-- CHART -->
-            <div class="q-mt-md chart-wrapper">
+            <div class="q-mt-xs">
               <apexchart
                 :key="activeIndex === index ? 'active' + index : 'idle' + index"
                 :type="item.type"
-                height="80"
-                :options="getChartOptions(item, activeIndex === index)"
-                :series="[{ data: item.chart }]"
+                height="100"
+                :options="getChartOptions(item, activeIndex === index, index)"
+                :series="[{ name: item.title, data: item.values }]"
+                :redrawOnWindowResize="false"
+                :animations="{
+                  enabled: true,
+                  easing: 'easeinout',
+                  speed: 600,
+                  animateGradually: {
+                    enabled: true,
+                    delay: 80,
+                  },
+                  dynamicAnimation: {
+                    enabled: true,
+                    speed: 500,
+                  },
+                }"
               />
             </div>
-
           </div>
         </swiper-slide>
       </swiper>
@@ -99,25 +102,24 @@
         </div>
       </div>
     </div>
-
   </q-page>
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Autoplay, Pagination } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import VueApexCharts from 'vue3-apexcharts'
-import { useEridaStore } from 'stores/erida'
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import VueApexCharts from "vue3-apexcharts";
+import { useEridaStore } from "stores/erida";
 
 export default {
-  name: 'EridaDashboard',
+  name: "EridaDashboard",
 
   components: {
     Swiper,
     SwiperSlide,
-    apexchart: VueApexCharts
+    apexchart: VueApexCharts,
   },
 
   data() {
@@ -127,114 +129,177 @@ export default {
       activeIndex: 0,
 
       quickActions: [
-        { label: 'Tambah Riset', icon: 'add' },
-        { label: 'Ajukan Inovasi', icon: 'lightbulb' },
-        { label: 'Laporan', icon: 'description' }
-      ]
-    }
+        { label: "Tambah Riset", icon: "add" },
+        { label: "Ajukan Inovasi", icon: "lightbulb" },
+        { label: "Laporan", icon: "description" },
+      ],
+    };
   },
 
   async mounted() {
-    await this.erida.fetchDashboard()
+    await this.erida.fetchDashboard();
   },
 
   methods: {
-
     onSlideChange(swiper) {
-      this.activeIndex = swiper.realIndex
+      const index = swiper.realIndex;
+
+      requestAnimationFrame(() => {
+        this.activeIndex = index;
+      });
     },
 
     goDetail(item) {
-      // 🔥 dynamic route
-      this.$router.push({
-        name: 'erida-detail',
-        query: { type: item.status }
-      })
-    },
+  console.log('CLICK ITEM:', item)
 
-    getChartOptions(item, isActive) {
-  return {
-    chart: {
-      sparkline: { enabled: false },
-      toolbar: { show: false },
-      animations: {
-        enabled: isActive,
-        speed: 500
-      }
-    },
-
-    stroke: {
-      curve: 'smooth',
-      width: item.type === 'bar' ? 0 : 2
-    },
-
-    plotOptions: {
-      bar: {
-        borderRadius: 6,
-        columnWidth: '60%'
-      }
-    },
-
-    dataLabels: {
-      enabled: true,
-      formatter: (val) => val === 0 ? '' : val,
-      offsetY: -6,
-      style: {
-        fontSize: '9px',
-        colors: ['#3b5bdb']
-      }
-    },
-
-    colors: ['#ffffff'],
-
-    xaxis: {
-      categories: item.labels,
-      labels: {
-        show: true,
-        rotate: -30, // 🔥 important for mobile
-        style: {
-          colors: '#ffffff',
-          fontSize: '9px'
-        }
-      },
-      axisBorder: { show: false },
-      axisTicks: { show: false }
-    },
-
-    yaxis: {
-      show: false
-    },
-
-    grid: {
-      show: false
-    },
-
-    tooltip: {
-      enabled: true,
-      theme: 'dark',
-      y: {
-        formatter: (val) => `${val}`
-      }
-    },
-
-    fill: {
-      type: item.type === 'area' ? 'gradient' : 'solid',
-      gradient: {
-        opacityFrom: isActive ? 0.6 : 0.2,
-        opacityTo: 0.05
-      }
-    },
-
-    markers: {
-      size: item.type === 'line' || item.type === 'area' ? 3 : 0
-    }
+  if (!item.route) {
+    console.warn('No route for:', item)
+    return
   }
-}
-  }
-}
+
+  this.$router.push({ name: item.route })
+},
+
+    getColor(index, item) {
+      const palette = [
+        "#3b82f6", // blue
+        "#22c55e", // green
+        "#f59e0b", // amber
+        "#ef4444", // red
+        "#8b5cf6", // purple
+      ];
+
+      // fallback by index (loop safely)
+      return palette[index % palette.length];
+    },
+
+    getChartOptions(item, isActive, index) {
+      const color = this.getColor(index, item);
+      const isBar = item.type === "bar";
+
+      const options = {
+        chart: {
+          toolbar: { show: false },
+          animations: {
+            enabled: isActive,
+            speed: 500,
+          },
+        },
+
+        // ✅ ONLY add stroke for non-bar
+        ...(isBar
+          ? {}
+          : {
+              stroke: {
+                curve: "smooth",
+                width: 2,
+                colors: [color],
+              },
+            }),
+
+        /* removed invalid fill completely */
+
+        // plotOptions: {
+        //   bar: {
+        //     borderRadius: 4,
+        //     columnWidth: '50%'
+        //   }
+        // },
+
+        plotOptions: {
+          bar: {
+            borderRadius: 4,
+            columnWidth: "35%",
+
+            dataLabels: {
+              position: "top",
+            },
+          },
+        },
+
+        colors: [color],
+
+        // dataLabels: {
+        //   enabled: true,
+        //   offsetY: isBar ? -8 : -6,
+        //   style: {
+        //     fontSize: '11px',
+        //     colors: [color]
+        //   }
+        // },
+
+        dataLabels: {
+          enabled: true,
+
+          // only show when bar OR line
+          enabledOnSeries: [0],
+
+          formatter: (val) => val,
+
+          offsetY: isBar ? -12 : -6,
+
+          style: {
+            fontSize: "11px",
+            colors: [color],
+            fontWeight: 600,
+          },
+
+          dropShadow: {
+            enabled: false,
+          },
+        },
+
+        xaxis: {
+          categories: item.labels,
+          tickPlacement: "on",
+          labels: {
+            show: true,
+            // rotate: -45,
+            // rotateAlways: true, // 🔥 force rotation
+            hideOverlappingLabels: false, // 🔥 important
+            trim: false,
+            style: {
+              colors: "#666",
+              fontSize: "10px",
+            },
+          },
+        },
+
+        yaxis: {
+          show: false,
+        },
+
+        grid: {
+          show: false,
+        },
+
+        tooltip: {
+          theme: "light",
+        },
+
+        markers: isBar
+          ? { size: 0 }
+          : {
+              size: 4,
+              colors: [color],
+            },
+      };
+
+      return options;
+    },
+  },
+};
 </script>
 
 <style scoped>
+.dashboard-page {
+  background: linear-gradient(180deg, #bdccff 0%, #f8fafc 100%);
+  min-height: 100vh;
+}
+
+.chart-wrapper {
+  margin-top: 8px;
+}
 
 /* SWIPER */
 .swiper-full {
@@ -264,24 +329,87 @@ export default {
 }
 
 .custom-pagination :deep(.swiper-pagination-bullet) {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   margin: 0 4px;
 }
 
 .custom-pagination :deep(.swiper-pagination-bullet-active) {
-  background: #3683FD;
+  background: #3683fd;
   width: 16px;
   border-radius: 8px;
 }
 
 /* CARD */
 .erida-card {
-  border-radius: 22px;
-  padding: 20px;
-  height: 200px;
-  color: white;
-  background: linear-gradient(135deg, #5b7cff, #3b5bdb);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  position: relative;
+  border-radius: 20px;
+  padding: 10px;
+  height: 150px;
+
+  color: #0f172a;
+
+  /* glass base */
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* soft border glow */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+
+  /* layered shadow (important for depth) */
+  /* box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6); */
+
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  transition: all 0.35s ease;
+}
+
+.erida-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    rgba(59, 130, 246, 0.15),
+    transparent,
+    rgba(139, 92, 246, 0.15)
+  );
+
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.erida-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.erida-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 60%;
+  height: 2px;
+
+  background: linear-gradient(
+    to right,
+    transparent,
+    #3b82f6,
+    #8b5cf6,
+    transparent
+  );
+
+  opacity: 0.6;
 }
 
 /* CHIP */
@@ -296,7 +424,7 @@ export default {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ACTION */
@@ -329,13 +457,20 @@ export default {
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0 }
-  100% { background-position: 200% 0 }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .notif-btn {
   background: white;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
-
+.no-click {
+  opacity: 0.7;
+  cursor: default;
+}
 </style>

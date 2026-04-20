@@ -12,7 +12,7 @@
               @click="goBack"
             />
           </q-avatar>
-          <span class="sapa_title">Data Riset</span>
+          <span class="sapa_title">Data Teknologi</span>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -45,11 +45,11 @@
           <q-skeleton v-for="n in 4" :key="n" height="80px" class="q-mb-sm" />
         </div>
 
-        <div v-else-if="risetList.length">
+        <div v-else-if="teknologiList.length">
           <div class="row q-col-gutter-sm q-mt-sm">
-            <div class="col-12" v-for="item in risetList" :key="item.id">
+            <div class="col-12" v-for="item in teknologiList" :key="item.id">
               <q-card
-                class="riset-card cursor-pointer"
+                class="teknologi-card cursor-pointer"
                 clickable
                 v-ripple
                 @click="goDetail(item)"
@@ -135,7 +135,7 @@
               />
 
               <q-toolbar-title class="text-subtitle2 text-weight-medium">
-                {{ selectedItem?.judul || "Detail Riset" }}
+                {{ selectedItem?.judul || "Detail Teknologi" }}
               </q-toolbar-title>
 
               <q-btn
@@ -176,12 +176,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 const pdfCache = new Map();
 
 export default {
-  name: "EridaRiset",
+  name: "EridaTeknologi",
   data() {
     return {
       erida: useEridaStore(),
 
-      risetList: [],
+      teknologiList: [],
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
@@ -215,9 +215,9 @@ export default {
 
       if (reset) {
         this.page = 1;
-        this.risetList = [];
+        this.teknologiList = [];
         this.allDataLoaded = false;
-        this.erida.riset = [];
+        this.erida.teknologi = [];
       }
 
       const payload = {
@@ -225,12 +225,12 @@ export default {
         cari_value: this.cari,
       };
 
-      await this.erida.fetchRiset(payload, !reset);
+      await this.erida.fetchTeknologi(payload, !reset);
 
       const totalPage = this.erida.dataLastPage || 1;
       this.lastPage = totalPage;
 
-      this.risetList = [...this.erida.riset];
+      this.teknologiList = [...this.erida.teknologi];
 
       if (this.page >= this.lastPage || this.erida.lastFetchedCount === 0) {
         this.allDataLoaded = true;
@@ -263,7 +263,7 @@ export default {
     },
 
     generateCacheKey() {
-      return `riset_${this.cari || "all"}`;
+      return `teknologi_${this.cari || "all"}`;
     },
 
     clearSearch() {
@@ -363,7 +363,7 @@ export default {
   background: #f6f6f6;
 }
 
-.riset-card {
+.teknologi-card {
   position: relative;
   border-radius: 16px;
   background: white;
@@ -373,7 +373,7 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.riset-card:active {
+.teknologi-card:active {
   transform: scale(0.97);
 }
 
