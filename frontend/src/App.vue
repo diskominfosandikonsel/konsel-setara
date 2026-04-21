@@ -81,7 +81,7 @@ export default {
             title: notification.title || 'Notifikasi',
             body: notification.body || '',
             type: data.type || '',
-            laporanId: data.laporanId || ''
+            laporanId: data.laporanId || data.kasusId || data.id || data.id_kasus || ''
           })
 
           // Tampilkan banner atas dengan aksi klik
@@ -90,7 +90,7 @@ export default {
             caption: notification.body || '',
             color: 'primary',
             icon: 'notifications',
-            position: 'top',
+            position: 'bottom',
             timeout: 5000,
             actions: [
               {
@@ -116,7 +116,7 @@ export default {
             title: notif.title || 'Notifikasi',
             body: notif.body || '',
             type: data.type || '',
-            laporanId: data.laporanId || ''
+            laporanId: data.laporanId || data.kasusId || data.id || data.id_kasus || ''
           })
 
           await this.navigateToDetail(data)
@@ -154,6 +154,21 @@ export default {
           await this.$router.push(target)
         } else {
           await this.$router.push(target)
+        }
+      }
+
+      else if (data.type === 'firetap') {
+        const firetapId = data.laporanId || data.kasusId || data.id || data.id_kasus
+        if (firetapId) {
+          const target = '/firetap_detail/' + firetapId
+
+          if (this.$route.path !== '/firetap_riwayat' && this.$route.path !== target) {
+            await this.$router.replace('/')
+            await this.$router.push('/firetap_riwayat')
+            await this.$router.push(target)
+          } else {
+            await this.$router.push(target)
+          }
         }
       }
     }

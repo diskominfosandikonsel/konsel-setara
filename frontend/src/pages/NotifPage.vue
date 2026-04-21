@@ -164,6 +164,8 @@ function onNotifClick(notif) {
     router.push('/sippadu_detail/' + notif.laporanId)
   } else if (notif.type === 'sapakonsel' && notif.laporanId) {
     router.push('/sapa_riwayat/' + notif.laporanId)
+  } else if (notif.type === 'firetap' && notif.laporanId) {
+    router.push('/firetap_detail/' + notif.laporanId)
   }
 }
 

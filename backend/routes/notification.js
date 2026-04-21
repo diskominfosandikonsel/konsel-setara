@@ -21,9 +21,9 @@ router.post('/send', (req, res) => {
 
   // 🔥 GET TOKENS FROM DATABASE
   db.query(
-  'SELECT token FROM users_fcm_tokens WHERE user_id = ?',
-  [userId],
-  async (err, rows) => {
+    'SELECT token FROM users_fcm_tokens WHERE user_id = ?',
+    [userId],
+    async (err, rows) => {
       if (err) {
         console.error('DB ERROR:', err)
         return res.status(500).json({ success: false, error: err })
@@ -52,7 +52,11 @@ router.post('/send', (req, res) => {
               title,
               body
             },
-            data: pushData
+            data: pushData,
+            android: {
+              priority: 'high',
+              notification: { channelId: 'default' }
+            }
           })
         }
 
@@ -64,7 +68,11 @@ router.post('/send', (req, res) => {
               title,
               body
             },
-            data: pushData
+            data: pushData,
+            android: {
+              priority: 'high',
+              notification: { channelId: 'default' }
+            }
           })
         }
 
