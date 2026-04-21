@@ -2,13 +2,14 @@
   <q-page class="dashboard-page">
     <!-- HEADER -->
     <div class="row items-center justify-between q-pa-md">
-      <div class="row items-center">
-        <q-avatar size="42px">
-          <img src="https://i.pravatar.cc/100" />
-        </q-avatar>
-        <div class="q-ml-sm text-weight-bold text-subtitle1">E-RIDA</div>
-      </div>
-      <q-btn flat round icon="notifications" class="notif-btn" />
+      <div class="text-weight-semibold">Elektronik Riset & Inovasi Daerah</div>
+      <q-icon
+        name="eva-close-circle-outline"
+        color="grey-9"
+        size="30px"
+        class="cursor-pointer"
+        @click="goBack"
+      />
     </div>
 
     <!-- ========================= -->
@@ -24,10 +25,10 @@
     <div v-else class="swiper-full">
       <swiper
         :modules="modules"
-        :slides-per-view="1.15"
+        :slides-per-view="1.05"
         :centered-slides="true"
-        :slides-offset-before="16"
-        :slides-offset-after="16"
+        :slides-offset-before="15"
+        :slides-offset-after="15"
         :loop="true"
         :looped-slides="erida.swiperData.length || 1"
         :autoplay="{
@@ -49,7 +50,13 @@
               <div class="text-caption text-grey-7">
                 {{ item.title }}
               </div>
-              <div class="text-caption text-grey-7">Detail</div>
+              <q-icon
+                flat
+                round
+                icon="close"
+                color="grey-9"
+                size="17px"
+              />
             </div>
 
             <!-- CHART -->
@@ -141,6 +148,10 @@ export default {
   },
 
   methods: {
+    goBack() {
+      this.$router.back();
+    },
+
     onSlideChange(swiper) {
       const index = swiper.realIndex;
 
@@ -150,15 +161,15 @@ export default {
     },
 
     goDetail(item) {
-  console.log('CLICK ITEM:', item)
+      console.log("CLICK ITEM:", item);
 
-  if (!item.route) {
-    console.warn('No route for:', item)
-    return
-  }
+      if (!item.route) {
+        console.warn("No route for:", item);
+        return;
+      }
 
-  this.$router.push({ name: item.route })
-},
+      this.$router.push({ name: item.route });
+    },
 
     getColor(index, item) {
       const palette = [
@@ -465,10 +476,6 @@ export default {
   }
 }
 
-.notif-btn {
-  background: white;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
 .no-click {
   opacity: 0.7;
   cursor: default;

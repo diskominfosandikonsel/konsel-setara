@@ -125,12 +125,13 @@
           <q-card class="bg-white column fit">
             <!-- HEADER -->
             <q-toolbar class="bg-white toolbar-bordered">
-              <q-btn
+              <q-icon
                 flat
                 round
-                icon="eva-close-circle-outline"
+                name="eva-close-circle-outline"
                 color="red"
-                size="15px"
+                size="25px"
+                class="cursor-pointer"
                 @click="showPdf = false"
               />
 
@@ -138,11 +139,13 @@
                 {{ selectedItem?.judul || "Detail Riset" }}
               </q-toolbar-title>
 
-              <q-btn
+              <q-icon
                 flat
                 round
-                icon="eva-arrow-circle-down-outline"
+                name="eva-arrow-circle-down-outline"
                 color="light-blue"
+                size="25px"
+                class="cursor-pointer"
                 @click="downloadPdf"
               />
             </q-toolbar>
