@@ -356,6 +356,11 @@ const routes = [
         component: () => import('src/pages/PerakKonsel/TambahBahasa.vue'),
         meta: { showBottomNav: true, requiresAuth: true }
       },
+      {
+        path: 'kartu',
+        component: () => import('src/pages/PerakKonsel/Kartu.vue'),
+        meta: { showBottomNav: true, requiresAuth: true }
+      },
 
       // SIMCARD
       {
