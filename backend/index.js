@@ -16,9 +16,9 @@ app.use(middleware.checkTokenSeetUser);
 
 app.use((req, res, next) => {
   console.log('==========================')
-  console.log('🌐 REQUEST:', req.method, req.url)
-  console.log('📦 BODY:', req.body)
-  console.log('🔑 AUTH:', req.headers.authorization)
+  // console.log('🌐 REQUEST:', req.method, req.url)
+  // console.log('📦 BODY:', req.body)
+  // console.log('🔑 AUTH:', req.headers.authorization)
   console.log('==========================')
   next()
 })

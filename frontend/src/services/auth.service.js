@@ -6,5 +6,11 @@ export const AuthService = {
   },
   register(data) {
     return api.post('auth/register', data)
+  },
+  forgotPassword(data) {
+    return api.post('auth/forgot-password', data)
+  },
+  resetPassword(data) {
+    return api.post('auth/reset-password', data)
   }
 }

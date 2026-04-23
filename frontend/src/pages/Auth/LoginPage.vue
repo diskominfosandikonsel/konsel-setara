@@ -13,7 +13,13 @@
         <!-- Illustration Content -->
         <div class="illustration-section"
             style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 50px;">
-            <img src="/img/logokonsel.png" alt="Logo Konsel" class="illustration"
+
+            <!-- Skeleton Loader -->
+            <q-skeleton v-if="logoLoading" type="QAvatar" size="135px" animation="pulse"
+                style="margin-bottom: 8px; background: rgba(255,255,255,0.2)" />
+
+            <img v-show="!logoLoading" src="/img/logokonsel.png" alt="Logo Konsel" class="illustration"
+                @load="logoLoading = false"
                 style="width: 135px; margin-bottom: 8px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));">
 
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
@@ -80,8 +86,17 @@ export default {
                 username: '',
                 password: ''
             },
-            showPassword: false
+            showPassword: false,
+            logoLoading: true
         }
+    },
+    mounted() {
+        // Ambil data login terakhir jika ada
+        const lastUsername = localStorage.getItem('last_username')
+        const lastPassword = localStorage.getItem('last_password')
+
+        if (lastUsername) this.form.username = lastUsername
+        if (lastPassword) this.form.password = lastPassword
     },
     methods: {
         async doLogin() {
@@ -89,6 +104,10 @@ export default {
             const success = await auth.login(this.form)
 
             if (success) {
+                // Simpan data login terakhir
+                localStorage.setItem('last_username', this.form.username)
+                localStorage.setItem('last_password', this.form.password)
+
                 // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
                 setTimeout(() => {
                     this.$router.push('/')
