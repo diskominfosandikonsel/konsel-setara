@@ -170,6 +170,30 @@ const routes = [
         component: () => import('pages/Erida/Penelitian.vue'),
         meta: { showBottomNav: false, requiresAuth: false }
       },
+      {
+        path: '/erida_izin',
+        name: 'erida-izin',
+        component: () => import('pages/Erida/Izin.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
+      {
+        path: '/erida_inovasi',
+        name: 'erida-inovasi',
+        component: () => import('pages/Erida/Inovasi.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
+      {
+        path: '/erida_usulan',
+        name: 'erida-usulan',
+        component: () => import('pages/Erida/Usulan.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
+      {
+        path: '/erida_dokumen',
+        name: 'erida-dokumen',
+        component: () => import('pages/Erida/Dokumen.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
 
       // SIPPADU
       {

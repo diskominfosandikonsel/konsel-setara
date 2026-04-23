@@ -1,12 +1,12 @@
 <template>
-  <q-page class="dashboard-page">
+  <q-page class="dashboard-pages">
     <!-- HEADER -->
     <div class="row items-center justify-between q-pa-md">
-      <div class="text-weight-semibold">Elektronik Riset & Inovasi Daerah</div>
+      <div class="text-subtitle2 text-weight-bold" style="color: #23303B;">Elektronik Riset & Inovasi Daerah</div>
       <q-icon
-        name="eva-close-circle-outline"
-        color="grey-9"
-        size="30px"
+        name="close"
+        color="grey-8"
+        size="25px"
         class="cursor-pointer"
         @click="goBack"
       />
@@ -27,8 +27,8 @@
         :modules="modules"
         :slides-per-view="1.05"
         :centered-slides="true"
-        :slides-offset-before="15"
-        :slides-offset-after="15"
+        :slides-offset-before="20"
+        :slides-offset-after="20"
         :loop="true"
         :looped-slides="erida.swiperData.length || 1"
         :autoplay="{
@@ -42,20 +42,22 @@
         <swiper-slide v-for="(item, index) in erida.swiperData" :key="item.id">
           <div
             class="erida-card"
-            :class="{ 'no-click': !item.route }"
+            :class="{ 'no-click': !item.route }, item.route"
+            clickable
+            v-ripple
             @click="goDetail(item)"
           >
             <!-- HEADER -->
             <div class="row justify-between items-center">
-              <div class="text-caption text-grey-7">
+              <div class="text-caption text-weight-medium text-grey-8">
                 {{ item.title }}
               </div>
               <q-icon
                 flat
                 round
-                icon="close"
-                color="grey-9"
-                size="17px"
+                name="fas fa-angle-right"
+                color="grey-7"
+                size="18px"
               />
             </div>
 
@@ -93,19 +95,17 @@
     <!-- ========================= -->
     <!-- QUICK ACTION -->
     <!-- ========================= -->
-    <div class="q-px-md q-mt-lg">
-      <div class="text-subtitle2 text-weight-bold">Quick Actions</div>
+    <div class="q-px-md q-mt-md">
+      <div class="text-subtitle2 text-weight-bold" style="color: #23303B;">Layanan</div>
 
-      <div class="row q-col-gutter-md q-mt-sm">
-        <div class="col-4" v-for="item in quickActions" :key="item.label">
-          <q-card flat class="action-card">
+      <div class="row q-col-gutter-md q-mt-xs">
+        <div class="col-3" clickable v-ripple v-for="item in services" :key="item.label" @click="goPages(item.route)">
             <div class="icon-box">
-              <q-icon :name="item.icon" size="24px" />
+              <q-icon :name="item.icon" style="color: #456EFE" size="25px" />
             </div>
-            <div class="text-caption q-mt-sm">
+            <div class="text-caption text-weight-medium text-grey-6 q-mt-xs text-center">
               {{ item.label }}
             </div>
-          </q-card>
         </div>
       </div>
     </div>
@@ -135,10 +135,11 @@ export default {
       erida: useEridaStore(),
       activeIndex: 0,
 
-      quickActions: [
-        { label: "Tambah Riset", icon: "add" },
-        { label: "Ajukan Inovasi", icon: "lightbulb" },
-        { label: "Laporan", icon: "description" },
+      services: [
+        { label: "Izin Penelitian", icon: "far fa-copy", route: "erida-izin" },
+        { label: "Kreatifitas Inovasi", icon: "far fa-lightbulb", route: "erida-inovasi" },
+        { label: "Tema Penelitian", icon: "far fa-folder-open", route: "erida-usulan" },
+        { label: "Dokumen Lainnya", icon: "far fa-file-alt", route: "erida-dokumen" },
       ],
     };
   },
@@ -169,6 +170,17 @@ export default {
       }
 
       this.$router.push({ name: item.route });
+    },
+
+    goPages(item) {
+      console.log("CLICK ITEM:", item);
+
+      if (!item) {
+        console.warn("No route for:", item);
+        return;
+      }
+
+      this.$router.push({ name: item });
     },
 
     getColor(index, item) {
@@ -303,8 +315,8 @@ export default {
 </script>
 
 <style scoped>
-.dashboard-page {
-  background: linear-gradient(180deg, #bdccff 0%, #f8fafc 100%);
+.dashboard-pages {
+  /* background: linear-gradient(180deg, #94adff 0%, #f8fafc 100%); */
   min-height: 100vh;
 }
 
@@ -360,7 +372,7 @@ export default {
   color: #0f172a;
 
   /* glass base */
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 
@@ -388,13 +400,85 @@ export default {
 
   background: linear-gradient(
     120deg,
-    rgba(59, 130, 246, 0.15),
+    rgba(59, 130, 246, 0.35),
     transparent,
-    rgba(139, 92, 246, 0.15)
+    rgba(139, 92, 246, 0.35)
   );
 
-  opacity: 0.6;
+  opacity: 0.75;
   pointer-events: none;
+}
+
+/* 🔵 RISET */
+.erida-riset::before {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(59,130,246,0.45), transparent 60%),
+    radial-gradient(circle at 80% 70%, rgba(37,99,235,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(59,130,246,0.25), transparent, rgba(37,99,235,0.25));
+}
+
+/* 🟢 KRENOVA */
+.erida-krenova::before {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(34,197,94,0.45), transparent 60%),
+    radial-gradient(circle at 75% 75%, rgba(16,185,129,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(34,197,94,0.25), transparent, rgba(16,185,129,0.25));
+}
+
+/* 🟠 AKSI */
+.erida-aksi::before {
+  background:
+    radial-gradient(circle at 20% 40%, rgba(249,115,22,0.45), transparent 60%),
+    radial-gradient(circle at 80% 60%, rgba(251,146,60,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(249,115,22,0.25), transparent, rgba(251,146,60,0.25));
+}
+
+/* 🟣 TEKNOLOGI */
+.erida-teknologi::before {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(139,92,246,0.45), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(168,85,247,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(139,92,246,0.25), transparent, rgba(168,85,247,0.25));
+}
+
+/* 🔴 HAKI */
+.erida-haki::before {
+  background:
+    radial-gradient(circle at 25% 35%, rgba(239,68,68,0.45), transparent 60%),
+    radial-gradient(circle at 75% 65%, rgba(220,38,38,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(239,68,68,0.25), transparent, rgba(220,38,38,0.25));
+}
+
+/* 🟡 PENELITIAN */
+.erida-penelitian::before {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(234,179,8,0.45), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(250,204,21,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(234,179,8,0.25), transparent, rgba(250,204,21,0.25));
+}
+
+/* 🧊 IID */
+.erida-iid::before {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(6,182,212,0.45), transparent 60%),
+    radial-gradient(circle at 75% 75%, rgba(34,211,238,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(6,182,212,0.25), transparent, rgba(34,211,238,0.25));
+}
+
+/* 🌸 IPKD */
+.erida-ipkd::before {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(236,72,153,0.45), transparent 60%),
+    radial-gradient(circle at 80% 70%, rgba(244,114,182,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(236,72,153,0.25), transparent, rgba(244,114,182,0.25));
+}
+
+/* 🩶 IDSD */
+.erida-idsd::before {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(99,102,241,0.45), transparent 60%),
+    radial-gradient(circle at 75% 75%, rgba(79,70,229,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(99,102,241,0.25), transparent, rgba(79,70,229,0.25));
 }
 
 .erida-card:hover {
@@ -447,10 +531,10 @@ export default {
 }
 
 .icon-box {
-  background: #eef2ff;
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
+  background-color: rgba(164, 169, 174, 0.15);
+  width: 100%;
+  height: 75px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;

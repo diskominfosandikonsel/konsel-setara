@@ -98,7 +98,7 @@ export const useEridaStore = defineStore("erida", {
         this.swiperData = [
           {
             id: 1,
-            title: "Data Riset",
+            title: "Riset",
             status: "Riset",
             value: "-",
             route: "erida-riset", // no need total
@@ -107,7 +107,7 @@ export const useEridaStore = defineStore("erida", {
           },
           {
             id: 2,
-            title: "Krenova",
+            title: "Kreatifitas & Inovasi",
             status: "Krenova",
             value: "-",
             route: "erida-krenova",
@@ -116,7 +116,7 @@ export const useEridaStore = defineStore("erida", {
           },
           {
             id: 3,
-            title: "Aksi",
+            title: "Aksi Perubahan",
             status: "Aksi",
             route: "erida-aksi",
             value: "-",
@@ -125,7 +125,7 @@ export const useEridaStore = defineStore("erida", {
           },
           {
             id: 4,
-            title: "Teknologi",
+            title: "Teknologi Tepat Guna",
             status: "Teknologi",
             value: "-",
             route: "erida-teknologi",
@@ -143,7 +143,7 @@ export const useEridaStore = defineStore("erida", {
           },
           {
             id: 6,
-            title: "Penelitian",
+            title: "Izin Penelitian",
             status: "Penelitian",
             route: "erida-penelitian",
             value: "-",
