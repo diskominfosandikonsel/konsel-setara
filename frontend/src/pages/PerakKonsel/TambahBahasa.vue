@@ -20,7 +20,7 @@
                             :options="perak.list_bahasa"
                             option-value="id"
                             option-label="uraian"
-                            label="Status Perkawinan"
+                            label="Bahasa"
                             class="formInput"
                             outlined emit-value map-options
                         />
