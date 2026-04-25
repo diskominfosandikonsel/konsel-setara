@@ -81,7 +81,7 @@
         <q-card-section class="col q-pa-none bg-grey-2 relative-position">
           <iframe 
             v-if="showPdfModal && news?.fileUrl" 
-            :src="news.fileUrl" 
+            :src="'https://docs.google.com/viewer?url=' + encodeURIComponent(news.fileUrl) + '&embedded=true'" 
             width="100%" 
             height="100%" 
             frameborder="0"
