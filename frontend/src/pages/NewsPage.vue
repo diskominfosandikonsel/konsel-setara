@@ -1,10 +1,24 @@
 <template>
   <q-page class="q-pa-md bg-white pb-xl">
     <!-- Header Berita -->
-    <div class="row items-center q-mb-md header-title">
+    <div class="row items-center q-mb-sm header-title">
       <q-btn flat round dense icon="keyboard_arrow_left" size="18px" @click="$router.back()" class="q-mr-sm" />
-      <div class="text-h5 text-weight-regular text-black">Berita</div>
+      <div class="text-h5 text-weight-regular text-black">Informasi Terkini</div>
     </div>
+
+    <!-- Tabs Kategori -->
+    <q-tabs
+      v-model="activeTab"
+      dense
+      class="text-grey q-mb-md bg-grey-1 rounded-borders"
+      active-color="primary"
+      indicator-color="primary"
+      align="justify"
+      narrow-indicator
+    >
+      <q-tab name="berita" label="Berita" />
+      <q-tab name="pengumuman" label="Pengumuman" />
+    </q-tabs>
 
     <!-- Kolom Pencarian -->
     <div class="q-mb-md">
@@ -12,7 +26,7 @@
         outlined
         dense
         v-model="searchQuery"
-        placeholder="Cari berita terkini..."
+        :placeholder="`Cari ${activeTab} terkini...`"
         bg-color="grey-1"
         color="primary"
         debounce="600"
@@ -34,7 +48,7 @@
       <!-- Empty State Pencarian -->
       <div v-if="newsList.length === 0 && allDataLoaded" class="text-center q-py-xl">
         <q-icon name="search_off" size="48px" color="grey-4" class="q-mb-sm" />
-        <div class="text-body2 text-grey-6">Berita tidak ditemukan</div>
+        <div class="text-body2 text-grey-6">Data {{ activeTab }} tidak ditemukan</div>
       </div>
 
       <!-- List Berita -->
@@ -42,17 +56,30 @@
         v-for="(news, idx) in newsList"
         :key="idx"
         class="row q-mb-md news-item items-start clickable-item"
-        @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date, content: news.content } })"
+        @click="$router.push({ path: `/news/${news.id}`, state: { img: news.img, title: news.title, author: news.author, date: news.date, content: news.content, type: news.type, fileUrl: news.fileUrl } })"
       >
-        <div class="col-4">
-          <q-img :src="news.img" class="rounded-borders news-img" ratio="1" />
+        <div :class="activeTab === 'pengumuman' ? 'col-3' : 'col-4'">
+          <q-img
+            :src="news.img"
+            class="rounded-borders news-img"
+            :ratio="activeTab === 'pengumuman' ? undefined : 1"
+            :fit="activeTab === 'pengumuman' ? 'contain' : 'cover'"
+            :style="activeTab === 'pengumuman' ? 'padding: 4px;' : ''"
+          />
         </div>
-        <div class="col-8 q-pl-md column justify-between py-1" style="min-height: 85px">
+        <div :class="activeTab === 'pengumuman' ? 'col-9' : 'col-8'" class="q-pl-md column justify-between py-1" style="min-height: 85px">
           <div>
-            <div class="text-subtitle2 text-weight-bold line-clamp-2 text-grey-10 lh-tight letter-spacing-tight" style="font-family: serif;">
+            <div 
+              class="text-weight-bold text-grey-10 lh-tight letter-spacing-tight" 
+              :class="activeTab === 'pengumuman' ? 'text-body2 line-clamp-3' : 'text-subtitle2 line-clamp-2'"
+              style="font-family: serif;"
+            >
               {{ news.title }}
             </div>
-            <div class="text-caption text-grey-6 q-mt-xs text-weight-medium">
+            <div 
+              class="text-weight-medium text-grey-6 q-mt-xs text-uppercase"
+              :class="activeTab === 'pengumuman' ? 'text-xs' : 'text-caption'"
+            >
               {{ news.author }}
             </div>
           </div>
@@ -74,14 +101,14 @@
 
       <!-- Teks indikator habisa data (jika database sudah tersedot semua) -->
       <div v-if="allDataLoaded && newsList.length > 0" class="text-center text-clack-5 q-py-md text-caption">
-        Semua berita terkini telah dimuat.
+        Semua {{ activeTab }} terkini telah dimuat.
       </div>
     </q-infinite-scroll>
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useBeritaStore } from 'src/stores/berita'
 import { getImageBerita, formatDate } from 'src/utils/helper'
 
@@ -94,6 +121,14 @@ const infiniteScrollRef = ref(null)
 const searchQuery = ref('')
 const page = ref(1)
 const lastPage = ref(1)
+
+const activeTab = ref('berita')
+
+// Reset dan fetch ulang ketika tab berubah
+watch(activeTab, () => {
+  searchQuery.value = ''
+  onSearch()
+})
 
 const onSearch = () => {
   newsList.value = []
@@ -114,7 +149,12 @@ const fetchNews = async () => {
       cari_value: searchQuery.value || ""
     }
     
-    const res = await beritaStore.fetchBerita(payload)
+    let res;
+    if (activeTab.value === 'berita') {
+      res = await beritaStore.fetchBerita(payload)
+    } else {
+      res = await beritaStore.fetchPengumuman(payload)
+    }
     
     // Sesuaikan format balikan object API -> { data, jml_data }
     const dataApi = res?.data || []
@@ -125,8 +165,10 @@ const fetchNews = async () => {
       title: item.judul || 'Tanpa Judul',
       author: item.createBy || 'Pemkab Konsel',
       date: formatDate(item.createAt) || 'Waktu tak diketahui',
-      img: getImageBerita(item.foto),
-      content: item.isi || 'Tidak Ada Konten'
+      img: activeTab.value === 'pengumuman' ? 'icons/pdf_logo.svg' : getImageBerita(item.foto),
+      content: item.isi || 'Tidak Ada Konten',
+      type: activeTab.value,
+      fileUrl: getImageBerita(item.file)
     }))
   } catch (error) {
     console.error('Error memuat berita:', error)
@@ -194,6 +236,16 @@ const onLoad = async (index, done) => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.text-xs {
+  font-size: 10px;
+}
 .lh-tight {
   line-height: 1.2;
 }
@@ -215,7 +267,11 @@ const onLoad = async (index, done) => {
     max-width: 150px;
     flex: 0 0 150px;
   }
-  .news-item .col-8 {
+  .news-item .col-3 {
+    max-width: 110px;
+    flex: 0 0 110px;
+  }
+  .news-item .col-8, .news-item .col-9 {
     flex: 1;
     max-width: none;
   }
@@ -225,6 +281,10 @@ const onLoad = async (index, done) => {
   .news-item .col-4 {
     max-width: 180px;
     flex: 0 0 180px;
+  }
+  .news-item .col-3 {
+    max-width: 130px;
+    flex: 0 0 130px;
   }
 }
 

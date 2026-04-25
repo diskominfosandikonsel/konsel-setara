@@ -11,6 +11,11 @@ export const BeritaService = {
 
     const response = await apiBerita.post('web_publish_video/view', payload)
     return response
+  },
+
+  async getPengumuman(payload = {}) {
+    const response = await apiBerita.post('web_publish_pengumuman/view', payload)
+    return response
   }
 
 }
