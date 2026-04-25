@@ -194,6 +194,24 @@ const routes = [
         component: () => import('pages/Erida/Dokumen.vue'),
         meta: { showBottomNav: false, requiresAuth: false }
       },
+      {
+        path: '/erida_kegiatan',
+        name: 'erida-kegiatan',
+        component: () => import('pages/Erida/Kegiatan.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
+      {
+        path: '/erida_news',
+        name: 'erida-news',
+        component: () => import('pages/Erida/Berita.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
+      {
+        path: 'erida_news/:id',
+        name: 'detail-berita',
+        component: () => import('pages/Erida/DetailBerita.vue'),
+        meta: { showBottomNav: false }
+      },
 
       // SIPPADU
       {

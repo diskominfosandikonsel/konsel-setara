@@ -1,5 +1,5 @@
 <template>
-  <q-page class="dashboard-pages">
+  <q-page class="dashboard-pages q-pb-md">
     <!-- HEADER -->
     <div class="row items-center justify-between q-pa-md">
       <div class="text-subtitle2 text-weight-bold" style="color: #23303b">
@@ -27,10 +27,10 @@
     <div v-else class="swiper-full">
       <swiper
         :modules="modules"
-        :slides-per-view="1.05"
+        :slides-per-view="1.15"
         :centered-slides="true"
-        :slides-offset-before="20"
-        :slides-offset-after="20"
+        :slides-offset-before="10"
+        :slides-offset-after="10"
         :loop="true"
         :looped-slides="erida.swiperData.length || 1"
         :autoplay="{
@@ -47,7 +47,7 @@
             :class="({ 'no-click': !item.route }, item.route)"
             clickable
             v-ripple
-            @click="goDetail(item)"
+            @click="goPages(item.route)"
           >
             <!-- HEADER -->
             <div class="row justify-between items-center">
@@ -98,7 +98,7 @@
     <!-- QUICK ACTION -->
     <!-- ========================= -->
     <div class="q-px-md q-mt-md">
-      <div class="row justify-between">
+      <div class="row justify-between q-mb-sm">
         <div class="text-subtitle2 text-weight-bold" style="color: #23303b">
           Layanan
         </div>
@@ -112,21 +112,17 @@
         />
       </div>
 
-      <div class="row q-col-gutter-md q-mt-xs">
+      <div class="row q-col-gutter-md">
         <div
           class="col-3"
-          clickable
-          v-ripple
           v-for="item in services"
           :key="item.label"
-          @click="goPages(item.route)"
+
         >
-          <div class="icon-box">
+          <div class="icon-box" clickable v-ripple @click="goPages(item.route)">
             <q-icon :name="item.icon" style="color: #456efe" size="25px" />
           </div>
-          <div
-            class="text-caption text-weight-medium text-grey-6 q-mt-xs text-center"
-          >
+          <div clickable v-ripple @click="goPages(item.route)" class="text-caption text-weight-medium text-grey-6 q-mt-xs text-center">
             {{ item.label }}
           </div>
         </div>
@@ -141,7 +137,7 @@
         <div class="text-subtitle2 text-weight-bold" style="color: #23303b">
           Kegiatan
         </div>
-        <div class="text-caption text-grey-6" style="font-size: 10px">
+        <div clickable v-ripple @click="goPages('erida-kegiatan')" class="text-caption text-grey-6 cursor-pointer" style="font-size: 10px">
           Lihat Semua >
         </div>
       </div>
@@ -165,16 +161,19 @@
             class="image-card"
             @click="openImage(img)"
           >
-            <img :src="img" class="image-thumb" />
+            <img :src="img.image" class="image-thumb" />
           </div>
         </div>
       </div>
 
       <!-- MODAL -->
       <q-dialog v-model="showDialog">
-        <q-card class="bg-black">
+        <q-card style="background-color: #3b82f6;">
           <q-card-section class="q-pa-none">
             <img :src="selectedImage" class="full-image" />
+            <div class="text-caption text-white text-center q-mb-sm q-px-md py-1" style="font-size: 11px;">
+              {{ selectedImageTitle }}
+            </div>
           </q-card-section>
 
           <q-btn
@@ -183,6 +182,7 @@
             round
             dense
             class="absolute-top-right q-ma-sm bg-white"
+            style="color: #3b82f6;"
             @click="showDialog = false"
           />
         </q-card>
@@ -198,8 +198,9 @@
           Rida News
         </div>
         <div
-          class="text-caption text-grey-6"
+          class="text-caption text-grey-6 cursor-pointer"
           style="font-size: 10px"
+          clickable v-ripple
           @click="goPages('erida-news')"
         >
           Lihat Semua >
@@ -227,8 +228,9 @@
         <div
           v-for="(news, i) in newsList"
           :key="i"
+          clickable v-ripple
           class="news-card row items-center q-mb-md cursor-pointer"
-          @click="openNews(news)"
+          @click="openNews(news.id)"
         >
           <img :src="news.image" class="news-img" />
 
@@ -265,6 +267,8 @@
           flat
           round
           dense
+          clickable
+          v-ripple
           class="close-btn"
           @click="showAlur = false"
         />
@@ -316,14 +320,15 @@
         </div>
 
         <!-- FOOTER -->
-        <div class="row bg-teal-1 q-mt-md q-pa-md py-2 justify-between">
-          
-          <q-icon name="task_alt" size="36px" />
-          <div class="col">
-            <div class="text-weight-medium text-teal-8">
+        <div class="row bg-teal-1 q-mt-md q-pa-md py-2 justify-between" style="border-radius: 15px; border: 1px solid #d1f2eb;">
+          <div class="col-2">
+            <q-img src="icons/check.png" width="50px" />
+          </div>
+          <div class="col-10 q-pl-sm">
+            <div class="text-weight-medium text-teal-10" style="font-size: 14px;">
               Pastikan setiap langkah dilakukan dengan benar.
             </div>
-            <div class="text-caption text-grey-7">
+            <div class="text-caption text-grey-7" style="font-size: 11px;">
               Terima kasih atas partisipasi Anda
             </div>
           </div>
@@ -340,6 +345,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import VueApexCharts from "vue3-apexcharts";
 import { useEridaStore } from "stores/erida";
+import { getFileErida, formatDate } from 'src/utils/helper'
 
 export default {
   name: "EridaDashboard",
@@ -420,6 +426,7 @@ export default {
 
       showDialog: false,
       selectedImage: null,
+      selectedImageTitle: '',
 
       images: [],
       newsList: [],
@@ -428,37 +435,8 @@ export default {
 
   async mounted() {
     await this.erida.fetchDashboard();
-    setTimeout(() => {
-      this.images = [
-        "https://picsum.photos/300/200?1",
-        "https://picsum.photos/300/200?2",
-        "https://picsum.photos/300/200?3",
-        "https://picsum.photos/300/200?4",
-        "https://picsum.photos/300/200?5",
-      ];
-      this.loadingKegiatan = false;
-    }, 1000);
-
-    setTimeout(() => {
-      this.newsList = [
-        {
-          title: "Inovasi Daerah Meningkat Pesat di Tahun 2026",
-          date: "24 Apr 2026",
-          image: "https://picsum.photos/200/150?1",
-        },
-        {
-          title: "Pemda Luncurkan Program Digitalisasi UMKM",
-          date: "23 Apr 2026",
-          image: "https://picsum.photos/200/150?2",
-        },
-        {
-          title: "Kolaborasi Riset Dengan Perguruan Tinggi",
-          date: "22 Apr 2026",
-          image: "https://picsum.photos/200/150?3",
-        },
-      ];
-      this.loadingNews = false;
-    }, 1500);
+    await this.getImages()
+    await this.getLatestNews()
   },
 
   methods: {
@@ -472,17 +450,6 @@ export default {
       requestAnimationFrame(() => {
         this.activeIndex = index;
       });
-    },
-
-    goDetail(item) {
-      console.log("CLICK ITEM:", item);
-
-      if (!item.route) {
-        console.warn("No route for:", item);
-        return;
-      }
-
-      this.$router.push({ name: item.route });
     },
 
     startDrag(e) {
@@ -513,13 +480,68 @@ export default {
       this.dragging = false;
     },
 
+    async getImages() {
+      this.loadingKegiatan = true
+
+      try {
+        const res = await this.erida.fetchImage({
+          data_ke: 1,
+          cari_value: ''
+        })
+
+        const data = res.data || []
+
+        this.images = data.slice(0, 5).map(item =>({
+          image: getFileErida(item.foto),
+          title: item.judul
+        }))
+
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loadingKegiatan = false
+      }
+    },
+
     openImage(img) {
-      this.selectedImage = img;
+      this.selectedImage = img.image;
+      this.selectedImageTitle = img.title;
       this.showDialog = true;
     },
 
-    openNews(news) {
-      console.log("OPEN NEWS:", news);
+    async getLatestNews() {
+      this.loadingNews = true
+
+      try {
+
+        const res = await this.erida.fetchBeritaPage({
+          data_ke: 1,
+          cari_value: ''
+        })
+
+        const data = res.data || []
+
+        this.newsList = data.map(item => ({
+          id: item.id,
+          title: item.judul,
+          date: formatDate(item.createAt),
+          image: getFileErida(item.foto),
+          author: item.createBy,
+          content: item.isi
+        }))
+
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loadingNews = false
+      }
+    },
+
+    openNews(id) {
+      this.$router.push({
+        name: 'detail-berita',
+        params: { id }
+      })
     },
 
     goPages(item) {
@@ -1228,18 +1250,6 @@ export default {
   background: #ec4899;
 }
 
-/* FOOTER */
-.footer {
-  margin-top: 16px;
-  padding: 14px;
-  margin: 14px;
-  background: #e6f4f1;
-  border-radius: 10px;
-  border: 1px solid #77a399;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
 
 /* ✨ ANIMASI */
 .animate-card {

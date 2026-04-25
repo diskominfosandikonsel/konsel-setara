@@ -13,23 +13,30 @@
   </q-header>
   <q-page class="q-pa-md bg-white pb-xl">
     <!-- 🔍 SEARCH -->
-    <div class="q-mb-md">
       <q-input
         v-model="cari"
-        placeholder="Cari berita..."
-        outlined
         dense
+        outlined
+        placeholder="Cari data..."
         debounce="500"
         @update:model-value="onSearch"
       >
-        <template v-slot:prepend>
-          <q-icon name="search" />
+        <template v-slot:append>
+          <q-icon name="search" size="17px" />
+        </template>
+
+        <template v-slot:append v-if="cari">
+          <q-icon
+            name="close"
+            class="cursor-pointer"
+            size="17px"
+            @click="clearSearch"
+          />
         </template>
       </q-input>
-    </div>
 
     <!-- 🦴 SKELETON -->
-    <div v-if="skeletonLoading">
+    <div v-if="skeletonLoading" class="q-mt-md">
       <div v-for="n in 10" :key="n" class="row q-mb-md">
         <div class="col-4">
           <q-skeleton height="90px" square />
@@ -41,7 +48,7 @@
         </div>
       </div>
     </div>
-    <q-infinite-scroll @load="onLoad" :offset="150" ref="infiniteScrollRef">
+    <q-infinite-scroll @load="onLoad" :offset="150" ref="infiniteScrollRef" class="q-mt-md">
       <!-- List Berita -->
       <div
         v-for="(news, idx) in newsList"
@@ -87,7 +94,7 @@
 
 <script>
 import { useEridaStore } from 'stores/erida'
-import { getImageUrl, formatDate } from 'src/utils/helper'
+import { getFileErida, formatDate } from "src/utils/helper";
 
 export default {
   name: 'EridaNews',
@@ -141,19 +148,20 @@ export default {
       }
 
       const res = await this.erida.fetchBerita(payload)
+      
 
-      // 🔥 IMPORTANT: backend kamu formatnya { data, jml_data }
       const data = res?.data || []
       const totalPage = res?.jml_data || 1
 
       this.lastPage = totalPage
+
 
       if (data.length > 0) {
         const mapped = data.map(item => ({
           id: item.id,
           title: item.judul,
           author: item.createBy || 'Admin',
-          img: getImageUrl(item.foto),
+          img: getFileErida(item.foto),
           date: formatDate(item.createAt)
         }))
 
@@ -166,7 +174,6 @@ export default {
           lastPage: this.lastPage
         }))
 
-        // ✅ STOP CONDITION
         if (this.page >= this.lastPage) {
           this.allDataLoaded = true
         }
@@ -189,6 +196,11 @@ export default {
       await this.loadData()
 
       this.allDataLoaded ? done(true) : done()
+    },
+
+    clearSearch() {
+      this.cari = "";
+      this.onSearch();
     },
 
     // 🔍 SEARCH

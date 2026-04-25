@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import { useSapaStore } from 'stores/sapa'
-import { formatDate, getImageUrl } from 'src/utils/helper'
+import { useEridaStore } from 'stores/erida'
+import { formatDate, getFileErida } from 'src/utils/helper'
 
 export default {
   name: 'DetailBerita',
@@ -77,7 +77,7 @@ export default {
     return {
       news: null,
       loading: true,
-      sapa: useSapaStore()
+      erida: useEridaStore()
     }
   },
 
@@ -90,7 +90,7 @@ export default {
       this.loading = true
 
       try {
-        const item = await this.sapa.fetchDetailBerita(this.$route.params.id)
+        const item = await this.erida.fetchDetailBerita(this.$route.params.id)
 
         if (!item) return
 
@@ -99,7 +99,7 @@ export default {
           title: item.judul,
           date: formatDate(item.createAt),
           author: item.createBy || 'Admin',
-          img: getImageUrl(item.foto),
+          img: getFileErida(item.foto),
           content: item.isi
         }
 
@@ -111,7 +111,7 @@ export default {
     shareWhatsApp() {
       if (!this.news) return
 
-      const text = `${this.news.title}\n\nBaca selengkapnya di aplikasi Sapa PPA`
+      const text = `${this.news.title}\n\nBaca selengkapnya di aplikasi Konsel Setara`
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`
 
       window.open(url, '_blank')
@@ -166,12 +166,24 @@ export default {
   color: #333;
   line-height: 1.75;
   text-align: justify;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.news-body * {
+  max-width: 100%;
+}
+
+.news-body div {
+  margin-bottom: 10px;
 }
 
 .news-body img {
-  max-width: 100%;
-  border-radius: 6px;
-  margin: 10px 0;
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 12px auto;
+  border-radius: 8px;
 }
 
 .news-body p {

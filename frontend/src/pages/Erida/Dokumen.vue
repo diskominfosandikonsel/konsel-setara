@@ -12,7 +12,7 @@
               @click="goBack"
             />
           </q-avatar>
-          <span class="sapa_title">Data Riset</span>
+          <span class="sapa_title">Dokumen Lainnya</span>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -28,7 +28,7 @@
             debounce="500"
             @update:model-value="onSearch"
           >
-            <template v-slot:prepend>
+            <template v-slot:append>
               <q-icon name="search" size="17px" />
             </template>
 
@@ -36,20 +36,21 @@
               <q-icon
                 name="close"
                 class="cursor-pointer"
+                size="17px"
                 @click="clearSearch"
               />
             </template>
           </q-input>
         </div>
-        <div v-if="skeletonLoading">
-          <q-skeleton v-for="n in 4" :key="n" height="80px" class="q-mb-sm" />
+        <div v-if="skeletonLoading" class="q-mt-sm">
+          <q-skeleton v-for="n in 8" :key="n" height="100px" class="q-mb-sm" />
         </div>
 
-        <div v-else-if="risetList.length">
+        <div v-else-if="dokumenList.length">
           <div class="row q-col-gutter-sm q-mt-sm">
-            <div class="col-12" v-for="item in risetList" :key="item.id">
+            <div class="col-12" v-for="item in dokumenList" :key="item.id">
               <q-card
-                class="riset-card cursor-pointer"
+                class="dokumen-card cursor-pointer"
                 clickable
                 v-ripple
                 @click="goDetail(item)"
@@ -136,7 +137,7 @@
               />
 
               <q-toolbar-title class="text-subtitle2 text-weight-medium">
-                {{ selectedItem?.judul || "Detail Riset" }}
+                {{ selectedItem?.judul || "Detail Dokumen" }}
               </q-toolbar-title>
 
               <q-icon
@@ -168,30 +169,28 @@
 
 <script>
 import { useEridaStore } from "stores/erida";
-import { formatDate } from "src/utils/helper";
+import { formatDate, getFileErida } from "src/utils/helper";
 
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
-import { FILE_URL_ERIDA } from "src/config/app";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const pdfCache = new Map();
 
 export default {
-  name: "EridaRiset",
+  name: "EridaDokumen",
   data() {
     return {
       erida: useEridaStore(),
 
-      risetList: [],
+      dokumenList: [],
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
       cari: "",
       skeletonLoading: true,
       formatDate: formatDate,
-      file_path: FILE_URL_ERIDA,
       showPdf: false,
       selectedItem: null,
       pdfLoading: false,
@@ -218,9 +217,9 @@ export default {
 
       if (reset) {
         this.page = 1;
-        this.risetList = [];
+        this.dokumenList = [];
         this.allDataLoaded = false;
-        this.erida.riset = [];
+        this.erida.dokumen = [];
       }
 
       const payload = {
@@ -228,12 +227,12 @@ export default {
         cari_value: this.cari,
       };
 
-      await this.erida.fetchRiset(payload, !reset);
+      await this.erida.fetchDokumen(payload, !reset);
 
       const totalPage = this.erida.dataLastPage || 1;
       this.lastPage = totalPage;
 
-      this.risetList = [...this.erida.riset];
+      this.dokumenList = [...this.erida.dokumen];
 
       if (this.page >= this.lastPage || this.erida.lastFetchedCount === 0) {
         this.allDataLoaded = true;
@@ -266,7 +265,7 @@ export default {
     },
 
     generateCacheKey() {
-      return `riset_${this.cari || "all"}`;
+      return `dokumen_${this.cari || "all"}`;
     },
 
     clearSearch() {
@@ -281,7 +280,7 @@ export default {
         const container = this.$refs.pdfContainer;
         container.innerHTML = "";
 
-        const url = this.file_path + item.file;
+        const url = getFileErida(item.file);
 
         let pdf;
 
@@ -338,7 +337,7 @@ export default {
     downloadPdf() {
       if (!this.selectedItem?.file) return;
 
-      const url = this.file_path + this.selectedItem.file;
+      const url = getFileErida(this.selectedItem.file);
 
       const link = document.createElement("a");
       link.href = url;
@@ -366,7 +365,7 @@ export default {
   background: #f6f6f6;
 }
 
-.riset-card {
+.dokumen-card {
   position: relative;
   border-radius: 16px;
   background: white;
@@ -376,7 +375,7 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.riset-card:active {
+.dokumen-card:active {
   transform: scale(0.97);
 }
 

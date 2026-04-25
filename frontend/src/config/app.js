@@ -1,1 +1,0 @@
-export const FILE_URL_ERIDA = 'https://server-erida.konaweselatankab.go.id/uploads/'

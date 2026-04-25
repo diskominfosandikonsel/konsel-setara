@@ -111,7 +111,7 @@ export default {
     shareWhatsApp() {
       if (!this.news) return
 
-      const text = `${this.news.title}\n\nBaca selengkapnya di aplikasi Sapa PPA`
+      const text = `${this.news.title}\n\nBaca selengkapnya di aplikasi Konsel Setara`
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`
 
       window.open(url, '_blank')

@@ -1,202 +1,193 @@
 <template>
-  <q-layout view="hHh lpR fFf" style="background-color: #f6f6f6">
-    <q-header bordered class="bg-white text-black">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <q-icon
-              name="r_chevron_left"
-              size="35px"
-              color="black"
-              class="cursor-pointer"
-              @click="goBack"
-            />
-          </q-avatar>
-          <span class="sapa_title">Data Riset</span>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-header>
+  <!-- HEADER -->
+  <q-header bordered class="bg-white text-black">
+    <q-toolbar>
+      <q-btn flat round dense icon="r_chevron_left" @click="goBack" />
+      <q-toolbar-title>Usulan Tema Penelitian</q-toolbar-title>
+    </q-toolbar>
+  </q-header>
 
-    <q-page-container>
-      <q-page class="q-pa-md mulish">
-        <div class="search-bar">
-          <q-input
-            v-model="cari"
-            dense
-            outlined
-            placeholder="Cari data..."
-            debounce="500"
-            @update:model-value="onSearch"
+  <q-page class="q-pa-md bg-white pb-xl">
+    <!-- 🔍 SEARCH -->
+    <q-input
+      v-model="cari"
+      dense
+      outlined
+      placeholder="Cari data..."
+      debounce="500"
+      @update:model-value="onSearch"
+    >
+      <template v-slot:append>
+        <q-icon name="search" size="17px" />
+      </template>
+
+      <template v-slot:append v-if="cari">
+        <q-icon
+          name="close"
+          class="cursor-pointer"
+          size="17px"
+          @click="clearSearch"
+        />
+      </template>
+    </q-input>
+
+    <!-- 🦴 SKELETON -->
+    <div v-if="skeletonLoading" class="q-mt-sm">
+      <div v-for="n in 6" :key="n" class="q-mb-md">
+        <q-skeleton height="70px" />
+      </div>
+    </div>
+
+    <!-- 📜 LIST + INFINITE -->
+    <q-infinite-scroll v-else @load="onLoad" :offset="150" class="q-mt-sm">
+      <div
+        v-for="(item, i) in temaList"
+        :key="i"
+        class="tema-card q-mb-sm"
+        :class="{ active: expandedId === item.id }"
+        @click="toggleExpand(item)"
+      >
+        <div class="col">
+          <div
+            class="tema-text text-weight-medium text-primary"
+            :class="{ collapsed: expandedId !== item.id }"
           >
-            <template v-slot:prepend>
-              <q-icon name="search" size="17px" />
-            </template>
-
-            <template v-slot:append v-if="cari">
-              <q-icon
-                name="close"
-                class="cursor-pointer"
-                @click="clearSearch"
-              />
-            </template>
-          </q-input>
-        </div>
-        <div v-if="skeletonLoading">
-          <q-skeleton v-for="n in 4" :key="n" height="80px" class="q-mb-sm" />
-        </div>
-
-        <div v-else-if="risetList.length">
-          <div class="row q-col-gutter-sm q-mt-sm">
-            <div class="col-12" v-for="item in risetList" :key="item.id">
-              <q-card
-                class="riset-card cursor-pointer"
-                clickable
-                v-ripple
-                @click="goDetail(item)"
-              >
-                <q-card-section class="content-wrapper">
-                  <!-- CONTENT -->
-                  <div class="text-content">
-                    <div class="title two_line">
-                      {{ item.judul }}
-                    </div>
-
-                    <div class="row justify-between items-end q-mt-xs">
-                      <!-- LEFT META -->
-                      <div>
-                        <div class="meta row items-center">
-                          <q-icon
-                            name="person"
-                            size="14px"
-                            class="icon-muted"
-                          />
-                          <span class="q-ml-xs">{{ item.createBy }}</span>
-                        </div>
-
-                        <div class="meta row items-center">
-                          <q-icon
-                            name="schedule"
-                            size="14px"
-                            class="icon-muted"
-                          />
-                          <span class="q-ml-xs">
-                            {{ formatDate(item.createAt) }}
-                          </span>
-                        </div>
-                      </div>
-
-                      <!-- RIGHT ICON -->
-                      <div class="doc-icon">
-                        <q-icon name="description" size="20px" />
-                      </div>
-                    </div>
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
+            {{ item.tema }}
           </div>
-
-          <q-infinite-scroll
-            @load="onLoad"
-            :offset="100"
-            :disable="allDataLoaded"
-          >
-            <template v-slot:loading>
-              <div class="row justify-center q-my-md">
-                <q-spinner />
-              </div>
-            </template>
-          </q-infinite-scroll>
-        </div>
-
-        <div v-else class="column flex-center text-center" style="height: 75vh">
-          <q-icon name="search_off" size="60px" color="grey-4" />
-          <div class="text-grey q-mt-sm">Data tidak ditemukan</div>
-        </div>
-
-        <q-dialog
-          v-model="showPdf"
-          maximized
-          transition-show="slide-up"
-          transition-hide="slide-down"
-          @hide="clearPdf"
-          persistent
-        >
-          <q-card class="bg-white column fit">
-            <!-- HEADER -->
-            <q-toolbar class="bg-white toolbar-bordered">
-              <q-icon
-                flat
-                round
-                name="eva-close-circle-outline"
-                color="red"
-                size="25px"
-                class="cursor-pointer"
-                @click="showPdf = false"
-              />
-
-              <q-toolbar-title class="text-subtitle2 text-weight-medium">
-                {{ selectedItem?.judul || "Detail Riset" }}
-              </q-toolbar-title>
-
-              <q-icon
-                flat
-                round
-                name="eva-arrow-circle-down-outline"
-                color="light-blue"
-                size="25px"
-                class="cursor-pointer"
-                @click="downloadPdf"
-              />
-            </q-toolbar>
-
-            <!-- CONTENT (scrollable) -->
-            <div class="col scroll bg-white">
-              <div v-if="pdfLoading" class="pdf-loading-overlay">
-                <q-spinner size="50px" color="primary" />
-                <div class="q-mt-sm text-grey">Memuat dokumen...</div>
-              </div>
-
-              <div ref="pdfContainer" class="pdf-container"></div>
+          <div class="row items-start justify-between no-wrap">
+            <!-- OPD (tetap di bawah tema) -->
+            <div class="opd-text text-caption text-grey-7 text-weight-medium">
+              {{ item.opd }}
             </div>
-          </q-card>
-        </q-dialog>
-      </q-page>
-    </q-page-container>
-  </q-layout>
+
+            <q-fab
+              color="amber"
+              text-color="black"
+              icon="more_vert"
+              direction="left"
+              padding="xs"
+            >
+              <q-fab-action
+                color="amber"
+                text-color="black"
+                @click="deleteItem(item)"
+                icon="mail"
+                padding="xs"
+              />
+              <q-fab-action
+                color="amber"
+                text-color="black"
+                @click="editItem(item)"
+                icon="alarm"
+                padding="xs"
+              />
+            </q-fab>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots size="40px" color="primary" />
+        </div>
+      </template>
+
+      <!-- END -->
+      <div
+        v-if="allDataLoaded && temaList.length > 0"
+        class="text-center text-grey-5 q-py-md text-caption"
+      >
+        Tidak ada data lagi
+      </div>
+    </q-infinite-scroll>
+
+    <!-- EMPTY -->
+    <div
+      v-if="!skeletonLoading && temaList.length === 0"
+      class="text-center text-grey-5 q-mt-lg"
+    >
+      Tidak ada data ditemukan
+    </div>
+
+    <!-- ➕ FLOATING BUTTON -->
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[17.5, 17.5]"
+      style="z-index: 9999"
+    >
+      <q-btn
+        fab
+        icon="add"
+        color="primary"
+        class="shadow-10"
+        @click="addItem"
+      />
+    </q-page-sticky>
+
+    <!-- 🧾 FORM MODAL -->
+    <q-dialog v-model="showForm">
+      <q-card style="width: 100%; max-width: 400px; border-radius: 16px">
+        <!-- HEADER -->
+        <q-card-section class="row items-center justify-between">
+          <div class="text-subtitle1 text-weight-bold">
+            {{ isEdit ? "Edit Tema" : "Tambah Tema" }}
+          </div>
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <!-- FORM -->
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model="form.tema"
+            label="Tema Penelitian"
+            outlined
+            dense
+            class="q-mb-md"
+          />
+
+          <q-input v-model="form.opd" label="Nama Instansi" outlined dense />
+        </q-card-section>
+
+        <!-- ACTION -->
+        <q-card-actions align="right">
+          <q-btn flat label="Batal" v-close-popup />
+          <q-btn label="Simpan" color="primary" @click="submitForm" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-page>
 </template>
 
 <script>
 import { useEridaStore } from "stores/erida";
-import { formatDate } from "src/utils/helper";
-
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
-import { FILE_URL_ERIDA } from "src/config/app";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
-const pdfCache = new Map();
 
 export default {
-  name: "EridaRiset",
+  name: "UsulanTema",
+
   data() {
     return {
-      erida: useEridaStore(),
-
-      risetList: [],
+      temaList: [],
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
       cari: "",
       skeletonLoading: true,
-      formatDate: formatDate,
-      file_path: FILE_URL_ERIDA,
-      showPdf: false,
-      selectedItem: null,
-      pdfLoading: false,
-      pagePlaceholders: [],
+      showForm: false,
+      isEdit: false,
+      expandedId: null,
+      form: {
+        id: null,
+        tema: "",
+        opd: "",
+      },
     };
+  },
+
+  computed: {
+    erida() {
+      return useEridaStore();
+    },
   },
 
   methods: {
@@ -204,13 +195,8 @@ export default {
       this.$router.back();
     },
 
-    async goDetail(item) {
-      this.selectedItem = item;
-      this.showPdf = true;
-
-      this.$nextTick(() => {
-        this.loadPdf(item);
-      });
+    toggleExpand(item) {
+      this.expandedId = this.expandedId === item.id ? null : item.id;
     },
 
     async loadData(reset = false) {
@@ -218,9 +204,9 @@ export default {
 
       if (reset) {
         this.page = 1;
-        this.risetList = [];
+        this.temaList = [];
         this.allDataLoaded = false;
-        this.erida.riset = [];
+        this.erida.tema = [];
       }
 
       const payload = {
@@ -228,12 +214,12 @@ export default {
         cari_value: this.cari,
       };
 
-      await this.erida.fetchRiset(payload, !reset);
+      await this.erida.fetchTema(payload, !reset);
 
       const totalPage = this.erida.dataLastPage || 1;
       this.lastPage = totalPage;
 
-      this.risetList = [...this.erida.riset];
+      this.temaList = [...this.erida.tema];
 
       if (this.page >= this.lastPage || this.erida.lastFetchedCount === 0) {
         this.allDataLoaded = true;
@@ -266,7 +252,7 @@ export default {
     },
 
     generateCacheKey() {
-      return `riset_${this.cari || "all"}`;
+      return `tema_${this.cari || "all"}`;
     },
 
     clearSearch() {
@@ -274,83 +260,38 @@ export default {
       this.onSearch();
     },
 
-    async loadPdf(item) {
-      try {
-        this.pdfLoading = true; // ✅ start loading
-
-        const container = this.$refs.pdfContainer;
-        container.innerHTML = "";
-
-        const url = this.file_path + item.file;
-
-        let pdf;
-
-        if (pdfCache.has(url)) {
-          pdf = pdfCache.get(url);
-        } else {
-          const loadingTask = pdfjsLib.getDocument(url);
-          pdf = await loadingTask.promise;
-          pdfCache.set(url, pdf);
-        }
-
-        this.pagePlaceholders = Array.from({ length: pdf.numPages });
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "pdf-page-wrapper";
-
-          const skeleton = document.createElement("div");
-          skeleton.className = "pdf-skeleton";
-
-          wrapper.appendChild(skeleton);
-          container.appendChild(wrapper);
-
-          this.renderPage(pdf, i, wrapper, skeleton);
-        }
-      } catch (err) {
-        console.error("PDF ERROR:", err);
-      } finally {
-        this.pdfLoading = false; // ✅ stop loading
-      }
+    addItem() {
+      this.isEdit = false;
+      this.form = {
+        id: null,
+        tema: "",
+        opd: "",
+      };
+      this.showForm = true;
     },
 
-    async renderPage(pdf, pageNumber, wrapper, skeleton) {
-      const page = await pdf.getPage(pageNumber);
-
-      const viewport = page.getViewport({ scale: 1.2 });
-
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      await page.render({
-        canvasContext: context,
-        viewport,
-      }).promise;
-
-      // ✅ replace skeleton with canvas
-      wrapper.innerHTML = "";
-      wrapper.appendChild(canvas);
+    editItem(item) {
+      this.isEdit = true;
+      this.form = {
+        id: item.id,
+        tema: item.tema,
+        opd: item.opd,
+      };
+      this.showForm = true;
     },
 
-    downloadPdf() {
-      if (!this.selectedItem?.file) return;
-
-      const url = this.file_path + this.selectedItem.file;
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = this.selectedItem.judul || "file.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    },
-
-    clearPdf() {
-      const container = this.$refs.pdfContainer;
-      if (container) container.innerHTML = "";
+    deleteItem(item) {
+      this.$q
+        .dialog({
+          title: "Konfirmasi",
+          message: "Hapus data ini?",
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          console.log("DELETE", item);
+          // call API delete di sini
+        });
     },
   },
 
@@ -360,144 +301,101 @@ export default {
 };
 </script>
 
-<style>
-.search-bar {
-  /* z-index: 5; */
-  background: #f6f6f6;
+<style scoped>
+.pb-xl {
+  padding-bottom: 30px;
 }
 
-.riset-card {
-  position: relative;
-  border-radius: 16px;
-  background: white;
-  overflow: hidden;
-
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* CARD */
+.tema-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #eef2f7;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.riset-card:active {
-  transform: scale(0.97);
+/* ACTIVE CARD */
+.tema-card.active {
+  background: #eef4ff;
+  border-color: #c7d7ff;
+  padding: 16px;
 }
 
-/* CONTENT */
-.content-wrapper {
-  display: flex;
-  align-items: flex-start;
-  padding-left: 10px;
-}
-
-.text-content {
-  flex: 1;
-  padding-left: 10px;
-}
-
-/* TITLE */
-.title {
-  font-weight: 600;
+/* TEMA TEXT */
+.tema-text {
   font-size: 14px;
-  color: #111827;
+  line-height: 1.5;
+  transition: all 0.25s ease;
 }
 
-/* META */
-.meta {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-/* ICON STYLE */
-.icon-muted {
-  color: #9ca3af;
-}
-
-/* 🔥 DOCUMENT ICON BADGE */
-.doc-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-
-  flex-shrink: 0;
-}
-
-.two_line {
+/* COLLAPSED (dipotong) */
+.tema-text.collapsed {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.toolbar-bordered {
-  border-bottom: 1px solid #e5e7eb; /* soft gray */
+/* EXPANDED */
+.tema-card.active .tema-text {
+  -webkit-line-clamp: unset;
+  font-size: 15px;
 }
 
-.pdf-container {
-  padding: 8px;
-  animation: fadeIn 0.3s ease;
+/* OPD */
+.opd-text {
+  margin-top: 5px;
+  transition: all 0.25s ease;
 }
 
-@keyframes fadeIn {
+/* efek naik dikit saat expand */
+.tema-card.active .opd-text {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.tema-card:active {
+  transform: scale(0.98);
+}
+
+.q-dialog__inner > div {
+  animation: scaleIn 0.2s ease;
+}
+
+.q-page-sticky {
+  pointer-events: none;
+}
+
+.q-page-sticky .q-btn {
+  pointer-events: all;
+}
+
+@keyframes scaleIn {
   from {
+    transform: scale(0.9);
     opacity: 0;
   }
   to {
+    transform: scale(1);
     opacity: 1;
   }
 }
 
-.pdf-page-wrapper {
-  margin-bottom: 12px;
-  position: relative;
-}
-
-.pdf-loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  background: rgba(255, 255, 255, 0.8);
-  z-index: 10;
-}
-
-.pdf-skeleton {
-  width: 100%;
-  height: 400px;
-  border-radius: 8px;
-
-  background: linear-gradient(90deg, #eeeeee 25%, #f5f5f5 50%, #eeeeee 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
-}
-
-canvas {
-  width: 100%;
-  display: block;
-  border-radius: 8px;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
+/* TABLET */
+@media (min-width: 600px) {
+  .tema-card {
+    padding: 16px;
   }
 }
-.col.scroll {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+
+/* DESKTOP */
+@media (min-width: 900px) {
+  .q-page {
+    max-width: 800px;
+    margin: auto;
+  }
 }
 </style>

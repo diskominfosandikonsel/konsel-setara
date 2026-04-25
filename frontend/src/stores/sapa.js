@@ -119,6 +119,7 @@ export const useSapaStore = defineStore('sapa', {
     },
 
     async fetchDetailEdukasi(id) {
+      this.loading = true
       try {
         const res = await SapaService.getDetailEdukasi({ id })
         return res.data?.[0] || null

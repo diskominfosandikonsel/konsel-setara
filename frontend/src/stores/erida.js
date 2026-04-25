@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import eridaService from "src/services/erida.service";
+import EridaService from "src/services/erida.service";
 
 export const useEridaStore = defineStore("erida", {
   state: () => ({
@@ -30,15 +30,15 @@ export const useEridaStore = defineStore("erida", {
           ipkd,
           idsd,
         ] = await Promise.all([
-          eridaService.getRiset(),
-          eridaService.getKrenova(),
-          eridaService.getAksi(),
-          eridaService.getTeknologi(),
-          eridaService.getHaki(),
-          eridaService.getPenelitian(),
-          eridaService.getIid(),
-          eridaService.getIpkd(),
-          eridaService.getIdsd(),
+          EridaService.getRiset(),
+          EridaService.getKrenova(),
+          EridaService.getAksi(),
+          EridaService.getTeknologi(),
+          EridaService.getHaki(),
+          EridaService.getPenelitian(),
+          EridaService.getIid(),
+          EridaService.getIpkd(),
+          EridaService.getIdsd(),
         ]);
 
         const normalizeData = (res) => {
@@ -189,7 +189,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataRiset(payload);
+        const res = await EridaService.getDataRiset(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -213,7 +213,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataKrenova(payload);
+        const res = await EridaService.getDataKrenova(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -237,7 +237,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataAksi(payload);
+        const res = await EridaService.getDataAksi(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -261,7 +261,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataTeknologi(payload);
+        const res = await EridaService.getDataTeknologi(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -285,7 +285,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataHaki(payload);
+        const res = await EridaService.getDataHaki(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -309,7 +309,7 @@ export const useEridaStore = defineStore("erida", {
       this.loading = true;
 
       try {
-        const res = await eridaService.getDataPenelitian(payload);
+        const res = await EridaService.getDataPenelitian(payload);
 
         const data = res.data?.data || [];
         const lastPage = res.data?.jml_data || 1;
@@ -326,6 +326,105 @@ export const useEridaStore = defineStore("erida", {
         console.error("PENELITIAN ERROR:", err);
       } finally {
         this.loading = false;
+      }
+    },
+
+    async fetchDokumen(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getDokumen(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.dokumen = [...this.dokumen, ...data];
+        } else {
+          this.dokumen = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("DOKUMEN ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchTema(payload, append = true) {
+      
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getTema(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.tema = [...this.tema, ...data];
+        } else {
+          this.tema = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("TEMA ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+  
+    async fetchImage(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await EridaService.getImage(payload)
+        return res.data
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchBeritaPage(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await EridaService.getBeritaPage(payload)
+        return res.data
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchBerita(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await EridaService.getBerita(payload)
+        return res.data
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchDetailBerita(id) {
+      this.loading = true
+
+      try {
+        const res = await EridaService.getDetailBerita({ id })
+        return res.data?.[0] || null
+      } catch (err) {
+        return null
       }
     },
   },

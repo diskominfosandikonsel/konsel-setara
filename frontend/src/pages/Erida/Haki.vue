@@ -28,7 +28,7 @@
             debounce="500"
             @update:model-value="onSearch"
           >
-            <template v-slot:prepend>
+            <template v-slot:append>
               <q-icon name="search" size="17px" />
             </template>
 
@@ -36,6 +36,7 @@
               <q-icon
                 name="close"
                 class="cursor-pointer"
+                size="17px"
                 @click="clearSearch"
               />
             </template>
@@ -168,11 +169,10 @@
 
 <script>
 import { useEridaStore } from "stores/erida";
-import { formatDate } from "src/utils/helper";
+import { getFileErida, formatDate } from "src/utils/helper";
 
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
-import { FILE_URL_ERIDA } from "src/config/app";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -191,7 +191,6 @@ export default {
       cari: "",
       skeletonLoading: true,
       formatDate: formatDate,
-      file_path: FILE_URL_ERIDA,
       showPdf: false,
       selectedItem: null,
       pdfLoading: false,
@@ -281,7 +280,7 @@ export default {
         const container = this.$refs.pdfContainer;
         container.innerHTML = "";
 
-        const url = this.file_path + item.file;
+        const url = getFileErida(item.file);
 
         let pdf;
 
@@ -338,7 +337,7 @@ export default {
     downloadPdf() {
       if (!this.selectedItem?.file) return;
 
-      const url = this.file_path + this.selectedItem.file;
+      const url = getFileErida(this.selectedItem.file);
 
       const link = document.createElement("a");
       link.href = url;
