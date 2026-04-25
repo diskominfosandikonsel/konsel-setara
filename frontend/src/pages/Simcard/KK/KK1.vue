@@ -107,7 +107,7 @@
                       </q-menu>
                     </q-btn>
 
-                    <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
+                    <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == '' || item.KK1.status_kabupaten == 2" color="primary" icon="settings">
                       <q-menu>
                         <q-list>
                           <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
@@ -1783,59 +1783,29 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="modal_syarat">
-      <q-card style="min-width: 90%; max-width: 90%;">
-        <q-toolbar>
-          <q-toolbar-title>
-            <q-icon name="description" color="primary" class="q-mr-md" />
-            <span style="font-size: 12pt;" class="text-weight-bold">Persyaratan Dokumen</span>
-          </q-toolbar-title>
-          <q-btn flat round dense icon="close" v-close-popup />
-        </q-toolbar>
+ 
 
-        <q-separator />
 
-        <q-scroll-area style="height: 400px; width: 100%;">
-          <q-card-section>
-            <div class="q-gutter-md">
-              <!-- Persyaratan Umum -->
-              <div>
-                <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  📋 Persyaratan Umum
-                </h5>
+    <!-- Modal Lihat Status Component -->
+    <ModalLihatStatus
+      v-model="modal_lihat_status"
+      :status-kecamatan="form.status_kecamatan"
+      :status-kabupaten="form.status_kabupaten"
+      :keterangan-kecamatan="form.keterangan_kecamatan"
+      :keterangan-kabupaten="form.keterangan_kabupaten"
+      title="Alasan Pengembalian Permohonan"
+      kecamatan-label="Keterangan dari Tingkat Kecamatan"
+      kabupaten-label="Keterangan dari Tingkat Kabupaten"
+      help-text="Silakan perbaiki data sesuai dengan keterangan di atas dan ajukan kembali permohonan Anda. Gunakan menu <strong>Edit</strong> untuk memperbaiki data."
+    />    
 
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-                  <li>Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf</li>
-                  <li>Kartu Tanda Penduduk (KTP) yang masih berlaku</li>
-                  <li>Surat Nikah (untuk yang sudah menikah)</li>
-                  <li>Akta Kelahiran dari kantor pencatatan sipil</li>
-                  <li>Pas Foto 4x6 cm (hitam putih atau berwarna)</li>
-                  <li>Surat Keterangan Domisili dari kelurahan setempat</li>
-                </ul>
-                
-              </div>
-
-            
-
-              <!-- Waktu dan Tempat -->
-                <div style="background-color: #E8F5E9; padding: 12px; border-radius: 8px; border-left: 4px solid #4CAF50;">
-                  <h5 style="margin: 0 0 8px 0; color: #2E7D32;">🕐 Jam Layanan</h5>
-                  <p style="margin: 0; line-height: 1.6; font-size: 13px;">
-                    <strong>Senin - Jumat:</strong> 08:00 - 16:00 WIT<br>
-                    <!-- <strong>Sabtu:</strong> 08:00 - 12:00 WIT -->
-                  </p>
-                </div>
-            </div>
-          </q-card-section>
-        </q-scroll-area>
-
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Tutup" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+        <!-- Modal Syarat Component -->
+    <ModalSyarat
+      v-model="modal_syarat"
+      title="Persyaratan Dokumen"
+      header-title="Dokumen Persyaratan Lampiran"
+      header-subtitle="@disdukcapil.konaweselatankab.go.id | 31 Januari 2020"
+    />
 
   </q-page>
 </template>
@@ -1843,17 +1813,21 @@
 <script>
 import { useSimcardStore } from '../../../../src/stores/simcard';
 import AutocompleteInput from 'src/components/AutocompleteInput.vue'
+import ModalSyarat from 'src/components/ModalSyarat.vue'
+import ModalLihatStatus from 'src/components/ModalLihatStatus.vue'
+
 import { Loading, Notify } from 'quasar'
 import axios from 'axios'
 
 export default {
-  components: { AutocompleteInput },
+  components: { AutocompleteInput, ModalSyarat, ModalLihatStatus },
   name: 'KK1_list',
   data() {
     return {
       nama_form:'KK1',
       nama:'',
       step: 1,
+      modal_lihat_status  : false,
       modal_lihat   : false,
       modal_add   : false,
       modal_edit  : false,
@@ -2011,6 +1985,7 @@ export default {
       page_first: 1,
       page_limit: 10,
       cari_value: '',
+      page_last: 0,
       totalPage: 1,
       totalData: 0,
       allDataLoaded: false,

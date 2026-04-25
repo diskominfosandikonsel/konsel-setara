@@ -49,30 +49,30 @@
             <div v-for="(item, index) in list_data" :key="index" style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;">
               <div class="row items-center no-wrap">
 
-                <div v-if="item.PPD1.status === 0" style="color:#6C7278;">
+                <div v-if="item.PPD3.status === 0" style="color:#6C7278;">
                   <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
-                <div v-if="item.PPD1.status === 1" style="color:#6C7278;">
+                <div v-if="item.PPD3.status === 1" style="color:#6C7278;">
                   <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
-                <div v-if="item.PPD1.status === 2" style="color:#6C7278;">
+                <div v-if="item.PPD3.status === 2" style="color:#6C7278;">
                   <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
                 <div class="flex-break col self-center" style="margin-left: 11px;">
-                  <div v-if="item.PPD1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.PPD3.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Mohon bersabar, data masih diverifikasi
                   </div>
-                  <div v-if="item.PPD1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.PPD3.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Permohonan Diterima
                   </div>
-                  <div v-if="item.PPD1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.PPD3.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Permohonan Dikembalikan
                   </div>
                   <div style="color:#6C7278;font-size: 11px;">
-                    Nama pemohon : {{ item.PPD1.nama }}
+                    Nama pemohon : {{ item.PPD3.nama }}
                   </div>
                 </div>
                 <div class="" style="margin-left: 11px;">
@@ -80,10 +80,10 @@
                   <div class="text-right" style="margin: 0px 0px 0px 0px ;">
 
                     <!-- Button Icon -->
-                    <q-btn class="text-right" v-show="item.PPD1.email_file !== null && item.PPD1.status_kabupaten == 1" color="primary" icon="attach_file">
+                    <q-btn class="text-right" v-show="item.PPD3.email_file !== null && item.PPD3.status_kabupaten == 1" color="primary" icon="attach_file">
                       <q-menu>
                         <q-list>
-                          <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.PPD1.email_file)">
+                          <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.PPD3.email_file)">
                             <q-item-section avatar>
                               <q-icon name="source" color="primary" />
                             </q-item-section>
@@ -106,7 +106,7 @@
                       </q-menu>
                     </q-btn>
 
-                    <q-btn class="text-right" v-show="item.PPD1.email_file == null && item.PPD1.status_kabupaten == ''" color="primary" icon="settings">
+                    <q-btn class="text-right" v-show="item.PPD3.email_file == null && item.PPD3.status_kabupaten == '' || item.PPD3.status_kabupaten == 2" color="primary" icon="settings">
                       <q-menu>
                         <q-list>
                           <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
@@ -115,7 +115,7 @@
                             </q-item-section>
                             <q-item-section>Detail</q-item-section>
                           </q-item>
-                          <q-item clickable v-show="item.PPD1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
+                          <q-item clickable v-show="item.PPD3.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
                             <q-item-section avatar>
                               <q-icon name="circle_notifications" color="red" />
                             </q-item-section>
@@ -2083,136 +2083,26 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="modal_syarat">
-      <q-card style="min-width: 90%; max-width: 90%;">
-        <q-toolbar>
-          <q-toolbar-title>
-            <q-icon name="description" color="primary" class="q-mr-md" />
-            <span style="font-size: 12pt;" class="text-weight-bold">Persyaratan Dokumen</span>
-          </q-toolbar-title>
-          <q-btn flat round dense icon="close" v-close-popup />
-        </q-toolbar>
+    <!-- Modal Lihat Status Component -->
+    <ModalLihatStatus
+      v-model="modal_lihat_status"
+      :status-kecamatan="form.status_kecamatan"
+      :status-kabupaten="form.status_kabupaten"
+      :keterangan-kecamatan="form.keterangan_kecamatan"
+      :keterangan-kabupaten="form.keterangan_kabupaten"
+      title="Alasan Pengembalian Permohonan"
+      kecamatan-label="Keterangan dari Tingkat Kecamatan"
+      kabupaten-label="Keterangan dari Tingkat Kabupaten"
+      help-text="Silakan perbaiki data sesuai dengan keterangan di atas dan ajukan kembali permohonan Anda. Gunakan menu <strong>Edit</strong> untuk memperbaiki data."
+    />    
 
-        <q-separator />
-
-        <q-scroll-area style="height: 500px; width: 100%;">
-          <q-card-section>
-            <div class="q-gutter-md">
-              <!-- Header -->
-              <div>
-                <h4 style="margin: 0 0 8px 0; color: #1976D2; font-weight: bold;">Persyaratan Penerbitan Kartu Keluarga</h4>
-                <p style="margin: 0; font-size: 12px; color: #666;">by Disdukcapil Konsel | 31 Januari 2020</p>
-              </div>
-
-              <!-- Penerbitan KK Baru atau Pisah KK -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  📋 Penerbitan KK Baru atau Pisah KK
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Berumur 17 (Tujuh Belas) Tahun atau sudah Kawin atau pernah Kawin yang dibuktikan dengan kepemilikan KTP-El</li>
-                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan atau Kutipan Akta Perceraian</li>
-                  <li>Surat Pindah bagi Penduduk yang pindah dalam wilayah Negara Kesatuan Republik Indonesia (SKPWNI)</li>
-                  <li>Surat Pernyataan Tanggung Jawab Mutlak Perkawinan/Perceraian belum tercatat</li>
-                  <li>Mengisi Formulir Biodata Keluarga (F-1.01)</li>
-                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
-                </ul>
-              </div>
-
-              <!-- Penerbitan KK Baru untuk Penduduk Orang Asing -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  🌍 Penerbitan KK Baru untuk Penduduk Orang Asing
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Kartu Izin Tinggal Tetap</li>
-                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan atau Kutipan Akta Perceraian atau yang disebut dengan nama lain</li>
-                  <li>Surat Keterangan Pindah Bagi Penduduk yang pindah dalam wilayah Negara Kesatuan Republik Indonesia</li>
-                  <li>Mengisi Formulir Biodata Keluarga (F-1.01)</li>
-                </ul>
-              </div>
-
-              <!-- Penerbitan KK Baru karena Perubahan Elemen Data -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  ✏️ Penerbitan KK Baru karena Perubahan Elemen Data
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Asli KK lama</li>
-                  <li>Surat Keterangan/Bukti Perubahan Peristiwa Kependudukan dan Peristiwa Penting</li>
-                  <li>Surat Pernyataan Perubahan Elemen Data (F 1.06)</li>
-                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
-                </ul>
-              </div>
-
-              <!-- Penambahan Anggota Keluarga Atau Numpang KK -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  👨‍👩‍👧 Penambahan Anggota Keluarga Atau Numpang KK
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Asli KK lama atau KK yang akan ditumpangi</li>
-                  <li>Surat keterangan lahir dari Dokter/Bidan</li>
-                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan bagi yang Perkawinannya belum tercatat di Kartu Keluarga</li>
-                  <li>Surat Keterangan Pindah Datang Warga Negara Indonesia (SKPWNI)</li>
-                  <li>Surat Pernyataan bersedia menerima sebagai Anggota Keluarga</li>
-                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
-                </ul>
-              </div>
-
-              <!-- Penerbitan KK Hilang atau Rusak -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  ⚠️ Penerbitan KK Hilang atau Rusak
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Surat Keterangan Kehilangan dari Kepolisian atau KK yang rusak</li>
-                  <li>Foto Copy KTP-El</li>
-                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
-                </ul>
-              </div>
-
-              <!-- Penerbitan KK Hilang atau Rusak untuk Penduduk Orang Asing -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  🌍 Penerbitan KK Hilang atau Rusak untuk Penduduk Orang Asing
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Surat Keterangan Hilang dari Kepolisian atau KK yang Rusak</li>
-                  <li>Kartu Izin Tinggal Tetap</li>
-                  <li>KTP-El</li>
-                </ul>
-              </div>
-
-              <!-- Persyaratan Permohonan SKPWNI -->
-              <div>
-                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  📄 Persyaratan Permohonan Surat Keterangan Pindah WNI (SKPWNI)
-                </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
-                  <li>Kartu Keluarga Asli</li>
-                  <li>Surat Kuasa Bagi yang Diwakili</li>
-                </ul>
-              </div>
-
-              <!-- Jam Layanan -->
-              <div style="background-color: #E8F5E9; padding: 12px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-top: 16px;">
-                <h5 style="margin: 0 0 8px 0; color: #2E7D32;">🕐 Jam Layanan</h5>
-                <p style="margin: 0; line-height: 1.6; font-size: 13px;">
-                  <strong>Senin - Jumat:</strong> 08:00 - 16:00 WIT
-                </p>
-              </div>
-            </div>
-          </q-card-section>
-        </q-scroll-area>
-
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Tutup" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <!-- Modal Syarat Component -->
+    <ModalSyarat
+      v-model="modal_syarat"
+      title="Persyaratan Dokumen"
+      header-title="Dokumen Persyaratan Lampiran"
+      header-subtitle="@disdukcapil.konaweselatankab.go.id | 31 Januari 2020"
+    />
 
   </q-page>
 </template>
@@ -2223,12 +2113,15 @@ import AutocompleteInput from 'src/components/AutocompleteInput.vue'
 import { Loading, Notify } from 'quasar'
 import axios from 'axios'
 
+import ModalSyarat from 'src/components/ModalSyarat.vue'
+import ModalLihatStatus from 'src/components/ModalLihatStatus.vue'
+
 export default {
-  components: { AutocompleteInput },
-  name: 'PPD1_list',
+  components: { AutocompleteInput, ModalSyarat, ModalLihatStatus },
+  name: 'PPD3_list',
   data() {
     return {
-      nama_form:'PPD1',
+      nama_form:'PPD3',
       nama:'',
       step: 1,
       modal_lihat   : false,
@@ -2237,6 +2130,7 @@ export default {
       modal_alur  : false,
       modal_delete  : false,
       modal_syarat  : false,
+      modal_lihat_status  : false,
       loading: false,
       isLoadingData: false, // Flag untuk menandai apakah sedang load data dari edit
       file_lampiran_new: null, // State untuk file baru
@@ -2406,6 +2300,7 @@ export default {
       cari_value: '',
       totalPage: 1,
       totalData: 0,
+      page_last: 0,
       allDataLoaded: false,
       searchTimeout: null,
 
@@ -2456,7 +2351,7 @@ export default {
  
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_PPD1 + "view",
+        this.simcard.url.URL_PERMOHONAN_PPD3 + "view",
         payload,
         {
           headers: {
@@ -2497,7 +2392,7 @@ export default {
       }
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_PPD1 + "addData",
+        this.simcard.url.URL_PERMOHONAN_PPD3 + "addData",
         formData,
         {
           headers: {
@@ -2544,7 +2439,7 @@ export default {
       }
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_PPD1 + "editData",
+        this.simcard.url.URL_PERMOHONAN_PPD3 + "editData",
         formData,
         {
           headers: {
@@ -2582,7 +2477,7 @@ export default {
       };
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_PPD1 + "removeData_mobile",
+        this.simcard.url.URL_PERMOHONAN_PPD3 + "removeData_mobile",
         body,
         {
           headers: {
@@ -2687,75 +2582,75 @@ export default {
       this.isLoadingData = true
 
           //  console.log(data);
-              this.form.id                                 = data.PPD1.id
-        this.form.KKref                              = data.PPD1.KKref
-        this.form.id_dari_form                       = data.PPD1.id_dari_form
-        this.form.m_provinsi                         = data.PPD1.m_provinsi
-        this.form.m_kabupaten                        = data.PPD1.m_kabupaten
-        this.form.m_kecamatan                        = data.PPD1.m_kecamatan
-        this.form.m_desa_kelurahan                   = data.PPD1.m_desa_kelurahan
-        this.form.no_kk                              = data.PPD1.no_kk
-        this.form.nama_kepalaKeluarga                = data.PPD1.nama_kepalaKeluarga
-        this.form.alamat                             = data.PPD1.alamat
-        this.form.rt                                 = data.PPD1.rt
-        this.form.rw                                 = data.PPD1.rw
-        this.form.provinsi                           = data.PPD1.provinsi
-        this.form.kabupaten                          = data.PPD1.kabupaten
-        this.form.kecamatan                          = data.PPD1.kecamatan
-        this.form.desa_kelurahan                     = data.PPD1.desa_kelurahan
-        this.form.kode_pos                           = data.PPD1.kode_pos
-        this.form.no_telp                            = data.PPD1.no_telp
-        this.form.nik                                = data.PPD1.nik
-        this.form.nama                               = data.PPD1.nama
-        this.form.alasan_kepindahan                  = data.PPD1.alasan_kepindahan
-        this.form.alasan_kepindahan_lainnya          = data.PPD1.alasan_kepindahan_lainnya
-        this.form.alamat_tujuan                      = data.PPD1.alamat_tujuan
-        this.form.rt_tujuan                          = data.PPD1.rt_tujuan
-        this.form.rw_tujuan                          = data.PPD1.rw_tujuan
-        this.form.provinsi_tujuan                    = data.PPD1.provinsi_tujuan
-        this.form.kabupaten_tujuan                   = data.PPD1.kabupaten_tujuan
-        this.form.kecamatan_tujuan                   = data.PPD1.kecamatan_tujuan
-        this.form.desa_kelurahan_tujuan              = data.PPD1.desa_kelurahan_tujuan
-        this.form.kodePos_tujuan                     = data.PPD1.kodePos_tujuan
-        this.form.noTelp_tujuan                      = data.PPD1.noTelp_tujuan
-        this.form.jenis_kepindahan                   = data.PPD1.jenis_kepindahan
-        this.form.status_kk_bagi_yang_tidak_pindah   = data.PPD1.status_kk_bagi_yang_tidak_pindah
-        this.form.status_kk_bagi_yang_pindah         = data.PPD1.status_kk_bagi_yang_pindah
-        this.form.shdk                               = data.PPD1.shdk
-        this.form.shdk_lainnya                       = data.PPD1.shdk_lainnya
-        this.form.file_Kabupaten                     = data.PPD1.file_Kabupaten
-        this.form.file_Old_Kabupaten                 = data.PPD1.file_Old_Kabupaten
+              this.form.id                                 = data.PPD3.id
+        this.form.KKref                              = data.PPD3.KKref
+        this.form.id_dari_form                       = data.PPD3.id_dari_form
+        this.form.m_provinsi                         = data.PPD3.m_provinsi
+        this.form.m_kabupaten                        = data.PPD3.m_kabupaten
+        this.form.m_kecamatan                        = data.PPD3.m_kecamatan
+        this.form.m_desa_kelurahan                   = data.PPD3.m_desa_kelurahan
+        this.form.no_kk                              = data.PPD3.no_kk
+        this.form.nama_kepalaKeluarga                = data.PPD3.nama_kepalaKeluarga
+        this.form.alamat                             = data.PPD3.alamat
+        this.form.rt                                 = data.PPD3.rt
+        this.form.rw                                 = data.PPD3.rw
+        this.form.provinsi                           = data.PPD3.provinsi
+        this.form.kabupaten                          = data.PPD3.kabupaten
+        this.form.kecamatan                          = data.PPD3.kecamatan
+        this.form.desa_kelurahan                     = data.PPD3.desa_kelurahan
+        this.form.kode_pos                           = data.PPD3.kode_pos
+        this.form.no_telp                            = data.PPD3.no_telp
+        this.form.nik                                = data.PPD3.nik
+        this.form.nama                               = data.PPD3.nama
+        this.form.alasan_kepindahan                  = data.PPD3.alasan_kepindahan
+        this.form.alasan_kepindahan_lainnya          = data.PPD3.alasan_kepindahan_lainnya
+        this.form.alamat_tujuan                      = data.PPD3.alamat_tujuan
+        this.form.rt_tujuan                          = data.PPD3.rt_tujuan
+        this.form.rw_tujuan                          = data.PPD3.rw_tujuan
+        this.form.provinsi_tujuan                    = data.PPD3.provinsi_tujuan
+        this.form.kabupaten_tujuan                   = data.PPD3.kabupaten_tujuan
+        this.form.kecamatan_tujuan                   = data.PPD3.kecamatan_tujuan
+        this.form.desa_kelurahan_tujuan              = data.PPD3.desa_kelurahan_tujuan
+        this.form.kodePos_tujuan                     = data.PPD3.kodePos_tujuan
+        this.form.noTelp_tujuan                      = data.PPD3.noTelp_tujuan
+        this.form.jenis_kepindahan                   = data.PPD3.jenis_kepindahan
+        this.form.status_kk_bagi_yang_tidak_pindah   = data.PPD3.status_kk_bagi_yang_tidak_pindah
+        this.form.status_kk_bagi_yang_pindah         = data.PPD3.status_kk_bagi_yang_pindah
+        this.form.shdk                               = data.PPD3.shdk
+        this.form.shdk_lainnya                       = data.PPD3.shdk_lainnya
+        this.form.file_Kabupaten                     = data.PPD3.file_Kabupaten
+        this.form.file_Old_Kabupaten                 = data.PPD3.file_Old_Kabupaten
 
 
-        this.form.status                = data.PPD1.status
-        this.form.keterangan            = data.PPD1.keterangan
-        this.form.keterangan_deskel     = data.PPD1.keterangan_deskel
-        this.form.keterangan_kecamatan  = data.PPD1.keterangan_kecamatan
-        this.form.keterangan_kabupaten  = data.PPD1.keterangan_kabupaten
-        this.form.status_deskel         = data.PPD1.status_deskel
-        this.form.status_kecamatan      = data.PPD1.status_kecamatan
-        this.form.status_kabupaten      = data.PPD1.status_kabupaten
-        this.form.createdBy             = data.PPD1.createdBy
-        this.form.createdAt             = data.PPD1.createdAt
-        this.form.createdAt_deskel      = data.PPD1.createdAt_deskel
-        this.form.createdAt_kecamatan   = data.PPD1.createdAt_kecamatan
-        this.form.createdAt_kabupaten   = data.PPD1.createdAt_kabupaten
+        this.form.status                = data.PPD3.status
+        this.form.keterangan            = data.PPD3.keterangan
+        this.form.keterangan_deskel     = data.PPD3.keterangan_deskel
+        this.form.keterangan_kecamatan  = data.PPD3.keterangan_kecamatan
+        this.form.keterangan_kabupaten  = data.PPD3.keterangan_kabupaten
+        this.form.status_deskel         = data.PPD3.status_deskel
+        this.form.status_kecamatan      = data.PPD3.status_kecamatan
+        this.form.status_kabupaten      = data.PPD3.status_kabupaten
+        this.form.createdBy             = data.PPD3.createdBy
+        this.form.createdAt             = data.PPD3.createdAt
+        this.form.createdAt_deskel      = data.PPD3.createdAt_deskel
+        this.form.createdAt_kecamatan   = data.PPD3.createdAt_kecamatan
+        this.form.createdAt_kabupaten   = data.PPD3.createdAt_kabupaten
 
 
         this.form.anggota_keluarga                = data.databio;  
 
-        this.form.emailPemohon          = data.PPD1.emailPemohon;
-        this.form.email_fileOld         = data.PPD1.email_file;
+        this.form.emailPemohon          = data.PPD3.emailPemohon;
+        this.form.email_fileOld         = data.PPD3.email_file;
         this.form.email_from            = this.form.email_from;
         this.form.email_to              = this.form.emailPemohon;
-        this.form.email_subject         = data.PPD1.email_subject;
-        if (data.PPD1.email_html == undefined || data.PPD1.email_html == null || data.PPD1.email_html == '') {
+        this.form.email_subject         = data.PPD3.email_subject;
+        if (data.PPD3.email_html == undefined || data.PPD3.email_html == null || data.PPD3.email_html == '') {
           this.form.email_html          = ''
         } else {
-          this.form.email_html          = data.PPD1.email_html; 
+          this.form.email_html          = data.PPD3.email_html; 
         }
-        this.form.file_lampiran         = data.PPD1.file_lampiran
-        this.form.file_lampiranOld      = data.PPD1.file_lampiranOld        
+        this.form.file_lampiran         = data.PPD3.file_lampiran
+        this.form.file_lampiranOld      = data.PPD3.file_lampiranOld        
 
         this.wilayah = {
           uraian_provinsi       : data.m_provinsi.uraian,
@@ -3166,8 +3061,8 @@ export default {
 
 
     cekButton_status_kecamatan: function(data){  
-      var a = data.PPD1.status 
-      var status_kab = data.PPD1.status_kabupaten  
+      var a = data.PPD3.status 
+      var status_kab = data.PPD3.status_kabupaten  
 
         if (a == 1) {
           return true

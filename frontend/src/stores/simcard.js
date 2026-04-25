@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { Loading, Notify } from 'quasar'
 import { SimcardService } from 'src/services/simcardService'
 import axios from 'axios'
-import { list } from 'postcss'
+ 
 
 var URL = 'https://server-simcard.konaweselatankab.go.id/'
 // var URL = 'http://server-simcard.konaweselatankab.go.id/'
@@ -64,6 +64,10 @@ export const useSimcardStore = defineStore('simcard', {
       URL_PERMOHONAN_PPD3       : URL + 'api/v1/permohonan_PPD3/',
       URL_WA_API                : URL + 'api/v1/wa_api/',
     },    
+
+    form:{
+      nama_hari : ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'],
+    },
 
      
     token: localStorage.token || null,
@@ -436,7 +440,8 @@ async getPersyaratan(tipe) {
       jamLayanan: 'Senin - Jumat: 08:00 - 16:00 WIT'
     }
   }
-}
+},
+
 
  
 
