@@ -19,9 +19,8 @@
     <div class="containerOne" style="padding-top:0px !important;">
       <div class="itemsContainer" style="padding: 0px 20px !important;">
         <div>
-          <p class="text-white" style="font-size: 20px; margin-bottom: 0;">{{ $route.name }}</p>
-          <p class="text-white" style="font-size: 12px; margin-bottom: 0;">Sistem Informasi Pencatatan dan Pendaftaran
-            Penduduk</p>
+          <p class="text-white" style="font-size: 14px; margin-bottom: 0;"><b>{{ $route.name }}</b></p>
+          <!-- <p class="text-white" style="font-size: 12px; margin-bottom: 0;">Sistem Informasi Pencatatan dan Pendaftaran Penduduk</p> -->
         </div>
         <div>
           <img src="~assets/simcard/firetap.png" style="width: 92px; height: 92px;" alt="">
@@ -29,15 +28,19 @@
       </div>
     </div>
 
-    <div class="" style="padding-top:0px !important;">
+    <div class="containerOne" style="padding-top:0px !important;">
       <q-card class="text-white full-width" style="border-radius: 15px; background-color: #FFFFFF; opacity: 0.85;">
 
-        <!-- <div class="text-black text-left" style="padding:10px 10px 0px 15px; font-weight: bold;">Daftar Permohonan</div> -->
-        <div class="row items-center no-wrap" style="justify-content: space-between; padding: 0 10px;">
-          <input type="text" v-model="cari_value" @input="getview" style="margin-left: 10px; margin-right: 10px; margin-top: 16px; margin-bottom:10px; border-radius: 8px; height: auto; flex: 1; padding: 10px 16px; border: 1px solid #C4C4C4;" placeholder="Pencarian" />
-          <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" style="margin-top: 16px;">
-            <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
-          </q-btn>
+        <div class="full-width row wrap justify-between items-center content-center" style="justify-content: space-between;">
+          <div class="col-10 self-center items-center" style="padding: 10px 10px 0px 20px;">
+            <input type="text" v-model="cari_value" @input="getview" style="width: 100%; padding: 10px 10px ;border-radius: 8px;border: 1px solid #C4C4C4;"  placeholder="Pencarian" />
+          </div>
+          <div class="col-2 self-center text-center items-center" style="margin-top: 10px;">
+            <q-btn round flat icon="info" color="primary" @click="modal_syarat = true" >
+              <q-tooltip>Lihat Persyaratan Permohonan</q-tooltip>
+            </q-btn>            
+          </div>
+
         </div>
 
         <!-- DAFTAR PERMOHONAN -->
@@ -46,30 +49,30 @@
             <div v-for="(item, index) in list_data" :key="index" style="padding:10px 0px 0px 10px; border-bottom: 1.5px solid #D9D9D9;">
               <div class="row items-center no-wrap">
 
-                <div v-if="item.KK1.status === 0" style="color:#6C7278;">
+                <div v-if="item.KK2.status === 0" style="color:#6C7278;">
                   <img src="~assets/simcard/wait.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
-                <div v-if="item.KK1.status === 1" style="color:#6C7278;">
+                <div v-if="item.KK2.status === 1" style="color:#6C7278;">
                   <img src="~assets/simcard/succes.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
-                <div v-if="item.KK1.status === 2" style="color:#6C7278;">
+                <div v-if="item.KK2.status === 2" style="color:#6C7278;">
                   <img src="~assets/simcard/fail.png" style="width: 100%; height: 56px;" alt="">
                 </div>
 
                 <div class="flex-break col self-center" style="margin-left: 11px;">
-                  <div v-if="item.KK1.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.KK2.status === 0" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Mohon bersabar, data masih diverifikasi
                   </div>
-                  <div v-if="item.KK1.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.KK2.status === 1" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Permohonan Diterima
                   </div>
-                  <div v-if="item.KK1.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
+                  <div v-if="item.KK2.status === 2" style="color:#000000;font-size: 12px;font-weight: bold;">
                     Permohonan Dikembalikan
                   </div>
                   <div style="color:#6C7278;font-size: 11px;">
-                    Nama pemohon : {{ item.KK1.nama }}
+                    Nama pemohon : {{ item.KK2.nama }}
                   </div>
                 </div>
                 <div class="" style="margin-left: 11px;">
@@ -77,10 +80,10 @@
                   <div class="text-right" style="margin: 0px 0px 0px 0px ;">
 
                     <!-- Button Icon -->
-                    <q-btn class="text-right" v-show="item.KK1.email_file !== null && item.KK1.status_kabupaten == 1" color="primary" icon="attach_file">
+                    <q-btn class="text-right" v-show="item.KK2.email_file !== null && item.KK2.status_kabupaten == 1" color="primary" icon="attach_file">
                       <q-menu>
                         <q-list>
-                          <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK1.email_file)">
+                          <q-item clickable v-close-popup @click="selectData(item), bukaLink(item.KK2.email_file)">
                             <q-item-section avatar>
                               <q-icon name="source" color="primary" />
                             </q-item-section>
@@ -103,7 +106,7 @@
                       </q-menu>
                     </q-btn>
 
-                    <q-btn class="text-right" v-show="item.KK1.email_file == null && item.KK1.status_kabupaten == ''" color="primary" icon="settings">
+                    <q-btn class="text-right" v-show="item.KK2.email_file == null && item.KK2.status_kabupaten == ''" color="primary" icon="settings">
                       <q-menu>
                         <q-list>
                           <q-item clickable v-close-popup @click="selectData(item), modal_lihat = true ">
@@ -112,7 +115,7 @@
                             </q-item-section>
                             <q-item-section>Detail</q-item-section>
                           </q-item>
-                          <q-item clickable v-show="item.KK1.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
+                          <q-item clickable v-show="item.KK2.status === 2" v-close-popup @click="selectData(item), modal_lihat_status = true ">
                             <q-item-section avatar>
                               <q-icon name="circle_notifications" color="red" />
                             </q-item-section>
@@ -175,7 +178,7 @@
     </div>
 
 
-    <q-dialog v-model="modal_add">
+    <q-dialog v-model="modal_add" full-width full-height>
       <q-card>
         <q-toolbar>
           <q-toolbar-title><span class="text-weight-bold">Formulir</span> Permohonan</q-toolbar-title>
@@ -339,35 +342,37 @@
                   Alasan Permohonan: <strong> {{ form.permohonan }}</strong>
                 </div>
                 <div class="q-gutter-sm txkecil" inline>
-                  <q-radio size="xs" v-model="form.permohonan" val="Karena Membentuk Rumah Tangga Baru"
-                    label="Karena Membentuk Rumah Tangga Baru" />
-                  <q-radio size="xs" v-model="form.permohonan" val="Karena Kartu Keluarga Hilang/Rusak "
-                    label="Karena Kartu Keluarga Hilang/Rusak " />
+                  <q-radio size="xs" v-model="form.permohonan" val="Karena Penambahan Anggota Keluarga (Kelahiran, Kedatangan)"
+                    label="Karena Penambahan Anggota Keluarga (Kelahiran, Kedatangan)" />
+                  <q-radio size="xs" v-model="form.permohonan" val="Karena Pengurangan Anggota Keluarga (Kematian, Kepindahan)"
+                    label="Karena Pengurangan Anggota Keluarga (Kematian, Kepindahan)" />
                   <q-radio size="xs" v-model="form.permohonan" val="Lainnya" label="Lainnya" />
                 </div>
                 <div v-if="form.permohonan == 'Lainnya'">
                   <input v-model="form.permohonan_lainnya" type="text" placeholder="Lainnya" class="input-form">
                 </div>
-              </div>
-
-              <label class="text-labelku">NO KK Pemohon</label>
-              <input v-model="form.no_kk" type="number" placeholder="NO KK" class="input-form">
-              <label class="text-labelku">NIK Pemohon</label>
-              <input v-model="form.nik" type="number" placeholder="NIK" class="input-form">
+              </div> 
 
               <label class="text-labelku">Nama Lengkap Pemohon</label>
-              <input v-model="form.nama" type="text" placeholder="NAMA LENGKAP" class="input-form">
-              <label class="text-labelku">Jenis Kelamin {{ form.jenis_kelamin }}</label>
-              <select v-model="form.jenis_kelamin" class="input-form">
+              <input  class="input-form" v-model="form.nama" type="text" placeholder="Nama Lengkap Pemohon">
+              <label class="text-labelku">NIK Pemohon</label>
+              <input class="input-form"  v-model="form.nik" type="number" placeholder="NIK Pemohon">
+              <label class="text-labelku">Nama Kepala Keluarga</label>
+              <input  class="input-form" v-model="form.nama_kepala_keluarga" type="text" placeholder="Nama Kepala Keluarga">
+              <label class="text-labelku">No. KK</label>
+              <input class="input-form" v-model="form.no_kk" type="number" placeholder="No. KK">   
+
+              <label class="text-labelku">Tempat Lahir</label>   
+              <input  class="input-form" v-model="form.tempat_lahir" type="text" placeholder="TEMPAT LAHIR (Ex: Kendari)">                  
+              <label class="text-labelku">Tanggal Lahir</label>   
+              <input  class="input-form" v-model="form.tanggal_lahir" type="date" placeholder="TANGGAL LAHIR">
+
+              <label class="text-labelku">Jenis Kelamin {{ form.jenis_kelamin }}</label>  
+              <select v-model="form.jenis_kelamin">
                 <option disabled value="">Pilih Jenis Kelamin</option>
                 <option>Laki - Laki</option>
-                <option>Perempuan</option>
-              </select>
-              <label class="text-labelku">Tempat Lahir</label>
-              <input v-model="form.tempat_lahir" type="text" placeholder="TEMPAT LAHIR (Ex: Kendari)"
-                class="input-form">
-              <label class="text-labelku">Tanggal Lahir</label>
-              <input v-model="form.tanggal_lahir" type="date" placeholder="TANGGAL LAHIR" class="input-form">
+                <option>Perempuan</option> 
+              </select>              
 
               <label class="text-labelku">Status Hubungan Dalam Keluarga {{ form.status_hubungan_dl_keluarga }}</label>
               <select v-model="form.status_hubungan_dl_keluarga" class="input-form">
@@ -417,7 +422,7 @@
 
 
               <!-- ================= Alamat ===================== -->
-               <label class="text-labelku">Alamat </label>
+              <label class="text-labelku">Alamat </label>
               <q-select
                 filled
                 v-model="form.provinsi"
@@ -571,10 +576,178 @@
               <label class="text-labelku">Kode Pos</label>
               <input v-model="form.kode_pos" type="number" placeholder="Kode Pos" class="input-form">
 
+              <label class="text-labelku">Nomor Hp</label>
+              <input v-model="form.no_hp" type="tel" placeholder="Nomor Hp" class="input-form">
+
               <!-- ================= Alamat ===================== -->
             </q-step> 
 
-            <q-step :name="3" title="Data Anggota keluarga" icon="add_comment" :done="step > 3">
+            <q-step :name="3" title="Data Sebelumnya" icon="add_comment" :done="step > 3">
+                <label class="text-labelku">Nama Kepala Keluarga Lama</label>   
+                <input class="input-form" v-model="form.nama_kepala_keluarga_lama" type="text" placeholder="Nama Kepala Keluarga Lama">  
+                <label class="text-labelku">No. KK Lama</label>   
+                <input class="input-form" v-model="form.no_kk_lama" type="number" placeholder="No. KK Lama">  
+
+                <label class="text-labelku">Alamat Keluarga Lama</label>   
+                <input class="input-form" v-model="form.alamat_keluarga_lama" type="text" placeholder="Alamat Keluarga Lama">  
+                <label class="text-labelku">RT</label>   
+                <input class="input-form" v-model="form.rt_lama" type="number" placeholder="RT">  
+                <label class="text-labelku">RW</label>   
+                <input class="input-form" v-model="form.rw_lama" type="number" placeholder="RW"> 
+
+                <label class="text-labelku">Alamat </label>
+                <q-select
+                  filled
+                  v-model="form.provinsi_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_provinsi3"
+                  @filter="provinsi3"
+                  label="Provinsi"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_provinsi }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.kabupaten_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_kabupaten3"
+                  @filter="(val, update) => kabupaten3(val, update, form.provinsi_lama)"
+                  label="Kabupaten"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_kabupaten }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.kecamatan_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_kecamatan3"
+                  @filter="(val, update) => kecamatan3(val, update, form.kabupaten_lama)"
+                  label="Kecamatan"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_kecamatan }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.desa_kelurahan_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_desa_kelurahan3"
+                  @filter="(val, update) => desa_kelurahan3(val, update, form.kecamatan_lama)"
+                  label="Desa/Kelurahan"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_desa_kelurahan }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <label class="text-labelku">Kode Pos</label>   
+                <input class="input-form" v-model="form.kode_pos_lama" type="tel" placeholder="Kode Pos">   
+                <label class="text-labelku">Telepon</label>   
+                <input class="input-form" v-model="form.telepon_lama" type="tel" placeholder="Telepon">               
+
+            </q-step>
+
+            <q-step :name="4" title="Data Anggota keluarga" icon="add_comment" :done="step > 4">
               <label class="text-labelku">Tambah Anggota Keluarga</label>
 
               <!-- Form Input Anggota Keluarga -->
@@ -739,14 +912,14 @@
                   </div>
                 </div>
               </div>
-              <div v-else style="text-align: center; padding: 20px; color: #999; border: 2px dashed #ddd; border-radius: 8px;">
-                <q-icon name="info" size="32px" style="opacity: 0.5; display: block; margin-bottom: 8px;" />
+              <div v-else style="text-align: center; padding: 20px; color: #999; border: 2px dashed #ddd; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px;">
+                <q-icon name="info" size="32px" style="opacity: 0.5; margin-bottom: 8px;" />
                 <p>Belum ada anggota keluarga yang ditambahkan</p>
               </div>
 
             </q-step>
 
-            <q-step :name="4" title="Data Dukung" icon="add_comment">
+            <q-step :name="5" title="Data Dukung" icon="add_comment">
               <label class="text-labelku">Lampiran file (*Bila ada tambahan file)</label>
               <div v-if="form.file_lampiranOld && !form.file_lampiran" style="margin-bottom: 16px; padding: 12px; background-color: #f5f5f5; border-radius: 8px;">
                 <div style="font-size: 12px; font-weight: 500; color: #666; margin-bottom: 8px;">File Lama:</div>
@@ -761,8 +934,8 @@
 
             <template v-slot:navigation>
               <q-stepper-navigation>
-                <q-btn v-if="step < 4" @click="$refs.stepper.next()" color="primary" label="Continue" />
-                <q-btn v-if="step === 4" @click="addData()" color="positive" label="Submit" :loading="loading" />
+                <q-btn v-if="step < 5" @click="$refs.stepper.next()" color="primary" label="Continue" />
+                <q-btn v-if="step === 5" @click="addData()" color="positive" label="Submit" :loading="loading" />
                 <q-btn v-if="step > 1" flat color="primary" @click="$refs.stepper.previous()" label="Back"
                   class="q-ml-sm" />
               </q-stepper-navigation>
@@ -774,7 +947,7 @@
     </q-dialog>
 
 
-    <q-dialog v-model="modal_edit">
+    <q-dialog v-model="modal_edit" full-width full-height>
       <q-card>
         <q-toolbar>
           <q-toolbar-title><span class="text-weight-bold">Formulir</span> Permohonan</q-toolbar-title>
@@ -938,35 +1111,37 @@
                   Alasan Permohonan: <strong> {{ form.permohonan }}</strong>
                 </div>
                 <div class="q-gutter-sm txkecil" inline>
-                  <q-radio size="xs" v-model="form.permohonan" val="Karena Membentuk Rumah Tangga Baru"
-                    label="Karena Membentuk Rumah Tangga Baru" />
-                  <q-radio size="xs" v-model="form.permohonan" val="Karena Kartu Keluarga Hilang/Rusak "
-                    label="Karena Kartu Keluarga Hilang/Rusak " />
+                  <q-radio size="xs" v-model="form.permohonan" val="Karena Penambahan Anggota Keluarga (Kelahiran, Kedatangan)"
+                    label="Karena Penambahan Anggota Keluarga (Kelahiran, Kedatangan)" />
+                  <q-radio size="xs" v-model="form.permohonan" val="Karena Pengurangan Anggota Keluarga (Kematian, Kepindahan)"
+                    label="Karena Pengurangan Anggota Keluarga (Kematian, Kepindahan)" />
                   <q-radio size="xs" v-model="form.permohonan" val="Lainnya" label="Lainnya" />
                 </div>
                 <div v-if="form.permohonan == 'Lainnya'">
                   <input v-model="form.permohonan_lainnya" type="text" placeholder="Lainnya" class="input-form">
                 </div>
-              </div>
-
-              <label class="text-labelku">NO KK Pemohon</label>
-              <input v-model="form.no_kk" type="number" placeholder="NO KK" class="input-form">
-              <label class="text-labelku">NIK Pemohon</label>
-              <input v-model="form.nik" type="number" placeholder="NIK" class="input-form">
+              </div> 
 
               <label class="text-labelku">Nama Lengkap Pemohon</label>
-              <input v-model="form.nama" type="text" placeholder="NAMA LENGKAP" class="input-form">
-              <label class="text-labelku">Jenis Kelamin {{ form.jenis_kelamin }}</label>
-              <select v-model="form.jenis_kelamin" class="input-form">
+              <input  class="input-form" v-model="form.nama" type="text" placeholder="Nama Lengkap Pemohon">
+              <label class="text-labelku">NIK Pemohon</label>
+              <input class="input-form"  v-model="form.nik" type="number" placeholder="NIK Pemohon">
+              <label class="text-labelku">Nama Kepala Keluarga</label>
+              <input  class="input-form" v-model="form.nama_kepala_keluarga" type="text" placeholder="Nama Kepala Keluarga">
+              <label class="text-labelku">No. KK</label>
+              <input class="input-form" v-model="form.no_kk" type="number" placeholder="No. KK">   
+
+              <label class="text-labelku">Tempat Lahir</label>   
+              <input  class="input-form" v-model="form.tempat_lahir" type="text" placeholder="TEMPAT LAHIR (Ex: Kendari)">                  
+              <label class="text-labelku">Tanggal Lahir</label>   
+              <input  class="input-form" v-model="form.tanggal_lahir" type="date" placeholder="TANGGAL LAHIR">
+
+              <label class="text-labelku">Jenis Kelamin {{ form.jenis_kelamin }}</label>  
+              <select v-model="form.jenis_kelamin">
                 <option disabled value="">Pilih Jenis Kelamin</option>
                 <option>Laki - Laki</option>
-                <option>Perempuan</option>
-              </select>
-              <label class="text-labelku">Tempat Lahir</label>
-              <input v-model="form.tempat_lahir" type="text" placeholder="TEMPAT LAHIR (Ex: Kendari)"
-                class="input-form">
-              <label class="text-labelku">Tanggal Lahir</label>
-              <input v-model="form.tanggal_lahir" type="date" placeholder="TANGGAL LAHIR" class="input-form">
+                <option>Perempuan</option> 
+              </select>              
 
               <label class="text-labelku">Status Hubungan Dalam Keluarga {{ form.status_hubungan_dl_keluarga }}</label>
               <select v-model="form.status_hubungan_dl_keluarga" class="input-form">
@@ -1016,8 +1191,7 @@
 
 
               <!-- ================= Alamat ===================== -->
-               <label class="text-labelku">Alamat </label>
-               {{form.provinsi}}
+              <label class="text-labelku">Alamat </label>
               <q-select
                 filled
                 v-model="form.provinsi"
@@ -1053,7 +1227,7 @@
                   <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
                 </template>
               </q-select>
-              {{ form.kabupaten }}
+
               <q-select
                 filled
                 v-model="form.kabupaten"
@@ -1090,8 +1264,6 @@
                 </template>
               </q-select>
 
-              {{form.kecamatan}}
-
               <q-select
                 filled
                 v-model="form.kecamatan"
@@ -1127,8 +1299,6 @@
                   <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
                 </template>
               </q-select>
-
-              {{ form.desa_kelurahan }}
 
               <q-select
                 filled
@@ -1175,10 +1345,178 @@
               <label class="text-labelku">Kode Pos</label>
               <input v-model="form.kode_pos" type="number" placeholder="Kode Pos" class="input-form">
 
+              <label class="text-labelku">Nomor Hp</label>
+              <input v-model="form.no_hp" type="tel" placeholder="Nomor Hp" class="input-form">
+
               <!-- ================= Alamat ===================== -->
             </q-step> 
 
-            <q-step :name="3" title="Data Anggota keluarga" icon="add_comment" :done="step > 3">
+            <q-step :name="3" title="Data Sebelumnya" icon="add_comment" :done="step > 3">
+                <label class="text-labelku">Nama Kepala Keluarga Lama</label>   
+                <input class="input-form" v-model="form.nama_kepala_keluarga_lama" type="text" placeholder="Nama Kepala Keluarga Lama">  
+                <label class="text-labelku">No. KK Lama</label>   
+                <input class="input-form" v-model="form.no_kk_lama" type="number" placeholder="No. KK Lama">  
+
+                <label class="text-labelku">Alamat Keluarga Lama</label>   
+                <input class="input-form" v-model="form.alamat_keluarga_lama" type="text" placeholder="Alamat Keluarga Lama">  
+                <label class="text-labelku">RT</label>   
+                <input class="input-form" v-model="form.rt_lama" type="number" placeholder="RT">  
+                <label class="text-labelku">RW</label>   
+                <input class="input-form" v-model="form.rw_lama" type="number" placeholder="RW"> 
+
+                <label class="text-labelku">Alamat </label>
+                <q-select
+                  filled
+                  v-model="form.provinsi_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_provinsi3"
+                  @filter="provinsi3"
+                  label="Provinsi"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_provinsi }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.kabupaten_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_kabupaten3"
+                  @filter="(val, update) => kabupaten3(val, update, form.provinsi_lama)"
+                  label="Kabupaten"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_kabupaten }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.kecamatan_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_kecamatan3"
+                  @filter="(val, update) => kecamatan3(val, update, form.kabupaten_lama)"
+                  label="Kecamatan"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_kecamatan }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <q-select
+                  filled
+                  v-model="form.desa_kelurahan_lama"
+                  use-input
+                  hide-selected
+                  fill-input
+                  input-debounce="300"
+                  :options="list_data_desa_kelurahan3"
+                  @filter="(val, update) => desa_kelurahan3(val, update, form.kecamatan_lama)"
+                  label="Desa/Kelurahan"
+                  option-value="id"
+                  option-label="uraian"
+                  emit-value
+                  map-options
+                  style="width: 100%; padding-bottom: 32px"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">Tidak ada hasil</q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.uraian }}</q-item-label>
+                        <q-item-label caption>Kode: {{ scope.opt.kd_desa_kelurahan }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.uraian }}</span>
+                  </template>
+                </q-select>
+
+                <label class="text-labelku">Kode Pos</label>   
+                <input class="input-form" v-model="form.kode_pos_lama" type="tel" placeholder="Kode Pos">   
+                <label class="text-labelku">Telepon</label>   
+                <input class="input-form" v-model="form.telepon_lama" type="tel" placeholder="Telepon">               
+
+            </q-step>
+
+            <q-step :name="4" title="Data Anggota keluarga" icon="add_comment" :done="step > 4">
               <label class="text-labelku">Tambah Anggota Keluarga</label>
 
               <!-- Form Input Anggota Keluarga -->
@@ -1343,14 +1681,14 @@
                   </div>
                 </div>
               </div>
-              <div v-else style="text-align: center; padding: 20px; color: #999; border: 2px dashed #ddd; border-radius: 8px;">
-                <q-icon name="info" size="32px" style="opacity: 0.5; display: block; margin-bottom: 8px;" />
+              <div v-else style="text-align: center; padding: 20px; color: #999; border: 2px dashed #ddd; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px;">
+                <q-icon name="info" size="32px" style="opacity: 0.5; margin-bottom: 8px;" />
                 <p>Belum ada anggota keluarga yang ditambahkan</p>
               </div>
 
             </q-step>
 
-            <q-step :name="4" title="Data Dukung" icon="add_comment">
+            <q-step :name="5" title="Data Dukung" icon="add_comment">
               <label class="text-labelku">Lampiran file (*Bila ada tambahan file)</label>
               <div v-if="form.file_lampiranOld && !form.file_lampiran" style="margin-bottom: 16px; padding: 12px; background-color: #f5f5f5; border-radius: 8px;">
                 <div style="font-size: 12px; font-weight: 500; color: #666; margin-bottom: 8px;">File Lama:</div>
@@ -1365,8 +1703,8 @@
 
             <template v-slot:navigation>
               <q-stepper-navigation>
-                <q-btn v-if="step < 4" @click="$refs.stepper.next()" color="primary" label="Continue" />
-                <q-btn v-if="step === 4" @click="editData()" color="positive" label="Submit" :loading="loading" />
+                <q-btn v-if="step < 5" @click="$refs.stepper.next()" color="primary" label="Continue" />
+                <q-btn v-if="step === 5" @click="editData()" color="positive" label="Submit" :loading="loading" />
                 <q-btn v-if="step > 1" flat color="primary" @click="$refs.stepper.previous()" label="Back"
                   class="q-ml-sm" />
               </q-stepper-navigation>
@@ -1415,10 +1753,10 @@
         <q-scroll-area style="height: 500px; width: 100%;">
           <q-card-section>
             <div class="q-gutter-lg">
-              <!-- Bagian 1: Data Daerah Administratif -->
+              <!-- Bagian 1: Data Daerah Administratif (Lokasi Permohonan) -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  📍 Daerah Administratif
+                  Daerah Administratif
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
@@ -1447,7 +1785,7 @@
               <!-- Bagian 2: Alasan Permohonan -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #388E3C; border-bottom: 2px solid #388E3C; padding-bottom: 8px;">
-                  ✍️ Alasan Permohonan
+                  Alasan Permohonan
                 </h5>
                 <div style="background-color: #F1F5FE; padding: 12px; border-radius: 8px;">
                   <div style="font-size: 14px; color: #2d3748;">{{ form.permohonan || '-' }}</div>
@@ -1460,7 +1798,7 @@
               <!-- Bagian 3: Data Pemohon -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #F57C00; border-bottom: 2px solid #F57C00; padding-bottom: 8px;">
-                  👤 Data Pemohon
+                  Data Pemohon
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
@@ -1629,6 +1967,68 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Bagian 8: Data KK Lama (jika ada) -->
+              <div v-if="form.no_kk_lama">
+                <h5 style="margin: 0 0 16px 0; color: #D84315; border-bottom: 2px solid #D84315; padding-bottom: 8px;">
+                  📋 Data KK Lama
+                </h5>
+                <div style="display: grid; gap: 16px;">
+                  <!-- Nama Kepala Keluarga Lama -->
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nama Kepala Keluarga Lama</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.nama_kepala_keluarga_lama || '-' }}</div>
+                  </div>
+                  
+                  <!-- NO KK Lama -->
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">NO KK Lama</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.no_kk_lama || '-' }}</div>
+                  </div>
+
+                  <!-- Alamat Keluarga Lama -->
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat Keluarga Lama</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.alamat_keluarga_lama || '-' }}</div>
+                  </div>
+
+                  <!-- Wilayah Lama -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Provinsi Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ wilayah_lama.uraian_provinsi || '-' }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kabupaten Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ wilayah_lama.uraian_kabupaten || '-' }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kecamatan Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ wilayah_lama.uraian_kecamatan || '-' }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Desa/Kelurahan Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ wilayah_lama.uraian_desa_kelurahan || '-' }}</div>
+                    </div>
+                  </div>
+
+                  <!-- RT/RW Lama -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">RT Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ form.rt_lama || '-' }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">RW Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ form.rw_lama || '-' }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kode Pos Lama</div>
+                      <div style="font-size: 14px; color: #2d3748;">{{ form.kode_pos_lama || '-' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </q-card-section>
         </q-scroll-area>
@@ -1791,34 +2191,113 @@
 
         <q-separator />
 
-        <q-scroll-area style="height: 400px; width: 100%;">
+        <q-scroll-area style="height: 500px; width: 100%;">
           <q-card-section>
             <div class="q-gutter-md">
-              <!-- Persyaratan Umum -->
+              <!-- Header -->
               <div>
-                <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  📋 Persyaratan Umum
+                <h4 style="margin: 0 0 8px 0; color: #1976D2; font-weight: bold;">Persyaratan Penerbitan Kartu Keluarga</h4>
+                <p style="margin: 0; font-size: 12px; color: #666;">by Disdukcapil Konsel | 31 Januari 2020</p>
+              </div>
+
+              <!-- Penerbitan KK Baru atau Pisah KK -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  📋 Penerbitan KK Baru atau Pisah KK
                 </h5>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-                  <li>Seluruh Dokumen Harus di scan di satukan dalam bentuk pdf</li>
-                  <li>Kartu Tanda Penduduk (KTP) yang masih berlaku</li>
-                  <li>Surat Nikah (untuk yang sudah menikah)</li>
-                  <li>Akta Kelahiran dari kantor pencatatan sipil</li>
-                  <li>Pas Foto 4x6 cm (hitam putih atau berwarna)</li>
-                  <li>Surat Keterangan Domisili dari kelurahan setempat</li>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Berumur 17 (Tujuh Belas) Tahun atau sudah Kawin atau pernah Kawin yang dibuktikan dengan kepemilikan KTP-El</li>
+                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan atau Kutipan Akta Perceraian</li>
+                  <li>Surat Pindah bagi Penduduk yang pindah dalam wilayah Negara Kesatuan Republik Indonesia (SKPWNI)</li>
+                  <li>Surat Pernyataan Tanggung Jawab Mutlak Perkawinan/Perceraian belum tercatat</li>
+                  <li>Mengisi Formulir Biodata Keluarga (F-1.01)</li>
+                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
                 </ul>
               </div>
 
-            
+              <!-- Penerbitan KK Baru untuk Penduduk Orang Asing -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  🌍 Penerbitan KK Baru untuk Penduduk Orang Asing
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Kartu Izin Tinggal Tetap</li>
+                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan atau Kutipan Akta Perceraian atau yang disebut dengan nama lain</li>
+                  <li>Surat Keterangan Pindah Bagi Penduduk yang pindah dalam wilayah Negara Kesatuan Republik Indonesia</li>
+                  <li>Mengisi Formulir Biodata Keluarga (F-1.01)</li>
+                </ul>
+              </div>
 
-              <!-- Waktu dan Tempat -->
-                <div style="background-color: #E8F5E9; padding: 12px; border-radius: 8px; border-left: 4px solid #4CAF50;">
-                  <h5 style="margin: 0 0 8px 0; color: #2E7D32;">🕐 Jam Layanan</h5>
-                  <p style="margin: 0; line-height: 1.6; font-size: 13px;">
-                    <strong>Senin - Jumat:</strong> 08:00 - 16:00 WIT<br>
-                    <!-- <strong>Sabtu:</strong> 08:00 - 12:00 WIT -->
-                  </p>
-                </div>
+              <!-- Penerbitan KK Baru karena Perubahan Elemen Data -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  ✏️ Penerbitan KK Baru karena Perubahan Elemen Data
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Asli KK lama</li>
+                  <li>Surat Keterangan/Bukti Perubahan Peristiwa Kependudukan dan Peristiwa Penting</li>
+                  <li>Surat Pernyataan Perubahan Elemen Data (F 1.06)</li>
+                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
+                </ul>
+              </div>
+
+              <!-- Penambahan Anggota Keluarga Atau Numpang KK -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  👨‍👩‍👧 Penambahan Anggota Keluarga Atau Numpang KK
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Asli KK lama atau KK yang akan ditumpangi</li>
+                  <li>Surat keterangan lahir dari Dokter/Bidan</li>
+                  <li>Foto Copy Buku Nikah/Kutipan Akta Perkawinan bagi yang Perkawinannya belum tercatat di Kartu Keluarga</li>
+                  <li>Surat Keterangan Pindah Datang Warga Negara Indonesia (SKPWNI)</li>
+                  <li>Surat Pernyataan bersedia menerima sebagai Anggota Keluarga</li>
+                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
+                </ul>
+              </div>
+
+              <!-- Penerbitan KK Hilang atau Rusak -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  ⚠️ Penerbitan KK Hilang atau Rusak
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Surat Keterangan Kehilangan dari Kepolisian atau KK yang rusak</li>
+                  <li>Foto Copy KTP-El</li>
+                  <li>Surat Kuasa jika diwakilkan (F 1.07)</li>
+                </ul>
+              </div>
+
+              <!-- Penerbitan KK Hilang atau Rusak untuk Penduduk Orang Asing -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  🌍 Penerbitan KK Hilang atau Rusak untuk Penduduk Orang Asing
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Surat Keterangan Hilang dari Kepolisian atau KK yang Rusak</li>
+                  <li>Kartu Izin Tinggal Tetap</li>
+                  <li>KTP-El</li>
+                </ul>
+              </div>
+
+              <!-- Persyaratan Permohonan SKPWNI -->
+              <div>
+                <h5 style="margin: 0 0 12px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
+                  📄 Persyaratan Permohonan Surat Keterangan Pindah WNI (SKPWNI)
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 13px;">
+                  <li>Kartu Keluarga Asli</li>
+                  <li>Surat Kuasa Bagi yang Diwakili</li>
+                </ul>
+              </div>
+
+              <!-- Jam Layanan -->
+              <div style="background-color: #E8F5E9; padding: 12px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-top: 16px;">
+                <h5 style="margin: 0 0 8px 0; color: #2E7D32;">🕐 Jam Layanan</h5>
+                <p style="margin: 0; line-height: 1.6; font-size: 13px;">
+                  <strong>Senin - Jumat:</strong> 08:00 - 16:00 WIT
+                </p>
+              </div>
             </div>
           </q-card-section>
         </q-scroll-area>
@@ -1842,9 +2321,10 @@ import axios from 'axios'
 
 export default {
   components: { AutocompleteInput },
-  name: 'KK1_list',
+  name: 'KK2_list',
   data() {
     return {
+      nama_form:'KK2',
       nama:'',
       step: 1,
       modal_lihat   : false,
@@ -1860,67 +2340,86 @@ export default {
       options2: [],
       token: localStorage.getItem('token') || '',
 
-            form: {
+      form: {
               id:'',
               KKref:'',
               id_dari_form:'',
+
+              modul:'kk2',
 
               m_provinsi : '74',
               m_kabupaten : '7405',
               m_kecamatan : '',
               m_desa_kelurahan : '',
 
-              permohonan: '',  
-              permohonan_lainnya: '',  
 
-              nama: '',  
-              nik: '',  
-              no_kk: '',  
+              permohonan: '',
+              keterangan_lainnya: '',
 
-              agama:'',
-              agama_lainnya:'',
-              pekerjaan:'',
-              pekerjaan_lainnya:'',
-              pendidikan:'',
-              pendidikan_lainnya:'',
-            
-              jenis_kelamin: '',  
-              tempat_lahir: '',  
-              tanggal_lahir: '', 
-              status_hubungan_dl_keluarga:'', 
+              nama: '',
+              nik: '',
+              nama_kepala_keluarga: '',
+              no_kk: '',
+
+              jenis_kelamin:'',
+              tempat_lahir:'',
+              tanggal_lahir:'',
+              status_hubungan_dl_keluarga:'',
+
+                agama:'',
+                agama_lainnya:'',
+                pekerjaan:'',
+                pekerjaan_lainnya:'',
+                pendidikan:'',
+                pendidikan_lainnya:'',
+
+              alamat: '',
+              rt: '',
+              rw: '',
+
               
-
-              alamat: '',  
-              rt: '',  
-              rw: '',  
-              kode_pos: '',  
 
               provinsi: '',
               kabupaten: '',
               kecamatan: '',
               desa_kelurahan: '',
 
-               
-              file_lampiran_kecamatan: null, 
-              file_lampiran_kabupaten: null, 
+              kode_pos: '',
+              telepon: '',
+
+              nama_kepala_keluarga_lama: '',
+              no_kk_lama: '',
+              
+              alamat_keluarga_lama: '',
+              rt_lama: '',
+              rw_lama: '',
+
+              provinsi_lama: '',
+              kabupaten_lama: '',
+              kecamatan_lama: '',
+              desa_kelurahan_lama: '',
+
+              kode_pos_lama: '',
+              telepon_lama: '',
 
               // ADMIN 
-              status : 0,
-              keterangan : 0,
-              
-              keterangan_deskel:'',
-              keterangan_kecamatan:'',
-              keterangan_kabupaten  :'',
+                status : 0,
+                keterangan : 0,
+                
+                keterangan_deskel:'',
+                keterangan_kecamatan:'',
+                keterangan_kabupaten  :'',
 
-              status_deskel:0,
-              status_kecamatan:0,
-              status_kabupaten  :0,
+                status_deskel:0,
+                status_kecamatan:0,
+                status_kabupaten  :0,
 
-              createdBy : '',
-              createdAt : '',
-              createdAt_deskel:'',
-              createdAt_kecamatan:'',
-              createdAt_kabupaten  :'',
+                createdBy : '',
+                createdAt : '',
+                createdAt_deskel:'',
+                createdAt_kecamatan:'',
+                createdAt_kabupaten  :'',
+              // ADMIN 
 
               file_terbitan   : null,
               emailPemohon    : '',
@@ -1930,17 +2429,13 @@ export default {
               email_to        : '',
               email_subject   : '',
               email_html      : '',
-              
-              // ADMIN 
 
- 
               file              : null, 
               fileThumb         : null, 
               file_lampiran     :null,
               file_lampiranOld  : null,
-              anggota_keluarga  : []              
+              anggota_keluarga  : []                            
               
-
             },
 
             list_data:[],
@@ -1953,6 +2448,13 @@ export default {
             list_data_kabupaten2:[],            
             list_data_kecamatan2:[],
             list_data_desa_kelurahan2:[],
+
+            list_data_provinsi3:[],            
+            list_data_kabupaten3:[],            
+            list_data_kecamatan3:[],
+            list_data_desa_kelurahan3:[],
+            
+
 
       listShdk: [],
       listAgama: [],
@@ -2067,7 +2569,10 @@ export default {
       .then(response => {
         this.list_data = response.data.data
         this.page_last = response.data.jmlData
-        console.log('Response:', response)
+        console.log("list_data");
+        console.log(this.list_data);
+
+        // console.log('Response:', response)
         this.loading = false;
  
       })
@@ -2079,6 +2584,7 @@ export default {
     addData() {
       this.loading = true;
 
+      console.log("addData called ===========>");
       console.log(this.form);
       console.log(this.form.anggota_keluarga);
 
@@ -2093,7 +2599,7 @@ export default {
       }
 
       axios.post(
-        this.simcard.url.URL_PERMOHONAN_KK_WNI + "addData",
+        this.simcard.url.URL_PERMOHONAN_KK_WNI + "addData1",
         formData,
         {
           headers: {
@@ -2109,11 +2615,11 @@ export default {
           color: 'positive'
         })
         this.getview();
-        this.modal_add = false;
+        // this.modal_add = false;
         this.file_lampiran_new = null; // Reset file state
       })
       .catch(error => {
-        this.loading = false;
+        // this.loading = false;
         console.error('Error:', error)
         Notify.create({
           message: 'Gagal mengirim data: ' + (error.response?.data?.message || error.message),
@@ -2282,94 +2788,119 @@ export default {
       // Set flag untuk tidak trigger reset di watcher
       this.isLoadingData = true
 
-      // Set semua data form
-      this.form.id                              = data.KK1.id
-      this.form.KKref                           = data.KK1.KKref
-      this.form.id_dari_form                    = data.KK1.id_dari_form
-      this.form.m_provinsi                      = data.KK1.m_provinsi
-      this.form.m_kabupaten                     = data.KK1.m_kabupaten
-      this.form.m_kecamatan                     = data.KK1.m_kecamatan
-      this.form.m_desa_kelurahan                = data.KK1.m_desa_kelurahan
-      this.form.permohonan                      = data.KK1.permohonan
-      this.form.permohonan_lainnya              = data.KK1.keterangan_lainnya
-      this.form.nama                            = data.KK1.nama
-      this.form.nik                             = data.KK1.nik
-      this.form.no_kk                           = data.KK1.no_kk
-      this.form.alamat                          = data.KK1.alamat
-      this.form.rt                              = data.KK1.rt
-      this.form.rw                              = data.KK1.rw
-      this.form.kode_pos                        = data.KK1.kode_pos
+          //  console.log(data);
+              this.form.id = data.KK2.id
+              this.form.KKref = data.KK2.KKref
+              this.form.id_dari_form = data.KK2.id_dari_form
 
-      // Set alamat data SEBELUM trigger watcher
-      this.form.provinsi                        = data.KK1.provinsi
-      this.form.kabupaten                       = data.KK1.kabupaten
-      this.form.kecamatan                       = data.KK1.kecamatan
-      this.form.desa_kelurahan                  = data.KK1.desa_kelurahan
+              this.form.m_provinsi = data.KK2.m_provinsi 
+              this.form.m_kabupaten = data.KK2.m_kabupaten 
+              this.form.m_kecamatan = data.KK2.m_kecamatan
+              this.form.m_desa_kelurahan = data.KK2.m_desa_kelurahan
 
-      this.form.agama                           = data.KK1.agama
-      this.form.agama_lainnya                   = data.KK1.agama_lainnya
-      this.form.pekerjaan                       = data.KK1.pekerjaan
-      this.form.pekerjaan_lainnya               = data.KK1.pekerjaan_lainnya
-      this.form.pendidikan                      = data.KK1.pendidikan
-      this.form.pendidikan_lainnya              = data.KK1.pendidikan_lainnya        
+              this.form.permohonan = data.KK2.permohonan
+              this.form.keterangan_lainnya = data.KK2.keterangan_lainnya
+              this.form.nama = data.KK2.nama
+              this.form.nik = data.KK2.nik
+              this.form.nama_kepala_keluarga = data.KK2.nama_kepala_keluarga
+              this.form.no_kk = data.KK2.no_kk
 
-      this.form.jenis_kelamin                   = data.KK1.jenis_kelamin
-      this.form.tempat_lahir                    = data.KK1.tempat_lahir
-      this.form.tanggal_lahir                   = data.KK1.tanggal_lahir
-      this.form.status_hubungan_dl_keluarga     = data.KK1.status_hubungan_dl_keluarga
+              this.form.jenis_kelamin = data.KK2.jenis_kelamin
+              this.form.tempat_lahir = data.KK2.tempat_lahir
+              this.form.tanggal_lahir = data.KK2.tanggal_lahir
+              this.form.status_hubungan_dl_keluarga = data.KK2.status_hubungan_dl_keluarga
 
-      this.form.anggota_keluarga                = data.databio;  
 
-      this.form.status_kecamatan      = data.KK1.status_kecamatan
-      this.form.status_kabupaten      = data.KK1.status_kabupaten
-      this.form.keterangan            = data.KK1.keterangan
-      this.form.keterangan_deskel     = data.KK1.keterangan_deskel
-      this.form.keterangan_kecamatan  = data.KK1.keterangan_kecamatan
-      this.form.keterangan_kabupaten  = data.KK1.keterangan_kabupaten
+              this.form.agama = data.KK2.agama
+              this.form.agama_lainnya = data.KK2.agama_lainnya
+              this.form.pekerjaan = data.KK2.pekerjaan
+              this.form.pekerjaan_lainnya = data.KK2.pekerjaan_lainnya
+              this.form.pendidikan = data.KK2.pendidikan
+              this.form.pendidikan_lainnya = data.KK2.pendidikan_lainnya
+              this.form.alamat = data.KK2.alamat
+              this.form.rt = data.KK2.rt
+              this.form.rw = data.KK2.rw
+              this.form.provinsi = data.KK2.provinsi
+              this.form.kabupaten = data.KK2.kabupaten
+              this.form.kecamatan = data.KK2.kecamatan 
+              this.form.desa_kelurahan = data.KK2.desa_kelurahan
+              this.form.kode_pos = data.KK2.kode_pos
+              this.form.telepon = data.KK2.telepon
+              this.form.nama_kepala_keluarga_lama = data.KK2.nama_kepala_keluarga_lama
+              this.form.no_kk_lama = data.KK2.no_kk_lama
+              this.form.alamat_keluarga_lama = data.KK2.alamat_keluarga_lama
+              this.form.rt_lama = data.KK2.rt_lama
+              this.form.rw_lama = data.KK2.rw_lama
+              this.form.provinsi_lama = data.KK2.provinsi_lama
+              this.form.kabupaten_lama = data.KK2.kabupaten_lama
+              this.form.kecamatan_lama = data.KK2.kecamatan_lama
+              this.form.desa_kelurahan_lama = data.KK2.desa_kelurahan_lama
+              this.form.kode_pos_lama = data.KK2.kode_pos_lama
+              this.form.telepon_lama = data.KK2.telepon_lama
 
-      this.form.emailPemohon          = data.KK1.emailPemohon;
-      this.form.email_fileOld         = data.KK1.email_file;
-      this.form.email_from            = this.form.email_from;
-      this.form.email_to              = this.form.emailPemohon;
-      this.form.email_subject         = data.KK1.email_subject;
+              this.form.status = data.KK2.status
+              this.form.keterangan = data.KK2.keterangan
+              this.form.keterangan_deskel = data.KK2.keterangan_deskel
+              this.form.keterangan_kecamatan = data.KK2.keterangan_kecamatan
+              this.form.keterangan_kabupaten = data.KK2.keterangan_kabupaten
+              this.form.status_deskel = data.KK2.status_deskel
+              this.form.status_kecamatan = data.KK2.status_kecamatan
+              this.form.status_kabupaten = data.KK2.status_kabupaten
+              this.form.createdBy = data.KK2.createdBy
+              this.form.createdAt = data.KK2.createdAt
+              this.form.createdAt_deskel = data.KK2.createdAt_deskel
+              this.form.createdAt_kecamatan = data.KK2.createdAt_kecamatan
+              this.form.createdAt_kabupaten = data.KK2.createdAt_kabupaten
 
-      this.form.file                  = data.KK1.file
-      this.form.fileThumb             = data.KK1.fileThumb
-      this.form.file_lampiran         = data.KK1.file_lampiran
-      this.form.file_lampiranOld      = data.KK1.file_lampiranOld
+              this.form.anggota_keluarga      = data.databio
 
-      this.form.createdBy             = data.KK1.createdBy
-      this.form.createdAt             = data.KK1.createdAt
-      this.form.createdAt_deskel      = data.KK1.createdAt_deskel
-      this.form.createdAt_kecamatan   = data.KK1.createdAt_kecamatan
-      this.form.createdAt_kabupaten   = data.KK1.createdAt_kabupaten
+              this.form.emailPemohon          = data.KK2.emailPemohon;
+              this.form.email_fileOld         = data.KK2.email_file;
+              this.form.email_from            = this.form.email_from;
+              this.form.email_to              = this.form.emailPemohon;
+              this.form.email_subject         = data.KK2.email_subject;
+              if (data.KK2.email_html == undefined || data.KK2.email_html == null || data.KK2.email_html == '') {
+                this.form.email_html          = ''
+              } else {
+                this.form.email_html          = data.KK2.email_html; 
+              }
 
-      if (data.KK1.email_html == undefined || data.KK1.email_html == null || data.KK1.email_html == '') {
-        this.form.email_html          = ''
-      } else {
-        this.form.email_html          = data.KK1.email_html; 
-      }
+              this.form.file              = data.KK2.file
+              this.form.fileThumb         = data.KK2.fileThumb
+              this.form.file_lampiran     = data.KK2.file_lampiran
+              this.form.file_lampiranOld  = data.KK2.file_lampiranOld
 
-      this.wilayah = {
-        uraian_provinsi : data.m_provinsi.uraian,
-        kd_provinsi : data.m_provinsi.kd_provinsi,
-        uraian_kabupaten : data.m_kabupaten.uraian,
-        kd_kabupaten : data.m_kabupaten.kd_kabupaten,
-        uraian_kecamatan : data.m_kecamatan.uraian,
-        kd_kecamatan : data.m_kecamatan.kd_kecamatan,
-        uraian_desa_kelurahan : data.m_desa_kelurahan.uraian,
-        kd_desa_kelurahan : data.m_desa_kelurahan.kd_desa_kelurahan,
-      };         
-      this.wilayah_alamat = {
-        uraian_provinsi : data.alamat_provinsi.uraian,
-        kd_provinsi : data.alamat_provinsi.kd_provinsi,
-        uraian_kabupaten : data.alamat_kabupaten.uraian,
-        kd_kabupaten : data.alamat_kabupaten.kd_kabupaten,
-        uraian_kecamatan : data.alamat_kecamatan.uraian,
-        kd_kecamatan : data.alamat_kecamatan.kd_kecamatan,
-        uraian_desa_kelurahan : data.alamat_desa_kelurahan.uraian,
-        kd_desa_kelurahan : data.alamat_desa_kelurahan.kd_desa_kelurahan,
-      };         
+              
+              this.wilayah = {
+                uraian_provinsi : data.m_provinsi.uraian,
+                kd_provinsi : data.m_provinsi.kd_provinsi,
+                uraian_kabupaten : data.m_kabupaten.uraian,
+                kd_kabupaten : data.m_kabupaten.kd_kabupaten,
+                uraian_kecamatan : data.m_kecamatan.uraian,
+                kd_kecamatan : data.m_kecamatan.kd_kecamatan,
+                uraian_desa_kelurahan : data.m_desa_kelurahan.uraian,
+                kd_desa_kelurahan : data.m_desa_kelurahan.kd_desa_kelurahan,
+              }
+              this.wilayah_pemohon = {
+                uraian_provinsi : data.provinsi.uraian,
+                kd_provinsi : data.provinsi.kd_provinsi,
+                uraian_kabupaten : data.kabupaten.uraian,
+                kd_kabupaten : data.kabupaten.kd_kabupaten,
+                uraian_kecamatan : data.kecamatan.uraian,
+                kd_kecamatan : data.kecamatan.kd_kecamatan,
+                uraian_desa_kelurahan : data.desa_kelurahan.uraian,
+                kd_desa_kelurahan : data.desa_kelurahan.kd_desa_kelurahan,
+              }
+              this.wilayah_lama = {
+                uraian_provinsi : data.provinsi_lama.uraian,
+                kd_provinsi : data.provinsi_lama.kd_provinsi,
+                uraian_kabupaten : data.kabupaten_lama.uraian,
+                kd_kabupaten : data.kabupaten_lama.kd_kabupaten,
+                uraian_kecamatan : data.kecamatan_lama.uraian,
+                kd_kecamatan : data.kecamatan_lama.kd_kecamatan,
+                uraian_desa_kelurahan : data.desa_kelurahan_lama.uraian,
+                kd_desa_kelurahan : data.desa_kelurahan_lama.kd_desa_kelurahan,
+              }
       
       // Reset file state untuk modal edit
       this.file_lampiran_new = null
@@ -2622,6 +3153,119 @@ export default {
       })
     },
 
+
+    provinsi3(val, update, abort) {
+      update(() => {
+        if (!val) {
+          this.options2 = this.list_data_provinsi3
+          return
+        }
+
+        axios.get(this.simcard.url.URL_APP+'api/v1/m_provinsi/list', {
+          params: {
+            q: val  // ← Dikirim sebagai query parameter
+          },          
+          headers: {
+            'Authorization': `kikensbatara ${this.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          // console.log('Provinsi response:', response)
+          // Simpan original data
+          this.list_data_provinsi3 = response.data || []
+          this.options2 = response.data || []
+        })
+        .catch(error => {
+          console.error('Error fetching provinsi:', error)
+        })
+      })
+    },
+    kabupaten3(val, update, provinsi, abort) {
+      update(() => {
+        if (!val) {
+          this.options2 = this.list_data_kabupaten3
+          return
+        }
+
+        axios.get(this.simcard.url.URL_DATAMASTER_KAB_KOTA+'autocomplete', {
+          params: {
+            q: val,  // ← Dikirim sebagai query parameter
+            m_provinsi: provinsi  // ← Dikirim sebagai query parameter
+          },          
+          headers: {
+            'Authorization': `kikensbatara ${this.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          // console.log('Kabupaten response:', response)
+          // Simpan original data
+          this.list_data_kabupaten3 = response.data || []
+          this.options2 = response.data || []
+        })
+        .catch(error => {
+          console.error('Error fetching kabupaten:', error)
+        })
+      })
+    },
+    kecamatan3(val, update, kabupaten, abort) {
+      update(() => {
+        if (!val) {
+          this.options2 = this.list_data_kecamatan3
+          return
+        }
+
+        axios.get(this.simcard.url.URL_DATAMASTER_KECAMATAN+'autocomplete', {
+          params: {
+            q: val,  // ← Dikirim sebagai query parameter
+            m_kabupaten: kabupaten  // ← Dikirim sebagai query parameter
+          },          
+          headers: {
+            'Authorization': `kikensbatara ${this.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          // console.log('Kecamatan response:', response)
+          // Simpan original data
+          this.list_data_kecamatan3 = response.data || []
+          this.options2 = response.data || []
+        })
+        .catch(error => {
+          console.error('Error fetching kabupaten:', error)
+        })
+      })
+    },
+    desa_kelurahan3(val, update, kecamatan, abort) {
+      update(() => {
+        if (!val) {
+          this.options2 = this.list_data_desa_kelurahan3
+          return
+        }
+
+        axios.get(this.simcard.url.URL_DATAMASTER_DES_KEL+'autocomplete', {
+          params: {
+            q: val,  // ← Dikirim sebagai query parameter
+            m_kecamatan: kecamatan  // ← Dikirim sebagai query parameter
+          },          
+          headers: {
+            'Authorization': `kikensbatara ${this.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          // console.log('Kecamatan response:', response)
+          // Simpan original data
+          this.list_data_desa_kelurahan3 = response.data || []
+          this.options2 = response.data || []
+        })
+        .catch(error => {
+          console.error('Error fetching kabupaten:', error)
+        })
+      })
+    },
+
     async getmasterData(){
       // Panggil action pekerjaan dari Pinia store
       await this.simcard.pekerjaan()
@@ -2635,8 +3279,8 @@ export default {
 
 
     cekButton_status_kecamatan: function(data){  
-      var a = data.KK1.status 
-      var status_kab = data.KK1.status_kabupaten  
+      var a = data.KK2.status 
+      var status_kab = data.KK2.status_kabupaten  
 
         if (a == 1) {
           return true
@@ -2818,6 +3462,10 @@ export default {
         if (dataKey === 'kecamatan2') params.m_kabupaten = this.form.kabupaten
         if (dataKey === 'desa_kelurahan2') params.m_kecamatan = this.form.kecamatan
 
+        if (dataKey === 'kabupaten3') params.m_provinsi = this.form.provinsi_lama
+        if (dataKey === 'kecamatan3') params.m_kabupaten = this.form.kabupaten_lama
+        if (dataKey === 'desa_kelurahan3') params.m_kecamatan = this.form.kecamatan_lama
+
         const response = await axios.get(endpoint, {
           params,
           headers: {
@@ -2866,6 +3514,22 @@ export default {
     async loadInitialDesaKelurahan2() {
       await this.loadInitialData('desa_kelurahan2', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan)
     },
+    
+    async loadInitialProvinsi3() {
+      await this.loadInitialData('provinsi3', this.simcard.url.URL_DATAMASTER_WILAYAH + 'list')
+    },
+
+    async loadInitialKabupaten3() {
+      await this.loadInitialData('kabupaten3', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_lama)
+    },
+
+    async loadInitialKecamatan3() {
+      await this.loadInitialData('kecamatan3', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_lama)
+    },
+
+    async loadInitialDesaKelurahan3() {
+      await this.loadInitialData('desa_kelurahan3', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_lama)
+    },
 
     loadfilter() {
           this.loadInitialProvinsi()
@@ -2877,6 +3541,11 @@ export default {
           this.loadInitialKabupaten2()
           this.loadInitialKecamatan2()
           this.loadInitialDesaKelurahan2()
+
+          this.loadInitialProvinsi3()
+          this.loadInitialKabupaten3()
+          this.loadInitialKecamatan3()
+          this.loadInitialDesaKelurahan3()
     },
  
 
@@ -2941,6 +3610,34 @@ export default {
       // Tapi skip jika sedang loading data dari edit
       if (newVal && !this.isLoadingData) {
         this.loadInitialDesaKelurahan2()
+      }
+    },
+
+    'form.provinsi_lama': function(newVal) {
+      // Ketika provinsi berubah, load ulang kabupaten dan reset kecamatan
+      // Tapi skip jika sedang loading data dari edit
+      if (newVal && !this.isLoadingData) {
+        this.loadInitialKabupaten3()
+        this.form.kecamatan_lama = ''
+        this.form.desa_kelurahan_lama = ''
+        this.list_data_kecamatan2 = []
+        this.list_data_desa_kelurahan2 = []
+      }
+    },
+    'form.kabupaten_lama': function(newVal) {
+      // Ketika kabupaten berubah, load ulang kecamatan dan reset desa
+      // Tapi skip jika sedang loading data dari edit
+      if (newVal && !this.isLoadingData) {
+        this.loadInitialKecamatan3()
+        this.form.desa_kelurahan_lama = ''
+        this.list_data_desa_kelurahan3 = []
+      }
+    },
+    'form.kecamatan_lama': function(newVal) {
+      // Ketika kecamatan berubah, load ulang desa
+      // Tapi skip jika sedang loading data dari edit
+      if (newVal && !this.isLoadingData) {
+        this.loadInitialDesaKelurahan3()
       }
     },
 
@@ -3148,7 +3845,7 @@ select option {
 }
 
 .q-card__section {
-  max-height: 70vh;
+  max-height: 90%;
   overflow-y: auto !important;
   overflow-x: visible !important;
 }

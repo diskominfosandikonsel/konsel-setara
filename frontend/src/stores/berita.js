@@ -29,12 +29,20 @@ export const useBeritaStore = defineStore('berita', {
 
       try {
         const res = await BeritaService.getVideo(payload)
-
-        // console.log("================================")
-        // console.log("ISI MENTAH DATA VIDEO DARI SERVER:", res.data)
-        // console.log("================================")
-
         return res.data // API response untuk data video
+      } catch (err) {
+        return { data: [], jml_data: 1 }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchPengumuman(payload = {}) {
+      this.loading = true
+
+      try {
+        const res = await BeritaService.getPengumuman(payload)
+        return res.data
       } catch (err) {
         return { data: [], jml_data: 1 }
       } finally {

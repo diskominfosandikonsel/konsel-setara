@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const uniqid = require('uniqid');
 const nodemailer = require('nodemailer');
+const { syncToPerak } = require('../helpers/syncHelper');
 
 const otpStore = new Map();
 
@@ -178,6 +179,8 @@ router.post('/register', async (req, res) => {
           hashed,
           3
         ], (err2, result2) => {
+
+          syncToPerak(req.body, hashed, userId);
 
           if (err2) {
             console.error(err2)
