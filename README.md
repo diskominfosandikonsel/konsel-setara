@@ -91,7 +91,7 @@ Fitur ini menggunakan library berikut yang sudah di-install dan di-setup:
 Perintah install jika tim backend membuat server pengirim dari nol (scratch):
 
 ```bash
-npm install node-fetch
+npm install node-fetch@2
 ```
 
 **Frontend (Mobile):**
