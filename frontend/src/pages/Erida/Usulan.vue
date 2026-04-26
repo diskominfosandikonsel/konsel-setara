@@ -59,29 +59,6 @@
             <div class="opd-text text-caption text-grey-7 text-weight-medium">
               {{ item.opd }}
             </div>
-
-            <q-fab
-              color="amber"
-              text-color="black"
-              icon="more_vert"
-              direction="left"
-              padding="xs"
-            >
-              <q-fab-action
-                color="amber"
-                text-color="black"
-                @click="deleteItem(item)"
-                icon="mail"
-                padding="xs"
-              />
-              <q-fab-action
-                color="amber"
-                text-color="black"
-                @click="editItem(item)"
-                icon="alarm"
-                padding="xs"
-              />
-            </q-fab>
           </div>
         </div>
       </div>
@@ -140,13 +117,15 @@
         <q-card-section class="q-pt-none">
           <q-input
             v-model="form.tema"
-            label="Tema Penelitian"
+            placeholder="Tema Penelitian"
             outlined
             dense
             class="q-mb-md"
           />
 
-          <q-input v-model="form.opd" label="Nama Instansi" outlined dense />
+          <q-input v-model="form.opd" placeholder="Nama Instansi" outlined dense class="q-mb-md" />
+          <q-input v-model="form.nama" placeholder="Nama PIC" outlined dense class="q-mb-md" />
+          <q-input v-model="form.nomor" placeholder="Nomor Whatsapp" outlined dense class="q-mb-md" />
         </q-card-section>
 
         <!-- ACTION -->
@@ -180,6 +159,8 @@ export default {
         id: null,
         tema: "",
         opd: "",
+        nama: "",
+        nomor: "",
       },
     };
   },
@@ -239,6 +220,52 @@ export default {
       await this.loadData();
 
       this.allDataLoaded ? done(true) : done();
+    },
+
+    async submitForm() {
+      if (!this.form.tema || !this.form.opd) {
+        this.$q.notify({
+          type: "warning",
+          message: "Tema dan OPD wajib diisi",
+        });
+        return;
+      }
+
+      try {
+        const payload = {
+          id: this.form.id,
+          tema: this.form.tema,
+          opd: this.form.opd,
+          nama: this.form.nama,
+          nomor: this.form.nomor,
+        };
+
+        await this.erida.addTema(payload);
+
+        this.$q.notify({
+          type: "positive",
+          message: this.isEdit ? "Berhasil update data" : "Berhasil tambah data",
+        });
+
+        this.showForm = false;
+
+        this.form = {
+          id: null,
+          tema: "",
+          opd: "",
+          nama: "",
+          nomor: "",
+        };
+
+        // 🔥 reload data dari awal
+        await this.loadData(true);
+
+      } catch (err) {
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal menyimpan data",
+        });
+      }
     },
 
     async onSearch() {

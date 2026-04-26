@@ -114,7 +114,7 @@
 
       <div class="row q-col-gutter-md">
         <div
-          class="col-3"
+          class="col-4"
           v-for="item in services"
           :key="item.label"
 
@@ -363,11 +363,11 @@ export default {
       activeIndex: 0,
 
       services: [
-        {
-          label: "Izin Penelitian",
-          icon: "far fa-copy",
-          route: "erida-izin",
-        },
+        // {
+        //   label: "Izin Penelitian",
+        //   icon: "far fa-copy",
+        //   route: "erida-izin",
+        // },
         {
           label: "Kreatifitas Inovasi",
           icon: "far fa-lightbulb",
@@ -1036,8 +1036,8 @@ export default {
 
 /* SKELETON */
 .shimmer-card {
-  min-width: 80%;
-  height: 200px;
+  min-width: 90%;
+  height: 175px;
   border-radius: 20px;
   background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
   background-size: 200% 100%;

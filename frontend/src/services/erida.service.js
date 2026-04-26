@@ -68,12 +68,53 @@ export default {
     return apiErida.post(base + '/tema', payload)
   },
 
+  addTema(payload) {
+    return apiErida.post('web_publish_tema/addData', payload)
+  },
+
+  getIzin(payload) {
+    return apiErida.post('server_penelitian/view', payload)
+  },
+
+  getInovasi(payload) {
+    return apiErida.post('server_krenova/view', payload)
+  },
+
+  addInovasi(data) {
+    return apiErida.post('server_krenova/addData', data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  editInovasi(data) {
+    
+    return apiErida.post('server_krenova/editData', data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  deleteInovasi(data) {
+    
+    return apiErida.post('server_krenova/removeData', {
+      id: data.id,
+      file: data.file,
+    });
+  },
+
   getDokumen(payload) {
     return apiErida.post('web_dokumen/view', payload)
   },
 
   getImage(payload) {
     return apiErida.post('web_publish_kegiatan/foto', payload)
+  },
+
+  getTahun() {
+    return apiErida.get('server_tahun')
   },
 
   getBeritaPage(payload) {

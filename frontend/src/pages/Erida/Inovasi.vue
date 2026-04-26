@@ -12,7 +12,7 @@
               @click="goBack"
             />
           </q-avatar>
-          <span class="sapa_title">Data Riset</span>
+          <span class="sapa_title">Kreatifitas & Inovasi</span>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -46,14 +46,14 @@
           <q-skeleton v-for="n in 8" :key="n" height="100px" class="q-mb-sm" />
         </div>
 
-        <div v-else-if="risetList.length">
+        <div v-else-if="inovasiList.length">
           <div class="row q-col-gutter-sm q-mt-sm">
-            <div class="col-12" v-for="item in risetList" :key="item.id">
+            <div class="col-12" v-for="item in inovasiList" :key="item.id">
               <q-card
-                class="riset-card cursor-pointer"
+                class="inovasi-card cursor-pointer"
                 clickable
                 v-ripple
-                @click="goDetail(item)"
+                @click="goDetail(item, $event)"
               >
                 <q-card-section class="content-wrapper">
                   <!-- CONTENT -->
@@ -87,8 +87,30 @@
                       </div>
 
                       <!-- RIGHT ICON -->
-                      <div class="doc-icon">
-                        <q-icon name="description" size="20px" />
+                      <div @click.stop>
+                        <q-fab
+                          color="primary"
+                          text-color="white"
+                          icon="more_vert"
+                          direction="left"
+                          padding="xs"
+                          @click.stop
+                        >
+                          <q-fab-action
+                            color="red"
+                            text-color="white"
+                            @click.stop="deleteItem(item)"
+                            icon="delete_forever"
+                            padding="xs"
+                          />
+                          <q-fab-action
+                            color="orange"
+                            text-color="white"
+                            @click.stop="editItem(item)"
+                            icon="edit_document"
+                            padding="xs"
+                          />
+                        </q-fab>
                       </div>
                     </div>
                   </div>
@@ -137,7 +159,7 @@
               />
 
               <q-toolbar-title class="text-subtitle2 text-weight-medium">
-                {{ selectedItem?.judul || "Detail Riset" }}
+                {{ selectedItem?.judul || "Detail Inovasi" }}
               </q-toolbar-title>
 
               <q-icon
@@ -162,6 +184,66 @@
             </div>
           </q-card>
         </q-dialog>
+        <q-dialog v-model="formDialog">
+          <q-card style="width: 100%; max-width: 400px; border-radius: 16px">
+            <!-- HEADER -->
+            <q-card-section class="row items-center justify-between">
+              <div class="text-subtitle1 text-weight-bold">
+                {{ isEdit ? "Edit Inovasi" : "Tambah Inovasi" }}
+              </div>
+              <q-btn icon="close" flat round dense v-close-popup />
+            </q-card-section>
+
+            <!-- FORM -->
+            <q-card-section class="q-pt-none">
+              <q-select
+                v-model="form.tahun"
+                :options="list_tahun"
+                option-label="tahun"
+                label="Tahun"
+                outlined
+                dense
+                class="q-mb-md"
+              />
+              <q-input
+                v-model="form.penulis"
+                placeholder="Author"
+                outlined
+                dense
+                class="q-mb-md"
+              />
+
+              <q-input
+                v-model="form.judul"
+                placeholder="Judul"
+                outlined
+                dense
+                class="q-mb-md"
+              />
+              <q-input
+                v-model="form.isi"
+                placeholder="Deskripsi"
+                outlined
+                dense
+                class="q-mb-md"
+              />
+              <q-file v-model="form.file" outlined dense class="bg-white">
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
+            </q-card-section>
+
+            <!-- ACTION -->
+            <q-card-actions align="right">
+              <q-btn flat label="Batal" v-close-popup />
+              <q-btn label="Simpan" color="primary" @click="submitForm" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+        <q-page-sticky position="bottom-right" :offset="[17.5, 17.5]">
+          <q-btn fab icon="add" color="primary" @click="onAdd" />
+        </q-page-sticky>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -179,12 +261,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 const pdfCache = new Map();
 
 export default {
-  name: "EridaRiset",
+  name: "EridaInovasi",
   data() {
     return {
       erida: useEridaStore(),
 
-      risetList: [],
+      inovasiList: [],
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
@@ -195,6 +277,21 @@ export default {
       selectedItem: null,
       pdfLoading: false,
       pagePlaceholders: [],
+      formDialog: false,
+      mode: "add", // add | edit | detail
+      form: {
+        id: "",
+        penulis: "",
+        judul: "",
+        isi: "",
+        file: null,
+        tahun: "",
+        createBy: "",
+        createAt: "",
+        editedAt: "",
+        file_old: null,
+      },
+      list_tahun: [],
     };
   },
 
@@ -203,7 +300,14 @@ export default {
       this.$router.back();
     },
 
-    async goDetail(item) {
+    onAdd() {
+      this.mode = "add";
+      this.resetForm();
+      this.formDialog = true;
+    },
+
+    async goDetail(item, evt) {
+      if (evt?.target?.closest(".q-fab")) return;
       this.selectedItem = item;
       this.showPdf = true;
 
@@ -212,14 +316,107 @@ export default {
       });
     },
 
+    resetForm() {
+      this.form = {
+        id: "",
+        penulis: "",
+        judul: "",
+        isi: "",
+        file: null,
+        tahun: "",
+        createBy: "",
+        createAt: "",
+        editedAt: "",
+        file_old: null,
+      };
+    },
+
+    async submitForm() {
+      try {
+        if (this.mode === "add") {
+          await this.erida.addInovasi(this.form);
+        } else {
+          await this.erida.editInovasi(this.form);
+        }
+
+        this.$q.notify({
+          type: "positive",
+          message: "Data berhasil disimpan",
+        });
+
+        this.formDialog = false;
+
+        await this.loadData(true);
+      } catch (err) {
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal menyimpan data",
+        });
+      }
+    },
+
+    editItem(item) {
+      this.mode = "edit";
+
+      this.form = {
+        id: item.id,
+        penulis: item.penulis,
+        judul: item.judul,
+        isi: item.isi,
+        tahun: item.tahun_id
+          ? this.list_tahun.find((t) => t.id === item.tahun_id)
+          : null,
+        file: null, // file baru
+        file_old: item.file,
+      };
+
+      this.formDialog = true;
+    },
+
+    deleteItem(item) {
+      this.$q
+        .dialog({
+          title: "Konfirmasi",
+          message: "Hapus data ini?",
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(async () => {
+          try {
+            await this.erida.deleteInovasi(item);
+
+            this.$q.notify({
+              type: "positive",
+              message: "Data berhasil dihapus",
+            });
+
+            await this.loadData(true);
+          } catch (err) {
+            this.$q.notify({
+              type: "negative",
+              message: "Gagal menghapus data",
+            });
+          }
+        });
+    },
+
+    async getTahun() {
+      try {
+        const res = await this.erida.fetchTahun();
+        this.list_tahun = res || [];
+      } catch (err) {
+        console.error(err);
+      }
+    },
+
     async loadData(reset = false) {
       if (this.erida.loading) return;
 
       if (reset) {
         this.page = 1;
-        this.risetList = [];
+        this.inovasiList = [];
         this.allDataLoaded = false;
-        this.erida.riset = [];
+        this.erida.inovasi = [];
       }
 
       const payload = {
@@ -227,12 +424,12 @@ export default {
         cari_value: this.cari,
       };
 
-      await this.erida.fetchRiset(payload, !reset);
+      await this.erida.fetchInovasi(payload, !reset);
 
       const totalPage = this.erida.dataLastPage || 1;
       this.lastPage = totalPage;
 
-      this.risetList = [...this.erida.riset];
+      this.inovasiList = [...this.erida.inovasi];
 
       if (this.page >= this.lastPage || this.erida.lastFetchedCount === 0) {
         this.allDataLoaded = true;
@@ -265,7 +462,7 @@ export default {
     },
 
     generateCacheKey() {
-      return `riset_${this.cari || "all"}`;
+      return `inovasi_${this.cari || "all"}`;
     },
 
     clearSearch() {
@@ -355,6 +552,7 @@ export default {
 
   mounted() {
     this.loadData(true);
+    this.getTahun();
   },
 };
 </script>
@@ -365,7 +563,7 @@ export default {
   background: #f6f6f6;
 }
 
-.riset-card {
+.inovasi-card {
   position: relative;
   border-radius: 16px;
   background: white;
@@ -375,7 +573,7 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.riset-card:active {
+.inovasi-card:active {
   transform: scale(0.97);
 }
 
@@ -433,7 +631,8 @@ export default {
 }
 
 .toolbar-bordered {
-  border-bottom: 1px solid #e5e7eb; /* soft gray */
+  border-bottom: 1px solid #e5e7eb;
+  /* soft gray */
 }
 
 .pdf-container {
@@ -445,6 +644,7 @@ export default {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -491,10 +691,12 @@ canvas {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
+
 .col.scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

@@ -46,11 +46,11 @@
           <q-skeleton v-for="n in 8" :key="n" height="100px" class="q-mb-sm" />
         </div>
 
-        <div v-else-if="penelitianList.length">
+        <div v-else-if="izinList.length">
           <div class="row q-col-gutter-sm q-mt-sm">
-            <div class="col-12" v-for="item in penelitianList" :key="item.id">
+            <div class="col-12" v-for="item in izinList" :key="item.id">
               <q-card
-                class="penelitian-card cursor-pointer"
+                class="izin-card cursor-pointer"
                 clickable
                 v-ripple
                 @click="goDetail(item)"
@@ -87,9 +87,29 @@
                       </div>
 
                       <!-- RIGHT ICON -->
-                      <div class="doc-icon">
-                        <q-icon name="description" size="20px" />
-                      </div>
+                      <q-fab
+                      fab-mini
+                        color="amber"
+                        text-color="black"
+                        icon="more_vert"
+                        direction="left"
+                        padding="xs"
+                      >
+                        <q-fab-action
+                          color="amber"
+                          text-color="black"
+                          @click="deleteItem(item)"
+                          icon="mail"
+                          padding="xs"
+                        />
+                        <q-fab-action
+                          color="amber"
+                          text-color="black"
+                          @click="editItem(item)"
+                          icon="alarm"
+                          padding="xs"
+                        />
+                      </q-fab>
                     </div>
                   </div>
                 </q-card-section>
@@ -137,7 +157,7 @@
               />
 
               <q-toolbar-title class="text-subtitle2 text-weight-medium">
-                {{ selectedItem?.judul || "Detail Penelitian" }}
+              {{ selectedItem?.judul || "Detail Penelitian" }}
               </q-toolbar-title>
 
               <q-icon
@@ -162,6 +182,161 @@
             </div>
           </q-card>
         </q-dialog>
+        <q-dialog
+          v-model="formDialog"
+          maximized
+          transition-show="slide-up"
+          transition-hide="slide-down"
+          persistent
+        >
+          <q-card class="column fit">
+            <!-- HEADER -->
+            <q-toolbar class="bg-white text-black toolbar-bordered">
+              <q-btn flat round icon="arrow_back" v-close-popup />
+
+              <q-toolbar-title class="text-subtitle2">
+                {{
+                  mode === "add"
+                    ? "Tambah Data"
+                    : mode === "edit"
+                      ? "Edit Data"
+                      : "Detail Penelitian"
+                }}
+              </q-toolbar-title>
+
+              <!-- ACTION -->
+              <q-btn
+                v-if="mode !== 'detail'"
+                flat
+                icon="check"
+                color="primary"
+                @click="submitForm"
+              />
+            </q-toolbar>
+
+            <!-- CONTENT -->
+            <div class="col scroll q-pa-md">
+              <!-- IDENTITAS -->
+              <div class="text-subtitle2 q-mb-sm">Identitas</div>
+
+              <q-input
+                v-model="form.nama"
+                label="Nama"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.alamat"
+                label="Alamat"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.hp"
+                label="HP"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.email"
+                label="Email"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.nik"
+                label="NIK"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+
+              <q-file
+                v-if="mode !== 'detail'"
+                v-model="form.ktp"
+                label="Upload KTP"
+                outlined
+                dense
+              />
+
+              <!-- PENELITIAN -->
+              <div class="text-subtitle2 q-mt-md q-mb-sm">Penelitian</div>
+
+              <q-select
+                v-model="form.kategori_id"
+                :options="list_kategori"
+                option-label="uraian"
+                label="Kategori"
+                outlined
+                dense
+                :disable="mode === 'detail'"
+              />
+
+              <q-input
+                v-model="form.judul"
+                label="Judul"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.lokasi"
+                label="Lokasi"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.tujuan"
+                label="Tujuan"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+              <q-input
+                v-model="form.lingkup"
+                label="Lingkup"
+                outlined
+                dense
+                :readonly="mode === 'detail'"
+              />
+
+              <q-file
+                v-if="mode !== 'detail'"
+                v-model="form.filePro"
+                label="Upload Proposal"
+                outlined
+                dense
+              />
+
+              <!-- ACTION BUTTONS (DETAIL MODE) -->
+              <div v-if="mode === 'detail'" class="q-mt-lg">
+                <q-btn
+                  label="Lihat PDF"
+                  icon="description"
+                  color="primary"
+                  class="full-width q-mb-sm"
+                  @click="openPdfFromDetail"
+                />
+
+                <q-btn
+                  label="Edit Data"
+                  icon="edit"
+                  color="orange"
+                  class="full-width"
+                  @click="mode = 'edit'"
+                />
+              </div>
+            </div>
+          </q-card>
+        </q-dialog>
+        <q-page-sticky position="bottom-right" :offset="[16, 16]">
+          <q-btn fab icon="add" color="primary" @click="onAdd" />
+        </q-page-sticky>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -179,12 +354,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 const pdfCache = new Map();
 
 export default {
-  name: "EridaPenelitian",
+  name: "EridaIzin",
   data() {
     return {
       erida: useEridaStore(),
 
-      penelitianList: [],
+      izinList: [],
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
@@ -195,12 +370,36 @@ export default {
       selectedItem: null,
       pdfLoading: false,
       pagePlaceholders: [],
+      formDialog: false,
+      mode: "add", // add | edit | detail
+      form: {
+        id: null,
+        nama: "",
+        alamat: "",
+        hp: "",
+        email: "",
+        nik: "",
+        ktp: null,
+        judul: "",
+        lokasi: "",
+        tujuan: "",
+        lingkup: "",
+        filePro: null,
+        kategori_id: null,
+      },
+      list_kategori: [],
     };
   },
 
   methods: {
     goBack() {
       this.$router.back();
+    },
+
+    onAdd() {
+      this.mode = "add";
+      this.resetForm();
+      this.formDialog = true;
     },
 
     async goDetail(item) {
@@ -212,14 +411,41 @@ export default {
       });
     },
 
+    resetForm() {
+      this.form = {
+        id: null,
+        nama: "",
+        alamat: "",
+        hp: "",
+        email: "",
+        nik: "",
+        ktp: null,
+        judul: "",
+        lokasi: "",
+        tujuan: "",
+        lingkup: "",
+        filePro: null,
+        kategori_id: null,
+      };
+    },
+
+    submitForm() {
+      if (this.mode === "add") {
+        this.addData();
+      } else {
+        this.editData();
+      }
+      this.formDialog = false;
+    },
+
     async loadData(reset = false) {
       if (this.erida.loading) return;
 
       if (reset) {
         this.page = 1;
-        this.penelitianList = [];
+        this.izinList = [];
         this.allDataLoaded = false;
-        this.erida.penelitian = [];
+        this.erida.izin = [];
       }
 
       const payload = {
@@ -227,12 +453,12 @@ export default {
         cari_value: this.cari,
       };
 
-      await this.erida.fetchPenelitian(payload, !reset);
+      await this.erida.fetchIzin(payload, !reset);
 
       const totalPage = this.erida.dataLastPage || 1;
       this.lastPage = totalPage;
 
-      this.penelitianList = [...this.erida.penelitian];
+      this.izinList = [...this.erida.izin];
 
       if (this.page >= this.lastPage || this.erida.lastFetchedCount === 0) {
         this.allDataLoaded = true;
@@ -265,7 +491,7 @@ export default {
     },
 
     generateCacheKey() {
-      return `penelitian_${this.cari || "all"}`;
+      return `izin_${this.cari || "all"}`;
     },
 
     clearSearch() {
@@ -365,7 +591,7 @@ export default {
   background: #f6f6f6;
 }
 
-.penelitian-card {
+.izin-card {
   position: relative;
   border-radius: 16px;
   background: white;
@@ -375,7 +601,7 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.penelitian-card:active {
+.izin-card:active {
   transform: scale(0.97);
 }
 
@@ -433,7 +659,8 @@ export default {
 }
 
 .toolbar-bordered {
-  border-bottom: 1px solid #e5e7eb; /* soft gray */
+  border-bottom: 1px solid #e5e7eb;
+  /* soft gray */
 }
 
 .pdf-container {
@@ -445,6 +672,7 @@ export default {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -491,10 +719,12 @@ canvas {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
+
 .col.scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

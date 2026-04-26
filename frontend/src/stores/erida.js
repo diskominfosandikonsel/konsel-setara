@@ -94,7 +94,7 @@ export const useEridaStore = defineStore("erida", {
         const sumData = (data) => {
           return (data || []).reduce((t, i) => t + (Number(i.jumlah) || 0), 0);
         };
-        
+
         this.swiperData = [
           {
             id: 1,
@@ -353,8 +353,125 @@ export const useEridaStore = defineStore("erida", {
       }
     },
 
+    async fetchIzin(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getIzin(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.izin = [...this.izin, ...data];
+        } else {
+          this.izin = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length; // 🔥 important
+      } catch (err) {
+        console.error("IZIN ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchInovasi(payload, append = true) {
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getInovasi(payload);
+
+        const data = res.data?.data || [];
+        const lastPage = res.data?.jml_data || 1;
+
+        if (append) {
+          this.inovasi = [...this.inovasi, ...data];
+        } else {
+          this.inovasi = data;
+        }
+
+        this.dataLastPage = lastPage;
+        this.lastFetchedCount = data.length;
+      } catch (err) {
+        console.error("INOVASI ERROR:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async addInovasi(form) {
+      this.loading = true;
+
+      try {
+        const formData = new FormData();
+
+        if (form.file) {
+          formData.append("file", form.file);
+        }
+
+        formData.append(
+          "data",
+          JSON.stringify({
+            penulis: form.penulis,
+            judul: form.judul,
+            isi: form.isi,
+            tahun: form.tahun,
+          }),
+        );
+
+        const res = await EridaService.addInovasi(formData);
+
+        return res;
+      } catch (err) {
+        console.error("ADD INOVASI ERROR:", err);
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async editInovasi(form) {
+      try {
+        const formData = new FormData();
+
+        const data = {
+          id: form.id,
+          penulis: form.penulis,
+          judul: form.judul,
+          isi: form.isi,
+          tahun: form.tahun,
+          file_old: form.file_old,
+        };
+
+        formData.append("data", JSON.stringify(data));
+
+        // kalau ada file baru
+        if (form.file) {
+          formData.append("file", form.file);
+        }
+
+        const res = await EridaService.editInovasi(formData);
+
+        return res.data;
+      } catch (err) {
+        console.error("EDIT ERROR:", err);
+        throw err;
+      }
+    },
+
+    async deleteInovasi(item) {
+      try {
+        const res = await EridaService.deleteInovasi(item);
+        return res.data;
+      } catch (err) {
+        console.error("DELETE ERROR:", err);
+        throw err;
+      }
+    },
+
     async fetchTema(payload, append = true) {
-      
       this.loading = true;
 
       try {
@@ -377,54 +494,82 @@ export const useEridaStore = defineStore("erida", {
         this.loading = false;
       }
     },
-  
-    async fetchImage(payload = {}) {
-      this.loading = true
+
+    async addTema(payload) {
+      this.loading = true;
 
       try {
-        const res = await EridaService.getImage(payload)
-        return res.data
+        const res = await EridaService.addTema(payload);
+
+        return res.data;
       } catch (err) {
-        return { data: [], jml_data: 1 }
+        console.error("SUBMIT TEMA ERROR:", err);
+        throw err;
       } finally {
-        this.loading = false
+        this.loading = false;
+      }
+    },
+
+    async fetchImage(payload = {}) {
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getImage(payload);
+        return res.data;
+      } catch (err) {
+        return { data: [], jml_data: 1 };
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchTahun() {
+      this.loading = true;
+
+      try {
+        const res = await EridaService.getTahun();
+        return res.data;
+      } catch (err) {
+        return err;
+      } finally {
+        this.loading = false;
       }
     },
 
     async fetchBeritaPage(payload = {}) {
-      this.loading = true
+      this.loading = true;
 
       try {
-        const res = await EridaService.getBeritaPage(payload)
-        return res.data
+        const res = await EridaService.getBeritaPage(payload);
+        return res.data;
       } catch (err) {
-        return { data: [], jml_data: 1 }
+        return { data: [], jml_data: 1 };
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
     async fetchBerita(payload = {}) {
-      this.loading = true
+      this.loading = true;
 
       try {
-        const res = await EridaService.getBerita(payload)
-        return res.data
+        const res = await EridaService.getBerita(payload);
+        return res.data;
       } catch (err) {
-        return { data: [], jml_data: 1 }
+        return { data: [], jml_data: 1 };
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
     async fetchDetailBerita(id) {
-      this.loading = true
+      this.loading = true;
 
       try {
-        const res = await EridaService.getDetailBerita({ id })
-        return res.data?.[0] || null
+        const res = await EridaService.getDetailBerita({ id });
+        return res.data?.[0] || null;
       } catch (err) {
-        return null
+        return null;
       }
     },
   },
