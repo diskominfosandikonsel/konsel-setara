@@ -166,6 +166,8 @@ function onNotifClick(notif) {
     router.push('/sapa_riwayat/' + notif.laporanId)
   } else if (notif.type === 'firetap' && notif.laporanId) {
     router.push('/firetap_detail/' + notif.laporanId)
+  } else if (notif.type === 'perak' && notif.laporanId) {
+    router.push('/kartu/' + notif.laporanId)
   }
 }
 
