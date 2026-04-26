@@ -173,14 +173,13 @@ export default {
       }
 
       else if (data.type === 'perak') {
-        const perakId = data.id || data.laporanId 
-        console.log(perakId);
+        const perakId = data.id || data.laporanId || data.kasusId || data.id_kasus
         if (perakId) {
           const target = '/kartu/'
 
-          if (this.$route.path !== '/kartu' && this.$route.path !== target) {
+          if (this.$route.path !== '/perak_dashboard' && this.$route.path !== target) {
             await this.$router.replace('/')
-            await this.$router.push('/kartu')
+            await this.$router.push('/perak_dashboard')
             await this.$router.push(target)
           } else {
             await this.$router.push(target)
