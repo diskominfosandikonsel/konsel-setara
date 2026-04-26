@@ -30,7 +30,27 @@
                         <q-input v-model="form.tmp_lahir" outlined placeholder="Tempat Lahir" class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-input v-model="form.tgl_lahir" outlined placeholder="Tanggal Lahir" class="formInput" type="date" />
+                        <q-input 
+                            outlined 
+                            v-model="form.tgl_lahir" 
+                            mask="date" 
+                            label="Tanggal Lahir"
+                            placeholder="YYYY/MM/DD"
+                            class="formInput"
+                            minimal
+                        >
+                            <template v-slot:append>
+                            <q-icon name="event" class="cursor-pointer">
+                                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                                <q-date v-model="form.tgl_lahir">
+                                    <div class="row items-center justify-end">
+                                    <q-btn v-close-popup label="Close" color="primary" flat />
+                                    </div>
+                                </q-date>
+                                </q-popup-proxy>
+                            </q-icon>
+                            </template>
+                        </q-input>
                     </div>
                     <div class="col-12 col-md-12">
                         <q-select v-model="form.jns_kelamin" :options="perak.opsiJenkel" emit-value map-options outlined label="Jenis Kelamin" class="formInput" />
