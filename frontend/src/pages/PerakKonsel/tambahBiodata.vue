@@ -37,6 +37,7 @@
                             label="Tanggal Lahir"
                             placeholder="YYYY/MM/DD"
                             class="formInput"
+                            minimal
                         >
                             <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer">
