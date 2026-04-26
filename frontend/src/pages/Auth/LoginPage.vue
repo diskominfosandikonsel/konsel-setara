@@ -55,7 +55,7 @@
             </div>
 
             <div class="links-section row justify-between items-center" style="margin-top: 8px;">
-                <q-checkbox v-model="rememberMe" label="Ingat saya" color="white" dark dense size="sm" />
+                <q-checkbox v-model="rememberMe" label="Ingat saya" color="white" dark dense size="sm" checked-icon="check_box" unchecked-icon="check_box_outline_blank" />
                 <a @click="$router.push('/lupa-password')" class="forgot-password" style="margin-top: 0;">Lupa Password Anda ?</a>
             </div>
 
