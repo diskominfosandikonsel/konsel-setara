@@ -122,10 +122,11 @@ const searchQuery = ref('')
 const page = ref(1)
 const lastPage = ref(1)
 
-const activeTab = ref('berita')
+const activeTab = ref(sessionStorage.getItem('news_active_tab') || 'berita')
 
 // Reset dan fetch ulang ketika tab berubah
-watch(activeTab, () => {
+watch(activeTab, (newVal) => {
+  sessionStorage.setItem('news_active_tab', newVal)
   searchQuery.value = ''
   onSearch()
 })

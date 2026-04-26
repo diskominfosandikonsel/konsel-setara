@@ -54,8 +54,9 @@
                 </div>
             </div>
 
-            <div class="links-section">
-                <a @click="$router.push('/lupa-password')" class="forgot-password">Lupa Password Anda ?</a>
+            <div class="links-section row justify-between items-center" style="margin-top: 8px;">
+                <q-checkbox v-model="rememberMe" label="Ingat saya" color="white" dark dense size="sm" />
+                <a @click="$router.push('/lupa-password')" class="forgot-password" style="margin-top: 0;">Lupa Password Anda ?</a>
             </div>
 
             <div class="button-group">
@@ -87,16 +88,24 @@ export default {
                 password: ''
             },
             showPassword: false,
-            logoLoading: true
+            logoLoading: true,
+            rememberMe: false
         }
     },
     mounted() {
-        // Ambil data login terakhir jika ada
-        const lastUsername = localStorage.getItem('last_username')
-        const lastPassword = localStorage.getItem('last_password')
+        // Cek status remember me dari login sebelumnya
+        const isRemembered = localStorage.getItem('remember_me') === 'true'
+        
+        // PENTING: Otomatis mencentang checkbox di layar jika sebelumnya pernah dicentang!
+        this.rememberMe = isRemembered
 
-        if (lastUsername) this.form.username = lastUsername
-        if (lastPassword) this.form.password = lastPassword
+        if (isRemembered) {
+            const lastUsername = localStorage.getItem('last_username')
+            const lastPassword = localStorage.getItem('last_password')
+
+            if (lastUsername) this.form.username = lastUsername
+            if (lastPassword) this.form.password = lastPassword
+        }
     },
     methods: {
         async doLogin() {
@@ -104,9 +113,16 @@ export default {
             const success = await auth.login(this.form)
 
             if (success) {
-                // Simpan data login terakhir
-                localStorage.setItem('last_username', this.form.username)
-                localStorage.setItem('last_password', this.form.password)
+                // Simpan flag pengingat akun
+                localStorage.setItem('remember_me', this.rememberMe.toString())
+
+                if (this.rememberMe) {
+                    localStorage.setItem('last_username', this.form.username)
+                    localStorage.setItem('last_password', this.form.password)
+                } else {
+                    localStorage.removeItem('last_username')
+                    localStorage.removeItem('last_password')
+                }
 
                 // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
                 setTimeout(() => {
