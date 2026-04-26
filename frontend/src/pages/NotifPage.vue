@@ -195,7 +195,8 @@ function getTypeLabel(type) {
   const map = {
     sippadu: 'SIPPADU',
     sapakonsel: 'SAPA KONSEL',
-    firetap: 'FIRETAP'
+    firetap: 'FIRETAP',
+    perak: 'PERAK'
   }
   return map[type] || 'UMUM'
 }
@@ -204,7 +205,8 @@ function getTypeClass(type) {
   const map = {
     sippadu: 'type-sippadu',
     sapakonsel: 'type-sapakonsel',
-    firetap: 'type-firetap'
+    firetap: 'type-firetap',
+    perak: 'type-perak'
   }
   return map[type] || 'type-default'
 }
@@ -324,6 +326,10 @@ function formatTimeAgo(isoStr) {
 
 .notif-type-label.type-firetap {
   color: #f59e0b;
+}
+
+.notif-type-label.type-perak {
+  color: #0495b3;
 }
 
 .notif-type-label.type-default {
