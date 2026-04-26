@@ -171,6 +171,22 @@ export default {
           }
         }
       }
+
+      else if (data.type === 'perak') {
+        const perakId = data.id || data.laporanId 
+        console.log(perakId);
+        if (perakId) {
+          const target = '/kartu/'
+
+          if (this.$route.path !== '/kartu' && this.$route.path !== target) {
+            await this.$router.replace('/')
+            await this.$router.push('/kartu')
+            await this.$router.push(target)
+          } else {
+            await this.$router.push(target)
+          }
+        }
+      }
     }
   }
 }
