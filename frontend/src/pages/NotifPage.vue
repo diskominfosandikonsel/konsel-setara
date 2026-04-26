@@ -9,46 +9,21 @@
 
     <!-- Header Notifikasi -->
     <div class="row items-center q-mb-none header-bar">
-      <q-btn
-        flat
-        round
-        dense
-        icon="chevron_left"
-        size="18px"
-        color="dark"
-        @click="$router.back()"
-      />
+      <q-btn flat round dense icon="chevron_left" size="18px" color="dark" @click="$router.back()" />
       <div class="text-h6 text-weight-regular q-ml-sm text-uppercase text-dark header-text">
         NOTIFIKASI
       </div>
       <q-space />
-      <q-btn
-        v-if="notifStore.list.length > 0"
-        flat
-        dense
-        no-caps
-        color="red-5"
-        label="Hapus Semua"
-        icon="delete_sweep"
-        class="text-caption"
-        @click="showClearAllDialog = true"
-      />
+      <q-btn v-if="notifStore.list.length > 0" flat dense no-caps color="red-5" label="Hapus Semua" icon="delete_sweep"
+        class="text-caption" @click="showClearAllDialog = true" />
     </div>
 
     <!-- Konten utama -->
     <div class="page-container q-px-md">
 
       <!-- Empty state -->
-      <div
-        v-if="notifStore.list.length === 0"
-        class="empty-state column flex-center"
-      >
-        <q-img
-          src="~assets/notify/img-notice.png"
-          class="empty-img"
-          fit="contain"
-          no-spinner
-        />
+      <div v-if="notifStore.list.length === 0" class="empty-state column flex-center">
+        <q-img src="~assets/notify/img-notice.png" class="empty-img" fit="contain" no-spinner />
         <div class="text-subtitle1 text-grey-6 q-mt-md text-weight-medium">
           Belum ada notifikasi
         </div>
@@ -60,15 +35,9 @@
       <!-- List Notifikasi -->
       <div v-else>
         <transition-group name="notif-list" tag="div">
-          <div
-            v-for="notif in notifStore.list"
-            :key="notif.id"
-            class="notif-card"
-            :class="{ unread: !notif.read }"
-            @click="onNotifClick(notif)"
-            @contextmenu.prevent="onNotifHold(notif)"
-            v-touch-hold.mouse.prevent="() => onNotifHold(notif)"
-          >
+          <div v-for="notif in notifStore.list" :key="notif.id" class="notif-card" :class="{ unread: !notif.read }"
+            @click="onNotifClick(notif)" @contextmenu.prevent="onNotifHold(notif)"
+            v-touch-hold.mouse.prevent="() => onNotifHold(notif)">
             <!-- Indikator belum dibaca -->
             <div v-if="!notif.read" class="unread-dot"></div>
 
@@ -101,15 +70,8 @@
         </q-card-section>
         <q-card-actions align="right" class="q-pt-none q-pb-md q-pr-md">
           <q-btn flat no-caps label="Batal" color="grey-7" v-close-popup />
-          <q-btn
-            unelevated
-            no-caps
-            label="Hapus"
-            color="red-5"
-            text-color="white"
-            style="border-radius: 10px; min-width: 80px"
-            @click="confirmDelete"
-          />
+          <q-btn unelevated no-caps label="Hapus" color="red-5" text-color="white"
+            style="border-radius: 10px; min-width: 80px" @click="confirmDelete" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -128,15 +90,8 @@
         </q-card-section>
         <q-card-actions align="right" class="q-pt-none q-pb-md q-pr-md">
           <q-btn flat no-caps label="Batal" color="grey-7" v-close-popup />
-          <q-btn
-            unelevated
-            no-caps
-            label="Hapus Semua"
-            color="red-5"
-            text-color="white"
-            style="border-radius: 10px; min-width: 80px"
-            @click="confirmClearAll"
-          />
+          <q-btn unelevated no-caps label="Hapus Semua" color="red-5" text-color="white"
+            style="border-radius: 10px; min-width: 80px" @click="confirmClearAll" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -159,6 +114,7 @@ const selectedNotif = ref(null)
 // ── Klik notifikasi: tandai dibaca lalu navigasi ke detail ──
 function onNotifClick(notif) {
   notifStore.markRead(notif.id)
+  console.log('NOTIF CLICKED:', JSON.stringify(notif))
 
   if (notif.type === 'sippadu' && notif.laporanId) {
     router.push('/sippadu_detail/' + notif.laporanId)
@@ -166,8 +122,8 @@ function onNotifClick(notif) {
     router.push('/sapa_riwayat/' + notif.laporanId)
   } else if (notif.type === 'firetap' && notif.laporanId) {
     router.push('/firetap_detail/' + notif.laporanId)
-  } else if (notif.type === 'perak' && notif.laporanId) {
-    router.push('/kartu/' + notif.laporanId)
+  } else if (notif.type === 'perak') {
+    router.push('/kartu')
   }
 }
 
@@ -236,7 +192,7 @@ function formatTimeAgo(isoStr) {
 .header-bar {
   padding: 14px 12px;
   background: white;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -277,7 +233,7 @@ function formatTimeAgo(isoStr) {
   position: relative;
   cursor: pointer;
   transition: transform 0.15s ease;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .notif-card:active {

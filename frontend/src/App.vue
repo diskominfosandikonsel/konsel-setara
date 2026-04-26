@@ -106,18 +106,78 @@ export default {
 
         // 👆 CLICK EVENT (dari background / cold start)
         PushNotifications.addListener('pushNotificationActionPerformed', async (action) => {
-          console.log('CLICKED:', action)
+          console.log('CLICKED:', JSON.stringify(action))
 
-          // Simpan ke riwayat notifikasi
+          // Simpan ke riwayat notifikasi (cegah duplikat dengan foreground)
           const notifStore = useNotifikasiStore()
-          const notif = action.notification
+          const notif = action.notification || {}
           const data = notif.data || {}
-          notifStore.add({
-            title: notif.title || 'Notifikasi',
-            body: notif.body || '',
-            type: data.type || '',
-            laporanId: data.laporanId || data.kasusId || data.id || data.id_kasus || ''
-          })
+
+          // Ambil title & body dari semua kemungkinan lokasi
+          let resolvedTitle = notif.title || data.title || notif.body || 'Notifikasi'
+          let resolvedBody = notif.body || data.body || ''
+
+          // FALLBACK KHUSUS PERAK: Karena backend perak tidak mengirim title/body di dalam data payload
+          if (data.type === 'perak' && (!notif.title && !data.title)) {
+            if (data.status === 'diterima') {
+              resolvedTitle = 'Data Diverifikasi'
+              resolvedBody = 'Selamat! Data Pencaker Anda telah diterima oleh Admin.'
+            } else if (data.status === 'ditolak') {
+              resolvedTitle = 'Data Ditolak'
+              resolvedBody = 'Maaf, Data Pencaker Anda ditolak oleh Admin.'
+            } else {
+              resolvedTitle = 'Notifikasi Perak'
+              resolvedBody = 'Ada pembaruan status pada pengajuan Anda.'
+            }
+          }
+
+          // FALLBACK KHUSUS SIPPADU
+          if (data.type === 'sippadu' && (!notif.title && !data.title)) {
+            if (data.status === 'proses') {
+              resolvedTitle = 'Laporan Diproses'
+              resolvedBody = 'Laporan SIPPADU Anda sedang diproses oleh petugas.'
+            } else if (data.status === 'selesai') {
+              resolvedTitle = 'Laporan Selesai'
+              resolvedBody = 'Laporan SIPPADU Anda telah selesai ditindaklanjuti.'
+            } else if (data.status === 'dikembalikan') {
+              resolvedTitle = 'Laporan Dikembalikan'
+              resolvedBody = 'Laporan SIPPADU Anda dikembalikan, mohon cek detailnya.'
+            } else {
+              resolvedTitle = 'Notifikasi SIPPADU'
+              resolvedBody = 'Ada pembaruan pada laporan SIPPADU Anda.'
+            }
+          }
+
+          // FALLBACK KHUSUS FIRETAP
+          if (data.type === 'firetap' && (!notif.title && !data.title)) {
+            const statusFiretap = String(data.status || data.status_kasus || '')
+            if (statusFiretap === '0') {
+              resolvedTitle = 'Laporan Diterima'
+              resolvedBody = 'Laporan Firetap Anda telah diterima.'
+            } else if (statusFiretap === '3') {
+              resolvedTitle = 'Penanganan Selesai'
+              resolvedBody = 'Laporan Firetap Anda telah selesai ditangani.'
+            } else {
+              resolvedTitle = 'Notifikasi Firetap'
+              resolvedBody = 'Ada pembaruan pada laporan FIRETAP Anda.'
+            }
+          }
+
+          // Cek apakah notifikasi yang sama sudah tersimpan (dari foreground listener)
+          const recentDuplicate = notifStore.list.find(n =>
+            n.type === (data.type || '') &&
+            n.laporanId === (data.laporanId || data.kasusId || data.id || data.id_kasus || '') &&
+            (Date.now() - new Date(n.createdAt).getTime()) < 30000 // dalam 30 detik terakhir
+          )
+
+          if (!recentDuplicate) {
+            notifStore.add({
+              title: resolvedTitle,
+              body: resolvedBody,
+              type: data.type || '',
+              laporanId: data.laporanId || data.kasusId || data.id || data.id_kasus || ''
+            })
+          }
 
           await this.navigateToDetail(data)
         })
