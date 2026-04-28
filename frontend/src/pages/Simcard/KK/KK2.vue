@@ -2810,6 +2810,10 @@ export default {
         // Tunggu kecamatan loaded, lalu load desa_kelurahan2
         await this.loadInitialDesaKelurahan2()
         
+        await this.loadInitialKabupaten3()
+        await this.loadInitialKecamatan3()
+        await this.loadInitialDesaKelurahan3()
+
         // Reset flag setelah loading selesai
         this.isLoadingData = false
         
@@ -3515,8 +3519,8 @@ export default {
         this.loadInitialKabupaten3()
         this.form.kecamatan_lama = ''
         this.form.desa_kelurahan_lama = ''
-        this.list_data_kecamatan2 = []
-        this.list_data_desa_kelurahan2 = []
+        this.list_data_kecamatan3 = []
+        this.list_data_desa_kelurahan3 = []
       }
     },
     'form.kabupaten_lama': function(newVal) {

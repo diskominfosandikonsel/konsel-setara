@@ -74,7 +74,6 @@
                   <div style="color:#6C7278;font-size: 11px;">
                     Nama : {{ item.pelaporan_MATI.nama }}
                   </div>
- 
                 </div>
                 <div class="" style="margin-left: 11px;">
 
@@ -672,6 +671,7 @@
                   code-field-name="kd_provinsi"
                 />
 
+                <p>{{ form.kabupaten_mati }}</p>
                 <AdministrativeSelect
                   :model-value="form.kabupaten_mati"
                   @update:model-value="form.kabupaten_mati = $event"
@@ -680,16 +680,19 @@
                   :on-filter="(val, update) => kabupaten2(val, update, form.provinsi_mati)"
                   code-field-name="kd_kabupaten"
                 />
-
+                <!-- <pre>{{ form }}</pre> -->
+                <!-- <p>{{ form.kecamatan_mati }}</p> -->
+                <pre>{{ form.desa_kelurahan_mati }}</pre>
                 <AdministrativeSelect
-                  :model-value="form.kecamatan_mati"
-                  @update:model-value="form.kecamatan_mati = $event"
-                  label="Kecamatan"
+                :model-value="form.kecamatan_mati"
+                @update:model-value="form.kecamatan_mati = $event"
+                label="Kecamatan"
                   :options="list_data_kecamatan_mati"
                   :on-filter="(val, update) => kecamatan2(val, update, form.kabupaten_mati)"
                   code-field-name="kd_kecamatan"
                 />
 
+                <pre>{{ form.desa_kelurahan_mati }}</pre>
                 <AdministrativeSelect
                   :model-value="form.desa_kelurahan_mati"
                   @update:model-value="form.desa_kelurahan_mati = $event"
@@ -1275,30 +1278,12 @@ export default {
             list_data_kecamatan:[],
             list_data_desa_kelurahan:[],
 
-            list_data_provinsi_mati:[],            
-            list_data_kabupaten_mati:[],            
-            list_data_kecamatan_mati:[],
-            list_data_desa_kelurahan_mati:[],
+            list_data_provinsi_mati          :[],            
+            list_data_kabupaten_mati         :[],            
+            list_data_kecamatan_mati         :[],
+            list_data_desa_kelurahan_mati    :[],
 
-            list_data_provinsi_ayah:[],            
-            list_data_kabupaten_ayah:[],            
-            list_data_kecamatan_ayah:[],
-            list_data_desa_kelurahan_ayah:[],
-
-            list_data_provinsi_pelapor:[],            
-            list_data_kabupaten_pelapor:[],            
-            list_data_kecamatan_pelapor:[],
-            list_data_desa_kelurahan_pelapor:[],
-            
-            list_data_provinsi_saksi1:[],            
-            list_data_kabupaten_saksi1:[],            
-            list_data_kecamatan_saksi1:[],
-            list_data_desa_kelurahan_saksi1:[],
-
-            list_data_provinsi_saksi2:[],            
-            list_data_kabupaten_saksi2:[],            
-            list_data_kecamatan_saksi2:[],
-            list_data_desa_kelurahan_saksi2:[],
+ 
 
 
       listShdk: [],
@@ -1467,107 +1452,107 @@ export default {
     },
 
     // Fungsi validasi form
-    validateForm() {
-      // Field-field yang wajib diisi
-      const requiredFields = {
-        // Step 1: Daerah Administratif
-        m_provinsi: 'Provinsi harus dipilih',
-        m_kabupaten: 'Kabupaten harus dipilih',
-        m_kecamatan: 'Kecamatan harus dipilih',
-        m_desa_kelurahan: 'Desa/Kelurahan harus dipilih',
+    // validateForm() {
+    //   // Field-field yang wajib diisi
+    //   const requiredFields = {
+    //     // Step 1: Daerah Administratif
+    //     m_provinsi: 'Provinsi harus dipilih',
+    //     m_kabupaten: 'Kabupaten harus dipilih',
+    //     m_kecamatan: 'Kecamatan harus dipilih',
+    //     m_desa_kelurahan: 'Desa/Kelurahan harus dipilih',
         
-        // Step 2: Data Pelapor
-        no_kk: 'Nomor Kartu Keluarga harus diisi',
-        nama: 'Nama harus diisi',
-        umur: 'Umur harus diisi',
-        pekerjaan: 'Pekerjaan harus diisi',
-        hub_dengan_si_bayi: 'Hubungan dengan bayi harus diisi',
+    //     // Step 2: Data Pelapor
+    //     no_kk: 'Nomor Kartu Keluarga harus diisi',
+    //     nama: 'Nama harus diisi',
+    //     umur: 'Umur harus diisi',
+    //     pekerjaan: 'Pekerjaan harus diisi',
+    //     hub_dengan_si_bayi: 'Hubungan dengan bayi harus diisi',
         
-        // Step 3: Laporan Kelahiran
-        hari: 'Hari lahir harus dipilih',
-        tanggal: 'Tanggal lahir harus diisi',
-        pukul: 'Waktu lahir harus diisi',
-        tempat: 'Tempat lahir harus diisi',
-        jenis_kelamin_bayi: 'Jenis kelamin bayi harus dipilih',
-        jenis_lahir: 'Jenis kelahiran harus dipilih',
-        lama_mengandung: 'Lama mengandung harus diisi',
-        sebab_kematian: 'Sebab kematian harus diisi',
+    //     // Step 3: Laporan Kelahiran
+    //     hari: 'Hari lahir harus dipilih',
+    //     tanggal: 'Tanggal lahir harus diisi',
+    //     pukul: 'Waktu lahir harus diisi',
+    //     tempat: 'Tempat lahir harus diisi',
+    //     jenis_kelamin_bayi: 'Jenis kelamin bayi harus dipilih',
+    //     jenis_lahir: 'Jenis kelahiran harus dipilih',
+    //     lama_mengandung: 'Lama mengandung harus diisi',
+    //     sebab_kematian: 'Sebab kematian harus diisi',
         
-        // Step 4: Data Ibu
-        nik_ibu: 'NIK Ibu harus diisi',
-        nama_ibu: 'Nama Ibu harus diisi',
-        tgl_lahir_ibu: 'Tanggal lahir Ibu harus diisi',
-        pekerjaan_ibu: 'Pekerjaan Ibu harus diisi',
-        provinsi_ibu: 'Provinsi Ibu harus dipilih',
-        kabupaten_ibu: 'Kabupaten Ibu harus dipilih',
-        kecamatan_ibu: 'Kecamatan Ibu harus dipilih',
-        des_kel_ibu: 'Desa/Kelurahan Ibu harus dipilih',
-        alamat_ibu: 'Alamat Ibu harus diisi',
-        kewarganegaraan_ibu: 'Kewarganegaraan Ibu harus dipilih',
+    //     // Step 4: Data Ibu
+    //     nik_ibu: 'NIK Ibu harus diisi',
+    //     nama_ibu: 'Nama Ibu harus diisi',
+    //     tgl_lahir_ibu: 'Tanggal lahir Ibu harus diisi',
+    //     pekerjaan_ibu: 'Pekerjaan Ibu harus diisi',
+    //     provinsi_ibu: 'Provinsi Ibu harus dipilih',
+    //     kabupaten_ibu: 'Kabupaten Ibu harus dipilih',
+    //     kecamatan_ibu: 'Kecamatan Ibu harus dipilih',
+    //     des_kel_ibu: 'Desa/Kelurahan Ibu harus dipilih',
+    //     alamat_ibu: 'Alamat Ibu harus diisi',
+    //     kewarganegaraan_ibu: 'Kewarganegaraan Ibu harus dipilih',
         
-        // Step 5: Data Ayah/Suami
-        nik_ayah: 'NIK Ayah/Suami harus diisi',
-        nama_ayah: 'Nama Ayah/Suami harus diisi',
-        tgl_lahir_ayah: 'Tanggal lahir Ayah/Suami harus diisi',
-        pekerjaan_ayah: 'Pekerjaan Ayah/Suami harus diisi',
-        provinsi_ayah: 'Provinsi Ayah/Suami harus dipilih',
-        kabupaten_ayah: 'Kabupaten Ayah/Suami harus dipilih',
-        kecamatan_ayah: 'Kecamatan Ayah/Suami harus dipilih',
-        des_kel_ayah: 'Desa/Kelurahan Ayah/Suami harus dipilih',
-        alamat_ayah: 'Alamat Ayah/Suami harus diisi',
-        kewarganegaraan_ayah: 'Kewarganegaraan Ayah/Suami harus dipilih',
-      }
+    //     // Step 5: Data Ayah/Suami
+    //     nik_ayah: 'NIK Ayah/Suami harus diisi',
+    //     nama_ayah: 'Nama Ayah/Suami harus diisi',
+    //     tgl_lahir_ayah: 'Tanggal lahir Ayah/Suami harus diisi',
+    //     pekerjaan_ayah: 'Pekerjaan Ayah/Suami harus diisi',
+    //     provinsi_ayah: 'Provinsi Ayah/Suami harus dipilih',
+    //     kabupaten_ayah: 'Kabupaten Ayah/Suami harus dipilih',
+    //     kecamatan_ayah: 'Kecamatan Ayah/Suami harus dipilih',
+    //     des_kel_ayah: 'Desa/Kelurahan Ayah/Suami harus dipilih',
+    //     alamat_ayah: 'Alamat Ayah/Suami harus diisi',
+    //     kewarganegaraan_ayah: 'Kewarganegaraan Ayah/Suami harus dipilih',
+    //   }
 
-      // Cek setiap field
-      for (const [field, message] of Object.entries(requiredFields)) {
-        const value = this.form[field]
+    //   // Cek setiap field
+    //   for (const [field, message] of Object.entries(requiredFields)) {
+    //     const value = this.form[field]
         
-        // Validasi nilai kosong
-        if (value === '' || value === null || value === undefined) {
-          return {
-            valid: false,
-            message: message
-          }
-        }
+    //     // Validasi nilai kosong
+    //     if (value === '' || value === null || value === undefined) {
+    //       return {
+    //         valid: false,
+    //         message: message
+    //       }
+    //     }
 
-        // Validasi number fields
-        if ((field === 'umur' || field === 'lama_mengandung') && value <= 0) {
-          return {
-            valid: false,
-            message: requiredFields[field] + ' harus lebih dari 0'
-          }
-        }
-      }
+    //     // Validasi number fields
+    //     if ((field === 'umur' || field === 'lama_mengandung') && value <= 0) {
+    //       return {
+    //         valid: false,
+    //         message: requiredFields[field] + ' harus lebih dari 0'
+    //       }
+    //     }
+    //   }
 
-      // Validasi kewarganegaraan ibu jika "Lainnya"
-      if (this.form.kewarganegaraan_ibu === 'Lainnya' && !this.form.kewarganegaraan_ibu_lainnya) {
-        return {
-          valid: false,
-          message: 'Kewarganegaraan Ibu (Lainnya) harus diisi'
-        }
-      }
+    //   // Validasi kewarganegaraan ibu jika "Lainnya"
+    //   if (this.form.kewarganegaraan_ibu === 'Lainnya' && !this.form.kewarganegaraan_ibu_lainnya) {
+    //     return {
+    //       valid: false,
+    //       message: 'Kewarganegaraan Ibu (Lainnya) harus diisi'
+    //     }
+    //   }
 
-      // Validasi kewarganegaraan ayah jika "Lainnya"
-      if (this.form.kewarganegaraan_ayah === 'Lainnya' && !this.form.kewarganegaraan_ayah_lainnya) {
-        return {
-          valid: false,
-          message: 'Kewarganegaraan Ayah/Suami (Lainnya) harus diisi'
-        }
-      }
+    //   // Validasi kewarganegaraan ayah jika "Lainnya"
+    //   if (this.form.kewarganegaraan_ayah === 'Lainnya' && !this.form.kewarganegaraan_ayah_lainnya) {
+    //     return {
+    //       valid: false,
+    //       message: 'Kewarganegaraan Ayah/Suami (Lainnya) harus diisi'
+    //     }
+    //   }
 
-      // Validasi jenis kelahiran jika "Lainnya"
-      if (this.form.jenis_lahir === 'Lainnya' && !this.form.jenis_lahir_lainnya) {
-        return {
-          valid: false,
-          message: 'Jenis Kelahiran (Lainnya) harus diisi'
-        }
-      }
+    //   // Validasi jenis kelahiran jika "Lainnya"
+    //   if (this.form.jenis_lahir === 'Lainnya' && !this.form.jenis_lahir_lainnya) {
+    //     return {
+    //       valid: false,
+    //       message: 'Jenis Kelahiran (Lainnya) harus diisi'
+    //     }
+    //   }
 
-      return {
-        valid: true,
-        message: 'Semua field valid'
-      }
-    },
+    //   return {
+    //     valid: true,
+    //     message: 'Semua field valid'
+    //   }
+    // },
 
     addData() {
       // Validasi form terlebih dahulu
@@ -1623,15 +1608,15 @@ export default {
 
     editData() {
       // Validasi form terlebih dahulu
-      const validationResult = this.validateForm()
-      if (!validationResult.valid) {
-        Notify.create({
-          message: validationResult.message,
-          color: 'warning',
-          position: 'top'
-        })
-        return
-      }
+      // const validationResult = this.validateForm()
+      // if (!validationResult.valid) {
+      //   Notify.create({
+      //     message: validationResult.message,
+      //     color: 'warning',
+      //     position: 'top'
+      //   })
+      //   return
+      // }
 
       this.loading = true;
 
@@ -1641,7 +1626,7 @@ export default {
       
       // Hanya append file_lampiran jika ada file baru
       if (this.form.file_lampiran && this.form.file_lampiran instanceof File) {
-        formData.append("file_lampiran", this.form.file_lampiran);
+        formData.append("bukti_kematian", this.form.file_lampiran);
       }
 
       axios.post(
@@ -1781,10 +1766,11 @@ export default {
 
 
     selectData(data){
+      this.isLoadingData = true;
       // Set flag untuk tidak trigger reset di watcher
       console.log(data);
       
-      this.form.id = data.pelaporan_MATI.id;
+          this.form.id                            = data.pelaporan_MATI.id;
 
           this.form.modul                         = data.pelaporan_MATI.modul;
           this.form.m_provinsi                    = data.pelaporan_MATI.m_provinsi;
@@ -1810,6 +1796,7 @@ export default {
           this.form.kecamatan_mati        = data.pelaporan_MATI.kecamatan_mati
           this.form.desa_kelurahan_mati   = data.pelaporan_MATI.desa_kelurahan_mati
 
+
           this.form.alamat_mati           = data.pelaporan_MATI.alamat_mati
           this.form.hari_meninggal        = data.pelaporan_MATI.hari_meninggal
           this.form.tanggal_meninggal     = data.pelaporan_MATI.tanggal_meninggal
@@ -1824,11 +1811,11 @@ export default {
           this.form.keterangan_kecamatan  = data.pelaporan_MATI.keterangan_kecamatan;
           this.form.keterangan_kabupaten  = data.pelaporan_MATI.keterangan_kabupaten;
           this.form.status                = data.pelaporan_MATI.status;
-          this.form.status_kabupaten                = data.pelaporan_MATI.status_kabupaten;
-          this.form.status_kecamatan                = data.pelaporan_MATI.status_kecamatan;
+          this.form.status_kabupaten      = data.pelaporan_MATI.status_kabupaten;
+          this.form.status_kecamatan      = data.pelaporan_MATI.status_kecamatan;
           this.form.keterangan            = data.pelaporan_MATI.keterangan; 
 
-          this.form.createdBy            = data.pelaporan_MATI.createdBy; 
+          this.form.createdBy             = data.pelaporan_MATI.createdBy; 
 
           this.form.emailPemohon          = data.pelaporan_MATI.emailPemohon;
           this.form.email_fileOld         = data.pelaporan_MATI.email_file;
@@ -1876,20 +1863,21 @@ export default {
         await this.loadInitialKecamatan()
         await this.loadInitialDesaKelurahan()
 
-        await this.loadDaerahMati()
+        // await this.loadDaerahMati()
+
+        await this.loadInitialProvinsi2()
+        await this.loadInitialKabupaten2()
+        await this.loadInitialKecamatan2()
+        await this.loadInitialDesaKelurahan2()        
         // Tunggu kabupaten loaded, lalu load kecamatan2
         // await this.loadDaerahAyah()
         // Tunggu kecamatan loaded, lalu load desa_kelurahan2
         // await this.loadDaerahPelapor()
-
         // await this.loadDaerahSaksi1()
-
         // await this.loadDaerahSaksi2()
-
         // Reset flag setelah loading selesai
         this.isLoadingData = false
       })
-
     },    
 
 
@@ -2268,29 +2256,15 @@ export default {
         if (dataKey === 'kecamatan') params.m_kabupaten = this.form.m_kabupaten
         if (dataKey === 'desa_kelurahan') params.m_kecamatan = this.form.m_kecamatan
 
-        if (dataKey === 'kabupaten2') params.m_provinsi = this.form.provinsi_ibu
-        if (dataKey === 'kecamatan2') params.m_kabupaten = this.form.kabupaten_ibu
-        if (dataKey === 'desa_kelurahan2') params.m_kecamatan = this.form.kecamatan_ibu
+        if (dataKey === 'kabupaten_mati') params.m_provinsi = this.form.provinsi_mati
+        if (dataKey === 'kecamatan_mati') params.m_kabupaten = this.form.kabupaten_mati
+        if (dataKey === 'desa_kelurahan_mati') params.m_kecamatan = this.form.kecamatan_mati
 
-        if (dataKey === 'kabupaten_ibu') params.m_provinsi = this.form.provinsi_ibu
-        if (dataKey === 'kecamatan_ibu') params.m_kabupaten = this.form.kabupaten_ibu
-        if (dataKey === 'desa_kelurahan_ibu') params.m_kecamatan = this.form.kecamatan_ibu
 
-        if (dataKey === 'kabupaten_ayah') params.m_provinsi = this.form.provinsi_ayah
-        if (dataKey === 'kecamatan_ayah') params.m_kabupaten = this.form.kabupaten_ayah
-        if (dataKey === 'desa_kelurahan_ayah') params.m_kecamatan = this.form.kecamatan_ayah
 
-        if (dataKey === 'kabupaten_pelapor') params.m_provinsi = this.form.provinsi_pelapor
-        if (dataKey === 'kecamatan_pelapor') params.m_kabupaten = this.form.kabupaten_pelapor
-        if (dataKey === 'desa_kelurahan_pelapor') params.m_kecamatan = this.form.kecamatan_pelapor
-
-        if (dataKey === 'kabupaten_saksi1') params.m_provinsi = this.form.provinsi_saksi1
-        if (dataKey === 'kecamatan_saksi1') params.m_kabupaten = this.form.kabupaten_saksi1
-        if (dataKey === 'desa_kelurahan_saksi1') params.m_kecamatan = this.form.kecamatan_saksi1
-
-        if (dataKey === 'kabupaten_saksi2') params.m_provinsi = this.form.provinsi_saksi2
-        if (dataKey === 'kecamatan_saksi2') params.m_kabupaten = this.form.kabupaten_saksi2
-        if (dataKey === 'desa_kelurahan_saksi2') params.m_kecamatan = this.form.kecamatan_saksi2
+        // if (dataKey === 'kabupaten_mati') params.m_provinsi = this.form.provinsi_mati
+        // if (dataKey === 'kecamatan_mati') params.m_kabupaten = this.form.kabupaten_mati
+        // if (dataKey === 'desa_kelurahan_mati') params.m_kecamatan = this.form.kecamatan_mati
 
         const response = await axios.get(endpoint, {
           params,
@@ -2325,23 +2299,44 @@ export default {
       await this.loadInitialData('desa_kelurahan', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.m_kecamatan)
     },
 
-    async loadDaerahMati() {
+    // async loadDaerahMati() {
+    //   await this.loadInitialData('provinsi_mati', this.simcard.url.URL_DATAMASTER_WILAYAH + 'list')
+    //   await this.loadInitialData('kabupaten_mati', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_mati)
+    //   await this.loadInitialData('kecamatan_mati', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_mati)
+    //   await this.loadInitialData('desa_kelurahan_mati', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_mati)
+    // },
+
+    async loadInitialProvinsi2(){
       await this.loadInitialData('provinsi_mati', this.simcard.url.URL_DATAMASTER_WILAYAH + 'list')
-      await this.loadInitialData('kabupaten_mati', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_mati)
-      await this.loadInitialData('kecamatan_mati', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_mati)
-      await this.loadInitialData('desa_kelurahan_mati', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_mati)
     },
 
- 
- 
+    async loadInitialKabupaten2(){
+      await this.loadInitialData('kabupaten_mati', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_mati)
+    },
+
+    async loadInitialKecamatan2(){
+      await this.loadInitialData('kecamatan_mati', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_mati)
+    },
+
+    async loadInitialDesaKelurahan2(){
+      await this.loadInitialData('desa_kelurahan_mati', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_mati)
+    },
 
     loadfilter() {
           this.loadInitialProvinsi()
           this.loadInitialKabupaten()
           this.loadInitialKecamatan()
           this.loadInitialDesaKelurahan()
+
+
+          this.loadInitialProvinsi2()
+          this.loadInitialKabupaten2()
+          this.loadInitialKecamatan2()
+          this.loadInitialDesaKelurahan2()
+
+
           
-          this.loadDaerahMati()
+          // this.loadDaerahMati()
     },
  
 
@@ -2380,38 +2375,6 @@ export default {
         this.loadInitialDesaKelurahan()
       }
     },
-
-    'form.provinsi_mati': function(newVal) {
-      // Ketika provinsi berubah, load ulang kabupaten dan reset kecamatan
-      // Tapi skip jika sedang loading data dari edit
-      if (newVal && !this.isLoadingData) {
-        this.loadDaerahMati()
-        this.form.kecamatan_mati = ''
-        this.form.desa_kelurahan_mati = ''
-        this.list_data_kecamatan_mati = []
-        this.list_data_desa_kelurahan_mati = []
-      }
-    },
-    'form.kabupaten_mati': function(newVal) {
-      // Ketika kabupaten berubah, load ulang kecamatan dan reset desa
-      // Tapi skip jika sedang loading data dari edit
-      if (newVal && !this.isLoadingData) {
-        this.loadDaerahMati()
-        this.form.desa_kelurahan_mati = ''
-        this.list_data_desa_kelurahan_mati = []
-      }
-    },
-    'form.kecamatan_mati': function(newVal) {
-      // Ketika kecamatan berubah, load ulang desa
-      // Tapi skip jika sedang loading data dari edit
-      if (newVal && !this.isLoadingData) {
-        this.loadDaerahMati()
-      }
-    },
-    
-
-
- 
 
     modal_add(newVal) {
       // Reset file state saat modal ditutup

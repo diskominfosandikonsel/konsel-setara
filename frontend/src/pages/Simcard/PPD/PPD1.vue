@@ -1266,6 +1266,7 @@
                 </template>
 
                 <label class="text-labelku">Alamat </label>
+                
                 <q-select
                   filled
                   v-model="form.provinsi_tujuan"
@@ -2116,8 +2117,11 @@ import ModalSyarat from 'src/components/ModalSyarat.vue'
 import ModalLihatStatus from 'src/components/ModalLihatStatus.vue'
 
 
+import AdministrativeSelect from 'src/components/AdministrativeSelect.vue' 
+
+
 export default {
-  components: { AutocompleteInput, ModalSyarat, ModalLihatStatus },
+  components: { AutocompleteInput, ModalSyarat, ModalLihatStatus, AdministrativeSelect },
   name: 'PPD1_list',
   data() {
     return {
@@ -2690,13 +2694,20 @@ export default {
 
       // Load initial data untuk alamat berdasarkan provinsi, kabupaten, kecamatan yang ada
       this.$nextTick(async () => {
+        await this.loadInitialKabupaten()
+        await this.loadInitialKecamatan()
+        await this.loadInitialDesaKelurahan()
+        
         // Load kabupaten2 terlebih dahulu
         await this.loadInitialKabupaten2()
-        // Tunggu kabupaten loaded, lalu load kecamatan2
         await this.loadInitialKecamatan2()
-        // Tunggu kecamatan loaded, lalu load desa_kelurahan2
         await this.loadInitialDesaKelurahan2()
-        
+
+        await this.loadInitialKabupaten3()
+        await this.loadInitialKecamatan3()
+        await this.loadInitialDesaKelurahan3()
+
+
         // Reset flag setelah loading selesai
         this.isLoadingData = false
         
@@ -2939,7 +2950,7 @@ export default {
     provinsi3(val, update, abort) {
       update(() => {
         if (!val) {
-          this.options2 = this.list_data_provinsi3
+          this.options3 = this.list_data_provinsi3
           return
         }
 
@@ -2956,7 +2967,7 @@ export default {
           // console.log('Provinsi response:', response)
           // Simpan original data
           this.list_data_provinsi3 = response.data || []
-          this.options2 = response.data || []
+           
         })
         .catch(error => {
           console.error('Error fetching provinsi:', error)
@@ -2966,7 +2977,7 @@ export default {
     kabupaten3(val, update, provinsi, abort) {
       update(() => {
         if (!val) {
-          this.options2 = this.list_data_kabupaten3
+          this.options3 = this.list_data_kabupaten3
           return
         }
 
@@ -2984,7 +2995,7 @@ export default {
           // console.log('Kabupaten response:', response)
           // Simpan original data
           this.list_data_kabupaten3 = response.data || []
-          this.options2 = response.data || []
+          this.options3 = response.data || []
         })
         .catch(error => {
           console.error('Error fetching kabupaten:', error)
@@ -2994,7 +3005,7 @@ export default {
     kecamatan3(val, update, kabupaten, abort) {
       update(() => {
         if (!val) {
-          this.options2 = this.list_data_kecamatan3
+          this.options3 = this.list_data_kecamatan3
           return
         }
 
@@ -3012,7 +3023,7 @@ export default {
           // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_kecamatan3 = response.data || []
-          this.options2 = response.data || []
+          this.options3 = response.data || []
         })
         .catch(error => {
           console.error('Error fetching kabupaten:', error)
@@ -3022,7 +3033,7 @@ export default {
     desa_kelurahan3(val, update, kecamatan, abort) {
       update(() => {
         if (!val) {
-          this.options2 = this.list_data_desa_kelurahan3
+          this.options3 = this.list_data_desa_kelurahan3
           return
         }
 
@@ -3040,7 +3051,7 @@ export default {
           // console.log('Kecamatan response:', response)
           // Simpan original data
           this.list_data_desa_kelurahan3 = response.data || []
-          this.options2 = response.data || []
+          this.options3 = response.data || []
         })
         .catch(error => {
           console.error('Error fetching kabupaten:', error)
@@ -3259,9 +3270,9 @@ export default {
         if (dataKey === 'kecamatan2') params.m_kabupaten = this.form.kabupaten
         if (dataKey === 'desa_kelurahan2') params.m_kecamatan = this.form.kecamatan
 
-        if (dataKey === 'kabupaten3') params.m_provinsi = this.form.provinsi_lama
-        if (dataKey === 'kecamatan3') params.m_kabupaten = this.form.kabupaten_lama
-        if (dataKey === 'desa_kelurahan3') params.m_kecamatan = this.form.kecamatan_lama
+        if (dataKey === 'kabupaten3') params.m_provinsi = this.form.provinsi_tujuan
+        if (dataKey === 'kecamatan3') params.m_kabupaten = this.form.kabupaten_tujuan
+        if (dataKey === 'desa_kelurahan3') params.m_kecamatan = this.form.kecamatan_tujuan
 
         const response = await axios.get(endpoint, {
           params,
@@ -3317,15 +3328,15 @@ export default {
     },
 
     async loadInitialKabupaten3() {
-      await this.loadInitialData('kabupaten3', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_lama)
+      await this.loadInitialData('kabupaten3', this.simcard.url.URL_DATAMASTER_KAB_KOTA + 'autocomplete', this.form.provinsi_tujuan)
     },
 
     async loadInitialKecamatan3() {
-      await this.loadInitialData('kecamatan3', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_lama)
+      await this.loadInitialData('kecamatan3', this.simcard.url.URL_DATAMASTER_KECAMATAN + 'autocomplete', this.form.kabupaten_tujuan)
     },
 
     async loadInitialDesaKelurahan3() {
-      await this.loadInitialData('desa_kelurahan3', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_lama)
+      await this.loadInitialData('desa_kelurahan3', this.simcard.url.URL_DATAMASTER_DES_KEL + 'autocomplete', this.form.kecamatan_tujuan)
     },
 
     loadfilter() {
@@ -3410,27 +3421,27 @@ export default {
       }
     },
 
-    'form.provinsi_lama': function(newVal) {
+    'form.provinsi_tujuan': function(newVal) {
       // Ketika provinsi berubah, load ulang kabupaten dan reset kecamatan
       // Tapi skip jika sedang loading data dari edit
       if (newVal && !this.isLoadingData) {
         this.loadInitialKabupaten3()
-        this.form.kecamatan_lama = ''
-        this.form.desa_kelurahan_lama = ''
-        this.list_data_kecamatan2 = []
-        this.list_data_desa_kelurahan2 = []
+        this.form.kecamatan_tujuan = ''
+        this.form.desa_kelurahan_tujuan = ''
+        this.list_data_kecamatan3 = []
+        this.list_data_desa_kelurahan3 = []
       }
     },
-    'form.kabupaten_lama': function(newVal) {
+    'form.kabupaten_tujuan': function(newVal) {
       // Ketika kabupaten berubah, load ulang kecamatan dan reset desa
       // Tapi skip jika sedang loading data dari edit
       if (newVal && !this.isLoadingData) {
         this.loadInitialKecamatan3()
-        this.form.desa_kelurahan_lama = ''
+        this.form.desa_kelurahan_tujuan = ''
         this.list_data_desa_kelurahan3 = []
       }
     },
-    'form.kecamatan_lama': function(newVal) {
+    'form.kecamatan_tujuan': function(newVal) {
       // Ketika kecamatan berubah, load ulang desa
       // Tapi skip jika sedang loading data dari edit
       if (newVal && !this.isLoadingData) {

@@ -179,7 +179,7 @@
     </div>
 
 
-    <q-dialog v-model="modal_add">
+    <q-dialog v-model="modal_add" full-width full-height>
       <q-card>
         <q-toolbar>
           <q-toolbar-title><span class="text-weight-bold">Formulir</span> Permohonan</q-toolbar-title>
@@ -778,7 +778,7 @@
     </q-dialog>
 
 
-    <q-dialog v-model="modal_edit">
+    <q-dialog v-model="modal_edit" full-width full-height>
       <q-card>
         <q-toolbar>
           <q-toolbar-title><span class="text-weight-bold">Formulir</span> Permohonan</q-toolbar-title>
