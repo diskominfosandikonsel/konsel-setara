@@ -29,6 +29,7 @@
     "@quasar/extras": "^1.17.0",
     "apexcharts": "^5.10.6",
     "axios": "^1.14.0",
+    "highcharts": "^12.6.0",
     "pdfjs-dist": "^5.6.205",
     "pinia": "^3.0.4",
     "quasar": "^2.16.0",

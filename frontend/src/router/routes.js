@@ -535,6 +535,12 @@ const routes = [
         component: () => import('pages/Jdih/DetilDokumen.vue'),
         meta: { showBottomNav: true }
       },
+      // BANSOS
+      {
+        path: 'bansos_dashboard',
+        component: () => import('pages/Bansos/Dashboard.vue'),
+        meta: { showBottomNav: true, requiresAuth: false }
+      },
       // ADMIN SECTION
       {
         path: 'admin/slider',
