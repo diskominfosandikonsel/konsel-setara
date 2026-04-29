@@ -268,6 +268,48 @@ const routes = [
       },
 
 
+      // CSR
+      {
+        path: 'csr_dashboard',
+        component: () => import('pages/Csr/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'csr_program',
+        component: () => import('pages/Csr/Program.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'csr_detail/:id',
+        component: () => import('pages/Csr/DetailProgram.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'csr_berita',
+        component: () => import('pages/Csr/Berita.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'csr_berita_detail/:id',
+        component: () => import('pages/Csr/DetailBerita.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'csr_registrasi',
+        component: () => import('pages/Csr/Registrasi.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'csr_panel',
+        component: () => import('pages/Csr/PanelPerusahaan.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+      {
+        path: 'csr_pengajuan',
+        component: () => import('pages/Csr/PengajuanSaya.vue'),
+        meta: { showBottomNav: false, requiresAuth: true }
+      },
+
       // PERAK
       {
         path: 'perak_dashboard',
