@@ -391,6 +391,7 @@ export default {
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
         { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
         { label: 'CSR', img: 'icons/Csr.png', route: '/csr_dashboard' },
+        { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
         // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
     }
