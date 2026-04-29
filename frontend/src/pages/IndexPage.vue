@@ -390,6 +390,7 @@ export default {
         { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
         { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
+        { label: 'CSR', img: 'icons/Csr.png', route: '/csr_dashboard' },
         // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
     }

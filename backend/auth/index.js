@@ -67,51 +67,112 @@ router.post('/login', (req, res) => {
       return res.status(500).json({ message: 'Database error' })
     }
 
-    if (!rows || rows.length === 0) {
-      return respondError422(res, "Username Salah")
-    }
+    // Jika user ditemukan di tabel utama (konsel_setara.users)
+    if (rows && rows.length > 0) {
+      const user = rows[0]
 
-    const user = rows[0]
+      try {
+        const match = await bcrypt.compare(req.body.password, user.password)
 
-    try {
-
-      const match = await bcrypt.compare(req.body.password, user.password)
-
-      if (!match) {
-        return respondError422(res, "Password salah")
-      }
-
-      const payload = {
-        _id: user.id,
-        username: user.username,
-        nama: user.nama,
-        hp: user.hp,
-        email: user.email,
-        menu_klp: user.menu_klp,
-        profile: {
-          menu_klp: user.menu_klp
-        }
-      }
-
-      jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
-        if (err) {
-          console.error(err)
-          return respondError422(res, "Gagal membuat token")
+        if (!match) {
+          return respondError422(res, "Password salah")
         }
 
-        return res.json({
-          token,
-          user: payload
+        const payload = {
+          _id: user.id,
+          username: user.username,
+          nama: user.nama,
+          hp: user.hp,
+          email: user.email,
+          menu_klp: user.menu_klp,
+          profile: {
+            menu_klp: user.menu_klp
+          }
+        }
+
+        jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
+          if (err) {
+            console.error(err)
+            return respondError422(res, "Gagal membuat token")
+          }
+
+          return res.json({
+            token,
+            user: payload
+          })
         })
-      })
 
-    } catch (e) {
-      console.error(e)
-      return res.status(500).json({ message: 'Auth error' })
+      } catch (e) {
+        console.error(e)
+        return res.status(500).json({ message: 'Auth error' })
+      }
+
+    } else {
+      // ========== FALLBACK: Cek di db_csrkonsel.users ==========
+      const cleanUsername = req.body.username ? req.body.username.trim() : '';
+      
+      const sqlCsr = `
+        SELECT * FROM \`db_csrkonsel\`.\`users\` 
+        WHERE \`username\` = ?
+      `
+
+      db.query(sqlCsr, [cleanUsername], async (errCsr, rowsCsr) => {
+        if (errCsr) {
+          console.error('CSR DB fallback error:', errCsr);
+          return respondError422(res, "Username Salah")
+        }
+
+        if (!rowsCsr || rowsCsr.length === 0) {
+          return respondError422(res, "Username Salah")
+        }
+
+        const userCsr = rowsCsr[0]
+
+        try {
+          const match = await bcrypt.compare(req.body.password, userCsr.password)
+
+          if (!match) {
+            return respondError422(res, "Password salah")
+          }
+
+          const payload = {
+            _id: String(userCsr.id),
+            username: userCsr.username,
+            nama: userCsr.nama,
+            hp: userCsr.hp,
+            email: userCsr.email,
+            menu_klp: userCsr.db_csrkonsel || 4,
+            db_csrkonsel: userCsr.db_csrkonsel || 4,
+            profile: {
+              nama: userCsr.nama,
+              menu_klp: userCsr.db_csrkonsel || 4,
+              db_csrkonsel: userCsr.db_csrkonsel || 4
+            }
+          }
+
+          jwt.sign(payload, process.env.TOKEN_SECRET, {}, (err, token) => {
+            if (err) {
+              console.error(err)
+              return respondError422(res, "Gagal membuat token")
+            }
+
+            return res.json({
+              token,
+              user: payload
+            })
+          })
+
+        } catch (e) {
+          console.error(e)
+          return res.status(500).json({ message: 'Auth error' })
+        }
+      })
     }
 
   })
 })
+
+
 
 router.post('/register', async (req, res) => {
 
