@@ -1,12 +1,10 @@
 <template>
   <q-page class="regis-bg">
     <!-- HEADER -->
-    <div class="regis-header">
-      <div class="header-overlay"></div>
-      <div class="row items-center q-pa-md relative-position z-top">
-        <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
-        <div class="q-ml-md text-white text-weight-bold" style="font-size: 16px;">Registrasi Mitra CSR</div>
-      </div>
+    <!-- TEAM STANDARD HEADER (Clean Style) -->
+    <div class="row items-center q-px-sm q-py-md bg-white border-bottom sticky-header">
+      <q-btn flat round dense icon="chevron_left" color="dark" size="18px" @click="$router.back()" />
+      <div class="header-title q-ml-sm text-uppercase text-dark">Registrasi Mitra CSR</div>
     </div>
 
     <div class="main-content">
@@ -18,10 +16,14 @@
         <q-step :name="1" title="Penanggung Jawab" icon="person" :done="step > 1" done-color="teal">
           <div class="step-desc q-mb-md">Data penanggung jawab perusahaan (PIC)</div>
 
-          <q-input v-model="form.nama" label="Nama Lengkap *" outlined dense class="q-mb-sm field-input" :rules="[v => !!v || 'Wajib diisi']" />
-          <q-input v-model="form.jabatan" label="Jabatan *" outlined dense class="q-mb-sm field-input" :rules="[v => !!v || 'Wajib diisi']" />
-          <q-input v-model="form.pic_email" label="Email PIC *" type="email" outlined dense class="q-mb-sm field-input" :rules="[v => !!v || 'Wajib diisi']" />
-          <q-input v-model="form.pic_hp" label="No. HP PIC *" outlined dense class="q-mb-sm field-input" :rules="[v => !!v || 'Wajib diisi']" />
+          <q-input v-model="form.nama" label="Nama Lengkap *" outlined dense class="q-mb-sm field-input"
+            :rules="[v => !!v || 'Wajib diisi']" />
+          <q-input v-model="form.jabatan" label="Jabatan *" outlined dense class="q-mb-sm field-input"
+            :rules="[v => !!v || 'Wajib diisi']" />
+          <q-input v-model="form.pic_email" label="Email PIC *" type="email" outlined dense class="q-mb-sm field-input"
+            :rules="[v => !!v || 'Wajib diisi']" />
+          <q-input v-model="form.pic_hp" label="No. HP PIC *" outlined dense class="q-mb-sm field-input"
+            :rules="[v => !!v || 'Wajib diisi']" />
 
           <q-stepper-navigation>
             <q-btn color="teal" label="Lanjut" @click="step = 2" :disable="!isStep1Valid" unelevated class="step-btn" />
@@ -32,19 +34,18 @@
         <q-step :name="2" title="Data Perusahaan" icon="business" :done="step > 2" done-color="teal">
           <div class="step-desc q-mb-md">Informasi lengkap perusahaan Anda</div>
 
-          <q-input v-model="form.perusahaan_nama" label="Nama Perusahaan *" outlined dense class="q-mb-sm field-input" />
-          
-          <q-select
-            v-model="form.bidang_usaha_id"
-            :options="bidangOptions"
-            label="Bidang Usaha *"
-            outlined dense emit-value map-options
-            class="q-mb-sm field-input"
-          />
-          
-          <q-input v-model="form.perusahaan_email" label="Email Perusahaan *" type="email" outlined dense class="q-mb-sm field-input" />
-          <q-input v-model="form.perusahaan_hp" label="Telepon Perusahaan *" outlined dense class="q-mb-sm field-input" />
-          <q-input v-model="form.alamat" label="Alamat *" type="textarea" outlined dense autogrow class="q-mb-sm field-input" />
+          <q-input v-model="form.perusahaan_nama" label="Nama Perusahaan *" outlined dense
+            class="q-mb-sm field-input" />
+
+          <q-select v-model="form.bidang_usaha_id" :options="bidangOptions" label="Bidang Usaha *" outlined dense
+            emit-value map-options class="q-mb-sm field-input" />
+
+          <q-input v-model="form.perusahaan_email" label="Email Perusahaan *" type="email" outlined dense
+            class="q-mb-sm field-input" />
+          <q-input v-model="form.perusahaan_hp" label="Telepon Perusahaan *" outlined dense
+            class="q-mb-sm field-input" />
+          <q-input v-model="form.alamat" label="Alamat *" type="textarea" outlined dense autogrow
+            class="q-mb-sm field-input" />
 
           <q-stepper-navigation>
             <q-btn color="teal" label="Lanjut" @click="step = 3" :disable="!isStep2Valid" unelevated class="step-btn" />
@@ -67,27 +68,16 @@
           </div>
 
           <!-- File Input -->
-          <q-file
-            v-model="form.dokumen"
-            label="Pilih Dokumen (PDF) *"
-            outlined dense accept=".pdf"
-            class="q-mb-md field-input"
-          >
+          <q-file v-model="form.dokumen" label="Pilih Dokumen (PDF) *" outlined dense accept=".pdf"
+            class="q-mb-md field-input">
             <template v-slot:prepend>
               <q-icon name="attach_file" color="teal" />
             </template>
           </q-file>
 
           <q-stepper-navigation>
-            <q-btn
-              color="teal"
-              label="Kirim Permohonan"
-              icon="send"
-              @click="submitRegistration"
-              :loading="submitting"
-              :disable="!form.dokumen"
-              unelevated class="step-btn"
-            />
+            <q-btn color="teal" label="Kirim Permohonan" icon="send" @click="submitRegistration" :loading="submitting"
+              :disable="!form.dokumen" unelevated class="step-btn" />
             <q-btn flat label="Kembali" @click="step = 2" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
@@ -135,13 +125,16 @@ const fetchBidangUsaha = async () => {
     const res = await CsrService.getBidangUsaha()
     const data = res.data?.data || []
     bidangOptions.value = data.map(b => ({ label: b.uraian, value: b.id }))
-  } catch(err) {
+  } catch (err) {
     console.error('Gagal fetch bidang usaha:', err)
   }
 }
 
 const downloadTemplate = () => {
-  window.open('https://server-csr.konaweselatankab.go.id/uploads/Form_Permohonan_Admin_CSR-Setara_Perusahaan.pdf', '_blank')
+  // Mengarahkan ke file template yang ada di website CSR Setara
+  const fileName = 'Form _Permohonan_Admin CSR-Setara _Perusahaan.pdf'
+  const url = `https://csr-setara.konaweselatankab.go.id/assets/template/${encodeURIComponent(fileName)}`
+  window.open(url, '_blank')
 }
 
 const submitRegistration = () => {
@@ -186,7 +179,7 @@ const submitRegistration = () => {
           position: 'top'
         })
       }
-    } catch(err) {
+    } catch (err) {
       console.error('Gagal registrasi:', err)
       Notify.create({
         message: 'Terjadi kesalahan server. Silakan coba lagi.',
@@ -210,23 +203,21 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-.regis-header {
-  position: relative;
-  background: linear-gradient(135deg, #065f46, #059669);
-  padding-bottom: 12px;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  overflow: hidden;
+/* ─── HEADER STANDAR (Clean Style) ─── */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-.header-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(6,78,59,0.2), rgba(16,185,129,0.1));
+.border-bottom {
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.glass-btn {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(4px);
+.header-title {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
 }
 
 .main-content {
@@ -262,7 +253,7 @@ onMounted(() => {
   background: white;
   border-radius: 14px;
   padding: 14px 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   border: 1px solid #d1fae5;
   transition: transform 0.2s;

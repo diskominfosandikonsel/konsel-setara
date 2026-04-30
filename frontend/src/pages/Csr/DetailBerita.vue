@@ -1,11 +1,9 @@
 <template>
   <q-page class="detail-bg">
-    <div class="detail-header">
-      <div class="header-overlay"></div>
-      <div class="row items-center q-pa-md relative-position z-top">
-        <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
-        <div class="q-ml-md text-white text-weight-bold" style="font-size: 16px;">Detail Berita</div>
-      </div>
+    <!-- TEAM STANDARD HEADER (Clean Style) -->
+    <div class="row items-center q-px-sm q-py-md bg-white border-bottom sticky-header">
+      <q-btn flat round dense icon="chevron_left" color="dark" size="18px" @click="$router.back()" />
+      <div class="header-title q-ml-sm text-uppercase text-dark">Detail Berita</div>
     </div>
 
     <!-- LOADING -->
@@ -87,23 +85,21 @@ onMounted(() => {
 <style scoped>
 .detail-bg { background: #f0fdf4; min-height: 100vh; }
 
-.detail-header {
-  position: relative;
-  background: linear-gradient(135deg, #065f46, #059669);
-  padding-bottom: 12px;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  overflow: hidden;
+/* ─── HEADER STANDAR (Clean Style) ─── */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-.header-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(6,78,59,0.2), rgba(16,185,129,0.1));
+.border-bottom {
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.glass-btn {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(4px);
+.header-title {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
 }
 
 .berita-title {

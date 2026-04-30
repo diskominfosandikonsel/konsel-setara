@@ -39,22 +39,23 @@
         <template v-slot:append>
           <q-icon name="search" color="primary" />
         </template>
-          </q-input> -->
+</q-input> -->
 
-      <!-- Menu Grid -->
-      <div class="row q-col-gutter-y-lg justify-start menu-grid">
-        <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index" @click="goToRoute(item.route)">
-          <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
-            <template v-if="item.img">
-              <img :src="item.img" class="menu-icon-img" />
-            </template>
-            <template v-else>
-              <q-icon :name="item.icon" color="indigo-5" class="menu-icon-q"/>
-            </template>
+        <!-- Menu Grid -->
+        <div class="row q-col-gutter-y-lg justify-start menu-grid">
+          <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index"
+            @click="goToRoute(item.route)">
+            <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
+              <template v-if="item.img">
+                <img :src="item.img" class="menu-icon-img" />
+              </template>
+              <template v-else>
+                <q-icon :name="item.icon" color="indigo-5" class="menu-icon-q" />
+              </template>
+            </div>
+            <div class="menu-label text-weight-bold text-grey-9">{{ item.label }}</div>
           </div>
-          <div class="menu-label text-weight-bold text-grey-9">{{ item.label }}</div>
         </div>
-      </div>
       </div>
 
       <!-- Video Berita -->
@@ -97,14 +98,14 @@
             <!-- Pilihan YouTube -->
             <div class="column items-center cursor-pointer" @click="openSocialLink('youtube')">
               <q-avatar size="64px" class="bg-red-1 q-mb-sm shadow-2">
-                <q-icon name="fab fa-youtube" color="red" size="32px"/>
+                <q-icon name="fab fa-youtube" color="red" size="32px" />
               </q-avatar>
               <div class="text-caption text-weight-bold text-grey-8">YouTube</div>
             </div>
             <!-- Pilihan TikTok -->
             <div class="column items-center cursor-pointer" @click="openSocialLink('tiktok')">
               <q-avatar size="64px" class="bg-grey-2 q-mb-sm shadow-2">
-                <q-icon name="fab fa-tiktok" color="dark" size="32px"/>
+                <q-icon name="fab fa-tiktok" color="dark" size="32px" />
               </q-avatar>
               <div class="text-caption text-weight-bold text-grey-8">TikTok</div>
             </div>
@@ -264,10 +265,10 @@ export default {
           cari_value: "",
           kategori_id: "" // WAJIB DIHADIRKAN agar tidak terbaca undefined di SQL Backend
         }
-        
+
         const response = await beritaStore.fetchVideo(payload)
         const dataApi = response?.data || []
-        
+
         // Pemetaan struktur balikan Video dari tabel gallery_video (web_konsel)
         const mappedVideo = dataApi.map(item => ({
           title: item.keterangan || 'Video Konsel',
@@ -314,10 +315,10 @@ export default {
           data_ke: 1,
           cari_value: ""
         }
-        
+
         const response = await beritaStore.fetchBerita(payload)
         const dataApi = response?.data || []
-        
+
         const mappedBerita = dataApi.map((item) => ({
           id: item.id,
           title: item.judul || 'Tanpa Judul',
@@ -342,7 +343,7 @@ export default {
 
     const goToRoute = (route) => {
       if (!route) return
-      
+
       // Cek apakah route adalah URL eksternal (dimulai dengan http:// atau https://)
       if (route.startsWith('http://') || route.startsWith('https://')) {
         // Buka di tab baru jika URL eksternal
@@ -390,7 +391,7 @@ export default {
         { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
         { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
         { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
-        { label: 'CSR', img: 'icons/Csr.png', route: '/csr_dashboard' },
+        { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
         { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
         // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
       ]
@@ -433,7 +434,8 @@ export default {
 .main-swiper :deep(.swiper-slide),
 .carousel-skeleton {
   width: 100%;
-  aspect-ratio: 16 / 7; /* Menjaga rasio panorama secara otomatis di segala layar */
+  aspect-ratio: 16 / 7;
+  /* Menjaga rasio panorama secara otomatis di segala layar */
   height: auto;
 }
 
@@ -441,7 +443,7 @@ export default {
   width: 100%;
   height: 100%;
   /* Gunakan contain jika ingin garansi 100% utuh, atau biarkan cover dengan aspect-ratio yang benar */
-  object-fit: cover; 
+  object-fit: cover;
   border-radius: 16px;
   display: block;
 }
@@ -483,12 +485,15 @@ export default {
   object-fit: contain;
   border-radius: 10px;
 }
+
 .menu-icon-q {
   font-size: 32px;
 }
+
 .menu-label {
   font-size: 11px;
 }
+
 .menu-icon-wrap.is-lainnya {
   background: #e0e0e0;
   border-radius: 50%;
@@ -570,33 +575,41 @@ export default {
     max-width: 150px;
     flex: 0 0 150px;
   }
+
   .news-item .col-8 {
     flex: 1;
     max-width: none;
   }
+
   .video-card {
     min-width: 200px;
     max-width: 200px;
   }
+
   .video-card .q-img {
     height: 180px !important;
   }
+
   /* Menu tablet */
   .menu-icon-wrap {
     width: 68px;
     height: 68px;
     border-radius: 18px;
   }
+
   .menu-icon-img {
     width: 42px;
     height: 42px;
   }
+
   .menu-icon-q {
     font-size: 38px;
   }
+
   .menu-label {
     font-size: 13px;
   }
+
   .menu-container .text-subtitle1 {
     font-size: 1.1rem;
   }
@@ -607,10 +620,12 @@ export default {
     max-width: 180px;
     flex: 0 0 180px;
   }
+
   .video-card {
     min-width: 240px;
     max-width: 240px;
   }
+
   .video-card .q-img {
     height: 200px !important;
   }
@@ -621,16 +636,20 @@ export default {
     height: 90px;
     border-radius: 20px;
   }
+
   .menu-icon-img {
     width: 60px;
     height: 60px;
   }
+
   .menu-icon-q {
     font-size: 50px;
   }
+
   .menu-label {
     font-size: 18px;
   }
+
   .menu-container .text-subtitle1 {
     font-size: 1.2rem;
   }
