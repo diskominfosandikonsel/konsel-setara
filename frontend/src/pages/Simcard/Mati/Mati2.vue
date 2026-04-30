@@ -793,48 +793,44 @@
         <q-scroll-area style="height: 600px; width: 100%;">
           <q-card-section>
             <div class="q-gutter-lg">
-              <!-- Bagian 1: Data Daerah Administratif (Alamat Permohonan) -->
+              <!-- Bagian 1: Data Daerah Administratif -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  🏘️ Daerah Administratif
+                  🏘️ Daerah Administratif (Alamat Permohonan)
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Provinsi</div>
                     <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_provinsi || '-' }}</div>
-                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_provinsi || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kabupaten</div>
                     <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_kabupaten || '-' }}</div>
-                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_kabupaten || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kecamatan</div>
                     <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_kecamatan || '-' }}</div>
-                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_kecamatan || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Desa/Kelurahan</div>
                     <div style="font-size: 14px; color: #2d3748;">{{ wilayah.uraian_desa_kelurahan || '-' }}</div>
-                    <div style="font-size: 11px; color: #A0AEC0; margin-top: 2px;">Kode: {{ wilayah.kd_desa_kelurahan || '-' }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- Bagian 2: Data Pelapor -->
+              <!-- Bagian 2: Data Pelapor (Yang Bertandatangan) -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #0097A7; border-bottom: 2px solid #0097A7; padding-bottom: 8px;">
-                  � Yang Bertandatangan
+                  👤 Yang Bertandatangan di Bawah Ini
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nomor Kartu Keluarga</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.no_kk || '-' }}</div>
-                  </div>
-                  <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nama</div>
                     <div style="font-size: 14px; color: #2d3748;">{{ form.nama || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">NIK</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.nik || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Umur</div>
@@ -845,143 +841,114 @@
                     <div style="font-size: 14px; color: #2d3748;">{{ form.pekerjaan || '-' }}</div>
                   </div>
                   <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Hubungan dengan Bayi</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.hub_dengan_si_bayi || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.alamat || '-' }}</div>
+                  </div>
+                  <div style="grid-column: 1 / -1;">
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Hubungan dengan yang Mati</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.hubungan_dengan_yang_mati || '-' }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- Bagian 3: Data Kematian Bayi -->
+              <!-- Bagian 3: Data yang Meninggal -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #E91E63; border-bottom: 2px solid #E91E63; padding-bottom: 8px;">
-                  👶 Laporan Kematian Bayi/Anak
+                  ⚰️ Melaporkan Bahwa (Yang Meninggal)
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Hari Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.hari || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nama</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.nama_mati || '-' }}</div>
                   </div>
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tanggal Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.tanggal || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Waktu Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.pukul || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tempat Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.tempat || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">NIK</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.nik_mati || '-' }}</div>
                   </div>
                   <div>
                     <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Jenis Kelamin</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.jenis_kelamin_bayi || '-' }}</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.jk_mati || '-' }}</div>
                   </div>
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Jenis Kelahiran</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.jenis_lahir || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tanggal Lahir</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.tgl_lahir_mati || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Umur</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.umur_mati || '-' }} Tahun</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Agama</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.agama_mati || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Provinsi</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahMati.uraian_provinsi || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kabupaten</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahMati.uraian_kabupaten || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kecamatan</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahMati.uraian_kecamatan || '-' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Desa/Kelurahan</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahMati.uraian_desa_kelurahan || '-' }}</div>
                   </div>
                   <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Lama Mengandung (Bulan)</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.lama_mengandung || '-' }} Bulan</div>
-                  </div>
-                  <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Sebab Kematian</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.sebab_kematian || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.alamat_mati || '-' }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- Bagian 4: Data Ibu -->
+              <!-- Bagian 4: Waktu Kematian -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #FF6F00; border-bottom: 2px solid #FF6F00; padding-bottom: 8px;">
-                  👩 Data Ibu
+                  ⏰ Telah Meninggal Dunia Pada
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">NIK</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.nik_ibu || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Hari</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.hari_meninggal || '-' }}</div>
                   </div>
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nama</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.nama_ibu || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tanggal Kematian</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.tanggal_meninggal || '-' }}</div>
                   </div>
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tanggal Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.tgl_lahir_ibu || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Waktu Kematian</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.waktu_meninggal || '-' }}</div>
                   </div>
                   <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Pekerjaan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.pekerjaan_ibu || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kewarganegaraan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.kewarganegaraan_ibu || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Bertempat Di</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.tempat_meninggal || '-' }}</div>
                   </div>
                   <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.alamat_ibu || '-' }}</div>
-                  </div>
-                  <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahIbu.uraian_provinsi || '-' }}, {{ wilayahIbu.uraian_kabupaten || '-' }}, {{ wilayahIbu.uraian_kecamatan || '-' }}, {{ wilayahIbu.uraian_desa_kelurahan || '-' }}</div>
+                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Disebabkan Kematian</div>
+                    <div style="font-size: 14px; color: #2d3748;">{{ form.penyebab_meninggal || '-' }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- Bagian 5: Data Ayah/Suami -->
-              <div>
-                <h5 style="margin: 0 0 16px 0; color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 8px;">
-                  👨 Data Ayah/Suami
-                </h5>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">NIK</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.nik_ayah || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Nama</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.nama_ayah || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Tanggal Lahir</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.tgl_lahir_ayah || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Pekerjaan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.pekerjaan_ayah || '-' }}</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Kewarganegaraan</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.kewarganegaraan_ayah || '-' }}</div>
-                  </div>
-                  <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ form.alamat_ayah || '-' }}</div>
-                  </div>
-                  <div style="grid-column: 1 / -1;">
-                    <div style="font-size: 12px; font-weight: 500; color: #718096; margin-bottom: 4px;">Alamat</div>
-                    <div style="font-size: 14px; color: #2d3748;">{{ wilayahAyah.uraian_provinsi || '-' }}, {{ wilayahAyah.uraian_kabupaten || '-' }}, {{ wilayahAyah.uraian_kecamatan || '-' }}, {{ wilayahAyah.uraian_desa_kelurahan || '-' }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bagian 6: File Lampiran -->
+              <!-- Bagian 5: File Lampiran -->
               <div>
                 <h5 style="margin: 0 0 16px 0; color: #1565C0; border-bottom: 2px solid #1565C0; padding-bottom: 8px;">
                   📎 File Lampiran
                 </h5>
                 <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
-                  <div v-if="form.file_lampiranOld" style="padding: 16px; background-color: #E3F2FD; border-radius: 8px; border-left: 4px solid #1976D2;">
+                  <div v-if="form.bukti_kematian_old" style="padding: 16px; background-color: #E3F2FD; border-radius: 8px; border-left: 4px solid #1976D2;">
                     <div style="font-size: 12px; font-weight: 500; color: #1565C0; margin-bottom: 8px;">📄 File Lampiran</div>
-                    <div style="font-size: 13px; color: #1976D2; word-break: break-all;">{{ form.file_lampiranOld }}</div>
+                    <div style="font-size: 13px; color: #1976D2; word-break: break-all;">{{ form.bukti_kematian_old }}</div>
                     <div style="margin-top: 8px;">
                       <q-btn 
                         size="sm" 
                         color="primary" 
                         label="Download" 
                         icon="download" 
-                        @click="bukaLink(form.file_lampiranOld)"
+                        @click="bukaLink(form.bukti_kematian_old)"
                         outline
                       />
                     </div>
