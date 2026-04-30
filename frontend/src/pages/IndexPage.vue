@@ -42,7 +42,7 @@
 </q-input> -->
 
         <!-- Menu Grid -->
-        <div class="row q-col-gutter-y-lg justify-start menu-grid">
+        <div class="row q-col-gutter-y-lg justify-center menu-grid">
           <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index"
             @click="goToRoute(item.route)">
             <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
