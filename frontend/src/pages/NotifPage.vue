@@ -124,6 +124,14 @@ function onNotifClick(notif) {
     router.push('/firetap_detail/' + notif.laporanId)
   } else if (notif.type === 'perak') {
     router.push('/kartu')
+  } else if (notif.type === 'csr_pengajuan') {
+    router.push('/csr_pengajuan')
+  } else if (notif.type === 'csr_registrasi') {
+    router.push('/csr_panel')
+  } else if (notif.type === 'csr_new_program' && notif.id) {
+    router.push('/csr_detail/' + notif.id)
+  } else if (notif.type === 'csr_program') {
+    router.push('/csr_program')
   }
 }
 

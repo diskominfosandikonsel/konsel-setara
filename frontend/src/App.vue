@@ -162,6 +162,23 @@ export default {
               resolvedBody = 'Ada pembaruan pada laporan FIRETAP Anda.'
             }
           }
+          
+          // FALLBACK KHUSUS CSR
+          if (data.type && data.type.startsWith('csr_') && (!notif.title && !data.title)) {
+            if (data.type === 'csr_pengajuan') {
+              resolvedTitle = data.status === '2' ? 'Pengajuan Disetujui' : 'Pengajuan Ditolak';
+              resolvedBody = data.status === '2' ? 'Selamat! Pengajuan CSR Anda telah disetujui.' : 'Maaf, pengajuan CSR Anda belum dapat diterima.';
+            } else if (data.type === 'csr_registrasi') {
+              resolvedTitle = data.status === 'terima' ? 'Akun Terverifikasi' : 'Registrasi Ditolak';
+              resolvedBody = data.status === 'terima' ? 'Selamat! Akun perusahaan Anda telah aktif.' : 'Maaf, registrasi perusahaan Anda ditolak.';
+            } else if (data.type === 'csr_new_program') {
+              resolvedTitle = 'Program CSR Baru';
+              resolvedBody = 'Pemerintah baru saja merilis program CSR baru. Cek sekarang!';
+            } else if (data.type === 'csr_program') {
+              resolvedTitle = 'Program Selesai';
+              resolvedBody = 'Program CSR yang Anda ikuti telah selesai.';
+            }
+          }
 
           // Cek apakah notifikasi yang sama sudah tersimpan (dari foreground listener)
           const recentDuplicate = notifStore.list.find(n =>
@@ -245,6 +262,22 @@ export default {
             await this.$router.push(target)
           }
         }
+      }
+
+      else if (data.type === 'csr_pengajuan') {
+        await this.$router.push('/csr_pengajuan')
+      }
+
+      else if (data.type === 'csr_registrasi') {
+        await this.$router.push('/csr_panel')
+      }
+
+      else if (data.type === 'csr_new_program' && data.id) {
+        await this.$router.push('/csr_detail/' + data.id)
+      }
+
+      else if (data.type === 'csr_program') {
+        await this.$router.push('/csr_program')
       }
     }
   }
