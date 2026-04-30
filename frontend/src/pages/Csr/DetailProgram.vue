@@ -20,21 +20,12 @@
     <!-- DATA -->
     <div v-else-if="detail" class="q-pa-md">
       <!-- Image -->
-      <q-img
-        :src="getImage(detail)"
-        height="200px"
-        class="rounded-borders q-mb-md"
-        style="border-radius: 18px;"
-      />
+      <q-img :src="getImage(detail)" height="200px" class="rounded-borders q-mb-md" style="border-radius: 18px;" />
 
       <!-- Status Badge -->
       <div class="q-mb-sm">
-        <q-chip
-          :color="getStatusColor(detail.status)"
-          text-color="white"
-          size="sm"
-          dense
-        >{{ getStatusLabel(detail.status) }}</q-chip>
+        <q-chip :color="getStatusColor(detail.status)" text-color="white" size="sm" dense>{{
+          getStatusLabel(detail.status) }}</q-chip>
       </div>
 
       <!-- Title -->
@@ -84,9 +75,17 @@
       </div>
 
       <!-- TOMBOL AMBIL PROGRAM (khusus perusahaan) -->
-      <div v-if="isCompany && detail && (detail.status == 1 || detail.status == 3) && detail.jumlah_sisa > 0" class="q-mt-lg">
-        <q-btn unelevated rounded color="orange-8" text-color="white" class="full-width q-py-sm"
-          icon="gavel" label="Ambil Program CSR Ini" @click="mdlAmbil = true" />
+      <div v-if="isCompany && detail && (detail.status == 1 || detail.status == 3) && detail.jumlah_sisa > 0"
+        class="q-mt-lg">
+        <q-btn unelevated rounded color="orange-8" text-color="white" class="full-width q-py-sm" icon="gavel"
+          label="Ambil Program CSR Ini" @click="mdlAmbil = true" />
+      </div>
+
+      <!-- Lampiran Spesifikasi -->
+      <div class="q-mt-lg" v-if="detail.file_spec">
+        <div class="section-title">Lampiran Spesifikasi</div>
+        <q-btn unelevated rounded color="blue-grey-7" icon="picture_as_pdf" label="Lihat Spesifikasi (PDF)"
+          class="full-width q-py-sm" @click="openPDF(detail.file_spec)" />
       </div>
 
       <!-- Deskripsi -->
@@ -103,7 +102,8 @@
             <q-icon name="business" size="18px" color="teal" />
             <div class="q-ml-sm">
               <div class="mitra-name">{{ m.nama_mitra }}</div>
-              <div class="mitra-info" v-if="m.jumlah_ambil">{{ m.jumlah_ambil }} {{ detail.satuan }} — {{ formatRupiah(m.nilai) }}</div>
+              <div class="mitra-info" v-if="m.jumlah_ambil">{{ m.jumlah_ambil }} {{ detail.satuan }} — {{
+                formatRupiah(m.nilai) }}</div>
             </div>
           </div>
         </div>
@@ -135,12 +135,13 @@
             label="Jumlah yang ingin diambil" :disable="ambilSemua"
             :rules="[v => v > 0 || 'Minimal 1', v => v <= (detail?.jumlah_sisa || 0) || 'Melebihi jumlah tersedia']" />
 
-          <q-input v-model="catatanAmbil" type="textarea" outlined dense autogrow
-            label="Catatan (opsional)" class="q-mt-xs" />
+          <q-input v-model="catatanAmbil" type="textarea" outlined dense autogrow label="Catatan (opsional)"
+            class="q-mt-xs" />
         </q-card-section>
         <q-card-actions align="right" class="bg-grey-2">
           <q-btn flat label="Batal" color="negative" v-close-popup />
-          <q-btn unelevated label="Kirim Pengajuan" color="orange-8" :loading="ambilLoading" @click="submitAmbil" />
+          <q-btn unelevated label="Kirim Pengajuan" color="orange-8" :loading="ambilLoading" @click="submitAmbil"
+            :disable="!jumlahAmbil || jumlahAmbil <= 0 || jumlahAmbil > (detail?.jumlah_sisa || 0)" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -184,13 +185,13 @@ const fetchDetail = async () => {
     detail.value = res.data?.data || null
 
     // Try fetch mitra if status allows
-    if (detail.value && [2,3,4].includes(detail.value.status)) {
+    if (detail.value && [2, 3, 4].includes(detail.value.status)) {
       try {
         const mitraRes = await CsrService.getMitraKegiatan(route.params.id)
         mitraList.value = mitraRes.data?.data || []
-      } catch(e) { /* mitra not available */ }
+      } catch (e) { /* mitra not available */ }
     }
-  } catch(err) {
+  } catch (err) {
     console.error('Gagal fetch detail CSR:', err)
   } finally {
     loading.value = false
@@ -241,10 +242,10 @@ const submitAmbil = async () => {
   try {
     const userId = authStore.user?._id || authStore.user?.id
     await CsrService.addPengajuan({
-      kegiatan_csr_id: detail.value.id,
-      users_id: userId,
+      kegiatan_id: detail.value.id,
+      perusahaan_id: userId,
       jumlah_ambil: jumlahAmbil.value,
-      catatan_admin: catatanAmbil.value || ''
+      catatan_mitra: catatanAmbil.value || ''
     })
     $q.notify({ type: 'positive', message: 'Pengajuan berhasil dikirim!' })
     mdlAmbil.value = false
@@ -256,6 +257,13 @@ const submitAmbil = async () => {
     $q.notify({ type: 'negative', message: err.response?.data?.message || 'Gagal mengirim pengajuan' })
   } finally {
     ambilLoading.value = false
+  }
+}
+
+const openPDF = (fileName) => {
+  const url = CsrService.getImageUrl(fileName)
+  if (url) {
+    window.open(url, '_blank')
   }
 }
 
@@ -282,11 +290,11 @@ onMounted(() => {
 .header-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(6,78,59,0.2), rgba(16,185,129,0.1));
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.2), rgba(16, 185, 129, 0.1));
 }
 
 .glass-btn {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(4px);
 }
 
@@ -310,7 +318,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .meta-label {
@@ -348,7 +356,7 @@ onMounted(() => {
   padding: 12px;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .mitra-name {

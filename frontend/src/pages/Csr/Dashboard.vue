@@ -19,15 +19,15 @@
         <q-btn unelevated rounded color="teal-7" text-color="white" size="sm" class="hotline-btn"
           @click="openCSRPortal">
           <q-icon name="language" size="14px" class="q-mr-xs" />
-          PORTAL CSR
+          PORTAL CSR-SETARA
         </q-btn>
       </div>
 
       <div class="column flex-center q-pb-md relative-position z-top">
-        <div class="brand-logo-wrapper">
+        <!-- <div class="brand-logo-wrapper">
           <img src="/icons/Csr.png" alt="CSR" class="brand-logo" />
-        </div>
-        <div class="app-title">CSR KONSEL</div>
+        </div> -->
+        <div class="app-title">CSR - SETARA</div>
         <div class="app-subtitle">Corporate Social Responsibility</div>
         <div class="app-sub-badge">Kabupaten Konawe Selatan</div>
         <div class="header-quote">Tanggung jawab sosial dan lingkungan adalah komitmen perseroan untuk berperan serta
@@ -41,10 +41,28 @@
     <!-- ════════════════════════════ -->
     <div class="main-content">
 
+      <!-- ══════════════════════════════════════════ -->
+      <!-- CTA DAFTARKAN PERUSAHAAN (Kecil & Di Atas)  -->
+      <!-- ══════════════════════════════════════════ -->
+      <div v-if="!isCompany" class="cta-section q-mb-lg">
+        <div class="cta-card-small" @click="goRegistrasi">
+          <div class="cta-glow"></div>
+          <div class="row items-center no-wrap q-gutter-md relative-position z-top">
+            <div class="cta-icon-wrap-small">
+              <q-icon name="handshake" size="24px" color="white" />
+            </div>
+            <div class="col">
+              <div class="cta-title-small">Daftarkan Perusahaan Anda</div>
+              <div class="cta-desc-small">Berkontribusi nyata untuk daerah melalui CSR.</div>
+            </div>
+            <q-btn flat round color="white" icon="chevron_right" class="cta-arrow-btn" />
+          </div>
+        </div>
+      </div>
+
       <!-- MENU UTAMA — 2 Kolom Grid -->
       <div class="q-pb-md">
-        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Menu Utama
-        </div>
+        <div class="text-weight-bold text-dark q-mb-md" style="font-size: 15px; letter-spacing: 0.3px;">Menu Utama</div>
 
         <div class="row q-col-gutter-md">
           <div v-for="item in menuItems" :key="item.key" class="col-6">
@@ -184,7 +202,6 @@ const menuItems = computed(() => {
   ]
 
   if (isCompany.value) {
-    // Sudah login sebagai perusahaan
     base.push({
       key: 'panel', label: 'PERUSAHAAN', hint: 'Panel Perusahaan',
       icon: 'business', badgeIcon: 'verified', badgeColor: '#059669',
@@ -196,14 +213,6 @@ const menuItems = computed(() => {
       icon: 'assignment', badgeIcon: 'pending_actions', badgeColor: '#ea580c',
       cardClass: 'regis-card', iconBgClass: 'regis-icon-bg', labelColor: 'text-purple-8',
       action: goPengajuan
-    })
-  } else {
-    // Belum login / bukan perusahaan
-    base.push({
-      key: 'registrasi', label: 'REGISTRASI', hint: 'Daftar Mitra CSR',
-      icon: 'domain_add', badgeIcon: 'how_to_reg', badgeColor: '#7c3aed',
-      cardClass: 'regis-card', iconBgClass: 'regis-icon-bg', labelColor: 'text-purple-8',
-      action: goRegistrasi
     })
   }
 
@@ -290,6 +299,7 @@ onMounted(() => {
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
   overflow: hidden;
+  padding-bottom: 24px;
 }
 
 .header-overlay {
@@ -431,11 +441,10 @@ onMounted(() => {
 
 /* ─── CONTENT ─── */
 .main-content {
-  margin-top: -28px;
+  margin-top: 16px;
   padding: 0 16px 40px;
 }
 
-/* ─── HEADER QUOTE ─── */
 .header-quote {
   margin-top: 8px;
   padding: 0 20px;
@@ -484,11 +493,6 @@ onMounted(() => {
   background: linear-gradient(145deg, #f5f3ff, #fff);
 }
 
-.login-card {
-  border: 1.5px solid #e5e7eb;
-  background: linear-gradient(145deg, #f9fafb, #fff);
-}
-
 .card-badge-top {
   position: absolute;
   top: 8px;
@@ -501,18 +505,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.berita-card .card-badge-top {
-  background: rgba(37, 99, 235, 0.1);
-}
-
-.regis-card .card-badge-top {
-  background: rgba(124, 58, 237, 0.1);
-}
-
-.login-card .card-badge-top {
-  background: rgba(107, 114, 128, 0.1);
 }
 
 .grid-icon-wrap {
@@ -538,11 +530,6 @@ onMounted(() => {
 .regis-icon-bg {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
   box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
-}
-
-.login-icon-bg {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-  box-shadow: 0 6px 16px rgba(75, 85, 99, 0.25);
 }
 
 .grid-label {
@@ -631,5 +618,58 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ─── CTA DAFTAR PERUSAHAAN (VERSI KECIL) ─── */
+.cta-card-small {
+  position: relative;
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+  border-radius: 14px;
+  padding: 12px 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.cta-card-small:active {
+  transform: scale(0.98);
+}
+
+.cta-glow {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cta-icon-wrap-small {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta-title-small {
+  font-size: 14px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.cta-desc-small {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cta-arrow-btn {
+  background: rgba(255, 255, 255, 0.15);
 }
 </style>

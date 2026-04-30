@@ -69,17 +69,17 @@
 
           <!-- Actions -->
           <div class="row q-mt-sm q-gutter-xs" @click.stop>
-            <!-- Edit (hanya jika pending) -->
-            <q-btn v-if="item.status_pengajuan == 1" flat dense size="sm" color="orange" icon="edit"
-              label="Edit" @click.stop="openEdit(item)" />
+            <!-- Edit (jika pending atau ditolak) -->
+            <q-btn v-if="item.status_pengajuan == 1 || item.status_pengajuan == 3" flat dense size="sm" color="orange"
+              icon="edit" label="Edit" @click.stop="openEdit(item)" />
 
             <!-- Upload Bukti (hanya jika diterima) -->
             <q-btn v-if="item.status_pengajuan == 2" flat dense size="sm" color="purple" icon="photo_camera"
               label="Upload Bukti" @click.stop="openUpload(item)" />
 
-            <!-- Hapus (hanya jika pending) -->
-            <q-btn v-if="item.status_pengajuan == 1" flat dense size="sm" color="negative" icon="delete"
-              @click.stop="confirmDelete(item)" />
+            <!-- Hapus (hanya jika pending atau ditolak) -->
+            <q-btn v-if="item.status_pengajuan == 1 || item.status_pengajuan == 3" flat dense size="sm" color="negative"
+              icon="delete" @click.stop="confirmDelete(item)" />
           </div>
 
           <!-- Catatan Admin (jika ditolak) -->
@@ -94,25 +94,66 @@
 
     <!-- ===================== MODAL DETAIL ===================== -->
     <q-dialog v-model="mdlDetail">
-      <q-card style="min-width: 340px; max-width: 90vw;">
-        <q-card-section class="bg-teal text-white">
-          <div class="text-h6">Detail Pengajuan</div>
+      <q-card style="min-width: 350px; max-width: 90vw; border-radius: 16px;">
+        <q-card-section class="bg-teal text-white flex items-center q-py-sm">
+          <q-icon name="assignment" size="20px" class="q-mr-sm" />
+          <div class="text-subtitle1 text-weight-bold">Detail Pengajuan</div>
+          <q-space />
+          <q-btn flat round dense icon="close" v-close-popup />
         </q-card-section>
-        <q-card-section v-if="selectedItem" class="q-gutter-sm">
-          <div><b>Program:</b> {{ selectedItem.nama_kegiatan }}</div>
-          <div><b>Bidang:</b> {{ selectedItem.uraian_bidang_csr }}</div>
-          <div v-if="selectedItem.uraian_bidang_sub_csr"><b>Sub Bidang:</b> {{ selectedItem.uraian_bidang_sub_csr }}</div>
-          <div><b>Jumlah Ambil:</b> {{ selectedItem.jumlah_ambil }} {{ selectedItem.satuan }}</div>
-          <div><b>Tersedia:</b> {{ selectedItem.jumlah_sisa }} {{ selectedItem.satuan }}</div>
-          <div><b>Tanggal:</b> {{ formatDate(selectedItem.tgl_pengajuan) }}</div>
-          <div><b>Status:</b>
-            <q-badge :color="getStatusColor(selectedItem.status_pengajuan)"
-              :label="getStatusLabel(selectedItem.status_pengajuan)" />
+
+        <q-card-section v-if="selectedItem" class="q-pa-none">
+          <!-- Foto Program -->
+          <q-img :src="getImage(selectedItem)" height="180px" class="q-mb-md">
+            <div class="absolute-bottom bg-transparent">
+              <q-badge :color="getStatusColor(selectedItem.status_pengajuan)"
+                :label="getStatusLabel(selectedItem.status_pengajuan)" class="q-pa-xs" style="font-size: 11px;" />
+            </div>
+          </q-img>
+
+          <div class="q-px-md q-pb-md">
+            <!-- Info Program -->
+            <div class="text-overline text-teal-8">INFO PROGRAM</div>
+            <div class="text-h6 text-dark q-mb-xs" style="line-height: 1.2;">{{ selectedItem.nama_kegiatan }}</div>
+            <div class="text-caption text-grey-7 q-mb-md">
+              {{ selectedItem.uraian_bidang_csr }}
+              <span v-if="selectedItem.uraian_bidang_sub_csr"> | {{ selectedItem.uraian_bidang_sub_csr }}</span>
+            </div>
+
+            <q-separator class="q-mb-md" />
+
+            <!-- Grid Info -->
+            <div class="row q-col-gutter-sm q-mb-md">
+              <div class="col-6">
+                <div class="text-caption text-grey">Jumlah Ambil</div>
+                <div class="text-subtitle2 text-weight-bolder text-orange-9">
+                  {{ selectedItem.jumlah_ambil }} {{ selectedItem.satuan }}
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption text-grey">Sisa Tersedia</div>
+                <div class="text-subtitle2 text-weight-bold">
+                  {{ selectedItem.jumlah_sisa }} {{ selectedItem.satuan }}
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption text-grey">Tanggal Pengajuan</div>
+                <div class="text-subtitle2">{{ formatDate(selectedItem.tgl_pengajuan) }}</div>
+              </div>
+            </div>
+
+            <!-- Catatan Admin -->
+            <div v-if="selectedItem.catatan_admin" class="catatan-box q-mt-sm">
+              <div class="text-caption text-weight-bold text-red-9">CATATAN ADMIN:</div>
+              <div class="text-body2 italic text-red-10">"{{ selectedItem.catatan_admin }}"</div>
+            </div>
           </div>
-          <div v-if="selectedItem.catatan_admin"><b>Catatan:</b> {{ selectedItem.catatan_admin }}</div>
         </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Tutup" color="negative" v-close-popup />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Tutup" color="grey-7" v-close-popup />
+          <q-btn v-if="selectedItem?.status_pengajuan == 3 || selectedItem?.status_pengajuan == 1" unelevated
+            label="Edit Pengajuan" color="orange" icon="edit" @click="openEdit(selectedItem)" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -127,12 +168,16 @@
           <div class="text-subtitle2 q-mb-sm">{{ editItem?.nama_kegiatan }}</div>
           <q-toggle v-model="editAmbilSemua" label="Ambil seluruh kebutuhan" color="amber"
             @update:model-value="onToggleEditSemua" />
-          <q-input v-model.number="editJumlah" type="number" outlined dense class="q-mt-sm"
-            label="Jumlah" :disable="editAmbilSemua" />
+          <q-input v-model.number="editJumlah" type="number" outlined dense class="q-mt-sm" label="Jumlah"
+            :disable="editAmbilSemua" :max="editItem?.jumlah_sisa" :rules="[
+              val => val > 0 || 'Minimal 1',
+              val => val <= (editItem?.jumlah_sisa || 0) || 'Melebihi sisa tersedia'
+            ]" />
         </q-card-section>
         <q-card-actions align="right" class="bg-grey-2">
           <q-btn flat label="Batal" color="negative" v-close-popup />
-          <q-btn unelevated label="Simpan" color="orange" :loading="editLoading" @click="submitEdit" />
+          <q-btn unelevated label="Simpan" color="orange" :loading="editLoading" @click="submitEdit"
+            :disable="!editJumlah || editJumlah <= 0 || editJumlah > (editItem?.jumlah_sisa || 0)" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -259,6 +304,12 @@ const getBuktiUrl = (fileName) => {
   return 'https://server-csr.konaweselatankab.go.id/uploads/' + fileName
 }
 
+const getImage = (item) => {
+  if (!item) return ''
+  const url = CsrService.getImageUrl(item.file_name)
+  return url || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400&auto=format'
+}
+
 // Detail
 const showDetail = (item) => {
   selectedItem.value = item
@@ -267,6 +318,7 @@ const showDetail = (item) => {
 
 // Edit
 const openEdit = (item) => {
+  mdlDetail.value = false // Tutup detail jika buka dari situ
   editItem.value = { ...item }
   editJumlah.value = item.jumlah_ambil
   editAmbilSemua.value = false
@@ -275,7 +327,8 @@ const openEdit = (item) => {
 
 const onToggleEditSemua = (val) => {
   if (val && editItem.value) {
-    editJumlah.value = editItem.value.jumlah || editItem.value.jumlah_sisa || 0
+    // Utamakan jumlah_sisa (sisa stok), jika tidak ada baru jumlah (total)
+    editJumlah.value = editItem.value.jumlah_sisa ?? editItem.value.jumlah ?? 0
   }
 }
 
@@ -444,5 +497,12 @@ onMounted(() => {
   background: #f8fafc;
   border-radius: 8px;
   padding: 6px 8px;
+}
+
+.catatan-box {
+  background: #fff5f5;
+  border: 1px dashed #feb2b2;
+  border-radius: 8px;
+  padding: 12px;
 }
 </style>

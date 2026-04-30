@@ -95,9 +95,9 @@ export const CsrService = {
     return apiCsr.post('api/v1/list_pengajuan/view', payload)
   },
 
-  // Submit pengajuan program
+  // Submit pengajuan program (route: kegiatan_csr, bukan list_pengajuan)
   addPengajuan(payload) {
-    return apiCsr.post('api/v1/list_pengajuan/addPengajuan', payload)
+    return apiCsr.post('api/v1/kegiatan_csr/addPengajuan', payload)
   },
 
   // Edit jumlah pengajuan
