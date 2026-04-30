@@ -308,9 +308,10 @@ export default {
     },
 
     series: [
-      {
-        data
-      }
+          {
+            name: "Jumlah",
+            data: data,
+          },
     ],
 
     credits: { enabled: false }
