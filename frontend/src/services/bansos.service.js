@@ -46,6 +46,10 @@ export default {
 
   getKelompokKecamatan (payload) {
     return apiBansos.post(base + '/viewKelompokKecamatan', payload)
+  },
+
+  searchNik(payload) {
+    return apiBansos.post(base + '/searchNik', payload)
   }
 
 }

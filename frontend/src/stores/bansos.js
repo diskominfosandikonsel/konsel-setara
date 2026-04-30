@@ -15,6 +15,10 @@ export const useBansosStore = defineStore('bansos', {
     individuKecamatan: [],
     kelompokKecamatan: [],
 
+    searchResult: null,
+    searchLoading: false,
+    searched: false,
+
     loading: false
   }),
 
@@ -152,7 +156,34 @@ export const useBansosStore = defineStore('bansos', {
       } finally {
         this.loading = false
       }
-    }
+    },
+
+    async searchNik(payload) {
+  this.searchLoading = true;
+  this.searched = false;
+
+  try {
+    const res = await BansosService.searchNik(payload);
+
+    console.log('RES FRONTEND:', res); // 🔥 cek ini
+
+    this.searchResult = res.data.data || null;
+    this.searched = true;
+
+    return this.searchResult;
+
+  } catch (err) {
+    console.error("SEARCH NIK ERROR:", err);
+
+    this.searchResult = null;
+    this.searched = true;
+
+    return null;
+
+  } finally {
+    this.searchLoading = false;
+  }
+},
 
   }
 })

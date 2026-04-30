@@ -25,31 +25,28 @@
         />
       </div>
       <div class="q-px-md q-pt-md">
-      <div class="row q-col-gutter-sm">
-        <div
-          class="col-4"
-          v-for="item in cards"
-          :key="item.title"
-        >
-          <!-- ICON BOX -->
-          <div class="icon-box-menu column justify-between items-center">
-  <!-- ICON (atas) -->
-  <q-icon :name="item.icon" size="20px" class="icon-main" />
+        <div class="row q-col-gutter-sm">
+          <div class="col-4" v-for="item in cards" :key="item.title">
+            <!-- ICON BOX -->
+            <div class="icon-box-menu column justify-between items-center">
+              <!-- ICON (atas) -->
+              <q-icon :name="item.icon" size="20px" class="icon-main" />
 
-  <!-- VALUE (bawah) -->
-  <div class="value-mini">
-    {{ formatNumber(item.value) }}
-  </div>
-</div>
+              <!-- VALUE (bawah) -->
+              <div class="value-mini">
+                {{ formatNumber(item.value) }}
+              </div>
+            </div>
 
-          <!-- TITLE -->
-          <div
-            class="text-caption text-weight-medium text-grey-8 q-mt-xs text-center ellipsis-2-lines" style="font-size: 9.5px;"
-          >
-            {{ item.title }}
+            <!-- TITLE -->
+            <div
+              class="text-caption text-weight-medium text-grey-8 q-mt-xs text-center ellipsis-2-lines"
+              style="font-size: 9.5px"
+            >
+              {{ item.title }}
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       <!-- CHARTS -->
@@ -79,9 +76,121 @@
         </div>
       </div>
 
+      <q-dialog v-model="dialogSearch" maximized="">
+        <q-card style="width: 100%;">
+          <!-- HEADER -->
+          <q-card-section class="row items-center">
+            <div class="text-subtitle1 text-weight-bold">
+              Verifikasi Penerima Bantuan
+            </div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <!-- INPUT -->
+          <q-card-section>
+            <q-input
+              v-model="searchNik"
+              label="Masukkan NIK Untuk Cek Data Anda"
+              dense
+              outlined
+              debounce="500"
+              @keyup.enter="searchData"
+            >
+              <template v-slot:append>
+                <q-icon
+                  name="search"
+                  class="cursor-pointer"
+                  @click="searchData"
+                />
+              </template>
+            </q-input>
+          </q-card-section>
+
+          <q-inner-loading :showing="searchLoading" />
+
+          <!-- RESULT -->
+          <q-card-section v-if="searchResult">
+            <q-card class="profile-card">
+              <!-- HEADER -->
+              <div class="profile-header">
+                <q-avatar size="56px" class="bg-white text-primary shadow-2">
+                  <q-icon name="mdi-account" size="30px" />
+                </q-avatar>
+
+                <div class="q-ml-md">
+                  <div class="text-subtitle1 text-weight-bold">
+                    {{ searchResult.nama_lgkp || '-' }}
+                  </div>
+
+                  <div class="text-caption text-white-7">
+                    {{ formatNik(searchResult.nik_id) }}
+                  </div>
+                  <div class="status-chip bg-green text-white">
+                    ✔ Terverifikasi
+                  </div>
+                </div>
+              </div>
+
+              <!-- BODY -->
+              <q-card-section class="q-pt-md">
+                <div class="info-row">
+                  <div class="label">No KK</div>
+                  <div class="value">{{ searchResult.no_kk || '-' }}</div>
+                </div>
+
+                <div class="info-row">
+  <div class="label">Jenis Kelamin</div>
+  <div class="value">
+    {{ formatGender(searchResult.jenis_klmin) }}
+  </div>
+</div>
+
+                <div class="info-row">
+                  <div class="label">Tempat / Tgl Lahir</div>
+                  <div class="value">
+                    {{ searchResult.tmpt_lhr || '-' }},
+                    {{ searchResult.tgl_lhr || '-' }}
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="label">No HP</div>
+                  <div class="value">{{ searchResult.no_hp || "-" }}</div>
+                </div>
+
+                <div class="info-row">
+                  <div class="label">Alamat</div>
+                  <div class="value">{{ searchResult.alamat || "-" }}</div>
+                </div>
+
+                <div class="info-row">
+                  <div class="label">Keterangan</div>
+                  <div class="value">{{ searchResult.keterangan || "-" }}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Jenis Bantuan</div>
+                  <div class="value">{{ searchResult.judul || "-" }}</div>
+                </div>
+              </q-card-section>
+
+              <!-- FOOTER -->
+              <div class="profile-footer">
+                <q-icon name="check_circle" size="16px" class="q-mr-xs" />
+                Data Terdaftar Sebagai Penerima Bantuan
+              </div>
+            </q-card>
+          </q-card-section>
+
+          <!-- NOT FOUND -->
+          <q-card-section v-if="searched && !searchResult">
+            <div class="text-negative text-center">Data tidak ditemukan</div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
       <!-- FAB -->
       <q-page-sticky position="bottom-right" :offset="[16, 16]">
-        <q-btn fab color="primary" icon="refresh" @click="refreshAll" />
+        <q-btn fab color="primary" icon="search" @click="dialogSearch = true" />
       </q-page-sticky>
     </q-pull-to-refresh>
   </q-page>
@@ -98,7 +207,20 @@ export default {
   data() {
     return {
       pilih_kecamatan: null,
+      dialogSearch: false,
+      searchNik: "",
     };
+  },
+
+  watch: {
+    dialogSearch(val) {
+      if (val) {
+        const store = useBansosStore();
+        store.searchResult = null;
+        store.searched = false;
+        this.searchNik = "";
+      }
+    },
   },
 
   computed: {
@@ -107,6 +229,9 @@ export default {
       "jmlKelompok",
       "jmlBantuanIndividu",
       "jmlBantuanKelompok",
+      "searchResult",
+      "searchLoading",
+      "searched",
       "loading",
     ]),
 
@@ -148,6 +273,24 @@ export default {
   methods: {
     getStore() {
       return useBansosStore();
+    },
+
+    formatNik(nik) {
+      return nik.replace(/(\d{4})(?=\d)/g, "$1 ");
+    },
+
+    async searchData() {
+      const store = useBansosStore();
+
+      const cleanNik = this.searchNik.replace(/\s/g, '');
+
+      await store.searchNik({
+        nik: cleanNik,
+      });
+    },
+
+    formatGender(val) {
+      return val == 1 ? 'Laki-laki' : 'Perempuan';
     },
 
     async refreshAll(done) {
@@ -199,12 +342,20 @@ export default {
         y: i.jmlPenerima,
       }));
 
-      this.renderPie("grafikBantuanIndividu", individu, "Individu Penerima Bantuan");
+      this.renderPie(
+        "grafikBantuanIndividu",
+        individu,
+        "Individu Penerima Bantuan",
+      );
 
       // PIE KELOMPOK
       const kelompok = store.kelompok.map((i) => [i.judul, i.jmlPenerima]);
 
-      this.renderPie("grafikBantuanKelompok", kelompok, "Kelompok Penerima Bantuan");
+      this.renderPie(
+        "grafikBantuanKelompok",
+        kelompok,
+        "Kelompok Penerima Bantuan",
+      );
 
       // BAR INDIVIDU
       const individuKec = store.individuKecamatan.map((i) => [
@@ -288,35 +439,35 @@ export default {
     },
 
     renderBar(id, data, title) {
-  Highcharts.chart(id, {
-    chart: { type: "column" },
+      Highcharts.chart(id, {
+        chart: { type: "column" },
 
-    title: { text: title },
+        title: { text: title },
 
-    legend: {
-      enabled: false // 🔥 hilangkan "Series 1"
-    },
+        legend: {
+          enabled: false, // 🔥 hilangkan "Series 1"
+        },
 
-    xAxis: {
-      type: "category"
-    },
+        xAxis: {
+          type: "category",
+        },
 
-    plotOptions: {
-      series: {
-        animation: { duration: 600 }
-      }
-    },
+        plotOptions: {
+          series: {
+            animation: { duration: 600 },
+          },
+        },
 
-    series: [
+        series: [
           {
             name: "Jumlah",
             data: data,
           },
-    ],
+        ],
 
-    credits: { enabled: false }
-  });
-}
+        credits: { enabled: false },
+      });
+    },
   },
 
   async mounted() {
@@ -377,7 +528,7 @@ export default {
 
   border-radius: 25px;
   display: flex;
-  flex-direction: column;   /* penting */
+  flex-direction: column; /* penting */
   justify-content: space-between; /* dorong atas & bawah */
   align-items: center;
 
@@ -431,5 +582,60 @@ export default {
 #grafikIndividuKecamatan,
 #grafikKelompokKecamatan {
   min-height: 300px;
+}
+
+/* CARD */
+.profile-card {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* HEADER */
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+
+  background: linear-gradient(135deg, #176b87, #1f8ca8);
+  color: white;
+}
+
+/* INFO LIST */
+.info-row {
+  margin-bottom: 10px;
+}
+
+.label {
+  font-size: 11px;
+  color: #888;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* FOOTER */
+.profile-footer {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+
+  background: #f5f5f5;
+  color: #4caf50;
+
+  display: flex;
+  align-items: center;
+}
+
+.status-chip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 10px;
 }
 </style>
