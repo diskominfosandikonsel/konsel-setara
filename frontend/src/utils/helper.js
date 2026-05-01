@@ -39,6 +39,21 @@ export const formatDate = (dateString) => {
   })
 }
 
+export const formatDates = (dateString) => {
+  if (!dateString) return ''
+
+  const date = new Date(dateString)
+  const now = new Date()
+
+  const diffMs = now - date
+
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
 export const formatDateTime = (dateString) => {
   if (!dateString) return { type: 'empty' }
 

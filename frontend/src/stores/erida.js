@@ -10,6 +10,7 @@ export const useEridaStore = defineStore("erida", {
     teknologi: [],
     haki: [],
     penelitian: [],
+    kategori: [],
     dataLastPage: 1,
     loading: false,
   }),
@@ -377,6 +378,26 @@ export const useEridaStore = defineStore("erida", {
       }
     },
 
+    async addIzin(formData) {
+      try {
+        const res = await EridaService.addIzin(formData);
+
+        return res.data;
+      } catch (err) {
+        console.error("CREATE IZIN ERROR:", err);
+        throw err;
+      }
+    },
+
+    async getKategori() {
+      try {
+        const res = await EridaService.getKategori();
+        this.kategori = res.data
+      } catch (err) {
+        console.error('GET KATEGORI ERROR:', err)
+      }
+    },
+    
     async fetchInovasi(payload, append = true) {
       this.loading = true;
 

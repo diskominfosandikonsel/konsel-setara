@@ -53,7 +53,7 @@
                 class="izin-card cursor-pointer"
                 clickable
                 v-ripple
-                @click="goDetail(item)"
+                @click="openDetail(item)"
               >
                 <q-card-section class="content-wrapper">
                   <!-- CONTENT -->
@@ -81,14 +81,14 @@
                             class="icon-muted"
                           />
                           <span class="q-ml-xs">
-                            {{ formatDate(item.createAt) }}
+                            {{ formatDates(item.createAt) }}
                           </span>
                         </div>
                       </div>
 
                       <!-- RIGHT ICON -->
                       <q-fab
-                      fab-mini
+                        fab-mini
                         color="amber"
                         text-color="black"
                         icon="more_vert"
@@ -157,7 +157,7 @@
               />
 
               <q-toolbar-title class="text-subtitle2 text-weight-medium">
-              {{ selectedItem?.judul || "Detail Penelitian" }}
+                {{ selectedItem?.judul || "Detail Penelitian" }}
               </q-toolbar-title>
 
               <q-icon
@@ -215,110 +215,461 @@
             </q-toolbar>
 
             <!-- CONTENT -->
+            <div class="col scroll">
+              <div class="form-wrapper">
+                <q-stepper
+                  v-model="step"
+                  vertical
+                  animated
+                  flat
+                  class="regis-stepper"
+                >
+                  <!-- STEP 1 -->
+                  <q-step
+                    :name="1"
+                    title="Identitas"
+                    icon="person"
+                    :done="step > 1"
+                  >
+                    <div class="step-card">
+                      <div class="step-title">Data Diri</div>
+
+                      <q-input
+                        v-model="form.nama"
+                        label="Nama"
+                        outlined
+                        dense
+                        readonly
+                      />
+                      <q-input
+                        v-model="form.alamat"
+                        label="Alamat"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.hp"
+                        label="No HP"
+                        outlined
+                        dense
+                        readonly
+                      />
+                      <q-input
+                        v-model="form.email"
+                        label="Email"
+                        outlined
+                        dense
+                        readonly
+                      />
+                      <q-input v-model="form.nik" label="NIK" outlined dense />
+
+                      <q-file
+                        v-model="form.ktp"
+                        label="Upload KTP (PDF)"
+                        outlined
+                        dense
+                        accept=".pdf"
+                      />
+
+                      <q-stepper-navigation>
+                        <q-btn
+                          color="primary"
+                          label="Lanjut"
+                          @click="step = 2"
+                          :disable="!isStep1Valid"
+                          class="full-width"
+                        />
+                      </q-stepper-navigation>
+                    </div>
+                  </q-step>
+
+                  <!-- STEP 2 -->
+                  <q-step
+                    :name="2"
+                    title="Pengantar"
+                    icon="description"
+                    :done="step > 2"
+                  >
+                    <div class="step-card">
+                      <div class="step-title">Surat Pengantar</div>
+
+                      <q-input
+                        v-model="form.nomorP"
+                        label="Nomor Surat"
+                        outlined
+                        dense
+                      />
+
+                      <q-input
+                        v-model="form.tanggalP"
+                        label="Tanggal"
+                        outlined
+                        dense
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="event">
+                            <q-popup-proxy cover>
+                              <q-date v-model="form.tanggalP" />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+
+                      <q-input
+                        v-model="form.namaP"
+                        label="Penandatangan"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.jabatanP"
+                        label="Jabatan"
+                        outlined
+                        dense
+                      />
+
+                      <q-file
+                        v-model="form.suratPeng"
+                        label="Upload Surat Pengantar"
+                        outlined
+                        dense
+                        accept=".pdf"
+                      />
+
+                      <q-stepper-navigation class="row q-col-gutter-sm">
+                        <q-btn
+                          color="primary"
+                          label="Lanjut"
+                          @click="step = 3"
+                          :disable="!isStep2Valid"
+                          class="col"
+                        />
+                        <q-btn
+                          flat
+                          label="Kembali"
+                          @click="step = 1"
+                          class="col"
+                        />
+                      </q-stepper-navigation>
+                    </div>
+                  </q-step>
+
+                  <!-- STEP 3 -->
+                  <q-step
+                    :name="3"
+                    title="Rekomendasi"
+                    icon="assignment"
+                    :done="step > 3"
+                  >
+                    <div class="step-card">
+                      <div class="step-title">Surat Rekomendasi</div>
+
+                      <q-input
+                        v-model="form.nomorR"
+                        label="Nomor Surat"
+                        outlined
+                        dense
+                      />
+
+                      <q-input
+                        v-model="form.tanggalR"
+                        label="Tanggal"
+                        outlined
+                        dense
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="event">
+                            <q-popup-proxy cover>
+                              <q-date v-model="form.tanggalR" />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+
+                      <q-input
+                        v-model="form.namaR"
+                        label="Penandatangan"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.jabatanR"
+                        label="Jabatan"
+                        outlined
+                        dense
+                      />
+
+                      <q-file
+                        v-model="form.suratRek"
+                        label="Upload Surat Rekomendasi"
+                        outlined
+                        dense
+                        accept=".pdf"
+                      />
+
+                      <q-stepper-navigation class="row q-col-gutter-sm">
+                        <q-btn
+                          color="primary"
+                          label="Lanjut"
+                          @click="step = 4"
+                          :disable="!isStep3Valid"
+                          class="col"
+                        />
+                        <q-btn
+                          flat
+                          label="Kembali"
+                          @click="step = 2"
+                          class="col"
+                        />
+                      </q-stepper-navigation>
+                    </div>
+                  </q-step>
+
+                  <!-- STEP 4 -->
+                  <q-step :name="4" title="Penelitian" icon="science">
+                    <div class="step-card">
+                      <div class="step-title">Detail Penelitian</div>
+
+                      <q-select
+                        v-model="form.kategori_id"
+                        :options="list_kategori"
+                        option-label="uraian"
+                        option-value="kategori_id"
+                        emit-value
+                        map-options
+                        label="Kategori"
+                        outlined
+                        dense
+                      />
+
+                      <q-input
+                        v-model="form.judul"
+                        label="Judul"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.lokasi"
+                        label="Lokasi"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.tujuan"
+                        label="Tujuan"
+                        outlined
+                        dense
+                      />
+                      <q-input
+                        v-model="form.lingkup"
+                        label="Lingkup"
+                        outlined
+                        dense
+                      />
+
+                      <q-input
+                        v-model="form.tgl_mulai"
+                        label="Mulai"
+                        outlined
+                        dense
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="event">
+                            <q-popup-proxy cover>
+                              <q-date v-model="form.tgl_mulai" />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+
+                      <q-input
+                        v-model="form.tgl_selesai"
+                        label="Selesai"
+                        outlined
+                        dense
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="event">
+                            <q-popup-proxy cover>
+                              <q-date v-model="form.tgl_selesai" />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+
+                      <q-file
+                        v-model="form.filePro"
+                        label="Upload Proposal"
+                        outlined
+                        dense
+                        accept=".pdf"
+                      />
+
+                      <q-stepper-navigation class="row q-col-gutter-sm">
+                        <q-btn
+                          color="primary"
+                          label="Simpan"
+                          icon="check"
+                          @click="submitAll"
+                          :disable="!isStep4Valid"
+                          class="col"
+                        />
+                        <q-btn
+                          flat
+                          label="Kembali"
+                          @click="step = 3"
+                          class="col"
+                        />
+                      </q-stepper-navigation>
+                    </div>
+                  </q-step>
+                </q-stepper>
+              </div>
+            </div>
+          </q-card>
+        </q-dialog>
+        <q-dialog
+          v-model="detailDialog"
+          maximized
+          transition-show="slide-up"
+          transition-hide="slide-down"
+        >
+          <q-card class="column fit bg-grey-1">
+            <!-- HEADER -->
+            <q-toolbar class="bg-white text-black toolbar-bordered">
+              <q-btn flat round icon="arrow_back" v-close-popup />
+
+              <q-toolbar-title class="text-subtitle2">
+                Detail Penelitian
+              </q-toolbar-title>
+            </q-toolbar>
+
+            <!-- CONTENT -->
             <div class="col scroll q-pa-md">
               <!-- IDENTITAS -->
-              <div class="text-subtitle2 q-mb-sm">Identitas</div>
+              <div class="detail-card">
+                <div class="col text-center q-mb-md q-mt-sm">
+                  <div class="text-subtitle1 text-weight-bold">
+                    {{ selectedItem.judul }}
+                  </div>
+                  <div class="text-caption text-grey-6 text-weight-medium">
+                    <!-- {{ selectedItem.createBy }} -->
+                    Kiken S Batara
+                  </div>
+                  <q-badge
+                    :color="getStatusColor(selectedItem.status)"
+                    text-color="white"
+                    class="q-px-sm q-py-xs"
+                  >
+                    {{ selectedItem.status || "unknown" }}
+                  </q-badge>
+                </div>
+                <div class="section-title">
+                  <q-icon name="person" size="16px" /> Identitas
+                </div>
 
-              <q-input
-                v-model="form.nama"
-                label="Nama"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.alamat"
-                label="Alamat"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.hp"
-                label="HP"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.email"
-                label="Email"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.nik"
-                label="NIK"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
+                <div class="detail-item">
+                  <span>Nama</span>
+                  <b>{{ selectedItem.nama }}</b>
+                </div>
 
-              <q-file
-                v-if="mode !== 'detail'"
-                v-model="form.ktp"
-                label="Upload KTP"
-                outlined
-                dense
-              />
+                <div class="detail-item">
+                  <span>Email</span>
+                  <b>{{ selectedItem.email }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>No HP</span>
+                  <b>{{ selectedItem.hp }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>Alamat</span>
+                  <b>{{ selectedItem.alamat }}</b>
+                </div>
+              </div>
+
+              <!-- PENGANTAR -->
+              <div class="detail-card">
+                <div class="section-title">
+                  <q-icon name="description" size="16px" /> Pengantar
+                </div>
+
+                <div class="detail-item">
+                  <span>Nomor</span>
+                  <b>{{ selectedItem.nomorP || "-" }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>Tanggal</span>
+                  <b>{{ formatDates(selectedItem.tanggalP) }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>Penandatangan</span>
+                  <b>{{ selectedItem.namaP }}</b>
+                </div>
+              </div>
+
+              <!-- REKOMENDASI -->
+              <div class="detail-card">
+                <div class="section-title">
+                  <q-icon name="assignment" size="16px" /> Rekomendasi
+                </div>
+
+                <div class="detail-item">
+                  <span>Nomor</span>
+                  <b>{{ selectedItem.nomorR || "-" }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>Tanggal</span>
+                  <b>{{ formatDates(selectedItem.tanggalR) }}</b>
+                </div>
+
+                <div class="detail-item">
+                  <span>Penandatangan</span>
+                  <b>{{ selectedItem.namaR }}</b>
+                </div>
+              </div>
 
               <!-- PENELITIAN -->
-              <div class="text-subtitle2 q-mt-md q-mb-sm">Penelitian</div>
+              <div class="detail-card">
+                <div class="section-title">
+                  <q-icon name="science" size="16px" /> Penelitian
+                </div>
 
-              <q-select
-                v-model="form.kategori_id"
-                :options="list_kategori"
-                option-label="uraian"
-                label="Kategori"
-                outlined
-                dense
-                :disable="mode === 'detail'"
-              />
+                <div class="detail-item">
+                  <span>Lokasi</span>
+                  <b>{{ selectedItem.lokasi }}</b>
+                </div>
 
-              <q-input
-                v-model="form.judul"
-                label="Judul"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.lokasi"
-                label="Lokasi"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.tujuan"
-                label="Tujuan"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
-              <q-input
-                v-model="form.lingkup"
-                label="Lingkup"
-                outlined
-                dense
-                :readonly="mode === 'detail'"
-              />
+                <div class="detail-item">
+                  <span>Tujuan</span>
+                  <b>{{ selectedItem.tujuan }}</b>
+                </div>
 
-              <q-file
-                v-if="mode !== 'detail'"
-                v-model="form.filePro"
-                label="Upload Proposal"
-                outlined
-                dense
-              />
+                <div class="detail-item">
+                  <span>Lingkup</span>
+                  <b>{{ selectedItem.lingkup }}</b>
+                </div>
 
-              <!-- ACTION BUTTONS (DETAIL MODE) -->
-              <div v-if="mode === 'detail'" class="q-mt-lg">
+                <div class="detail-item">
+                  <span>Periode</span>
+                  <b>
+                    {{ formatDates(selectedItem.tgl_mulai) }} -
+                    {{ formatDates(selectedItem.tgl_selesai) }}
+                  </b>
+                </div>
+              </div>
+
+              <!-- ACTION -->
+              <div class="q-mt-md">
                 <q-btn
-                  label="Lihat PDF"
-                  icon="description"
+                  label="Lihat Dokumen PDF"
+                  icon="picture_as_pdf"
                   color="primary"
+                  unelevated
                   class="full-width q-mb-sm"
                   @click="openPdfFromDetail"
                 />
@@ -327,8 +678,9 @@
                   label="Edit Data"
                   icon="edit"
                   color="orange"
+                  flat
                   class="full-width"
-                  @click="mode = 'edit'"
+                  @click="editItem(selectedItem)"
                 />
               </div>
             </div>
@@ -344,7 +696,7 @@
 
 <script>
 import { useEridaStore } from "stores/erida";
-import { getFileErida, formatDate } from "src/utils/helper";
+import { getFileErida, formatDates } from "src/utils/helper";
 
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
@@ -363,15 +715,18 @@ export default {
       page: 1,
       lastPage: 1,
       allDataLoaded: false,
+      detailDialog: false,
       cari: "",
       skeletonLoading: true,
-      formatDate: formatDate,
+      formatDates: formatDates,
       showPdf: false,
       selectedItem: null,
       pdfLoading: false,
       pagePlaceholders: [],
+      list_kategori: [],
       formDialog: false,
       mode: "add", // add | edit | detail
+      step: 1,
       form: {
         id: null,
         nama: "",
@@ -386,9 +741,40 @@ export default {
         lingkup: "",
         filePro: null,
         kategori_id: null,
+        nomorP: "",
+        tanggalP: "",
+        namaP: "",
+        jabatanP: "",
+        suratPeng: null,
+
+        nomorR: "",
+        tanggalR: "",
+        namaR: "",
+        jabatanR: "",
+        suratRek: null,
+
+        tgl_mulai: "",
+        tgl_selesai: "",
       },
       list_kategori: [],
     };
+  },
+
+  computed: {
+    isStep1Valid() {
+      return (
+        this.form.nama && this.form.alamat && this.form.nik && this.form.ktp
+      );
+    },
+    isStep2Valid() {
+      return this.form.nomorP && this.form.suratPeng;
+    },
+    isStep3Valid() {
+      return this.form.nomorR && this.form.suratRek;
+    },
+    isStep4Valid() {
+      return this.form.judul && this.form.kategori_id && this.form.filePro;
+    },
   },
 
   methods: {
@@ -396,18 +782,54 @@ export default {
       this.$router.back();
     },
 
+    openDetail(item) {
+      this.selectedItem = item;
+      this.mode = "detail";
+      this.detailDialog = true;
+    },
+
+    initUserData() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (!user || !user._id) return;
+
+        this.form.nama = user.nama ?? "";
+        this.form.hp = user.hp ?? "";
+        this.form.email = user.email ?? "";
+      } catch (err) {
+        console.error("USER PARSE ERROR:", err);
+      }
+    },
+
     onAdd() {
       this.mode = "add";
       this.resetForm();
+      this.initUserData();
+      this.step = 1;
       this.formDialog = true;
     },
 
-    async goDetail(item) {
-      this.selectedItem = item;
+    async loadKategori() {
+      await this.erida.getKategori();
+      this.list_kategori = this.erida.kategori;
+    },
+
+    // async goDetail(item) {
+    //   this.selectedItem = item;
+    //   this.showPdf = true;
+
+    //   this.$nextTick(() => {
+    //     this.loadPdf(item);
+    //   });
+    // },
+
+    openPdfFromDetail() {
+      this.detailDialog = false;
       this.showPdf = true;
 
       this.$nextTick(() => {
-        this.loadPdf(item);
+        this.loadPdf(this.selectedItem);
       });
     },
 
@@ -467,6 +889,19 @@ export default {
       this.skeletonLoading = false;
     },
 
+    getStatusColor(status) {
+      switch (status) {
+        case "proses":
+          return "orange";
+        case "selesai":
+          return "green";
+        case "ditolak":
+          return "red";
+        default:
+          return "grey";
+      }
+    },
+
     async onLoad(index, done) {
       if (this.allDataLoaded) {
         done(true);
@@ -488,6 +923,111 @@ export default {
 
       this.skeletonLoading = true;
       await this.loadData(true);
+    },
+
+    async submitAll() {
+      try {
+        // 🔥 VALIDASI FINAL (semua step)
+        if (
+          !this.isStep1Valid ||
+          !this.isStep2Valid ||
+          !this.isStep3Valid ||
+          !this.isStep4Valid
+        ) {
+          this.$q.notify({
+            type: "warning",
+            message: "Lengkapi semua data terlebih dahulu",
+          });
+          return;
+        }
+
+        this.$q.loading.show();
+
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        // 🔥 GUNAKAN FORMDATA (karena ada file)
+        const formData = new FormData();
+
+        // =====================
+        // IDENTITAS
+        // =====================
+        formData.append("user_id", user._id);
+        formData.append("nama", this.form.nama);
+        formData.append("email", this.form.email);
+        formData.append("hp", this.form.hp);
+        formData.append("alamat", this.form.alamat);
+        formData.append("nik", this.form.nik);
+
+        if (this.form.ktp) {
+          formData.append("ktp", this.form.ktp);
+        }
+
+        // =====================
+        // PENGANTAR
+        // =====================
+        formData.append("nomor_pengantar", this.form.nomorP || "");
+        formData.append("tanggal_pengantar", this.form.tanggalP || "");
+        formData.append("nama_pengantar", this.form.namaP || "");
+        formData.append("jabatan_pengantar", this.form.jabatanP || "");
+
+        if (this.form.suratPeng) {
+          formData.append("file_pengantar", this.form.suratPeng);
+        }
+
+        // =====================
+        // REKOMENDASI
+        // =====================
+        formData.append("nomor_rekomendasi", this.form.nomorR || "");
+        formData.append("tanggal_rekomendasi", this.form.tanggalR || "");
+        formData.append("nama_rekomendasi", this.form.namaR || "");
+        formData.append("jabatan_rekomendasi", this.form.jabatanR || "");
+
+        if (this.form.suratRek) {
+          formData.append("file_rekomendasi", this.form.suratRek);
+        }
+
+        // =====================
+        // PENELITIAN
+        // =====================
+        formData.append("kategori_id", this.form.kategori_id || "");
+        formData.append("judul", this.form.judul || "");
+        formData.append("lokasi", this.form.lokasi || "");
+        formData.append("tujuan", this.form.tujuan || "");
+        formData.append("lingkup", this.form.lingkup || "");
+        formData.append("tgl_mulai", this.form.tgl_mulai || "");
+        formData.append("tgl_selesai", this.form.tgl_selesai || "");
+
+        if (this.form.filePro) {
+          formData.append("proposal", this.form.filePro);
+        }
+
+        // =====================
+        // HIT API (SESUAIKAN)
+        // =====================
+        await this.erida.addIzin(formData);
+
+        // =====================
+        // SUCCESS
+        // =====================
+        this.$q.notify({
+          type: "positive",
+          message: "Data berhasil disimpan",
+        });
+
+        this.formDialog = false;
+        this.step = 1;
+        this.resetForm();
+        this.loadData(true);
+      } catch (err) {
+        console.error("SUBMIT ERROR:", err);
+
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal menyimpan data",
+        });
+      } finally {
+        this.$q.loading.hide();
+      }
     },
 
     generateCacheKey() {
@@ -581,6 +1121,7 @@ export default {
 
   mounted() {
     this.loadData(true);
+    this.loadKategori();
   },
 };
 </script>
@@ -633,22 +1174,6 @@ export default {
 /* ICON STYLE */
 .icon-muted {
   color: #9ca3af;
-}
-
-/* 🔥 DOCUMENT ICON BADGE */
-.doc-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-
-  flex-shrink: 0;
 }
 
 .two_line {
@@ -728,5 +1253,101 @@ canvas {
 .col.scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.regis-stepper {
+  background: transparent;
+}
+
+.step-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.q-stepper__tab {
+  border-radius: 12px;
+}
+
+.q-stepper__dot {
+  transform: scale(0.9);
+}
+
+.form-wrapper {
+  padding: 16px;
+  padding-bottom: 40px;
+}
+
+.step-card {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.regis-stepper {
+  background: transparent;
+}
+
+.step-card div {
+  font-size: 13px;
+  color: #374151;
+}
+
+.detail-hero {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.detail-card {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 10px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item span {
+  color: #6b7280;
 }
 </style>

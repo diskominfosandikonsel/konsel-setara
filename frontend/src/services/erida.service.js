@@ -76,6 +76,18 @@ export default {
     return apiErida.post('server_penelitian/view', payload)
   },
 
+  getKategori() {
+    return apiErida.get('server_penelitian/getKategori')
+  },
+
+  addIzin(data) {
+    return apiErida.post('server_penelitian/createIzin', data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   getInovasi(payload) {
     return apiErida.post('server_krenova/view', payload)
   },

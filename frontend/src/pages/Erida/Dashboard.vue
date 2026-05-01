@@ -114,7 +114,7 @@
 
       <div class="row q-col-gutter-md">
         <div
-          class="col-4"
+          class="col-3"
           v-for="item in services"
           :key="item.label"
 
@@ -363,11 +363,11 @@ export default {
       activeIndex: 0,
 
       services: [
-        // {
-        //   label: "Izin Penelitian",
-        //   icon: "far fa-copy",
-        //   route: "erida-izin",
-        // },
+        {
+          label: "Izin Penelitian",
+          icon: "far fa-copy",
+          route: "erida-izin",
+        },
         {
           label: "Kreatifitas Inovasi",
           icon: "far fa-lightbulb",

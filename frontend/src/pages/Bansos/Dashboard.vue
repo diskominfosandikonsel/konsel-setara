@@ -77,7 +77,7 @@
       </div>
 
       <q-dialog v-model="dialogSearch" maximized="">
-        <q-card style="width: 100%;">
+        <q-card style="width: 100%">
           <!-- HEADER -->
           <q-card-section class="row items-center">
             <div class="text-subtitle1 text-weight-bold">
@@ -120,7 +120,7 @@
 
                 <div class="q-ml-md">
                   <div class="text-subtitle1 text-weight-bold">
-                    {{ searchResult.nama_lgkp || '-' }}
+                    {{ searchResult.nama_lgkp || "-" }}
                   </div>
 
                   <div class="text-caption text-white-7">
@@ -136,21 +136,21 @@
               <q-card-section class="q-pt-md">
                 <div class="info-row">
                   <div class="label">No KK</div>
-                  <div class="value">{{ searchResult.no_kk || '-' }}</div>
+                  <div class="value">{{ searchResult.no_kk || "-" }}</div>
                 </div>
 
                 <div class="info-row">
-  <div class="label">Jenis Kelamin</div>
-  <div class="value">
-    {{ formatGender(searchResult.jenis_klmin) }}
-  </div>
-</div>
+                  <div class="label">Jenis Kelamin</div>
+                  <div class="value">
+                    {{ formatGender(searchResult.jenis_klmin) }}
+                  </div>
+                </div>
 
                 <div class="info-row">
                   <div class="label">Tempat / Tgl Lahir</div>
                   <div class="value">
-                    {{ searchResult.tmpt_lhr || '-' }},
-                    {{ searchResult.tgl_lhr || '-' }}
+                    {{ searchResult.tmpt_lhr || "-" }},
+                    {{ searchResult.tgl_lhr || "-" }}
                   </div>
                 </div>
                 <div class="info-row">
@@ -282,7 +282,7 @@ export default {
     async searchData() {
       const store = useBansosStore();
 
-      const cleanNik = this.searchNik.replace(/\s/g, '');
+      const cleanNik = this.searchNik.replace(/\s/g, "");
 
       await store.searchNik({
         nik: cleanNik,
@@ -290,7 +290,7 @@ export default {
     },
 
     formatGender(val) {
-      return val == 1 ? 'Laki-laki' : 'Perempuan';
+      return val == 1 ? "Laki-laki" : "Perempuan";
     },
 
     async refreshAll(done) {
