@@ -126,8 +126,6 @@ function onNotifClick(notif) {
     router.push('/kartu')
   } else if (notif.type === 'csr_pengajuan') {
     router.push('/csr_pengajuan')
-  } else if (notif.type === 'csr_registrasi') {
-    router.push('/csr_panel')
   } else if (notif.type === 'csr_new_program' && notif.id) {
     router.push('/csr_detail/' + notif.id)
   } else if (notif.type === 'csr_program') {
@@ -160,7 +158,10 @@ function getTypeLabel(type) {
     sippadu: 'SIPPADU',
     sapakonsel: 'SAPA KONSEL',
     firetap: 'FIRETAP',
-    perak: 'PERAK'
+    perak: 'PERAK',
+    csr_pengajuan: 'CSR SETARA',
+    csr_new_program: 'CSR SETARA',
+    csr_program: 'CSR SETARA'
   }
   return map[type] || 'UMUM'
 }
@@ -170,7 +171,10 @@ function getTypeClass(type) {
     sippadu: 'type-sippadu',
     sapakonsel: 'type-sapakonsel',
     firetap: 'type-firetap',
-    perak: 'type-perak'
+    perak: 'type-perak',
+    csr_pengajuan: 'type-csr',
+    csr_new_program: 'type-csr',
+    csr_program: 'type-csr'
   }
   return map[type] || 'type-default'
 }
@@ -294,6 +298,10 @@ function formatTimeAgo(isoStr) {
 
 .notif-type-label.type-perak {
   color: #0495b3;
+}
+
+.notif-type-label.type-csr {
+  color: #0d9488; /* Teal color untuk CSR */
 }
 
 .notif-type-label.type-default {

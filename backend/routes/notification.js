@@ -35,7 +35,11 @@ router.post('/send', (req, res) => {
 
       console.log('TOKENS FOUND:', rows)
 
-      const tokens = rows.map(r => r.token)
+      const tokens = rows.map(r => r.token).filter(t => t && typeof t === 'string' && t.trim().length > 5)
+
+      if (tokens.length === 0) {
+        return res.status(404).json({ message: 'No valid FCM tokens found' })
+      }
 
       try {
         let response

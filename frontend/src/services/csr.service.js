@@ -119,12 +119,12 @@ export const CsrService = {
 
   // Lihat daftar bukti dukung
   getEviden(pengajuan_id) {
-    return apiCsr.post('api/v1/list_pengajuan/viewEviden', { pengajuan_id })
+    return apiCsr.get('api/v1/list_pengajuan/getEviden', { params: { id: pengajuan_id } })
   },
 
   // Hapus bukti dukung
   hapusEviden(id) {
-    return apiCsr.post('api/v1/list_pengajuan/hapusEviden', { id })
+    return apiCsr.post('api/v1/list_pengajuan/removeEviden', { id })
   },
 
   // ========== HELPERS ==========

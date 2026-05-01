@@ -168,9 +168,6 @@ export default {
             if (data.type === 'csr_pengajuan') {
               resolvedTitle = data.status === '2' ? 'Pengajuan Disetujui' : 'Pengajuan Ditolak';
               resolvedBody = data.status === '2' ? 'Selamat! Pengajuan CSR Anda telah disetujui.' : 'Maaf, pengajuan CSR Anda belum dapat diterima.';
-            } else if (data.type === 'csr_registrasi') {
-              resolvedTitle = data.status === 'terima' ? 'Akun Terverifikasi' : 'Registrasi Ditolak';
-              resolvedBody = data.status === 'terima' ? 'Selamat! Akun perusahaan Anda telah aktif.' : 'Maaf, registrasi perusahaan Anda ditolak.';
             } else if (data.type === 'csr_new_program') {
               resolvedTitle = 'Program CSR Baru';
               resolvedBody = 'Pemerintah baru saja merilis program CSR baru. Cek sekarang!';
@@ -268,16 +265,12 @@ export default {
         await this.$router.push('/csr_pengajuan')
       }
 
-      else if (data.type === 'csr_registrasi') {
-        await this.$router.push('/csr_panel')
-      }
-
       else if (data.type === 'csr_new_program' && data.id) {
         await this.$router.push('/csr_detail/' + data.id)
       }
 
       else if (data.type === 'csr_program') {
-        await this.$router.push('/csr_program')
+        await this.$router.push('/csr_pengajuan')
       }
     }
   }

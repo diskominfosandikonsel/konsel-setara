@@ -83,7 +83,7 @@
       <div class="q-mt-lg" v-if="detail.file_spec">
         <div class="section-title">Lampiran Spesifikasi</div>
         <q-btn unelevated rounded color="blue-grey-7" icon="picture_as_pdf" label="Lihat Spesifikasi (PDF)"
-          class="full-width q-py-sm" @click="openPDF(detail.file_spec)" />
+          class="full-width q-py-sm" @click="openSpecPdf()" />
       </div>
 
       <!-- Deskripsi -->
@@ -98,10 +98,22 @@
         <div class="mitra-list">
           <div v-for="(m, idx) in mitraList" :key="idx" class="mitra-item">
             <q-icon name="business" size="18px" color="teal" />
-            <div class="q-ml-sm">
+            <div class="q-ml-sm" style="flex: 1;">
               <div class="mitra-name">{{ m.nama_mitra }}</div>
               <div class="mitra-info" v-if="m.jumlah_ambil">{{ m.jumlah_ambil }} {{ detail.satuan }} — {{
                 formatRupiah(m.nilai) }}</div>
+
+              <!-- Eviden List -->
+              <div v-if="m.eviden && m.eviden.length > 0" class="q-mt-sm">
+                <div class="text-caption text-weight-bold text-teal-8 q-mb-xs">Bukti Dukung:</div>
+                <div v-for="(ev, eIdx) in m.eviden" :key="eIdx" class="row items-center justify-between q-mb-xs q-pa-xs bg-grey-2 rounded-borders">
+                  <div class="row items-center" style="flex: 1; overflow: hidden; cursor: pointer;" @click="openGallery(m.eviden, eIdx)">
+                    <q-icon name="image" size="16px" color="grey-7" class="q-mr-xs"/>
+                    <div class="text-caption ellipsis" style="max-width: 80%;">{{ ev.keterangan || 'Lampiran Bukti' }}</div>
+                  </div>
+                  <q-btn flat dense round size="sm" color="primary" icon="visibility" @click="openGallery(m.eviden, eIdx)" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -144,6 +156,61 @@
       </q-card>
     </q-dialog>
 
+    <!-- MODAL GALLERY EVIDEN -->
+    <q-dialog v-model="mdlGallery">
+      <q-card style="width: 100vw; max-width: 500px; border-radius: 12px; overflow: hidden; background: #000;">
+        <q-toolbar class="bg-black text-white">
+          <q-toolbar-title class="text-subtitle1">Bukti Dukung</q-toolbar-title>
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-toolbar>
+        
+        <q-carousel
+          v-model="slide"
+          transition-prev="slide-right"
+          transition-next="slide-left"
+          swipeable
+          animated
+          control-color="white"
+          navigation
+          arrows
+          height="70vh"
+          class="bg-black shadow-1"
+        >
+          <q-carousel-slide v-for="(ev, i) in activeEvidenList" :name="i" :key="i" class="column no-wrap flex-center q-pa-none">
+            <q-img :src="CsrService.getImageUrl(ev.file_name)" fit="contain" style="height: 100%; width: 100%;" />
+            <div class="absolute-bottom text-center q-pa-md" style="background: rgba(0,0,0,0.6); color: white;">
+              <div class="text-subtitle1">{{ ev.keterangan || 'Lampiran Bukti' }}</div>
+              <div class="text-caption text-grey-4">{{ formatDate(ev.createdAt) }}</div>
+            </div>
+          </q-carousel-slide>
+        </q-carousel>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal Dialog Preview PDF Internal (Spesifikasi) -->
+    <q-dialog v-model="showPdfModal" maximized transition-show="slide-up" transition-hide="slide-down">
+      <q-card class="column full-height">
+        <q-toolbar class="bg-primary text-white">
+          <q-btn flat round dense icon="arrow_back" v-close-popup />
+          <q-toolbar-title class="text-subtitle1 text-weight-bold" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ detail?.nama_csr || 'Preview Spesifikasi' }}
+          </q-toolbar-title>
+          <q-btn flat round dense icon="download" @click="downloadPdf(CsrService.getImageUrl(detail.file_spec))" />
+        </q-toolbar>
+
+        <q-card-section class="col q-pa-none bg-grey-2 relative-position">
+          <iframe 
+            v-if="showPdfModal && detail?.file_spec" 
+            :src="'https://docs.google.com/viewer?url=' + encodeURIComponent(CsrService.getImageUrl(detail.file_spec)) + '&embedded=true'" 
+            width="100%" 
+            height="100%" 
+            frameborder="0"
+            style="border: none; position: absolute; top: 0; left: 0;"
+          ></iframe>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -175,6 +242,40 @@ const jumlahAmbil = ref(0)
 const ambilSemua = ref(false)
 const catatanAmbil = ref('')
 const ambilLoading = ref(false)
+
+// Modal PDF State
+const showPdfModal = ref(false)
+
+const openSpecPdf = () => {
+  showPdfModal.value = true
+}
+
+const downloadPdf = (url) => {
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', '')
+  link.target = '_blank'
+  document.body.appendChild(link)
+  link.click()
+}
+
+// Gallery State
+const mdlGallery = ref(false)
+const activeEvidenList = ref([])
+const slide = ref(0)
+
+const openGallery = (evidenArray, startIndex) => {
+  activeEvidenList.value = evidenArray
+  slide.value = startIndex
+  mdlGallery.value = true
+}
+
+const formatDate = (d) => {
+  if (!d) return '-'
+  try {
+    return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  } catch { return d }
+}
 
 const fetchDetail = async () => {
   loading.value = true

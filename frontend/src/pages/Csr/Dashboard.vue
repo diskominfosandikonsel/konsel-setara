@@ -17,9 +17,9 @@
         <q-btn flat round icon="arrow_back" color="white" class="glass-btn" @click="$router.back()" />
 
         <q-btn unelevated rounded color="teal-7" text-color="white" size="sm" class="hotline-btn"
-          @click="openCSRPortal">
-          <q-icon name="language" size="14px" class="q-mr-xs" />
-          PORTAL CSR-SETARA
+          @click="authStore.user ? doLogout() : $router.push('/login')">
+          <q-icon :name="authStore.user ? 'logout' : 'login'" size="14px" class="q-mr-xs" />
+          {{ authStore.user ? 'LOGOUT' : 'LOGIN' }}
         </q-btn>
       </div>
 
@@ -29,7 +29,8 @@
         </div> -->
         <div class="app-title">CSR - SETARA</div>
         <div class="app-subtitle">Corporate Social Responsibility</div>
-        <div class="app-sub-badge">Kabupaten Konawe Selatan</div>
+        <div class="app-sub-badge text-center cursor-pointer" @click="openCSRPortal">Portal CSR - SETARA <br> Kabupaten
+          Konawe Selatan</div>
         <div class="header-quote">Tanggung jawab sosial dan lingkungan adalah komitmen perseroan untuk berperan serta
           dalam pembangunan ekonomi berkelanjutan guna meningkatkan kualitas kehidupan dan lingkungan yang bermanfaat,
           baik bagi perseroan sendiri, komunitas setempat, maupun masyarakat pada umumnya.</div>
@@ -174,6 +175,10 @@ const isCompany = computed(() => {
   const u = authStore.user
   return u.db_csrkonsel == 4 || u.menu_klp == 4 || u.profile?.db_csrkonsel == 4 || u.profile?.menu_klp == 4
 })
+
+const doLogout = () => {
+  authStore.logout()
+}
 
 // Navigation
 const goProgram = () => router.push('/csr_program')

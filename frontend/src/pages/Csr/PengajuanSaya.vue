@@ -42,7 +42,8 @@
         <div v-for="item in listData" :key="item.id" class="pengajuan-card q-mb-md" @click="showDetail(item)">
           <!-- Status Badge -->
           <div class="row items-center justify-between q-mb-xs">
-            <q-badge :color="getStatusColor(item.status_pengajuan)" :label="getStatusLabel(item.status_pengajuan)" />
+            <q-badge :color="item.status == 4 ? 'green-9' : getStatusColor(item.status_pengajuan)" 
+                     :label="item.status == 4 ? 'Program Selesai' : getStatusLabel(item.status_pengajuan)" />
             <span class="text-caption text-grey-6">{{ formatDate(item.tgl_pengajuan) }}</span>
           </div>
 
@@ -66,7 +67,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="row q-mt-sm q-gutter-xs" @click.stop>
+          <div class="row q-mt-sm q-gutter-xs" @click.stop v-if="item.status != 4">
             <!-- Edit (jika pending atau ditolak) -->
             <q-btn v-if="item.status_pengajuan == 1 || item.status_pengajuan == 3" flat dense size="sm" color="orange"
               icon="edit" label="Edit" @click.stop="openEdit(item)" />
@@ -104,8 +105,8 @@
           <!-- Foto Program -->
           <q-img :src="getImage(selectedItem)" height="180px" class="q-mb-md">
             <div class="absolute-bottom bg-transparent">
-              <q-badge :color="getStatusColor(selectedItem.status_pengajuan)"
-                :label="getStatusLabel(selectedItem.status_pengajuan)" class="q-pa-xs" style="font-size: 11px;" />
+              <q-badge :color="selectedItem.status == 4 ? 'green-9' : getStatusColor(selectedItem.status_pengajuan)"
+                :label="selectedItem.status == 4 ? 'Program Selesai' : getStatusLabel(selectedItem.status_pengajuan)" class="q-pa-xs" style="font-size: 11px;" />
             </div>
           </q-img>
 
@@ -144,6 +145,19 @@
             <div v-if="selectedItem.catatan_admin" class="catatan-box q-mt-sm">
               <div class="text-caption text-weight-bold text-red-9">CATATAN ADMIN:</div>
               <div class="text-body2 italic text-red-10">"{{ selectedItem.catatan_admin }}"</div>
+            </div>
+
+            <!-- Bukti Dukung (Riwayat Upload) -->
+            <div v-if="listBukti.length > 0" class="q-mt-md">
+              <div class="text-caption text-weight-bold text-teal-8 q-mb-xs">BUKTI DUKUNG YANG DIKIRIM:</div>
+              <div v-for="(b, i) in listBukti" :key="i" class="row items-center justify-between q-pa-xs q-mb-xs bg-grey-2 rounded-borders">
+                <div class="row items-center" style="flex: 1; overflow: hidden; cursor: pointer;" @click="openGallery(listBukti, i)">
+                  <q-icon name="image" size="16px" color="grey-7" class="q-mr-xs"/>
+                  <div class="text-caption ellipsis" style="max-width: 80%;">{{ b.keterangan || 'Lampiran Bukti' }}</div>
+                </div>
+                <q-btn flat dense round size="sm" color="primary" icon="visibility" @click="openGallery(listBukti, i)" />
+                <div class="text-caption text-grey-6" style="font-size: 10px;">{{ formatDate(b.createdAt) }}</div>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -209,6 +223,37 @@
           <q-btn unelevated label="Upload" color="purple" :loading="uploadLoading" @click="submitUpload"
             :disable="!uploadFile" />
         </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- MODAL GALLERY EVIDEN -->
+    <q-dialog v-model="mdlGallery">
+      <q-card style="width: 100vw; max-width: 500px; border-radius: 12px; overflow: hidden; background: #000;">
+        <q-toolbar class="bg-black text-white">
+          <q-toolbar-title class="text-subtitle1">Bukti Dukung</q-toolbar-title>
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-toolbar>
+        
+        <q-carousel
+          v-model="slide"
+          transition-prev="slide-right"
+          transition-next="slide-left"
+          swipeable
+          animated
+          control-color="white"
+          navigation
+          arrows
+          height="70vh"
+          class="bg-black shadow-1"
+        >
+          <q-carousel-slide v-for="(ev, i) in activeEvidenList" :name="i" :key="i" class="column no-wrap flex-center q-pa-none">
+            <q-img :src="getBuktiUrl(ev.file_name)" fit="contain" style="height: 100%; width: 100%;" />
+            <div class="absolute-bottom text-center q-pa-md" style="background: rgba(0,0,0,0.6); color: white;">
+              <div class="text-subtitle1">{{ ev.keterangan || 'Lampiran Bukti' }}</div>
+              <div class="text-caption text-grey-4">{{ formatDate(ev.createdAt) }}</div>
+            </div>
+          </q-carousel-slide>
+        </q-carousel>
       </q-card>
     </q-dialog>
 
@@ -309,9 +354,28 @@ const getImage = (item) => {
 }
 
 // Detail
-const showDetail = (item) => {
+const showDetail = async (item) => {
   selectedItem.value = item
+  listBukti.value = []
   mdlDetail.value = true
+
+  try {
+    const res = await CsrService.getEviden(item.id)
+    listBukti.value = res.data?.data || res.data || []
+  } catch (err) {
+    console.error('Gagal fetch bukti untuk detail:', err)
+  }
+}
+
+// Gallery State
+const mdlGallery = ref(false)
+const activeEvidenList = ref([])
+const slide = ref(0)
+
+const openGallery = (evidenArray, startIndex) => {
+  activeEvidenList.value = evidenArray
+  slide.value = startIndex
+  mdlGallery.value = true
 }
 
 // Edit
