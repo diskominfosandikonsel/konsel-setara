@@ -9,20 +9,9 @@
           Penerima Bantuan Berdasarkan Kecamatan
         </div>
 
-        <q-select
-          v-model="pilih_kecamatan"
-          :options="kecamatan"
-          option-label="uraian"
-          option-value="kecamatan_id"
-          emit-value
-          map-options
-          dense
-          outlined
-          bg-color="white"
-          class="q-mt-md"
-          label="Pilih Kecamatan"
-          @update:model-value="onFilterChange"
-        />
+        <q-select v-model="pilih_kecamatan" :options="kecamatan" option-label="uraian" option-value="kecamatan_id"
+          emit-value map-options dense outlined bg-color="white" class="q-mt-md" label="Pilih Kecamatan"
+          @update:model-value="onFilterChange" />
       </div>
       <div class="q-px-md q-pt-md">
         <div class="row q-col-gutter-sm">
@@ -39,10 +28,8 @@
             </div>
 
             <!-- TITLE -->
-            <div
-              class="text-caption text-weight-medium text-grey-8 q-mt-xs text-center ellipsis-2-lines"
-              style="font-size: 9.5px"
-            >
+            <div class="text-caption text-weight-medium text-grey-8 q-mt-xs text-center ellipsis-2-lines"
+              style="font-size: 9.5px">
               {{ item.title }}
             </div>
           </div>
@@ -52,11 +39,7 @@
       <!-- CHARTS -->
       <div class="q-pa-md">
         <div class="row q-col-gutter-md">
-          <div
-            class="col-12 col-md-6"
-            v-for="chart in pieCharts"
-            :key="chart.id"
-          >
+          <div class="col-12 col-md-6" v-for="chart in pieCharts" :key="chart.id">
             <q-card class="card-modern animate-slide">
               <q-card-section>
                 <q-skeleton v-if="loading" type="rect" height="250px" />
@@ -76,6 +59,24 @@
         </div>
       </div>
 
+      <!-- UKT SECTION -->
+      <div class="q-pa-md">
+        <div class="row items-center justify-between q-mb-sm">
+          <div class="text-subtitle1 text-weight-bold">
+            Mahasiswa Penerima UKT
+          </div>
+          <q-select v-model="pilih_tahun_ukt" :options="tahunUktList" dense outlined bg-color="white"
+            style="min-width: 120px" label="Pilih Tahun" @update:model-value="onFilterUktChange" />
+        </div>
+
+        <q-card class="card-modern animate-slide" style="margin-top: 10px">
+          <q-card-section>
+            <q-skeleton v-if="loading" type="rect" height="300px" />
+            <div v-else id="grafikUkt" style="width: 100%"></div>
+          </q-card-section>
+        </q-card>
+      </div>
+
       <q-dialog v-model="dialogSearch" maximized="">
         <q-card style="width: 100%">
           <!-- HEADER -->
@@ -89,20 +90,10 @@
 
           <!-- INPUT -->
           <q-card-section>
-            <q-input
-              v-model="searchNik"
-              label="Masukkan NIK Untuk Cek Data Anda"
-              dense
-              outlined
-              debounce="500"
-              @keyup.enter="searchData"
-            >
+            <q-input v-model="searchNik" label="Masukkan NIK Untuk Cek Data Anda" dense outlined debounce="500"
+              @keyup.enter="searchData">
               <template v-slot:append>
-                <q-icon
-                  name="search"
-                  class="cursor-pointer"
-                  @click="searchData"
-                />
+                <q-icon name="search" class="cursor-pointer" @click="searchData" />
               </template>
             </q-input>
           </q-card-section>
@@ -207,6 +198,7 @@ export default {
   data() {
     return {
       pilih_kecamatan: null,
+      pilih_tahun_ukt: null,
       dialogSearch: false,
       searchNik: "",
     };
@@ -233,6 +225,8 @@ export default {
       "searchLoading",
       "searched",
       "loading",
+      "ukt",
+      "tahunUktList",
     ]),
 
     cards() {
@@ -301,10 +295,22 @@ export default {
           kecamatan: this.pilih_kecamatan || "",
         });
 
+        this.pilih_tahun_ukt = store.pilih_tahun_ukt;
+
         this.renderAllCharts();
 
         if (done) done();
       });
+    },
+
+    async onFilterUktChange() {
+      const store = this.getStore();
+      store.pilih_tahun_ukt = this.pilih_tahun_ukt;
+      await store.getUkt({
+        kecamatan: this.pilih_kecamatan || "",
+        tahun: this.pilih_tahun_ukt,
+      });
+      this.renderUktChart();
     },
 
     async onFilterChange() {
@@ -313,6 +319,8 @@ export default {
       await store.fetchAll({
         kecamatan: this.pilih_kecamatan || "",
       });
+
+      this.pilih_tahun_ukt = store.pilih_tahun_ukt;
 
       this.renderAllCharts();
     },
@@ -380,6 +388,9 @@ export default {
         kelompokKec,
         "Kelompok Penerima Bantuan",
       );
+
+      // UKT CHART
+      this.renderUktChart();
     },
 
     // =========================
@@ -468,6 +479,116 @@ export default {
         credits: { enabled: false },
       });
     },
+
+    renderUktChart() {
+      const store = this.getStore();
+
+      const el = document.getElementById("grafikUkt");
+      if (!el) return;
+
+      if (!store.ukt || store.ukt.length === 0) {
+        el.innerHTML =
+          '<div class="text-center text-grey q-pa-lg">Tidak ada data</div>';
+        return;
+      }
+
+      // Sort data descending by jmlMahasiswa
+      const sortedData = [...store.ukt].sort(
+        (a, b) => b.jmlMahasiswa - a.jmlMahasiswa,
+      );
+
+      const categories = sortedData.map(
+        (item) => item.namaKampus || item.judul,
+      );
+
+      const data = sortedData.map((item, index) => {
+        // Gradient of blues based on value (or index)
+        // To mimic the image, top 1 is very dark blue, then lighter.
+        let color = "#dbeafe"; // default very light blue
+        if (index === 0) color = "#1e3a8a";
+        else if (index === 1) color = "#2563eb";
+        else if (index === 2) color = "#3b82f6";
+        else if (index === 3) color = "#60a5fa";
+        else if (index === 4) color = "#93c5fd";
+        else if (index === 5)
+          color = "#1d4ed8"; // alternate dark blue for variety
+        else if (index === 6) color = "#2563eb";
+        else color = "#f3f4f6"; // faint grey-blue for the rest
+
+        return {
+          y: item.jmlMahasiswa,
+          color: color,
+        };
+      });
+
+      const chartHeight = Math.max(400, categories.length * 35 + 100);
+
+      Highcharts.chart("grafikUkt", {
+        chart: {
+          type: "bar",
+          height: chartHeight,
+        },
+        title: {
+          text: "Grafik Jumlah Mahasiswa Penerima per Institusi",
+          align: "left",
+          style: { fontWeight: "bold", fontSize: "15px" },
+        },
+        subtitle: {
+          text: `Berdasarkan data penerima UKT tahun ${this.pilih_tahun_ukt || "-"}`,
+          align: "left",
+        },
+        xAxis: {
+          categories: categories,
+          title: { text: null },
+          gridLineWidth: 0,
+          lineWidth: 0,
+          tickWidth: 0,
+          labels: {
+            style: {
+              fontSize: "11px",
+              fontWeight: "500",
+              color: "#4b5563",
+            },
+          },
+        },
+        yAxis: {
+          min: 0,
+          title: { text: null },
+          labels: { enabled: false },
+          gridLineWidth: 0,
+        },
+        tooltip: {
+          valueSuffix: " mhs",
+        },
+        plotOptions: {
+          bar: {
+            dataLabels: {
+              enabled: true,
+              formatter: function () {
+                return this.y + " mhs";
+              },
+              inside: false,
+              style: {
+                fontWeight: "600",
+                fontSize: "11px",
+                color: "#374151",
+                textOutline: "none",
+              },
+            },
+            borderRadius: 4,
+            borderWidth: 0,
+          },
+        },
+        legend: { enabled: false },
+        credits: { enabled: false },
+        series: [
+          {
+            name: "Jumlah Mahasiswa",
+            data: data,
+          },
+        ],
+      });
+    },
   },
 
   async mounted() {
@@ -505,6 +626,7 @@ export default {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -515,6 +637,7 @@ export default {
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -528,8 +651,10 @@ export default {
 
   border-radius: 25px;
   display: flex;
-  flex-direction: column; /* penting */
-  justify-content: space-between; /* dorong atas & bawah */
+  flex-direction: column;
+  /* penting */
+  justify-content: space-between;
+  /* dorong atas & bawah */
   align-items: center;
 
   padding: 8px 6px;
@@ -571,6 +696,7 @@ export default {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

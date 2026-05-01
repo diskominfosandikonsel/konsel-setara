@@ -19,7 +19,12 @@ export const useBansosStore = defineStore('bansos', {
     searchLoading: false,
     searched: false,
 
-    loading: false
+    loading: false,
+
+    // UKT
+    ukt: [],
+    tahunUktList: [],
+    pilih_tahun_ukt: null
   }),
 
   actions: {
@@ -149,12 +154,51 @@ export const useBansosStore = defineStore('bansos', {
           this.getIndividu(payload),
           this.getKelompok(payload),
           this.getIndividuKecamatan(payload),
-          this.getKelompokKecamatan(payload)
+          this.getKelompokKecamatan(payload),
+          this.getTahunUkt()
         ])
+        
+        // Sesudah tahun didapat, default tahun akan diset
+        if (this.pilih_tahun_ukt) {
+          payload.tahun = this.pilih_tahun_ukt
+        }
+        await this.getUkt(payload)
+
       } catch (err) {
         console.error('FETCH ALL ERROR:', err)
       } finally {
         this.loading = false
+      }
+    },
+
+    // =========================
+    // UKT
+    // =========================
+    async getUkt(payload) {
+      this.loading = true;
+      try {
+        const res = await BansosService.getUkt(payload);
+        this.ukt = res.data?.data || [];
+        return this.ukt;
+      } catch (err) {
+        console.error('UKT ERROR:', err);
+        return [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async getTahunUkt() {
+      try {
+        const res = await BansosService.getTahunUkt();
+        this.tahunUktList = res.data?.data || [];
+        if (this.tahunUktList.length > 0 && !this.pilih_tahun_ukt) {
+          this.pilih_tahun_ukt = this.tahunUktList[0];
+        }
+        return this.tahunUktList;
+      } catch (err) {
+        console.error('GET TAHUN UKT ERROR:', err);
+        return [];
       }
     },
 

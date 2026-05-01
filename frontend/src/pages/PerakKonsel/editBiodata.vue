@@ -127,7 +127,7 @@
                         <q-input v-model="form.berat_bdn" placeholder="Berat Badan" outlined class="formInput" />
                     </div>
                     <div class="col-12 col-md-12">
-                        <q-file v-model="form.file" outlined class="formInput">
+                        <q-file v-model="form.file" placeholder="Pas Foto" outlined class="formInput">
                             <template v-slot:prepend>
                                 <q-icon name="attach_file" />
                             </template>

@@ -275,6 +275,11 @@ const routes = [
         meta: { showBottomNav: true }
       },
       {
+        path: 'csr_mitra',
+        component: () => import('pages/Csr/MitraResmi.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
         path: 'csr_program',
         component: () => import('pages/Csr/Program.vue'),
         meta: { showBottomNav: false }

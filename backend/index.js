@@ -62,6 +62,15 @@ app.get('/syarat-ketentuan', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/html/syarat-ketentuan.html'));
 });
 
+// APP VERSION ENDPOINT
+app.get('/api/v1/app-version', (req, res) => {
+  res.json({
+    latestVersion: '1.2.2', // Update this to trigger update popup (e.g. '1.2.3')
+    storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
+    forceUpdate: false 
+  });
+});
+
 // API ENDPOINTS
 
 // ERROR HANDLER
