@@ -182,14 +182,26 @@
                   <div class="prog-mitra-bidang">
                     {{ p.uraian_bidang_csr || "-" }}
                   </div>
-                  <q-chip
-                    :color="getStatusColor(p.status)"
-                    text-color="white"
-                    size="xs"
-                    dense
-                    class="q-mt-xs"
-                    >{{ getStatusLabel(p.status) }}</q-chip
-                  >
+                  <div class="row items-center q-mt-xs q-gutter-x-sm">
+                    <q-chip
+                      :color="getStatusColor(p.status)"
+                      text-color="white"
+                      size="xs"
+                      dense
+                      class="q-ma-none"
+                      >{{ getStatusLabel(p.status) }}</q-chip
+                    >
+                    <div
+                      v-if="p.jumlah_ambil"
+                      class="text-caption text-grey-8 text-weight-medium"
+                      style="font-size: 11px"
+                    >
+                      {{ p.jumlah_ambil }} {{ p.satuan || "" }}
+                      <template v-if="p.nilai">
+                        — Rp {{ formatRupiah(p.nilai * p.jumlah_ambil) }}
+                      </template>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,6 +320,11 @@ const getStatusLabel = (status) => {
 const getStatusColor = (status) => {
   const map = { 1: "amber-8", 2: "blue", 3: "blue-grey", 4: "green" };
   return map[status] || "grey";
+};
+
+const formatRupiah = (value) => {
+  if (!value) return "0";
+  return new Intl.NumberFormat("id-ID").format(value);
 };
 
 onMounted(() => {

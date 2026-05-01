@@ -16,6 +16,16 @@ export const CsrService = {
     return apiCsr.post('api/v1/publish/homeCSR/beritaHome')
   },
 
+  // Mitra Resmi
+  getMitraResmi() {
+    return apiCsr.post('api/v1/publish/homeCSR/mitraResmi')
+  },
+
+  // Program Mitra
+  getProgramMitra(users_id) {
+    return apiCsr.post('api/v1/publish/homeCSR/programMitra', { perusahaan_id: users_id })
+  },
+
   // Kegiatan CSR list (with filters & pagination)
   getKegiatanCSR(payload = {}) {
     return apiCsr.post('api/v1/publish/kegiatanCSR/kegiatanCSRview', payload)

@@ -50,6 +50,17 @@ export default {
 
   searchNik(payload) {
     return apiBansos.post(base + '/searchNik', payload)
+  },
+
+  // =========================
+  // UKT
+  // =========================
+  getUkt (payload) {
+    return apiBansos.post(base + '/viewUkt', payload)
+  },
+
+  getTahunUkt () {
+    return apiBansos.get(base + '/tahunUkt')
   }
 
 }

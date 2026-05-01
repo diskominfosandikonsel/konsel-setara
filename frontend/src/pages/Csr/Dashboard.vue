@@ -183,6 +183,7 @@ const doLogout = () => {
 // Navigation
 const goProgram = () => router.push('/csr_program')
 const goBerita = () => router.push('/csr_berita')
+const goMitra = () => router.push('/csr_mitra')
 const goRegistrasi = () => router.push('/csr_registrasi')
 const goPanel = () => router.push('/csr_panel')
 const goPengajuan = () => router.push('/csr_pengajuan')
@@ -199,10 +200,10 @@ const menuItems = computed(() => {
       action: goProgram
     },
     {
-      key: 'berita', label: 'BERITA', hint: 'Berita CSR Terbaru',
-      icon: 'newspaper', badgeIcon: 'article', badgeColor: '#2563eb',
-      cardClass: 'berita-card', iconBgClass: 'berita-icon-bg', labelColor: 'text-blue-8',
-      action: goBerita
+      key: 'mitra', label: 'MITRA RESMI', hint: 'Daftar Perusahaan',
+      icon: 'handshake', badgeIcon: 'verified', badgeColor: '#ea580c',
+      cardClass: 'regis-card', iconBgClass: 'regis-icon-bg', labelColor: 'text-orange-8',
+      action: goMitra
     }
   ]
 
