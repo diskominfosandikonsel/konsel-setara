@@ -389,15 +389,65 @@ export const useEridaStore = defineStore("erida", {
       }
     },
 
+    async addSurvey(data) {
+      try {
+        const res = await EridaService.addSurvey(data);
+        return res.data;
+      } catch (err) {
+        console.error("ADD SURVEY ERROR:", err);
+        throw err;
+      }
+    },
+
+    async updateSurveyStatus(id) {
+      try {
+        const res = await EridaService.updateSurveyStatus(id);
+        return res.data;
+      } catch (err) {
+        console.error("UPDATE STATUS ERROR:", err);
+        throw err;
+      }
+    },
+
+    async uploadLaporan(form) {
+      this.loading = true;
+
+      try {
+        const formData = new FormData();
+
+        // file
+        if (form.file) {
+          formData.append("file", form.file);
+        }
+
+        // data (WAJIB stringify)
+        formData.append(
+          "data",
+          JSON.stringify({
+            id: form.id
+          })
+        );
+
+        const res = await EridaService.uploadLaporan(formData);
+
+        return res.data;
+      } catch (err) {
+        console.error("UPLOAD LAPORAN ERROR:", err);
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async getKategori() {
       try {
         const res = await EridaService.getKategori();
-        this.kategori = res.data
+        this.kategori = res.data;
       } catch (err) {
-        console.error('GET KATEGORI ERROR:', err)
+        console.error("GET KATEGORI ERROR:", err);
       }
     },
-    
+
     async fetchInovasi(payload, append = true) {
       this.loading = true;
 

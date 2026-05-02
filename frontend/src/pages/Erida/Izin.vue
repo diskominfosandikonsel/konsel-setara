@@ -71,12 +71,12 @@
                             size="14px"
                             class="icon-muted"
                           />
-                          <span class="q-ml-xs">{{ item.createBy }}</span>
+                          <span class="q-ml-xs">{{ item.nama }}</span>
                         </div>
 
                         <div class="meta row items-center">
                           <q-icon
-                            name="schedule"
+                            name="calendar_month"
                             size="14px"
                             class="icon-muted"
                           />
@@ -87,29 +87,48 @@
                       </div>
 
                       <!-- RIGHT ICON -->
-                      <q-fab
-                        fab-mini
-                        color="amber"
-                        text-color="black"
-                        icon="more_vert"
-                        direction="left"
-                        padding="xs"
-                      >
-                        <q-fab-action
-                          color="amber"
-                          text-color="black"
-                          @click="deleteItem(item)"
-                          icon="mail"
-                          padding="xs"
+                      <div @click.stop>
+                        <!-- 🔥 DITERIMA (single button, no FAB) -->
+                        <q-btn
+                          v-if="item.status === 'diterima'"
+                          round
+                          dense
+                          icon="checklist"
+                          color="green"
+                          text-color="white"
+                          @click.stop="openSurvey(item)"
                         />
-                        <q-fab-action
-                          color="amber"
-                          text-color="black"
-                          @click="editItem(item)"
-                          icon="alarm"
-                          padding="xs"
+
+                        <!-- 🔥 SELESAI (static icon, no click) -->
+                        <q-icon
+                          v-else-if="item.status === 'publish'"
+                          name="verified"
+                          color="blue"
+                          size="35px"
                         />
-                      </q-fab>
+
+                        <!-- 🔥 MULTI ACTION FAB -->
+                        <q-fab
+                          v-else
+                          fab-mini
+                          :color="getFabConfig(item.status).color"
+                          text-color="white"
+                          :class="'fab-' + item.status"
+                          :icon="getFabConfig(item.status).icon"
+                          direction="left"
+                          padding="xs"
+                        >
+                          <q-fab-action
+                            v-for="(action, i) in getFabActions(item)"
+                            :key="i"
+                            :icon="action.icon"
+                            :color="action.color"
+                            text-color="white"
+                            @click.stop="action.handler"
+                            padding="xs"
+                          />
+                        </q-fab>
+                      </div>
                     </div>
                   </div>
                 </q-card-section>
@@ -179,6 +198,156 @@
               </div>
 
               <div ref="pdfContainer" class="pdf-container"></div>
+            </div>
+          </q-card>
+        </q-dialog>
+        <q-dialog
+          v-model="surveyDialog"
+          maximized
+          transition-show="slide-up"
+          transition-hide="slide-down"
+          persistent
+        >
+          <q-card class="column fit">
+            <!-- HEADER -->
+            <q-toolbar class="bg-white text-black toolbar-bordered">
+              <q-btn flat round icon="arrow_back" v-close-popup />
+
+              <q-toolbar-title class="text-subtitle2">
+                Survey Kepuasan
+              </q-toolbar-title>
+
+              <q-btn
+                flat
+                icon="send"
+                color="primary"
+                :loading="btn_add"
+                @click="submitSurvey"
+              />
+            </q-toolbar>
+
+            <!-- CONTENT -->
+            <div class="col scroll q-pa-md">
+              <!-- BIODATA -->
+              <div class="step-card">
+                <div class="step-title">Identitas</div>
+
+                <q-input
+                  v-model="ikm.nama"
+                  label="Nama"
+                  outlined
+                  dense
+                  readonly
+                />
+                <q-input
+                  v-model="ikm.email"
+                  label="Email"
+                  outlined
+                  dense
+                  readonly
+                />
+
+                <q-input v-model="ikm.umur" label="Umur" outlined dense />
+                <q-input
+                  v-model="ikm.pendidikan"
+                  label="Pendidikan"
+                  outlined
+                  dense
+                />
+                <q-input
+                  v-model="ikm.pekerjaan"
+                  label="Pekerjaan"
+                  outlined
+                  dense
+                />
+              </div>
+
+              <!-- PERTANYAAN -->
+              <div class="step-card">
+                <div class="step-title">Penilaian</div>
+
+                <q-select
+                  v-model="ikm.persyaratan"
+                  emit-value
+                  map-options
+                  :options="persyaratan"
+                  label="Persyaratan"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.prosedur"
+                  emit-value
+                  map-options
+                  :options="prosedur"
+                  label="Prosedur"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.pelayanan"
+                  emit-value
+                  map-options
+                  :options="pelayanan"
+                  label="Pelayanan"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.tarif"
+                  emit-value
+                  map-options
+                  :options="tarif"
+                  label="Tarif"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.ketentuan"
+                  emit-value
+                  map-options
+                  :options="ketentuan"
+                  label="Ketentuan"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.kompetensi"
+                  emit-value
+                  map-options
+                  :options="kompetensi"
+                  label="Kompetensi"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.sikap"
+                  emit-value
+                  map-options
+                  :options="sikap"
+                  label="Sikap Petugas"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.maklumat"
+                  emit-value
+                  map-options
+                  :options="maklumat"
+                  label="Maklumat"
+                  outlined
+                  dense
+                />
+                <q-select
+                  v-model="ikm.pengaduan"
+                  emit-value
+                  map-options
+                  :options="pengaduan"
+                  label="Penanganan Pengaduan"
+                  outlined
+                  dense
+                />
+              </div>
             </div>
           </q-card>
         </q-dialog>
@@ -545,145 +714,266 @@
             </q-toolbar>
 
             <!-- CONTENT -->
-            <div class="col scroll q-pa-md">
-              <!-- IDENTITAS -->
-              <div class="detail-card">
-                <div class="col text-center q-mb-md q-mt-sm">
-                  <div class="text-subtitle1 text-weight-bold">
-                    {{ selectedItem.judul }}
-                  </div>
-                  <div class="text-caption text-grey-6 text-weight-medium">
-                    <!-- {{ selectedItem.createBy }} -->
-                    Kiken S Batara
-                  </div>
-                  <q-badge
-                    :color="getStatusColor(selectedItem.status)"
-                    text-color="white"
-                    class="q-px-sm q-py-xs"
-                  >
-                    {{ selectedItem.status || "unknown" }}
-                  </q-badge>
-                </div>
-                <div class="section-title">
-                  <q-icon name="person" size="16px" /> Identitas
+            <div class="col scroll q-px-md">
+              <!-- HEADER -->
+              <div class="card-header text-center">
+                <div class="text-subtitle1 text-weight-bold">
+                  {{ selectedItem.judul }}
                 </div>
 
-                <div class="detail-item">
+                <div class="text-caption text-grey-6 q-mt-xs">
+                  {{ selectedItem.nama }}
+                </div>
+
+                <div
+                  class="status-pill q-mt-sm"
+                  :class="getStatusClass(selectedItem.status)"
+                >
+                  Status Permohonan : {{ selectedItem.status || "Unknown" }}
+                </div>
+              </div>
+
+              <div class="section" v-if="selectedItem.status == 'publish'">
+                <div class="row justify-between">
+                  <div class="section-title">Laporan Akhir</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.laporan)"
+                  />
+                </div>
+
+                <q-separator />
+
+                <div class="row-item justify-between">
+                  <div class="section-title">Surat Rekomendasi</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.rekomendasi)"
+                  />
+                </div>
+              </div>
+
+              <q-separator />
+
+              <!-- IDENTITAS -->
+              <div class="section">
+                <div class="row justify-between">
+                  <div class="section-title">Data Diri</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.ktp)"
+                  />
+                </div>
+
+                <!-- <div class="row-item">
                   <span>Nama</span>
                   <b>{{ selectedItem.nama }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator /> -->
+
+                <div class="row-item">
                   <span>Email</span>
                   <b>{{ selectedItem.email }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator />
+
+                <div class="row-item">
                   <span>No HP</span>
                   <b>{{ selectedItem.hp }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator />
+
+                <div class="row-item">
                   <span>Alamat</span>
                   <b>{{ selectedItem.alamat }}</b>
                 </div>
               </div>
 
+              <q-separator />
+
               <!-- PENGANTAR -->
-              <div class="detail-card">
-                <div class="section-title">
-                  <q-icon name="description" size="16px" /> Pengantar
+              <div class="section">
+                <div class="row justify-between">
+                  <div class="section-title">Surat Pengantar</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.suratP)"
+                  />
                 </div>
 
-                <div class="detail-item">
+                <div class="row-item">
                   <span>Nomor</span>
                   <b>{{ selectedItem.nomorP || "-" }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator />
+
+                <div class="row-item">
                   <span>Tanggal</span>
                   <b>{{ formatDates(selectedItem.tanggalP) }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator inset />
+
+                <div class="row-item">
                   <span>Penandatangan</span>
                   <b>{{ selectedItem.namaP }}</b>
                 </div>
               </div>
 
+              <q-separator />
+
               <!-- REKOMENDASI -->
-              <div class="detail-card">
-                <div class="section-title">
-                  <q-icon name="assignment" size="16px" /> Rekomendasi
+              <div class="section">
+                <div class="row justify-between">
+                  <div class="section-title">Surat Rekomendasi</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.suratR)"
+                  />
                 </div>
 
-                <div class="detail-item">
+                <div class="row-item">
                   <span>Nomor</span>
                   <b>{{ selectedItem.nomorR || "-" }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator inset />
+
+                <div class="row-item">
                   <span>Tanggal</span>
                   <b>{{ formatDates(selectedItem.tanggalR) }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator inset />
+
+                <div class="row-item">
                   <span>Penandatangan</span>
                   <b>{{ selectedItem.namaR }}</b>
                 </div>
               </div>
 
+              <q-separator />
+
               <!-- PENELITIAN -->
-              <div class="detail-card">
-                <div class="section-title">
-                  <q-icon name="science" size="16px" /> Penelitian
+              <div class="section">
+                <div class="row justify-between">
+                  <div class="section-title">Data Penelitian</div>
+                  <q-icon
+                    name="picture_as_pdf"
+                    color="primary"
+                    size="25px"
+                    clickable
+                    v-ripple
+                    @click="openPdfFile(selectedItem.proposal)"
+                  />
                 </div>
 
-                <div class="detail-item">
+                <div class="row-item">
                   <span>Lokasi</span>
                   <b>{{ selectedItem.lokasi }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator inset />
+
+                <div class="row-item">
                   <span>Tujuan</span>
                   <b>{{ selectedItem.tujuan }}</b>
                 </div>
 
-                <div class="detail-item">
+                <q-separator inset />
+
+                <div class="row-item">
                   <span>Lingkup</span>
                   <b>{{ selectedItem.lingkup }}</b>
                 </div>
 
-                <div class="detail-item">
-                  <span>Periode</span>
+                <q-separator inset />
+
+                <div class="row-item">
+                  <span>Tanggal Mulai</span>
                   <b>
-                    {{ formatDates(selectedItem.tgl_mulai) }} -
+                    {{ formatDates(selectedItem.tgl_mulai) }}
+                  </b>
+                </div>
+
+                <q-separator inset />
+
+                <div class="row-item">
+                  <span>Tanggal Selesai</span>
+                  <b>
                     {{ formatDates(selectedItem.tgl_selesai) }}
                   </b>
                 </div>
-              </div>
 
-              <!-- ACTION -->
-              <div class="q-mt-md">
                 <q-btn
-                  label="Lihat Dokumen PDF"
-                  icon="picture_as_pdf"
-                  color="primary"
                   unelevated
-                  class="full-width q-mb-sm"
-                  @click="openPdfFromDetail"
-                />
-
-                <q-btn
-                  label="Edit Data"
-                  icon="edit"
-                  color="orange"
-                  flat
-                  class="full-width"
-                  @click="editItem(selectedItem)"
+                  color="primary"
+                  icon="picture_as_pdf"
+                  label="Lihat Proposal"
+                  class="full-width q-mt-sm"
+                  @click="openPdfFile(selectedItem.proposal)"
                 />
               </div>
             </div>
+          </q-card>
+        </q-dialog>
+        <q-dialog v-model="uploadDialog" persistent>
+          <q-card style="width: 100%; max-width: 400px">
+            <q-card-section class="row items-center">
+              <div class="text-subtitle2 text-weight-medium">
+                Unggah Laporan Akhir
+              </div>
+              <q-space />
+              <q-btn icon="close" flat round dense v-close-popup />
+            </q-card-section>
+
+            <q-card-section>
+              <q-file
+                v-model="form.laporan"
+                outlined
+                dense
+                accept=".pdf"
+                label="Upload PDF"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn flat label="Batal" v-close-popup />
+              <q-btn
+                color="primary"
+                label="Upload"
+                :loading="uploadLoading"
+                @click="submitLaporan"
+              />
+            </q-card-actions>
           </q-card>
         </q-dialog>
         <q-page-sticky position="bottom-right" :offset="[16, 16]">
@@ -716,6 +1006,7 @@ export default {
       lastPage: 1,
       allDataLoaded: false,
       detailDialog: false,
+      currentPdfFile: null,
       cari: "",
       skeletonLoading: true,
       formatDates: formatDates,
@@ -723,10 +1014,101 @@ export default {
       selectedItem: null,
       pdfLoading: false,
       pagePlaceholders: [],
-      list_kategori: [],
       formDialog: false,
       mode: "add", // add | edit | detail
       step: 1,
+      surveyDialog: false,
+      btn_add: false,
+      uploadDialog: false,
+
+      persyaratan: [
+        { label: "Tidak Sesuai", value: "Tidak Sesuai", color: "red" },
+        { label: "Kurang Sesuai", value: "Kurang Sesuai", color: "yellow" },
+        { label: "Sesuai", value: "Sesuai", color: "green" },
+        { label: "Sangat Sesuai", value: "Sangat Sesuai" },
+      ],
+      prosedur: [
+        { label: "Tidak Mudah", value: "Tidak Mudah", color: "red" },
+        { label: "Kurang Mudah", value: "Kurang Mudah", color: "yellow" },
+        { label: "Mudah", value: "Mudah", color: "green" },
+        { label: "Sangat Mudah", value: "Sangat Mudah" },
+      ],
+      pelayanan: [
+        { label: "Tidak Cepat", value: "Tidak Cepat", color: "red" },
+        { label: "Kurang Cepat", value: "Kurang Cepat", color: "yellow" },
+        { label: "Cepat", value: "Cepat", color: "green" },
+        { label: "Sangat Cepat", value: "Sangat Cepat" },
+      ],
+      tarif: [
+        { label: "Sangat Mahal", value: "Sangat Mahal", color: "red" },
+        { label: "Cukup Mahal", value: "Cukup Mahal", color: "yellow" },
+        { label: "Murah", value: "Murah", color: "green" },
+        { label: "Gratis", value: "Gratis" },
+      ],
+      ketentuan: [
+        { label: "Tidak Sesuai", value: "Tidak Sesuai", color: "red" },
+        { label: "Kurang Sesuai", value: "Kurang Sesuai", color: "yellow" },
+        { label: "Sesuai", value: "Sesuai", color: "green" },
+        { label: "Sangat Sesuai", value: "Sangat Sesuai" },
+      ],
+      kompetensi: [
+        { label: "Tidak Kompeten", value: "Tidak Kompeten", color: "red" },
+        { label: "Kurang Kompeten", value: "Kurang Kompeten", color: "yellow" },
+        { label: "Kompeten", value: "Kompeten", color: "green" },
+        { label: "Sangat Kompeten", value: "Sangat Kompeten" },
+      ],
+      sikap: [
+        {
+          label: "Tidak Sopan dan Ramah",
+          value: "Tidak Sopan dan Ramah",
+          color: "red",
+        },
+        {
+          label: "Kurang Sopan dan Ramah",
+          value: "Kurang Sopan dan Ramah",
+          color: "yellow",
+        },
+        { label: "Sopan dan Ramah", value: "Sopan dan Ramah", color: "green" },
+        { label: "Sangat Sopan dan Ramah", value: "Sangat Sopan dan Ramah" },
+      ],
+      maklumat: [
+        { label: "Buruk", value: "Buruk", color: "red" },
+        { label: "Cukup", value: "Cukup", color: "yellow" },
+        { label: "Baik", value: "Baik", color: "green" },
+        { label: "Sangat Baik", value: "Sangat Baik" },
+      ],
+      pengaduan: [
+        { label: "Tidak Ada", value: "Tidak Ada", color: "red" },
+        {
+          label: "Ada Tapi Tidak Berfungsi",
+          value: "Ada Tapi Tidak Berfungsi",
+          color: "yellow",
+        },
+        {
+          label: "Berfungsi Kurang Maksimal",
+          value: "Berfungsi Kurang Maksimal",
+          color: "green",
+        },
+        { label: "Dikelola Dengan Baik", value: "Dikelola Dengan Baik" },
+      ],
+
+      ikm: {
+        nama: "",
+        email: "",
+        umur: "",
+        pendidikan: "",
+        pekerjaan: "",
+
+        persyaratan: "",
+        prosedur: "",
+        pelayanan: "",
+        tarif: "",
+        ketentuan: "",
+        kompetensi: "",
+        sikap: "",
+        maklumat: "",
+        pengaduan: "",
+      },
       form: {
         id: null,
         nama: "",
@@ -782,10 +1164,184 @@ export default {
       this.$router.back();
     },
 
-    openDetail(item) {
+    async submitSurvey() {
+      try {
+        this.btn_add = true;
+
+        const requiredFields = [
+          "umur",
+          "pendidikan",
+          "pekerjaan",
+          "persyaratan",
+          "prosedur",
+          "pelayanan",
+          "tarif",
+          "ketentuan",
+          "kompetensi",
+          "sikap",
+          "maklumat",
+          "pengaduan",
+        ];
+
+        for (let field of requiredFields) {
+          if (!this.ikm[field]) {
+            this.$q.notify({
+              type: "warning",
+              message: "Semua pertanyaan wajib diisi",
+            });
+            this.btn_add = false;
+            return;
+          }
+        }
+
+        await this.erida.addSurvey(this.ikm);
+
+        await this.erida.updateSurveyStatus(this.ikm.izin_id);
+
+        this.$q.notify({
+          type: "positive",
+          message: "Survey berhasil dikirim",
+        });
+
+        this.surveyDialog = false;
+
+        this.loadData(true);
+      } catch (err) {
+        console.error(err);
+
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal mengirim survey",
+        });
+      } finally {
+        this.btn_add = false;
+      }
+    },
+
+    getFabConfig(status) {
+      switch (status) {
+        case "proses":
+          return { color: "orange", icon: "restart_alt" };
+        case "ditolak":
+          return { color: "red", icon: "cancel" };
+        case "survey":
+          return { color: "purple", icon: "pending_actions" };
+        case "verifikasi":
+          return { color: "teal", icon: "checklist_rtl" };
+        default:
+          return { color: "grey", icon: "help" };
+      }
+    },
+
+    getFabActions(item) {
+      if (["proses", "ditolak"].includes(item.status)) {
+        return [
+          {
+            icon: "edit",
+            color: "orange",
+            handler: () => this.editItem(item),
+          },
+          {
+            icon: "delete",
+            color: "red",
+            handler: () => this.deleteItem(item),
+          },
+        ];
+      }
+
+      // 🔥 survey
+      if (["survey", "verifikasi"].includes(item.status)) {
+        return [
+          {
+            icon: "description",
+            color: "green",
+            handler: () => this.openPdfFile(item.rekomendasi),
+          },
+          {
+            icon: "upload_file",
+            color: "blue",
+            handler: () => this.openUpload(item),
+          },
+        ];
+      }
+
+      return [];
+    },
+
+    openUpload(item) {
       this.selectedItem = item;
-      this.mode = "detail";
-      this.detailDialog = true;
+      this.form.laporan = null;
+      this.uploadDialog = true;
+    },
+
+    async submitLaporan() {
+      try {
+        if (!this.form.laporan) {
+          this.$q.notify({
+            type: "warning",
+            message: "File wajib diupload",
+          });
+          return;
+        }
+
+        this.uploadLoading = true;
+
+        await this.erida.uploadLaporan({
+          id: this.selectedItem.id,
+          file: this.form.laporan,
+        });
+
+        this.$q.notify({
+          type: "positive",
+          message: "Laporan berhasil diupload",
+        });
+
+        this.uploadDialog = false;
+        this.loadData(true);
+      } catch (err) {
+        console.error(err);
+
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal upload laporan",
+        });
+      } finally {
+        this.uploadLoading = false;
+      }
+    },
+
+    getStatusClass(status) {
+      switch (status) {
+        case "proses":
+          return "status-orange";
+        case "ditolak":
+          return "status-red";
+        case "diterima":
+          return "status-green";
+        case "survey":
+          return "status-purple";
+        case "verifikasi":
+          return "status-teal";
+        case "publish":
+          return "status-blue";
+        default:
+          return "status-grey";
+      }
+    },
+
+    async openPdfFile(file) {
+      if (!file) return;
+
+      this.currentPdfFile = file; // ✅ simpan file aktif
+      this.showPdf = true;
+
+      await this.$nextTick();
+
+      try {
+        await this.loadPdf(file);
+      } catch (err) {
+        console.error("LOAD PDF ERROR:", err);
+      }
     },
 
     initUserData() {
@@ -815,22 +1371,10 @@ export default {
       this.list_kategori = this.erida.kategori;
     },
 
-    // async goDetail(item) {
-    //   this.selectedItem = item;
-    //   this.showPdf = true;
-
-    //   this.$nextTick(() => {
-    //     this.loadPdf(item);
-    //   });
-    // },
-
-    openPdfFromDetail() {
-      this.detailDialog = false;
-      this.showPdf = true;
-
-      this.$nextTick(() => {
-        this.loadPdf(this.selectedItem);
-      });
+    openDetail(item) {
+      console.log("CLICKED:", item);
+      this.selectedItem = item;
+      this.detailDialog = true;
     },
 
     resetForm() {
@@ -842,22 +1386,29 @@ export default {
         email: "",
         nik: "",
         ktp: null,
+
         judul: "",
         lokasi: "",
         tujuan: "",
         lingkup: "",
         filePro: null,
         kategori_id: null,
-      };
-    },
 
-    submitForm() {
-      if (this.mode === "add") {
-        this.addData();
-      } else {
-        this.editData();
-      }
-      this.formDialog = false;
+        nomorP: "",
+        tanggalP: "",
+        namaP: "",
+        jabatanP: "",
+        suratPeng: null,
+
+        nomorR: "",
+        tanggalR: "",
+        namaR: "",
+        jabatanR: "",
+        suratRek: null,
+
+        tgl_mulai: "",
+        tgl_selesai: "",
+      };
     },
 
     async loadData(reset = false) {
@@ -887,19 +1438,6 @@ export default {
       }
 
       this.skeletonLoading = false;
-    },
-
-    getStatusColor(status) {
-      switch (status) {
-        case "proses":
-          return "orange";
-        case "selesai":
-          return "green";
-        case "ditolak":
-          return "red";
-        default:
-          return "grey";
-      }
     },
 
     async onLoad(index, done) {
@@ -1039,43 +1577,78 @@ export default {
       this.onSearch();
     },
 
-    async loadPdf(item) {
+    openSurvey(item) {
+      this.surveyDialog = true;
+
+      // isi default dari user / item
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      this.ikm = {
+        izin_id: item.id, // 🔥 penting (relasi ke izin)
+        nama: user.nama || item.nama,
+        email: user.email || item.email,
+        umur: "",
+        pendidikan: "",
+        pekerjaan: "",
+
+        persyaratan: "",
+        prosedur: "",
+        pelayanan: "",
+        tarif: "",
+        ketentuan: "",
+        kompetensi: "",
+        sikap: "",
+        maklumat: "",
+        pengaduan: "",
+      };
+    },
+
+    async loadPdf(file) {
       try {
-        this.pdfLoading = true; // ✅ start loading
+        this.pdfLoading = true;
 
         const container = this.$refs.pdfContainer;
-        container.innerHTML = "";
 
-        const url = getFileErida(item.file);
-
-        let pdf;
-
-        if (pdfCache.has(url)) {
-          pdf = pdfCache.get(url);
-        } else {
-          const loadingTask = pdfjsLib.getDocument(url);
-          pdf = await loadingTask.promise;
-          pdfCache.set(url, pdf);
+        if (!container) {
+          throw new Error("PDF container not ready");
         }
 
-        this.pagePlaceholders = Array.from({ length: pdf.numPages });
+        container.innerHTML = "";
+
+        const url = getFileErida(file);
+
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
 
         for (let i = 1; i <= pdf.numPages; i++) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "pdf-page-wrapper";
+          const page = await pdf.getPage(i);
 
-          const skeleton = document.createElement("div");
-          skeleton.className = "pdf-skeleton";
+          const viewport = page.getViewport({ scale: 1.2 });
 
-          wrapper.appendChild(skeleton);
-          container.appendChild(wrapper);
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
 
-          this.renderPage(pdf, i, wrapper, skeleton);
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          await page.render({
+            canvasContext: context,
+            viewport,
+          }).promise;
+
+          container.appendChild(canvas);
         }
       } catch (err) {
         console.error("PDF ERROR:", err);
+
+        this.$q.notify({
+          type: "negative",
+          message: "Gagal memuat PDF",
+        });
+
+        throw err;
       } finally {
-        this.pdfLoading = false; // ✅ stop loading
+        this.pdfLoading = false;
       }
     },
 
@@ -1101,13 +1674,14 @@ export default {
     },
 
     downloadPdf() {
-      if (!this.selectedItem?.file) return;
+      if (!this.currentPdfFile) return;
 
-      const url = getFileErida(this.selectedItem.file);
+      const url = getFileErida(this.currentPdfFile);
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = this.selectedItem.judul || "file.pdf";
+      link.download = this.selectedItem?.judul || "file.pdf";
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1168,6 +1742,7 @@ export default {
 /* META */
 .meta {
   font-size: 12px;
+  padding: 2px 0;
   color: #6b7280;
 }
 
@@ -1232,6 +1807,31 @@ export default {
   background: linear-gradient(90deg, #eeeeee 25%, #f5f5f5 50%, #eeeeee 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
+}
+
+.fab-proses {
+  box-shadow: 0 0 10px rgba(255, 165, 0, 0.5); /* orange */
+}
+
+.fab-ditolak {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); /* red */
+}
+
+.fab-survey {
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5); /* purple */
+}
+
+.fab-diterima {
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); /* green */
+}
+
+/* optional */
+.fab-publish {
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* blue */
+}
+
+.fab-verifikasi {
+  box-shadow: 0 0 10px rgba(13, 148, 136, 0.5); /* teal */
 }
 
 canvas {
@@ -1301,53 +1901,76 @@ canvas {
   background: transparent;
 }
 
-.step-card div {
-  font-size: 13px;
-  color: #374151;
+/* HEADER */
+.card-header {
+  padding: 18px;
 }
 
-.detail-hero {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 12px;
+/* STATUS PILL */
+.status-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.detail-card {
-  background: white;
-  border-radius: 16px;
+.status-orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.status-green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-grey {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.status-purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.status-teal {
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+/* SECTION */
+.section {
   padding: 14px;
-  margin-bottom: 12px;
-
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .section-title {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
-
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
   margin-bottom: 10px;
+  color: #374151;
 }
 
-.detail-item {
+/* ROW ITEM */
+.row-item {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  padding: 6px 0;
-  border-bottom: 1px dashed #e5e7eb;
+  padding: 10px 0;
 }
 
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-item span {
+.row-item span {
   color: #6b7280;
 }
 </style>
