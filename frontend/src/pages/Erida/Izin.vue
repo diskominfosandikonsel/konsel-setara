@@ -928,15 +928,6 @@
                     {{ formatDates(selectedItem.tgl_selesai) }}
                   </b>
                 </div>
-
-                <q-btn
-                  unelevated
-                  color="primary"
-                  icon="picture_as_pdf"
-                  label="Lihat Proposal"
-                  class="full-width q-mt-sm"
-                  @click="openPdfFile(selectedItem.proposal)"
-                />
               </div>
             </div>
           </q-card>
