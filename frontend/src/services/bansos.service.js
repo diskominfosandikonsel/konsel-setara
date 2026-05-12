@@ -14,16 +14,16 @@ export default {
   // =========================
   // SUMMARY
   // =========================
-  getJmlKelompok () {
-    return apiBansos.post(base + '/jmlKelompok')
+  getJmlKelompok (payload) {
+    return apiBansos.post(base + '/jmlKelompok', payload)
   },
 
-  getJmlBantuanIndividu () {
-    return apiBansos.post(base + '/jmlBantuanIndividu')
+  getJmlBantuanIndividu (payload) {
+    return apiBansos.post(base + '/jmlBantuanIndividu', payload)
   },
 
-  getJmlBantuanKelompok () {
-    return apiBansos.post(base + '/jmlBantuanKelompok')
+  getJmlBantuanKelompok (payload) {
+    return apiBansos.post(base + '/jmlBantuanKelompok', payload)
   },
 
   // =========================
@@ -35,6 +35,10 @@ export default {
 
   getKelompok (payload) {
     return apiBansos.post(base + '/viewKelompok', payload)
+  },
+
+  getSektor (payload) {
+    return apiBansos.post(base + '/viewSektor', payload)
   },
 
   // =========================
@@ -61,6 +65,10 @@ export default {
 
   getTahunUkt () {
     return apiBansos.get(base + '/tahunUkt')
+  },
+
+  getTahunAll () {
+    return apiBansos.get(base + '/tahunAll')
   }
 
 }

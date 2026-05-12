@@ -11,6 +11,7 @@ export const useBansosStore = defineStore('bansos', {
 
     individu: [],
     kelompok: [],
+    sektorBansos: [],
 
     individuKecamatan: [],
     kelompokKecamatan: [],
@@ -20,6 +21,11 @@ export const useBansosStore = defineStore('bansos', {
     searched: false,
 
     loading: false,
+    loadingUkt: false,
+
+    // Global Filters
+    tahunList: [],
+    pilih_tahun: null,
 
     // UKT
     ukt: [],
@@ -49,13 +55,13 @@ export const useBansosStore = defineStore('bansos', {
     // =========================
     // SUMMARY
     // =========================
-    async getSummary () {
+    async getSummary (payload = {}) {
       this.loading = true
       try {
         const [kelompok, individu, kelompokBantuan] = await Promise.all([
-          BansosService.getJmlKelompok(),
-          BansosService.getJmlBantuanIndividu(),
-          BansosService.getJmlBantuanKelompok()
+          BansosService.getJmlKelompok(payload),
+          BansosService.getJmlBantuanIndividu(payload),
+          BansosService.getJmlBantuanKelompok(payload)
         ])
 
         this.jmlKelompok = kelompok.data?.total || 0
@@ -111,6 +117,20 @@ export const useBansosStore = defineStore('bansos', {
       }
     },
 
+    async getSektorBansos (payload) {
+      this.loading = true
+      try {
+        const res = await BansosService.getSektor(payload)
+        this.sektorBansos = res.data?.data || []
+        return this.sektorBansos
+      } catch (err) {
+        console.error('SEKTOR BANSOS ERROR:', err)
+        return []
+      } finally {
+        this.loading = false
+      }
+    },
+
     // =========================
     // BAR CHART
     // =========================
@@ -148,11 +168,22 @@ export const useBansosStore = defineStore('bansos', {
     async fetchAll (payload = {}) {
       this.loading = true
       try {
+        // Fetch tahun list if empty
+        if (this.tahunList.length === 0) {
+          await this.getTahunAll()
+        }
+
+        // Apply global year filter to payload if selected
+        if (this.pilih_tahun) {
+          payload.tahun = this.pilih_tahun
+        }
+
         await Promise.all([
           this.getKecamatan(),
-          this.getSummary(),
+          this.getSummary(payload),
           this.getIndividu(payload),
           this.getKelompok(payload),
+          this.getSektorBansos(payload),
           this.getIndividuKecamatan(payload),
           this.getKelompokKecamatan(payload),
           this.getTahunUkt()
@@ -175,7 +206,7 @@ export const useBansosStore = defineStore('bansos', {
     // UKT
     // =========================
     async getUkt(payload) {
-      this.loading = true;
+      this.loadingUkt = true;
       try {
         const res = await BansosService.getUkt(payload);
         this.ukt = res.data?.data || [];
@@ -184,14 +215,20 @@ export const useBansosStore = defineStore('bansos', {
         console.error('UKT ERROR:', err);
         return [];
       } finally {
-        this.loading = false;
+        this.loadingUkt = false;
       }
     },
 
     async getTahunUkt() {
       try {
         const res = await BansosService.getTahunUkt();
-        this.tahunUktList = res.data?.data || [];
+        const dbYears = res.data?.data || [];
+        
+        // Ensure 2025 and 2024 etc are included as per user request
+        const mandatoryYears = ['2025', '2024', '2023'];
+        
+        this.tahunUktList = [...new Set([...mandatoryYears, ...dbYears])].sort((a, b) => b - a);
+        
         if (this.tahunUktList.length > 0 && !this.pilih_tahun_ukt) {
           this.pilih_tahun_ukt = this.tahunUktList[0];
         }
@@ -227,7 +264,29 @@ export const useBansosStore = defineStore('bansos', {
   } finally {
     this.searchLoading = false;
   }
-},
+  },
 
-  }
+  async getTahunAll() {
+    try {
+      const res = await BansosService.getTahunAll();
+      const dbYears = res.data?.data || [];
+      
+      // Generate years from current year down to 2022 to ensure 2024 etc exist
+      const currentYear = new Date().getFullYear();
+      const startYear = 2022;
+      const years = [];
+      for (let y = currentYear; y >= startYear; y--) {
+        years.push(y.toString());
+      }
+
+      // Merge with dbYears and unique
+      this.tahunList = [...new Set([...years, ...dbYears])].sort((a, b) => b - a);
+      
+      return this.tahunList;
+    } catch (err) {
+      console.error('GET TAHUN ALL ERROR:', err);
+      return [];
+    }
+  },
+}
 })

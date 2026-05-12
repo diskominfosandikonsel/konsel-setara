@@ -9,9 +9,18 @@
           Penerima Bantuan Berdasarkan Kecamatan
         </div>
 
-        <q-select v-model="pilih_kecamatan" :options="kecamatan" option-label="uraian" option-value="kecamatan_id"
-          emit-value map-options dense outlined bg-color="white" class="q-mt-md" label="Pilih Kecamatan"
-          @update:model-value="onFilterChange" />
+        <div class="row q-col-gutter-sm q-mt-md">
+          <div class="col-6">
+            <q-select v-model="pilih_kecamatan" :options="kecamatan" option-label="uraian" option-value="kecamatan_id"
+              emit-value map-options dense outlined bg-color="white" label="Pilih Kecamatan"
+              @update:model-value="onFilterChange" clearable />
+          </div>
+          <div class="col-6">
+            <q-select v-model="pilih_tahun" :options="tahunList"
+              dense outlined bg-color="white" label="Pilih Tahun"
+              @update:model-value="onFilterChange" clearable />
+          </div>
+        </div>
       </div>
       <div class="q-px-md q-pt-md">
         <div class="row q-col-gutter-sm">
@@ -71,7 +80,7 @@
 
         <q-card class="card-modern animate-slide" style="margin-top: 10px">
           <q-card-section>
-            <q-skeleton v-if="loading" type="rect" height="300px" />
+            <q-skeleton v-if="loadingUkt" type="rect" height="300px" />
             <div v-else id="grafikUkt" style="width: 100%"></div>
           </q-card-section>
         </q-card>
@@ -198,6 +207,7 @@ export default {
   data() {
     return {
       pilih_kecamatan: null,
+      pilih_tahun: null,
       pilih_tahun_ukt: null,
       dialogSearch: false,
       searchNik: "",
@@ -225,8 +235,10 @@ export default {
       "searchLoading",
       "searched",
       "loading",
+      "loadingUkt",
       "ukt",
       "tahunUktList",
+      "tahunList",
     ]),
 
     cards() {
@@ -253,7 +265,10 @@ export default {
     },
 
     pieCharts() {
-      return [{ id: "grafikBantuanIndividu" }, { id: "grafikBantuanKelompok" }];
+      return [
+        { id: "grafikSektorIndividu" },
+        { id: "grafikSektorKelompok" }
+      ];
     },
 
     barCharts() {
@@ -290,15 +305,16 @@ export default {
     async refreshAll(done) {
       const store = this.getStore();
 
-      this.$nextTick(async () => {
-        await store.fetchAll({
-          kecamatan: this.pilih_kecamatan || "",
-        });
+      await store.fetchAll({
+        kecamatan: this.pilih_kecamatan || "",
+        tahun: this.pilih_tahun || "",
+      });
 
-        this.pilih_tahun_ukt = store.pilih_tahun_ukt;
+      this.pilih_tahun = store.pilih_tahun;
+      this.pilih_tahun_ukt = store.pilih_tahun_ukt;
 
+      this.$nextTick(() => {
         this.renderAllCharts();
-
         if (done) done();
       });
     },
@@ -310,19 +326,27 @@ export default {
         kecamatan: this.pilih_kecamatan || "",
         tahun: this.pilih_tahun_ukt,
       });
-      this.renderUktChart();
+      this.$nextTick(() => {
+        this.renderUktChart();
+      });
     },
 
     async onFilterChange() {
       const store = this.getStore();
 
+      store.pilih_tahun = this.pilih_tahun;
+
       await store.fetchAll({
         kecamatan: this.pilih_kecamatan || "",
+        tahun: this.pilih_tahun || "",
       });
 
+      this.pilih_tahun = store.pilih_tahun;
       this.pilih_tahun_ukt = store.pilih_tahun_ukt;
 
-      this.renderAllCharts();
+      this.$nextTick(() => {
+        this.renderAllCharts();
+      });
     },
 
     formatNumber(val) {
@@ -344,25 +368,28 @@ export default {
     renderAllCharts() {
       const store = this.getStore();
 
-      // PIE INDIVIDU
-      const individu = store.individu.map((i) => ({
-        name: i.judul,
-        y: i.jmlPenerima,
-      }));
-
+      // PIE SEKTOR INDIVIDU
+      const dataSektorIndividu = store.sektorBansos.map((item) => ({
+        name: item.uraian,
+        y: item.jmlIndividu || 0,
+      })).sort((a, b) => b.y - a.y);
+      
       this.renderPie(
-        "grafikBantuanIndividu",
-        individu,
-        "Individu Penerima Bantuan",
+        "grafikSektorIndividu",
+        dataSektorIndividu,
+        "Sektor Bantuan (Individu)",
       );
 
-      // PIE KELOMPOK
-      const kelompok = store.kelompok.map((i) => [i.judul, i.jmlPenerima]);
+      // PIE SEKTOR KELOMPOK
+      const dataSektorKelompok = store.sektorBansos.map((item) => ({
+        name: item.uraian,
+        y: item.jmlKelompok || 0,
+      })).sort((a, b) => b.y - a.y);
 
       this.renderPie(
-        "grafikBantuanKelompok",
-        kelompok,
-        "Kelompok Penerima Bantuan",
+        "grafikSektorKelompok",
+        dataSektorKelompok,
+        "Sektor Bantuan (Kelompok)",
       );
 
       // BAR INDIVIDU
@@ -405,12 +432,21 @@ export default {
         },
 
         title: {
-          text: `<div style="text-align:center">
-              <div style="font-size:12px; color:#999">${title}</div>
-              <div style="font-size:20px; font-weight:bold">${total}</div>
-            </div>`,
-          useHTML: true,
-          verticalAlign: "middle",
+          text: title,
+          align: "center",
+          style: {
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#333"
+          }
+        },
+        subtitle: {
+          text: `Total Penerima: <b>${total}</b>`,
+          align: "center",
+          style: {
+            fontSize: "12px",
+            color: "#666"
+          }
         },
 
         tooltip: {
@@ -420,15 +456,16 @@ export default {
         plotOptions: {
           pie: {
             innerSize: "65%",
+            showInLegend: true,
             dataLabels: {
               enabled: true,
               distance: -30,
               style: {
                 fontSize: "11px",
                 textOutline: "none",
+                color: "black"
               },
               formatter() {
-                // show ONLY if big enough (mobile friendly)
                 if (this.percentage > 8) {
                   return `${this.percentage.toFixed(0)}%`;
                 }
@@ -436,6 +473,17 @@ export default {
               },
             },
           },
+        },
+
+        legend: {
+          enabled: true,
+          itemStyle: {
+            fontSize: "10px",
+            fontWeight: "normal"
+          },
+          labelFormatter: function() {
+            return `${this.name}: ${this.y}`;
+          }
         },
 
         series: [
@@ -703,8 +751,11 @@ export default {
   }
 }
 
-#grafikBantuanIndividu,
-#grafikBantuanKelompok,
+#grafikSektorIndividu,
+#grafikSektorKelompok {
+  min-height: 450px;
+}
+
 #grafikIndividuKecamatan,
 #grafikKelompokKecamatan {
   min-height: 300px;
