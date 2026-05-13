@@ -393,7 +393,7 @@ export default {
         { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
         { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
         { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
-        // { label: 'Lainnya', icon: 'grid_view', color: 'black', route: '' }
+        { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
       ]
     }
   }
