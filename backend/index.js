@@ -65,9 +65,9 @@ app.get('/syarat-ketentuan', (req, res) => {
 // APP VERSION ENDPOINT
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
-    latestVersion: '1.2.2', // Update this to trigger update popup (e.g. '1.2.3')
+    latestVersion: '1.3.0', // Updated to match the new release version
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
-    forceUpdate: false 
+    forceUpdate: true // Ubah jadi true jika update ini sifatnya WAJIB (user tidak bisa skip)
   });
 });
 
