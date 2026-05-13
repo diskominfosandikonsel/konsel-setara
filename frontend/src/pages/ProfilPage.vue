@@ -133,7 +133,7 @@
 
         <!-- Versi Aplikasi -->
         <div class="text-center q-mt-lg text-grey-6 text-caption">
-          Versi Aplikasi 1.2.1
+          Versi Aplikasi 1.3.0
         </div>
       </div>
     </div>

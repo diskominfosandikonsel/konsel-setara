@@ -588,6 +588,17 @@ const routes = [
         component: () => import('pages/Bansos/Dashboard.vue'),
         meta: { showBottomNav: true, requiresAuth: false }
       },
+      // DATA
+      {
+        path: 'data_dashboard',
+        component: () => import('pages/Data/Dashboard.vue'),
+        meta: { showBottomNav: true, requiresAuth: false }
+      },
+      {
+        path: 'data_detail',
+        component: () => import('pages/Data/DetailOpd.vue'),
+        meta: { showBottomNav: false, requiresAuth: false }
+      },
       // ADMIN SECTION
       {
         path: 'admin/slider',
