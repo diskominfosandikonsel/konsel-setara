@@ -60,7 +60,12 @@ export const useDataStore = defineStore('data', {
     // FETCH ALL INITIAL DATA
     // =========================
     async fetchAll () {
-      this.loading = true
+      // Optimasi: Jika data sudah ada di store (cache memori), jangan tampilkan loading
+      // Biarkan aplikasi menggunakan data lama sambil memuat data baru secara diam-diam (Stale-While-Revalidate)
+      if (this.opds.length === 0 || this.dashboard.length === 0) {
+        this.loading = true
+      }
+      
       try {
         await Promise.all([
           this.fetchOpd(),

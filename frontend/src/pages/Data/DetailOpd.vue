@@ -3,15 +3,7 @@
     <!-- HEADER -->
     <div class="detail-header">
       <div class="header-inner">
-        <q-btn
-          flat
-          round
-          dense
-          icon="arrow_back"
-          color="white"
-          @click="$router.back()"
-          class="q-mr-sm"
-        />
+        <q-btn flat round dense icon="arrow_back" color="white" @click="$router.back()" class="q-mr-sm" />
         <div class="col">
           <div class="text-subtitle1 text-weight-bold text-white ellipsis-title">
             {{ namaOpd }}
@@ -24,27 +16,14 @@
 
       <!-- Search Indikator -->
       <div class="q-px-md q-pb-md">
-        <q-input
-          v-model="searchIndikator"
-          dense
-          outlined
-          bg-color="white"
-          placeholder="Cari indikator..."
-          class="search-ind"
-          color="indigo"
-          debounce="300"
-        >
+        <q-input v-model="searchIndikator" dense outlined bg-color="white" placeholder="Cari indikator..."
+          class="search-ind" color="indigo" debounce="300">
           <template v-slot:prepend>
             <q-icon name="search" color="indigo-4" />
           </template>
           <template v-slot:append>
-            <q-icon
-              v-if="searchIndikator"
-              name="close"
-              color="grey-5"
-              class="cursor-pointer"
-              @click="searchIndikator = ''"
-            />
+            <q-icon v-if="searchIndikator" name="close" color="grey-5" class="cursor-pointer"
+              @click="searchIndikator = ''" />
           </template>
         </q-input>
       </div>
@@ -82,12 +61,8 @@
           </div>
         </div>
 
-        <div
-          v-for="(indicator, idx) in filteredIndicators"
-          :key="indicator.kode_indikator"
-          class="q-mb-md"
-          :style="{ animationDelay: idx * 60 + 'ms' }"
-        >
+        <div v-for="(indicator, idx) in filteredIndicators" :key="indicator.kode_indikator" class="q-mb-md"
+          :style="{ animationDelay: idx * 60 + 'ms' }">
           <q-card class="chart-card animate-card">
             <q-card-section>
               <!-- Indicator Header -->
@@ -97,14 +72,7 @@
                     {{ indicator.nama_indikator }}
                   </div>
                   <div class="row items-center q-mt-xs q-gutter-x-sm">
-                    <q-chip
-                      dense
-                      size="sm"
-                      color="indigo-1"
-                      text-color="indigo-8"
-                      square
-                      class="q-ma-none"
-                    >
+                    <q-chip dense size="sm" color="indigo-1" text-color="indigo-8" square class="q-ma-none">
                       {{ indicator.nama_opd }}
                     </q-chip>
                     <span class="text-caption text-grey-5">
@@ -141,7 +109,7 @@ import { mapState } from 'pinia'
 export default {
   name: 'DataDetailOpd',
 
-  data () {
+  data() {
     return {
       kodeOpd: '',
       namaOpd: '',
@@ -152,11 +120,11 @@ export default {
   computed: {
     ...mapState(useDataStore, ['dashboard', 'loadingDetail']),
 
-    opdIndicators () {
+    opdIndicators() {
       return this.dashboard.filter(d => d.kode_opd === this.kodeOpd)
     },
 
-    filteredIndicators () {
+    filteredIndicators() {
       if (!this.searchIndikator) return this.opdIndicators
       const q = this.searchIndikator.toLowerCase()
       return this.opdIndicators.filter(ind =>
@@ -166,7 +134,7 @@ export default {
   },
 
   watch: {
-    filteredIndicators () {
+    filteredIndicators() {
       this.$nextTick(() => {
         this.renderCharts()
       })
@@ -174,11 +142,11 @@ export default {
   },
 
   methods: {
-    getStore () {
+    getStore() {
       return useDataStore()
     },
 
-    formatValue (val) {
+    formatValue(val) {
       if (val === null || val === undefined) return '-'
       if (typeof val === 'number') {
         return new Intl.NumberFormat('id-ID', {
@@ -188,11 +156,14 @@ export default {
       return val
     },
 
-    renderCharts () {
-      this.filteredIndicators.forEach((indicator) => {
+    async renderCharts() {
+      for (const indicator of this.filteredIndicators) {
+        // Optimasi: Membagi proses render grafik agar tidak membekukan UI (Main Thread Yielding)
+        await new Promise(resolve => setTimeout(resolve, 15))
+
         const containerId = 'chart-' + indicator.kode_indikator
         const el = document.getElementById(containerId)
-        if (!el) return
+        if (!el) continue
 
         const years = indicator.years || []
         const values = indicator.values || []
@@ -263,7 +234,7 @@ export default {
                   color: '#374151',
                   textOutline: 'none'
                 },
-                formatter () {
+                formatter() {
                   const val = this.y
                   if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M'
                   if (val >= 1000) return (val / 1000).toFixed(1) + 'K'
@@ -283,11 +254,11 @@ export default {
             data: values.map(v => (typeof v === 'number' ? v : parseFloat(v) || 0))
           }]
         })
-      })
+      }
     }
   },
 
-  async mounted () {
+  async mounted() {
     this.kodeOpd = this.$route.query.kode || ''
     this.namaOpd = this.$route.query.nama || ''
 
@@ -327,7 +298,7 @@ export default {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .header-inner {
@@ -348,14 +319,14 @@ export default {
 
 .search-ind :deep(.q-field__control) {
   border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 /* CHART CARD */
 .chart-card {
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
   overflow: hidden;
   transition: all 0.2s ease;
 }
@@ -374,6 +345,7 @@ export default {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
