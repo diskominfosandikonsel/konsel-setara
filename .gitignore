@@ -156,3 +156,7 @@ frontend/generate_icons.py
 generate_icons.py
 
 serviceAccountKey.json
+
+# Ignore document files
+*.doc
+*.docx
