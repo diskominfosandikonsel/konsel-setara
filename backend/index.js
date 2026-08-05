@@ -73,6 +73,11 @@ app.get('/api/v1/app-version', (req, res) => {
 
 // API ENDPOINTS
 
+// SKM ENDPOINTS
+const skm = require('./apiMysql/skm');
+app.use('/api/v1/skm', middleware.isLoggedIn, skm);
+// SKM ENDPOINTS
+
 // ERROR HANDLER
 
 function notFound(req, res, next) {
