@@ -5,49 +5,162 @@ var db = require('../db/MySql/utama');
 var upload = require('../db/multer/pdf');
 var uniqid = require('uniqid');
 
+// DASBOARD
+router.get('/getDashboard', async (req, res) => {
+    try {
+        // Query 1: Ringkasan Keseluruhan (Skor Kepuasan, Total Responden, Total Layanan)
+        const qSummary = `
+            SELECT 
+                COALESCE(ROUND(AVG(rating), 1), 0) AS skorKepuasan,
+                COUNT(id) AS totalResponden,
+                (SELECT COUNT(id) FROM aplikasi) AS totalLayanan
+            FROM ulasan
+        `;
+
+        // Query 2: Tren Kepuasan (Group per bulan 6 bulan terakhir)
+        const qTren = `
+            SELECT 
+                DATE_FORMAT(createdAt, '%b') AS bulan,
+                ROUND(AVG(rating), 1) AS skor
+            FROM ulasan
+            WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY YEAR(createdAt), MONTH(createdAt)
+            ORDER BY createdAt ASC
+        `;
+
+        // Query 3: Kategori Kepuasan (Distribution Rating 1 - 5)
+        const qKategori = `
+            SELECT 
+                CASE 
+                    WHEN rating = 5 THEN 'Sangat Puas'
+                    WHEN rating = 4 THEN 'Puas'
+                    WHEN rating = 3 THEN 'Cukup'
+                    WHEN rating = 2 THEN 'Kurang'
+                    WHEN rating = 1 THEN 'Kecewa'
+                END AS nilai,
+                COUNT(id) AS jumlah,
+                CASE 
+                    WHEN rating = 5 THEN '#10b981'
+                    WHEN rating = 4 THEN '#60a5fa'
+                    WHEN rating = 3 THEN '#facc15'
+                    WHEN rating = 2 THEN '#f97316'
+                    WHEN rating = 1 THEN '#ef4444'
+                END AS fill
+            FROM ulasan
+            GROUP BY rating
+            ORDER BY rating DESC
+        `;
+
+        // Query 4: Skor per Layanan (Aplikasi)
+        const qLayanan = `
+            SELECT 
+                aplikasi.*,
+                COALESCE(ROUND(AVG(ulasan.rating), 1), 0) AS skor,
+                COUNT(ulasan.id) AS responden
+            FROM aplikasi
+            LEFT JOIN ulasan ON ulasan.aplikasi_id = aplikasi.id
+            GROUP BY aplikasi.id
+            ORDER BY aplikasi.id DESC
+            LIMIT 5
+        `;
+
+        // Query 5: 5 Komentar Terbaru
+        const qKomentar = `
+            SELECT 
+                u.id,
+                usr.nama,
+                u.komentar,
+                u.rating,
+                a.nama AS layanan,
+                u.createdAt AS waktu
+            FROM ulasan u
+            LEFT JOIN users usr ON usr.id = u.createdBy
+            LEFT JOIN aplikasi a ON a.id = u.aplikasi_id
+            ORDER BY u.createdAt DESC
+            LIMIT 5
+        `;
+
+        // Eksekusi semua query secara paralel
+        const [summaryRes, trenRes, kategoriRes, layananRes, komentarRes] = await Promise.all([
+            new Promise((resolve, reject) => db.query(qSummary, (err, r) => err ? reject(err) : resolve(r))),
+            new Promise((resolve, reject) => db.query(qTren, (err, r) => err ? reject(err) : resolve(r))),
+            new Promise((resolve, reject) => db.query(qKategori, (err, r) => err ? reject(err) : resolve(r))),
+            new Promise((resolve, reject) => db.query(qLayanan, (err, r) => err ? reject(err) : resolve(r))),
+            new Promise((resolve, reject) => db.query(qKomentar, (err, r) => err ? reject(err) : resolve(r)))
+        ]);
+
+        res.json({
+            summary: summaryRes[0] || { skorKepuasan: 0, totalResponden: 0, totalLayanan: 0 },
+            trenKepuasan: trenRes,
+            kategoriKepuasan: kategoriRes,
+            kepuasanPerLayanan: layananRes,
+            komentarPengguna: komentarRes
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+// DASBOARD
+
+
 // APLIKASI
 router.post('/viewAplikasi', (req, res) => {
-    var data_batas = 10;
-    var data_star = (req.body.data_ke - 1) * data_batas;
-    var cari = req.body.cari_value;
-    var halaman = 1;
+    const data_batas = Number(req.body.page_limit) || 10;
+    const page_first = Number(req.body.data_ke) || 1;
+    const data_star = (page_first - 1) * data_batas;
+    const cari = req.body.cari_value || '';
 
-    let jml_data = `
-        SELECT aplikasi.*
+    let whereClause = '';
+    let params = [];
+    if (cari) {
+        whereClause = ` WHERE aplikasi.nama LIKE ? OR aplikasi.keterangan LIKE ?`;
+        params = [`%${cari}%`, `%${cari}%`];
+    }
 
+    const jml_data = `
+        SELECT COUNT(*) AS total
         FROM aplikasi
+        ${whereClause}
     `;
 
-    let view = `
-        SELECT aplikasi.*
-
+    const view = `
+        SELECT 
+            aplikasi.*,
+            COALESCE(ROUND(AVG(ulasan.rating), 1), 0) AS skor,
+            COUNT(ulasan.id) AS responden
         FROM aplikasi
-        LIMIT `+ data_star + `,` + data_batas + `
+        LEFT JOIN ulasan ON ulasan.aplikasi_id = aplikasi.id
+        ${whereClause}
+        GROUP BY aplikasi.id
+        ORDER BY aplikasi.id DESC
+        LIMIT ${data_star}, ${data_batas}
     `;
 
-    db.query(jml_data, (err, row) => {
+    db.query(jml_data, params, (err, countResult) => {
         if (err) {
-            console.log(err);
-            res.json(err)
-        } else {
-            halaman = Math.ceil(row.length / data_batas);
-            if (halaman < 1) { halaman = 1 }
-            // ========================
-            db.query(view, (err, result) => {
-                if (err) { res.json(err) }
-                else {
-                    halaman = Math.ceil(row.length / data_batas);
-                    if (halaman < 1) { halaman = 1 }
-                    res.json({
-                        data: result,
-                        jml_data: halaman,
-                        total: row.length,
-                    })
-                }
-            })
-            // ========================
+            console.error(err);
+            return res.status(500).json({ error: err.message });
         }
-    })
+
+        const totalData = countResult[0].total;
+        let totalHalaman = Math.ceil(totalData / data_batas);
+        if (totalHalaman < 1) totalHalaman = 1;
+
+        db.query(view, params, (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: err.message });
+            }
+
+            res.json({
+                data: result,
+                jml_data: totalHalaman,
+                total: totalData
+            });
+        });
+    });
 });
 
 router.post('/addAplikasi', (req, res) => {
@@ -135,15 +248,30 @@ router.post('/viewUlasan', (req, res) => {
     var halaman = 1;
 
     let jml_data = `
-        SELECT ulasan.*
+        SELECT ulasan.*,
+        users.nama,
+        aplikasi.nama as app
 
         FROM ulasan
+
+        LEFT JOIN users ON users.id = ulasan.createdBy
+        LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+
+        ORDER BY ulasan.createdAt DESC
     `;
 
     let view = `
-        SELECT ulasan.*
+        SELECT ulasan.*,
+        users.nama,
+        aplikasi.nama as app
 
         FROM ulasan
+
+        LEFT JOIN users ON users.id = ulasan.createdBy
+        LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+
+        ORDER BY ulasan.createdAt DESC
+
         LIMIT `+ data_star + `,` + data_batas + `
     `;
 
