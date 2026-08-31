@@ -75,8 +75,24 @@ app.get('/api/v1/app-version', (req, res) => {
 
 // SKM ENDPOINTS
 const skm = require('./apiMysql/skm');
-app.use('/api/v1/skm', middleware.isLoggedIn, skm);
+app.use('/api/v1/skm', skm);
 // SKM ENDPOINTS
+
+// DYNAMIC MENU ENDPOINTS
+const menu = require('./apiMysql/menu');
+app.use('/api/v1/menu', menu);
+
+// USERS MANAGEMENT ENDPOINTS
+const users = require('./apiMysql/users');
+app.use('/api/v1/users', users);
+
+// REALISASI SETARA (PROGRAM PRIORITAS BUPATI) ENDPOINTS
+const realisasi = require('./apiMysql/realisasi');
+app.use('/api/v1/realisasi', realisasi);
+
+// PEGAWAI ACCESS & E-GOV SSO ENDPOINTS
+const pegawai = require('./apiMysql/pegawai');
+app.use('/api/v1/pegawai', pegawai);
 
 // ERROR HANDLER
 

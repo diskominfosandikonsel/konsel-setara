@@ -300,31 +300,133 @@ router.post('/viewUlasan', (req, res) => {
     })
 });
 
-router.post('/addUlasan', (req, res) => {
-    console.log(req.body);
-    let query = `INSERT INTO ulasan (id, aplikasi_id, rating, komentar, createdBy, createdAt)
-    VALUES(
-        '`+ uniqid() + `',
-        '`+ req.body.aplikasi_id + `',
-        '`+ req.body.rating + `',
-        '`+ req.body.komentar + `',
-        '`+ req.body.createdBy + `',
-        NOW()
-    )
-    `;
-
-    db.query(query, (err, row) => {
+router.post('/checkStatus', (req, res) => {
+    const { aplikasi_id, createdBy } = req.body;
+    if (!aplikasi_id || !createdBy || createdBy === 'anonim') {
+        return res.json({ hasSubmitted: false });
+    }
+    const checkSql = `SELECT id, rating, komentar, createdAt FROM ulasan WHERE (aplikasi_id = ? OR aplikasi_id = (SELECT id FROM aplikasi WHERE nama LIKE ? LIMIT 1)) AND createdBy = ? LIMIT 1`;
+    db.query(checkSql, [aplikasi_id, `%${aplikasi_id}%`, createdBy], (err, rows) => {
         if (err) {
-            console.log('errrrooorrr');
-            res.send(err);
-            console.log(err);
-        } else {
-            res.send(row);
-            console.log(row)
+            console.error('checkStatus error:', err);
+            return res.status(500).json({ error: err.message });
         }
-    })
+        res.json({
+            hasSubmitted: Boolean(rows && rows.length > 0),
+            review: rows && rows.length > 0 ? rows[0] : null
+        });
+    });
+});
+
+router.post('/addUlasan', (req, res) => {
+    const { aplikasi_id, rating, komentar, createdBy } = req.body;
+
+    if (!aplikasi_id || !rating) {
+        return res.status(422).json({ success: false, message: 'Aplikasi dan rating wajib diisi' });
+    }
+
+    const userId = createdBy && createdBy !== 'anonim' ? createdBy : null;
+
+    // Jika user login, cek apakah sudah pernah mengisi survei untuk aplikasi ini
+    if (userId) {
+        const checkSql = `SELECT id FROM ulasan WHERE aplikasi_id = ? AND createdBy = ? LIMIT 1`;
+        db.query(checkSql, [aplikasi_id, userId], (err, rows) => {
+            if (err) {
+                console.error('Check ulasan error:', err);
+                return res.status(500).json({ error: err.message });
+            }
+            if (rows && rows.length > 0) {
+                return res.status(409).json({
+                    success: false,
+                    alreadySubmitted: true,
+                    message: 'Anda sudah pernah mengisi survei kepuasan untuk layanan ini.'
+                });
+            }
+            insertUlasan();
+        });
+    } else {
+        insertUlasan();
+    }
+
+    function insertUlasan() {
+        const newId = uniqid();
+        let query = `INSERT INTO ulasan (id, aplikasi_id, rating, komentar, createdBy, createdAt)
+        VALUES (?, ?, ?, ?, ?, NOW())`;
+
+        db.query(query, [newId, aplikasi_id, Number(rating), komentar || '-', createdBy || 'anonim'], (err, row) => {
+            if (err) {
+                console.error('Insert ulasan error:', err);
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ success: true, message: 'Ulasan berhasil dikirim', id: newId });
+        });
+    }
 });
 // ULASAN
+// ═══════════════════════════════════════════════════════════════
+// ENDPOINT BARU KHUSUS ADMIN (CEPAT & TERINDEX)
+// ═══════════════════════════════════════════════════════════════
+router.post('/viewUlasanFast', (req, res) => {
+    const data_batas = Number(req.body.page_limit) || 10;
+    const page_first = Number(req.body.data_ke) || 1;
+    const data_star = (page_first - 1) * data_batas;
+    const cari = req.body.cari_value || '';
+
+    let whereClause = '';
+    let params = [];
+    if (cari && cari.trim() !== '') {
+        whereClause = ` WHERE users.nama LIKE ? OR ulasan.komentar LIKE ? OR aplikasi.nama LIKE ?`;
+        params = [`%${cari}%`, `%${cari}%`, `%${cari}%`];
+    }
+
+    const countQuery = `
+        SELECT COUNT(ulasan.id) AS total
+        FROM ulasan
+        LEFT JOIN users ON users.id = ulasan.createdBy
+        LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+        ${whereClause}
+    `;
+
+    const dataQuery = `
+        SELECT 
+            ulasan.id,
+            ulasan.rating,
+            ulasan.komentar,
+            ulasan.createdAt,
+            users.nama,
+            aplikasi.nama as app
+        FROM ulasan
+        LEFT JOIN users ON users.id = ulasan.createdBy
+        LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+        ${whereClause}
+        ORDER BY ulasan.createdAt DESC
+        LIMIT ${data_star}, ${data_batas}
+    `;
+
+    db.query(countQuery, params, (err, countResult) => {
+        if (err) {
+            console.error('viewUlasanFast count error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        const totalData = countResult[0] ? countResult[0].total : 0;
+        let totalHalaman = Math.ceil(totalData / data_batas);
+        if (totalHalaman < 1) totalHalaman = 1;
+
+        db.query(dataQuery, params, (err2, dataResult) => {
+            if (err2) {
+                console.error('viewUlasanFast data error:', err2);
+                return res.status(500).json({ error: err2.message });
+            }
+
+            res.json({
+                data: dataResult,
+                jml_data: totalHalaman,
+                total: totalData,
+            });
+        });
+    });
+});
 
 
 module.exports = router;
