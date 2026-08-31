@@ -153,14 +153,24 @@
 
       </div>
     </div> -->
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="PerakKonsel" />
+
     </q-page>
 </template>
 
 <script>
 import { usePerakStore } from 'stores/perak'
+import Skm from 'src/components/Skm.vue'
 
 export default {
     name: 'PerakDashboard',
+    components: {
+        Skm
+    },
     data() {
         return {
             menuList: [

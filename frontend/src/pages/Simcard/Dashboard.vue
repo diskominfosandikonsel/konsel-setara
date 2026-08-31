@@ -216,13 +216,24 @@
  
 
 
+
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Simcard" />
+
   </q-page>
 </template>
 
 <script>
 import { useSimcardStore } from 'src/stores/simcard';
+import Skm from 'src/components/Skm.vue';
 export default {
   name: 'SapaDashboard',
+  components: {
+    Skm
+  },
   data () {
     return {
       slide: 1,

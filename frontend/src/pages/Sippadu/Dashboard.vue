@@ -115,6 +115,12 @@
     <input type="file" accept="image/*" capture="environment" ref="cameraInput" style="display: none"
       @change="onCameraCapture" />
 
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Sippadu" />
+
   </q-page>
 </template>
 
@@ -123,6 +129,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSippaduStore } from 'stores/sippadu'
 import { useAuthStore } from 'stores/auth'
+import Skm from 'src/components/Skm.vue'
 
 const router = useRouter()
 const sippaduStore = useSippaduStore()

@@ -93,6 +93,21 @@ const routes = [
       },
       // Legal End
       {
+        path: 'realisasi_setara',
+        component: () => import('pages/Realisasi/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'realisasi_dashboard',
+        component: () => import('pages/Realisasi/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'realisasi',
+        component: () => import('pages/Realisasi/Dashboard.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
         path: 'sapa_dashboard',
         component: () => import('pages/SapaKonsel/Dashboard.vue'),
         meta: { showBottomNav: true }

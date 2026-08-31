@@ -120,6 +120,12 @@
 
     </div>
 
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Firetap" />
+
   </q-page>
 </template>
 
@@ -127,6 +133,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { FiretapService } from 'src/services/firetap.service'
+import Skm from 'src/components/Skm.vue'
 
 const router = useRouter()
 

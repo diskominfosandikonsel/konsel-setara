@@ -193,6 +193,12 @@
         <q-btn fab color="primary" icon="search" @click="dialogSearch = true" />
       </q-page-sticky>
     </q-pull-to-refresh>
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Bansos" />
+
   </q-page>
 </template>
 
@@ -200,9 +206,13 @@
 import Highcharts from "highcharts";
 import { useBansosStore } from "stores/bansos";
 import { mapState } from "pinia";
+import Skm from 'src/components/Skm.vue';
 
 export default {
   name: "DashboardMobilePro",
+  components: {
+    Skm
+  },
 
   data() {
     return {

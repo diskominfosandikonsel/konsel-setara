@@ -157,6 +157,12 @@
 
     </div>
 
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="CSR" />
+
   </q-page>
 </template>
 
@@ -165,6 +171,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'stores/auth'
 import { CsrService } from 'src/services/csr.service'
+import Skm from 'src/components/Skm.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

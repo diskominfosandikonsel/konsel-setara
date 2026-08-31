@@ -93,6 +93,12 @@
   </div>
 </div>
 
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="SapaKonsel" />
+
   </q-page>
 </template>
 
@@ -105,12 +111,14 @@ import { Autoplay, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/autoplay'
 import 'swiper/css/pagination'
+import Skm from 'src/components/Skm.vue'
 
 export default {
   name: 'SapaDashboard',
   components: {
     Swiper,
-    SwiperSlide
+    SwiperSlide,
+    Skm
   },
   data () {
     return {

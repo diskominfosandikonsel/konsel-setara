@@ -335,6 +335,12 @@
         </div>
       </q-card>
     </q-dialog>
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Erida" />
+
   </q-page>
 </template>
 
@@ -346,6 +352,7 @@ import "swiper/css/pagination";
 import VueApexCharts from "vue3-apexcharts";
 import { useEridaStore } from "stores/erida";
 import { getFileErida, formatDate } from 'src/utils/helper'
+import Skm from 'src/components/Skm.vue'
 
 export default {
   name: "EridaDashboard",
@@ -354,6 +361,7 @@ export default {
     Swiper,
     SwiperSlide,
     apexchart: VueApexCharts,
+    Skm,
   },
 
   data() {

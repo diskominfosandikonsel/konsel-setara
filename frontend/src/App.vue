@@ -97,19 +97,16 @@ export default {
 
   methods: {
     async checkAppVersion() {
+      // Hanya cek versi di perangkat Android/iOS native, tidak di browser
+      if (!Capacitor.isNativePlatform()) {
+        console.log("🌐 Menjalankan di Web, skip pengecekan versi aplikasi.");
+        return;
+      }
+
       try {
         const { data } = await api.get("/api/v1/app-version");
-
-        // Mock version untuk testing di Web (browser)
-        let currentVersion = "1.0.0";
-
-        if (Capacitor.isNativePlatform()) {
-          const info = await CapacitorApp.getInfo();
-          currentVersion = info.version;
-        } else {
-          console.log("🌐 Menjalankan di Web, menggunakan mock version:", currentVersion);
-        }
-
+        const info = await CapacitorApp.getInfo();
+        const currentVersion = info.version;
         const latestVersion = data.latestVersion;
 
         if (this.isUpdateAvailable(currentVersion, latestVersion)) {

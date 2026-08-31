@@ -131,15 +131,25 @@
         </div>
       </template>
     </div>
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="Data" />
+
   </q-page>
 </template>
 
 <script>
 import { useDataStore } from 'stores/data'
 import { mapState } from 'pinia'
+import Skm from 'src/components/Skm.vue'
 
 export default {
   name: 'DataDashboard',
+  components: {
+    Skm
+  },
 
   data () {
     return {

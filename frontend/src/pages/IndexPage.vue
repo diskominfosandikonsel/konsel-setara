@@ -335,10 +335,42 @@ export default {
       }
     }
 
+    const menuItems = ref([
+      { label: 'Realisasi', icon: 'military_tech', route: '/realisasi_dashboard' },
+      { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
+      { label: 'SapaKonsel', img: 'icons/sapa.svg', route: '/sapa_dashboard' },
+      { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
+      { label: 'PPID', img: 'icons/Ppid.png', route: 'http://ppid.konaweselatankab.go.id' },
+      { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
+      { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
+      { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
+      { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
+      { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
+      { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
+      { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
+    ])
+
+    const fetchDynamicMenu = async () => {
+      try {
+        const res = await api.get('/api/v1/menu/list')
+        if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          menuItems.value = res.data.data.map(item => ({
+            label: item.label,
+            img: item.img || '',
+            icon: item.icon || 'apps',
+            route: item.route
+          }))
+        }
+      } catch (err) {
+        console.warn('Gagal memuat dynamic menu, menggunakan fallback:', err)
+      }
+    }
+
     onMounted(() => {
       fetchCarousel()
       fetchVideoBerita()
       fetchBeritaTerbaru()
+      fetchDynamicMenu()
     })
 
     const goToRoute = (route) => {
@@ -349,8 +381,9 @@ export default {
         // Buka di tab baru jika URL eksternal
         window.open(route, '_blank')
       } else {
-        // Gunakan Vue Router untuk route internal
-        router.push(route)
+        // Normalisasi route internal (pastikan ada leading slash)
+        const targetRoute = route.startsWith('/') ? route : `/${route}`
+        router.push(targetRoute)
       }
     }
 
@@ -382,19 +415,7 @@ export default {
       showVideoSocials,
       openSocialLink,
       search: ref(''),
-      menuItems: [
-        { label: 'Firetap', img: 'icons/firetap_logo.png', route: '/firetap_dashboard' },
-        { label: 'SapaKonsel', img: 'icons/sapa.svg', route: '/sapa_dashboard' },
-        { label: 'PERAK', img: 'icons/Perak.png', route: '/perak_dashboard' },
-        { label: 'PPID', img: 'icons/Ppid.png', route: 'http://ppid.konaweselatankab.go.id' },
-        { label: 'JDIH', img: 'icons/Jdih.png', route: '/jdih_dashboard' },
-        { label: 'SIPPADU', img: 'icons/logo_sippadu.png', route: '/sippadu_dashboard' },
-        { label: 'SIMCARD', img: 'icons/Simcard.png', route: '/simcard_dashboard' },
-        { label: 'E-Rida', img: 'icons/E-rida.png', route: '/erida_dashboard' },
-        { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
-        { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
-        { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
-      ]
+      menuItems
     }
   }
 }

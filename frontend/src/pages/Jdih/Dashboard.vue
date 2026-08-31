@@ -138,6 +138,12 @@
                 </div>
             </q-card>
         </div>
+
+    <!-- ════════════════════════════ -->
+    <!-- SKM SURVEY BUTTON           -->
+    <!-- ════════════════════════════ -->
+    <Skm nama-aplikasi="JDIH" />
+
     </q-page>
 </template>
 
@@ -151,11 +157,13 @@ import 'swiper/css/autoplay';
 
 // Import required modules
 import { Autoplay } from 'swiper/modules';
+import Skm from 'src/components/Skm.vue';
 
 export default {
     components: {
         Swiper,
         SwiperSlide,
+        Skm,
     },
     setup() {
         return {
