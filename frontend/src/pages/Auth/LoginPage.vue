@@ -66,10 +66,11 @@
 
             <!-- Footer Aplikasi -->
             <div
-                style="position: absolute; bottom: 15px; left: 0; width: 100%; font-size: 0.8rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+                style="position: absolute; bottom: 10px; left: 0; width: 100%; font-size: 0.78rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
                 <div>@copyright : DiskominfoSandi Konawe Selatan 2026</div>
+                <div style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.85); font-weight: 600; letter-spacing: 0.8px;">Versi {{ appVersion }}</div>
                 <img src="/img/setara.png" alt="Logo Setara"
-                    style="height: 36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+                    style="height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
             </div>
         </div>
     </div>
@@ -77,6 +78,7 @@
 
 <script>
 import { useAuthStore } from 'src/stores/auth';
+import { App } from '@capacitor/app';
 
 export default {
     name: 'LoginPage',
@@ -89,10 +91,21 @@ export default {
             },
             showPassword: false,
             logoLoading: true,
-            rememberMe: false
+            rememberMe: false,
+            appVersion: '1.4.0'
         }
     },
-    mounted() {
+    async mounted() {
+        // Cek versi aplikasi dari Capacitor
+        try {
+            const info = await App.getInfo();
+            if (info && info.version) {
+                this.appVersion = info.version;
+            }
+        } catch (e) {
+            // fallback di web browser
+        }
+
         // Cek status remember me dari login sebelumnya
         const isRemembered = localStorage.getItem('remember_me') === 'true'
         

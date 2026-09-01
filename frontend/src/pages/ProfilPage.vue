@@ -133,7 +133,7 @@
 
         <!-- Versi Aplikasi -->
         <div class="text-center q-mt-lg text-grey-6 text-caption">
-          Versi Aplikasi 1.3.0
+          Versi Aplikasi {{ appVersion }}
         </div>
       </div>
     </div>
@@ -148,17 +148,16 @@
         </div>
 
         <q-card-section class="text-center q-pt-xl q-pb-md">
-          <div class="text-h6 text-weight-bolder text-grey-9">Konfirmasi Keluar</div>
-          <p class="text-grey-7 q-mt-sm" style="font-size: 14px;">Apakah Anda yakin ingin keluar dari akun? Anda harus
-            masuk
-            kembali untuk mengakses data Anda.</p>
+          <div class="text-h6 text-weight-bold text-grey-9 q-mb-xs">Konfirmasi Keluar</div>
+          <div class="text-body2 text-grey-7">
+            Apakah Anda yakin ingin keluar dari akun <b>{{ userName }}</b>?
+          </div>
         </q-card-section>
 
-        <q-card-actions align="center" class="q-pb-xl q-px-lg">
-          <q-btn label="Ya, Keluar Sekarang" color="negative" unelevated
-            class="full-width rounded-btn q-py-sm text-weight-bold" @click="confirmLogout" :loading="loggingOut" />
-          <q-btn label="Batal" flat color="grey-7" class="full-width q-mt-xs rounded-btn text-weight-medium"
-            v-close-popup />
+        <q-card-actions align="center" class="q-px-lg q-pb-lg q-gutter-sm no-wrap">
+          <q-btn flat label="Batal" color="grey-8" v-close-popup class="btn-cancel full-width" no-caps />
+          <q-btn unelevated label="Ya, Keluar" color="negative" :loading="loggingOut" @click="confirmLogout"
+            class="btn-confirm full-width" no-caps />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -168,7 +167,7 @@
 
 <script>
 import { useAuthStore } from 'src/stores/auth';
-import { Dialog } from 'quasar';
+import { App } from '@capacitor/app';
 
 export default {
   name: 'ProfilPage',
@@ -176,7 +175,19 @@ export default {
   data() {
     return {
       showLogoutDialog: false,
-      loggingOut: false
+      loggingOut: false,
+      appVersion: '1.4.0'
+    }
+  },
+
+  async mounted() {
+    try {
+      const info = await App.getInfo()
+      if (info && info.version) {
+        this.appVersion = info.version
+      }
+    } catch (e) {
+      // fallback jika di browser web
     }
   },
 
