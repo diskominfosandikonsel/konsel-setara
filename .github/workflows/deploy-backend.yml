@@ -1,0 +1,47 @@
+name: Auto Deploy Backend KONSEL-SETARA
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote SSH Commands on Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            echo "🚀 [1/4] Memulai proses deployment backend..."
+            cd ~/App/konsel_setara
+            
+            echo "⬇️ [2/4] Menarik perubahan kode terbaru dari Git..."
+            git pull origin main
+            
+            # Jika repo monorepo (ada folder backend), masuk ke folder backend
+            if [ -d "backend" ]; then
+              cd backend
+            fi
+            
+            echo "📦 [3/4] Memasang dependensi baru (jika ada)..."
+            npm install --omit=dev
+            
+            echo "🔄 [4/4] Mereload proses PM2 'KONSEL-SETARA' (Zero-Downtime)..."
+            pm2 reload KONSEL-SETARA --update-env || pm2 restart KONSEL-SETARA
+            
+            echo "✅ Deployment Backend KONSEL-SETARA Berhasil Selesai!"

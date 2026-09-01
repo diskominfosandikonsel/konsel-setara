@@ -160,3 +160,10 @@ serviceAccountKey.json
 # Ignore document files
 *.doc
 *.docx
+*.pdf
+*.xlsx
+Worksheet_*
+
+# Ignore worksheet & utility generator scripts
+generate_worksheet.py
+generate_all_worksheets.py
