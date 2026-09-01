@@ -68,7 +68,7 @@ router.get('/getDashboard', async (req, res) => {
         const qKomentar = `
             SELECT 
                 u.id,
-                usr.nama,
+                COALESCE(NULLIF(usr.nama, ''), NULLIF(u.createdBy, ''), 'Anonim') AS nama,
                 u.komentar,
                 u.rating,
                 a.nama AS layanan,
@@ -363,6 +363,98 @@ router.post('/addUlasan', (req, res) => {
     }
 });
 // ULASAN
+// LIST APLIKASI UNTUK DROPDOWN / FILTER
+router.get('/listAplikasi', (req, res) => {
+    const query = `SELECT id, nama, kategori FROM aplikasi ORDER BY nama ASC`;
+    db.query(query, (err, rows) => {
+        if (err) {
+            console.error('listAplikasi error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ data: rows || [] });
+    });
+});
+
+const { MongoClient } = require('mongodb');
+const uriMongoWB = "mongodb://diskominfosandi:Kominfo2018@121.52.72.101:27017/warga_bicara?authSource=admin";
+
+// Fungsi sinkronisasi realtime dari MongoDB Warga Bicara ke MySQL konsel_setara
+async function syncWargaBicaraRatings() {
+    try {
+        const client = new MongoClient(uriMongoWB, { serverSelectionTimeoutMS: 5000 });
+        await client.connect();
+        const mongoDb = client.db('warga_bicara');
+
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'post',
+                    localField: 'post_id',
+                    foreignField: 'id',
+                    as: 'post_info'
+                }
+            },
+            { $unwind: { path: '$post_info', preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'created_by',
+                    foreignField: 'id',
+                    as: 'user_info'
+                }
+            },
+            { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 1,
+                    id: 1,
+                    post_id: 1,
+                    nilai: 1,
+                    ulasan: 1,
+                    created_at: 1,
+                    created_by: 1,
+                    post_title: '$post_info.title',
+                    pelapor_nama: { $ifNull: ['$user_info.nama', '$user_info.username', 'Pelapor'] }
+                }
+            },
+            { $sort: { created_at: -1 } }
+        ];
+
+        const ratings = await mongoDb.collection('rating').aggregate(pipeline).toArray();
+        await client.close();
+
+        if (!ratings || ratings.length === 0) return;
+
+        db.query("SELECT id FROM aplikasi WHERE nama LIKE '%WARGA BICARA%' LIMIT 1", (err, apps) => {
+            if (err || !apps || apps.length === 0) return;
+            const appId = apps[0].id;
+
+            db.query("DELETE FROM ulasan WHERE aplikasi_id = ?", [appId], () => {
+                for (const r of ratings) {
+                    const ulasanId = r._id.toString();
+                    const ratingVal = Number(r.nilai) || 5;
+                    const komentar = r.ulasan ? r.ulasan.trim() : (r.post_title ? `Aduan: ${r.post_title}` : '-');
+                    const createdBy = r.pelapor_nama;
+                    const createdAt = r.created_at ? new Date(r.created_at) : new Date();
+
+                    db.query(
+                        "INSERT INTO ulasan (id, aplikasi_id, rating, komentar, createdBy, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+                        [ulasanId, appId, ratingVal, komentar, createdBy, createdAt]
+                    );
+                }
+            });
+        });
+    } catch (err) {
+        console.warn("Sync Warga Bicara MongoDB notice:", err.message);
+    }
+}
+
+// Endpoint manual sync jika dibutuhkan
+router.get('/syncWargaBicara', async (req, res) => {
+    await syncWargaBicaraRatings();
+    res.json({ success: true, message: "Sinkronisasi Warga Bicara berhasil" });
+});
+
 // ═══════════════════════════════════════════════════════════════
 // ENDPOINT BARU KHUSUS ADMIN (CEPAT & TERINDEX)
 // ═══════════════════════════════════════════════════════════════
@@ -371,13 +463,22 @@ router.post('/viewUlasanFast', (req, res) => {
     const page_first = Number(req.body.data_ke) || 1;
     const data_star = (page_first - 1) * data_batas;
     const cari = req.body.cari_value || '';
+    const aplikasi_id = req.body.aplikasi_id || '';
 
-    let whereClause = '';
+    let whereConditions = [];
     let params = [];
+
     if (cari && cari.trim() !== '') {
-        whereClause = ` WHERE users.nama LIKE ? OR ulasan.komentar LIKE ? OR aplikasi.nama LIKE ?`;
-        params = [`%${cari}%`, `%${cari}%`, `%${cari}%`];
+        whereConditions.push(`(users.nama LIKE ? OR ulasan.createdBy LIKE ? OR ulasan.komentar LIKE ? OR aplikasi.nama LIKE ?)`);
+        params.push(`%${cari}%`, `%${cari}%`, `%${cari}%`, `%${cari}%`);
     }
+
+    if (aplikasi_id && aplikasi_id !== 'all') {
+        whereConditions.push(`(ulasan.aplikasi_id = ? OR aplikasi.id = ? OR aplikasi.nama = ?)`);
+        params.push(aplikasi_id, aplikasi_id, aplikasi_id);
+    }
+
+    const whereClause = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
 
     const countQuery = `
         SELECT COUNT(ulasan.id) AS total
@@ -393,7 +494,7 @@ router.post('/viewUlasanFast', (req, res) => {
             ulasan.rating,
             ulasan.komentar,
             ulasan.createdAt,
-            users.nama,
+            COALESCE(NULLIF(users.nama, ''), NULLIF(ulasan.createdBy, ''), 'Anonim') AS nama,
             aplikasi.nama as app
         FROM ulasan
         LEFT JOIN users ON users.id = ulasan.createdBy

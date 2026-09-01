@@ -4,6 +4,19 @@ const db = require('../db/MySql/utama');
 const uniqid = require('uniqid');
 const middleware = require('../auth/middlewares');
 
+// Auto-migration: ensure column `rincian` exists in `realisasi_setara`
+db.query("SHOW COLUMNS FROM realisasi_setara LIKE 'rincian'", (err, rows) => {
+  if (!err && rows && rows.length === 0) {
+    db.query("ALTER TABLE realisasi_setara ADD COLUMN rincian LONGTEXT NULL", (alterErr) => {
+      if (alterErr) {
+        console.warn("Note: ALTER TABLE realisasi_setara ADD rincian:", alterErr.message);
+      } else {
+        console.log("Column 'rincian' added to realisasi_setara table successfully.");
+      }
+    });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/realisasi/view — List Program Realisasi
 // ═══════════════════════════════════════════════════════════════
@@ -44,6 +57,7 @@ router.post('/view', (req, res) => {
       realisasi_anggaran,
       volume,
       satuan,
+      rincian,
       opd,
       createdBy,
       creatorName,
@@ -69,8 +83,23 @@ router.post('/view', (req, res) => {
         return res.status(500).json({ error: err2.message });
       }
 
+      const formatted = (dataRes || []).map(row => {
+        let rincianParsed = [];
+        if (row.rincian) {
+          try {
+            rincianParsed = typeof row.rincian === 'string' ? JSON.parse(row.rincian) : row.rincian;
+          } catch (e) {
+            rincianParsed = [];
+          }
+        }
+        return {
+          ...row,
+          rincian: rincianParsed,
+        };
+      });
+
       res.json({
-        data: dataRes || [],
+        data: formatted,
         jml_data: totalHalaman,
         total: totalData,
       });
@@ -137,7 +166,7 @@ router.get('/years', (req, res) => {
 // POST /api/v1/realisasi/add — Tambah Program Realisasi (Auto Assign OPD)
 // ═══════════════════════════════════════════════════════════════
 router.post('/add', middleware.isLoggedIn, (req, res) => {
-  const { tahun, nama_program, realisasi_anggaran, volume, satuan, opd } = req.body;
+  const { tahun, nama_program, realisasi_anggaran, volume, satuan, opd, rincian } = req.body;
 
   if (!nama_program || !tahun) {
     return res.status(400).json({ success: false, message: 'Tahun dan Nama program wajib diisi' });
@@ -149,11 +178,13 @@ router.post('/add', middleware.isLoggedIn, (req, res) => {
   const createdBy = req.user?.nip || req.user?.username || 'Admin';
   const creatorName = req.user?.nama || 'Admin';
 
+  const rincianStr = rincian ? (typeof rincian === 'string' ? rincian : JSON.stringify(rincian)) : null;
+
   const id = uniqid();
   const sql = `
     INSERT INTO realisasi_setara 
-    (id, tahun, nama_program, realisasi_anggaran, volume, satuan, opd, createdBy, creatorName)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, tahun, nama_program, realisasi_anggaran, volume, satuan, rincian, opd, createdBy, creatorName)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
@@ -165,6 +196,7 @@ router.post('/add', middleware.isLoggedIn, (req, res) => {
       Number(realisasi_anggaran) || 0,
       Number(volume) || 0,
       satuan || 'Paket',
+      rincianStr,
       assignedOpd,
       createdBy,
       creatorName,
@@ -183,7 +215,7 @@ router.post('/add', middleware.isLoggedIn, (req, res) => {
 // POST /api/v1/realisasi/edit — Edit Program Realisasi (OPD Protection)
 // ═══════════════════════════════════════════════════════════════
 router.post('/edit', middleware.isLoggedIn, (req, res) => {
-  const { id, tahun, nama_program, realisasi_anggaran, volume, satuan, opd } = req.body;
+  const { id, tahun, nama_program, realisasi_anggaran, volume, satuan, opd, rincian } = req.body;
 
   if (!id) {
     return res.status(400).json({ success: false, message: 'ID data wajib disertakan' });
@@ -192,6 +224,7 @@ router.post('/edit', middleware.isLoggedIn, (req, res) => {
   const userRole = Number(req.user?.menu_klp);
   const userOpd = (req.user?.opd || req.user?.profile?.opd || '').trim().toLowerCase();
   const updatedBy = req.user?.nama || req.user?.username || 'Admin';
+  const rincianStr = rincian ? (typeof rincian === 'string' ? rincian : JSON.stringify(rincian)) : null;
 
   // 1. Cek kepemilikan data sebelum edit
   db.query('SELECT * FROM realisasi_setara WHERE id = ?', [id], (errCheck, rowsCheck) => {
@@ -221,6 +254,7 @@ router.post('/edit', middleware.isLoggedIn, (req, res) => {
         realisasi_anggaran = ?,
         volume = ?,
         satuan = ?,
+        rincian = ?,
         opd = ?,
         updatedBy = ?
       WHERE id = ?
@@ -234,6 +268,7 @@ router.post('/edit', middleware.isLoggedIn, (req, res) => {
         Number(realisasi_anggaran) || 0,
         Number(volume) || 0,
         satuan || 'Paket',
+        rincianStr,
         newOpd,
         updatedBy,
         id,

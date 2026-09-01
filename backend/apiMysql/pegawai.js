@@ -12,7 +12,7 @@ function formatNamaLengkap(row) {
   const gBelakang = row.gelar_belakang && row.gelar_belakang.trim() !== '' && row.gelar_belakang.trim() !== '-' 
     ? `, ${row.gelar_belakang.trim()}` 
     : '';
-  const rawNama = (row.nama || row.egov_username || '').replace(/^[-,\s]+|[-,\s]+$/g, '');
+  const rawNama = (row.nama || '').replace(/^[-,\s]+|[-,\s]+$/g, '');
   return `${gDepan}${rawNama}${gBelakang}`.trim();
 }
 
@@ -64,7 +64,7 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
   const cari = req.body.cari_value ? req.body.cari_value.trim() : '';
   const filterAkses = req.body.filter_akses || 'all'; // 'all', 'granted', 'ungranted'
 
-  let whereClauses = ['1=1'];
+  let whereClauses = ['simpeg.biodata.nama IS NOT NULL AND simpeg.biodata.nama != ""'];
   let params = [];
 
   if (instansiId) {
@@ -78,7 +78,7 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
   }
 
   if (cari) {
-    whereClauses.push('(egov.users.username LIKE ? OR simpeg.biodata.nip LIKE ? OR simpeg.biodata.nama LIKE ?)');
+    whereClauses.push('(simpeg.biodata.nip LIKE ? OR simpeg.biodata.nama LIKE ? OR egov.users.username LIKE ?)');
     params.push(`%${cari}%`, `%${cari}%`, `%${cari}%`);
   }
 
@@ -93,10 +93,10 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
   const countSql = `
     SELECT COUNT(DISTINCT egov.users.id) AS total
     FROM egov.users
-    LEFT JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
-    LEFT JOIN simpeg.unit_kerja ON egov.users.unit_kerja = simpeg.unit_kerja.id
+    INNER JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
+    LEFT JOIN simpeg.unit_kerja ON COALESCE(NULLIF(simpeg.biodata.unit_kerja, ''), egov.users.unit_kerja) = simpeg.unit_kerja.id
     LEFT JOIN simpeg.instansi ON simpeg.instansi.id = simpeg.unit_kerja.instansi
-    LEFT JOIN konsel_setara.pegawai_akses ON (konsel_setara.pegawai_akses.nip = simpeg.biodata.nip OR konsel_setara.pegawai_akses.nip = egov.users.username)
+    LEFT JOIN konsel_setara.pegawai_akses ON konsel_setara.pegawai_akses.nip = simpeg.biodata.nip
     WHERE ${whereStr}
   `;
 
@@ -118,11 +118,11 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
       konsel_setara.pegawai_akses.is_active AS is_active,
       konsel_setara.pegawai_akses.createdAt AS granted_at
     FROM egov.users
-    LEFT JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
+    INNER JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
     LEFT JOIN simpeg.jabatan ON simpeg.biodata.jabatan = simpeg.jabatan._id
-    LEFT JOIN simpeg.unit_kerja ON egov.users.unit_kerja = simpeg.unit_kerja.id
+    LEFT JOIN simpeg.unit_kerja ON COALESCE(NULLIF(simpeg.biodata.unit_kerja, ''), egov.users.unit_kerja) = simpeg.unit_kerja.id
     LEFT JOIN simpeg.instansi ON simpeg.instansi.id = simpeg.unit_kerja.instansi
-    LEFT JOIN konsel_setara.pegawai_akses ON (konsel_setara.pegawai_akses.nip = simpeg.biodata.nip OR konsel_setara.pegawai_akses.nip = egov.users.username)
+    LEFT JOIN konsel_setara.pegawai_akses ON konsel_setara.pegawai_akses.nip = simpeg.biodata.nip
     WHERE ${whereStr}
     GROUP BY egov.users.id
     ORDER BY (konsel_setara.pegawai_akses.is_active = 1) DESC, simpeg.biodata.nama ASC
@@ -148,7 +148,7 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
         return {
           egov_id: r.egov_id,
           username: r.egov_username,
-          nip: r.nip || r.egov_username,
+          nip: r.nip,
           nama: formatNamaLengkap(r),
           jabatan: r.jabatan_nama || 'Pegawai',
           opd: r.opd || r.unit_kerja || 'OPD Konawe Selatan',
@@ -197,19 +197,21 @@ router.post('/lookup', middleware.isLoggedIn, (req, res) => {
       simpeg.unit_kerja.unit_kerja AS unit_kerja,
       simpeg.instansi.instansi AS opd
     FROM egov.users
-    LEFT JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
+    INNER JOIN simpeg.biodata ON egov.users.nama_nip = simpeg.biodata.nip
     LEFT JOIN simpeg.jabatan ON simpeg.biodata.jabatan = simpeg.jabatan._id
-    LEFT JOIN simpeg.unit_kerja ON egov.users.unit_kerja = simpeg.unit_kerja.id
+    LEFT JOIN simpeg.unit_kerja ON COALESCE(NULLIF(simpeg.biodata.unit_kerja, ''), egov.users.unit_kerja) = simpeg.unit_kerja.id
     LEFT JOIN simpeg.instansi ON simpeg.instansi.id = simpeg.unit_kerja.instansi
     WHERE 
-      egov.users.username LIKE ? 
-      OR simpeg.biodata.nip LIKE ? 
-      OR simpeg.biodata.nama LIKE ? 
-      OR simpeg.instansi.instansi LIKE ?
+      simpeg.biodata.nama IS NOT NULL 
+      AND (
+        simpeg.biodata.nip LIKE ? 
+        OR simpeg.biodata.nama LIKE ? 
+        OR simpeg.instansi.instansi LIKE ?
+      )
     LIMIT 20;
   `;
 
-  const params = [`%${cari}%`, `%${cari}%`, `%${cari}%`, `%${cari}%`];
+  const params = [`%${cari}%`, `%${cari}%`, `%${cari}%`];
 
   db.query(sql, params, (err, rows) => {
     if (err) {
@@ -221,7 +223,7 @@ router.post('/lookup', middleware.isLoggedIn, (req, res) => {
       return {
         egov_id: r.egov_id,
         username: r.egov_username,
-        nip: r.nip || r.egov_username,
+        nip: r.nip,
         nama: formatNamaLengkap(r),
         jabatan: r.jabatan_nama || 'Pegawai',
         opd: r.opd || r.unit_kerja || 'Pemerintah Kabupaten Konawe Selatan',
