@@ -45,27 +45,36 @@ import {
   ChevronRight,
   Loader2,
   RefreshCw,
+  Building2,
+  Lock,
+  ListPlus,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
-
 import { getProfile } from "@/lib/auth"
-import { Building2, Lock } from "lucide-react"
 
-interface RealisasiItem {
+export interface RincianItem {
+  label: string
+  nilai: number
+  satuan?: string
+}
+
+export interface RealisasiItem {
   id: string
   tahun: number
   nama_program: string
   realisasi_anggaran: number
   volume: number
   satuan: string
+  rincian?: RincianItem[]
   opd?: string
   createdBy?: string
   creatorName?: string
   createdAt: string
 }
 
-const QUICK_UNITS = ["Siswa", "Mahasiswa", "Ton", "Kg", "Stel", "Paket", "Unit", "Kelompok", "Hektar", "Orang"]
+const QUICK_UNITS = ["Siswa", "Mahasiswa", "Jiwa", "Ton", "Kg", "Stel", "Paket", "Unit", "Kelompok", "Hektar", "Orang"]
 
 function formatRupiah(val: number | string): string {
   const num = Number(val) || 0
@@ -98,7 +107,7 @@ export default function RealisasiPage() {
   const [editingItem, setEditingItem] = useState<RealisasiItem | null>(null)
   const [saving, setSaving] = useState(false)
 
-  // Form State
+  // Dynamic Form State
   const [form, setForm] = useState({
     tahun: currentYear,
     nama_program: "",
@@ -107,6 +116,7 @@ export default function RealisasiPage() {
     satuan: "Siswa",
     opd: userOpd,
   })
+  const [rincianList, setRincianList] = useState<RincianItem[]>([])
 
   // Permission check helper: Can current user edit/delete this item?
   const canModify = (item: RealisasiItem) => {
@@ -168,6 +178,15 @@ export default function RealisasiPage() {
   const totalCount = listData?.total || 0
   const summary = summaryData || { total_program: 0, total_realisasi: 0 }
 
+  // Recalculate total volume automatically from sub-items if rincian list has items
+  const updateRincianAndVolume = (updatedList: RincianItem[]) => {
+    setRincianList(updatedList)
+    if (updatedList.length > 0) {
+      const totalVol = updatedList.reduce((acc, curr) => acc + (Number(curr.nilai) || 0), 0)
+      setForm((prev) => ({ ...prev, volume: totalVol }))
+    }
+  }
+
   const openAdd = () => {
     setEditingItem(null)
     setForm({
@@ -178,11 +197,15 @@ export default function RealisasiPage() {
       satuan: "Siswa",
       opd: userOpd,
     })
+    setRincianList([])
     setModalOpen(true)
   }
 
   const openEdit = (item: RealisasiItem) => {
     setEditingItem(item)
+    const existingRincian = Array.isArray(item.rincian) ? item.rincian : []
+    setRincianList(existingRincian)
+
     setForm({
       tahun: item.tahun,
       nama_program: item.nama_program,
@@ -194,6 +217,25 @@ export default function RealisasiPage() {
     setModalOpen(true)
   }
 
+  const handleRincianChange = (index: number, field: keyof RincianItem, val: any) => {
+    const next = [...rincianList]
+    next[index] = {
+      ...next[index],
+      [field]: field === "nilai" ? Number(val) || 0 : val,
+    }
+    updateRincianAndVolume(next)
+  }
+
+  const addRincianRow = () => {
+    const next = [...rincianList, { label: "", nilai: 0, satuan: form.satuan || "Siswa" }]
+    updateRincianAndVolume(next)
+  }
+
+  const removeRincianRow = (index: number) => {
+    const next = rincianList.filter((_, i) => i !== index)
+    updateRincianAndVolume(next)
+  }
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.nama_program.trim()) {
@@ -201,16 +243,24 @@ export default function RealisasiPage() {
       return
     }
 
+    // Filter non-empty rincian if any
+    const validRincian = rincianList.filter((r) => r.label.trim() !== "")
+
     setSaving(true)
     try {
+      const payload = {
+        ...form,
+        rincian: validRincian.length > 0 ? validRincian : null,
+      }
+
       if (editingItem) {
         await api.post("/api/v1/realisasi/edit", {
           id: editingItem.id,
-          ...form,
+          ...payload,
         })
         toast.success("Data program berhasil diperbarui")
       } else {
-        await api.post("/api/v1/realisasi/add", form)
+        await api.post("/api/v1/realisasi/add", payload)
         toast.success("Program prioritas baru berhasil ditambahkan")
       }
       setModalOpen(false)
@@ -246,7 +296,7 @@ export default function RealisasiPage() {
     <AuthGuard>
       <BaseLayout
         title="Realisasi Setara"
-        description="Data capaian Program Prioritas Bupati (Tahun, Nama Program, Realisasi Anggaran, dan Volume/Satuan)"
+        description="Data capaian Program Prioritas Bupati (Tahun, Nama Program, Realisasi Anggaran, dan Sub-Rincian Capaian)"
       >
         <div className="px-4 lg:px-6 space-y-6">
           {/* Header Controls & Filter */}
@@ -256,7 +306,13 @@ export default function RealisasiPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filter Tahun:</span>
               </div>
-              <Select value={selectedYear} onValueChange={(val) => { setSelectedYear(val); setPage(1); }}>
+              <Select
+                value={selectedYear}
+                onValueChange={(val) => {
+                  setSelectedYear(val)
+                  setPage(1)
+                }}
+              >
                 <SelectTrigger className="w-[140px] h-9">
                   <SelectValue placeholder="Pilih Tahun" />
                 </SelectTrigger>
@@ -343,7 +399,7 @@ export default function RealisasiPage() {
                     Daftar Realisasi Program Prioritas
                   </CardTitle>
                   <CardDescription>
-                    Rincian data program prioritas bupati per tahun
+                    Rincian data program prioritas bupati per tahun beserta sub-indikator capaian
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className="font-mono text-xs">
@@ -360,7 +416,7 @@ export default function RealisasiPage() {
                       <TableHead className="w-[80px] text-center">Tahun</TableHead>
                       <TableHead className="min-w-[260px]">Nama Program & Instansi</TableHead>
                       <TableHead className="w-[180px]">Realisasi Anggaran</TableHead>
-                      <TableHead className="w-[160px]">Volume / Satuan</TableHead>
+                      <TableHead className="min-w-[220px]">Volume & Rincian Capaian</TableHead>
                       <TableHead className="w-[110px] text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -371,7 +427,7 @@ export default function RealisasiPage() {
                           <TableCell><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-48 mb-1" /><Skeleton className="h-3 w-32" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                          <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-36" /></TableCell>
                           <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                         </TableRow>
                       ))
@@ -384,15 +440,19 @@ export default function RealisasiPage() {
                     ) : (
                       items.map((item) => {
                         const isAllowed = canModify(item)
+                        const rincianArr = Array.isArray(item.rincian) ? item.rincian : []
 
                         return (
                           <TableRow key={item.id} className="hover:bg-muted/30">
                             {/* Tahun */}
-                            <TableCell className="text-center font-mono font-medium">
+                            <TableCell className="text-center font-mono font-medium align-top py-3.5">
                               <div className="flex flex-col items-center gap-1">
                                 <Badge variant="outline">{item.tahun}</Badge>
                                 {item.tahun >= currentYear && (
-                                  <Badge variant="secondary" className="bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] px-1 py-0 border-amber-300">
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] px-1 py-0 border-amber-300"
+                                  >
                                     * Berjalan
                                   </Badge>
                                 )}
@@ -400,7 +460,7 @@ export default function RealisasiPage() {
                             </TableCell>
 
                             {/* Nama Program & Instansi OPD */}
-                            <TableCell className="font-medium text-foreground">
+                            <TableCell className="font-medium text-foreground align-top py-3.5">
                               <div className="font-semibold">{item.nama_program}</div>
                               <div className="text-xs text-primary/80 mt-1 flex items-center gap-1">
                                 <Building2 className="h-3.5 w-3.5 shrink-0" />
@@ -414,22 +474,42 @@ export default function RealisasiPage() {
                             </TableCell>
 
                             {/* Realisasi Anggaran */}
-                            <TableCell className="font-semibold text-emerald-600">
+                            <TableCell className="font-semibold text-emerald-600 align-top py-3.5">
                               {formatRupiah(item.realisasi_anggaran)}
                             </TableCell>
 
-                            {/* Volume & Satuan Dinamis */}
-                            <TableCell>
-                              <span className="font-semibold text-foreground">
-                                {formatNumber(item.volume)}
-                              </span>{" "}
-                              <span className="text-muted-foreground text-xs">
-                                {item.satuan}
-                              </span>
+                            {/* Volume & Rincian Sub-Indikator */}
+                            <TableCell className="align-top py-3.5">
+                              <div className="space-y-1.5">
+                                <div>
+                                  <span className="font-bold text-foreground">
+                                    {formatNumber(item.volume)}
+                                  </span>{" "}
+                                  <span className="text-muted-foreground text-xs font-medium">
+                                    {item.satuan}
+                                  </span>
+                                </div>
+
+                                {/* Rincian Sub Breakdown Tags */}
+                                {rincianArr.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-1">
+                                    {rincianArr.map((r, rIdx) => (
+                                      <div
+                                        key={rIdx}
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/80 border text-[11px] text-muted-foreground"
+                                      >
+                                        <span className="font-medium text-foreground/80">{r.label}:</span>
+                                        <span className="font-bold text-primary">{formatNumber(r.nilai)}</span>
+                                        <span className="text-[10px]">{r.satuan || item.satuan}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
 
                             {/* Aksi (Terkunci jika milik OPD lain) */}
-                            <TableCell className="text-right">
+                            <TableCell className="text-right align-top py-3.5">
                               {isAllowed ? (
                                 <div className="flex justify-end gap-1">
                                   <Button
@@ -452,8 +532,14 @@ export default function RealisasiPage() {
                                   </Button>
                                 </div>
                               ) : (
-                                <div className="flex justify-end items-center" title={`Program ini diinput oleh ${item.opd || "OPD lain"}`}>
-                                  <Badge variant="outline" className="text-muted-foreground text-[10px] gap-1 py-1 font-normal bg-muted/40">
+                                <div
+                                  className="flex justify-end items-center"
+                                  title={`Program ini diinput oleh ${item.opd || "OPD lain"}`}
+                                >
+                                  <Badge
+                                    variant="outline"
+                                    className="text-muted-foreground text-[10px] gap-1 py-1 font-normal bg-muted/40"
+                                  >
                                     <Lock className="h-3 w-3" />
                                     Terkunci
                                   </Badge>
@@ -486,7 +572,8 @@ export default function RealisasiPage() {
                     <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                   </Button>
                   <span className="text-xs">
-                    Halaman <strong className="text-foreground">{page}</strong> dari <strong className="text-foreground">{totalPages}</strong>
+                    Halaman <strong className="text-foreground">{page}</strong> dari{" "}
+                    <strong className="text-foreground">{totalPages}</strong>
                   </span>
                   <Button
                     variant="outline"
@@ -503,15 +590,15 @@ export default function RealisasiPage() {
           </Card>
         </div>
 
-        {/* Modal Add / Edit Program */}
+        {/* Modal Add / Edit Program with Fully Dynamic Form */}
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingItem ? "Edit Program Prioritas" : "Tambah Program Prioritas"}
               </DialogTitle>
               <DialogDescription>
-                Masukkan data realisasi program prioritas bupati
+                Masukkan data capaian program prioritas daerah beserta sub-rincian (jika ada)
               </DialogDescription>
             </DialogHeader>
 
@@ -543,7 +630,7 @@ export default function RealisasiPage() {
                 <Input
                   id="tahun"
                   type="number"
-                  placeholder="Contoh: 2025"
+                  placeholder="Contoh: 2026"
                   value={form.tahun}
                   onChange={(e) => setForm({ ...form, tahun: Number(e.target.value) })}
                   required
@@ -555,7 +642,7 @@ export default function RealisasiPage() {
                 <Label htmlFor="nama_program">2. Nama Program *</Label>
                 <Input
                   id="nama_program"
-                  placeholder="Contoh: Beasiswa UKT / Bantuan Pupuk / Seragam Sekolah"
+                  placeholder="Contoh: Bantuan Beasiswa UKT / Seragam Sekolah / BPJS Kesehatan"
                   value={form.nama_program}
                   onChange={(e) => setForm({ ...form, nama_program: e.target.value })}
                   required
@@ -564,7 +651,7 @@ export default function RealisasiPage() {
 
               {/* 3. Jumlah Realisasi Anggaran (Rp) */}
               <div className="space-y-1.5">
-                <Label htmlFor="realisasi_anggaran">3. Jumlah Realisasi Anggaran (Rp) *</Label>
+                <Label htmlFor="realisasi_anggaran">3. Jumlah Realisasi Anggaran APBD (Rp) *</Label>
                 <Input
                   id="realisasi_anggaran"
                   type="number"
@@ -572,14 +659,95 @@ export default function RealisasiPage() {
                   value={form.realisasi_anggaran || ""}
                   onChange={(e) => setForm({ ...form, realisasi_anggaran: Number(e.target.value) })}
                 />
-                <p className="text-xs text-muted-foreground font-medium">
+                <p className="text-xs text-emerald-600 font-medium">
                   {formatRupiah(form.realisasi_anggaran)}
                 </p>
               </div>
 
-              {/* 4. Volume & Satuan Dinamis */}
+              {/* 4. Sub-Rincian / Breakdown Dinamis (Opsional) */}
+              <div className="p-3.5 bg-muted/40 rounded-xl border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                      <ListPlus className="h-3.5 w-3.5 text-primary" /> Rincian Sub-Capaian (Opsional)
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Tambahkan jika program memiliki rincian (cth: Siswa SD & SMP, atau BPJS JKN & Daerah)
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs px-2"
+                    onClick={addRincianRow}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Tambah Rincian
+                  </Button>
+                </div>
+
+                {rincianList.length === 0 ? (
+                  <div className="text-xs text-muted-foreground italic py-1 text-center bg-background/50 rounded-lg border border-dashed">
+                    Tidak ada rincian sub-capaian (format standar satu angka).
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {rincianList.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-background p-2 rounded-lg border">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Nama Rincian (cth: Siswa SD / BPJS JKN)"
+                            value={item.label}
+                            onChange={(e) => handleRincianChange(idx, "label", e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <div className="w-28">
+                          <Input
+                            type="number"
+                            step="any"
+                            placeholder="Jumlah"
+                            value={item.nilai || ""}
+                            onChange={(e) => handleRincianChange(idx, "nilai", e.target.value)}
+                            className="h-8 text-xs font-mono font-semibold"
+                          />
+                        </div>
+                        <div className="w-24">
+                          <Input
+                            placeholder="Satuan"
+                            value={item.satuan || form.satuan}
+                            onChange={(e) => handleRincianChange(idx, "satuan", e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive shrink-0 hover:bg-destructive/10"
+                          onClick={() => removeRincianRow(idx)}
+                          title="Hapus baris rincian"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Total Volume & Satuan */}
               <div className="space-y-1.5">
-                <Label>4. Volume & Satuan *</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="volume">
+                    {rincianList.length > 0 ? "5. Total Volume (Akumulasi) & Satuan *" : "4. Volume & Satuan *"}
+                  </Label>
+                  {rincianList.length > 0 && (
+                    <span className="text-[11px] text-primary font-medium">
+                      Otomatis dihitung dari penjumlahan rincian di atas
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Input
@@ -589,13 +757,15 @@ export default function RealisasiPage() {
                       placeholder="Jumlah (Contoh: 1000)"
                       value={form.volume || ""}
                       onChange={(e) => setForm({ ...form, volume: Number(e.target.value) })}
+                      disabled={rincianList.length > 0}
+                      className={rincianList.length > 0 ? "bg-muted/70 font-semibold cursor-not-allowed text-foreground" : ""}
                       required
                     />
                   </div>
                   <div>
                     <Input
                       id="satuan"
-                      placeholder="Satuan (Contoh: Siswa/Ton/Stel)"
+                      placeholder="Satuan (Contoh: Siswa/Ton/Paket)"
                       value={form.satuan}
                       onChange={(e) => setForm({ ...form, satuan: e.target.value })}
                       required

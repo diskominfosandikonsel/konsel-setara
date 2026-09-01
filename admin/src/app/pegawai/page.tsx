@@ -17,6 +17,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
   Table,
   TableBody,
   TableCell,
@@ -43,15 +56,16 @@ import {
   Building2,
   ShieldCheck,
   Shield,
-  UserCheck,
-  UserX,
   Building,
   RefreshCw,
   Edit,
   Loader2,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { cn } from "@/lib/utils"
 
 interface InstansiItem {
   id: string
@@ -78,6 +92,96 @@ interface PegawaiDirectoryItem {
   role_akses: number // 0 = None, 1 = Administrator, 2 = Admin OPD
   is_active: boolean
   granted_at: string | null
+}
+
+// Reusable Searchable Combobox Component
+interface SearchableSelectProps {
+  value: string
+  onValueChange: (val: string) => void
+  items: { id: string; label: string }[]
+  placeholder: string
+  searchPlaceholder?: string
+  emptyText?: string
+  disabled?: boolean
+}
+
+function SearchableSelect({
+  value,
+  onValueChange,
+  items,
+  placeholder,
+  searchPlaceholder = "Ketik untuk mencari...",
+  emptyText = "Tidak ditemukan data yang sesuai.",
+  disabled = false,
+}: SearchableSelectProps) {
+  const [open, setOpen] = useState(false)
+  const selectedItem = items.find((i) => i.id === value)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className="h-9 w-full justify-between text-xs font-normal px-3 bg-background"
+        >
+          <span className="truncate">
+            {selectedItem ? selectedItem.label : placeholder}
+          </span>
+          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] sm:w-[380px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder} className="h-9 text-xs" />
+          <CommandList className="max-h-60">
+            <CommandEmpty className="py-3 text-center text-xs text-muted-foreground">
+              {emptyText}
+            </CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="-- Semua --"
+                onSelect={() => {
+                  onValueChange("all")
+                  setOpen(false)
+                }}
+                className="text-xs cursor-pointer"
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-3.5 w-3.5 text-primary",
+                    value === "all" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                <span className="font-medium text-foreground">{placeholder}</span>
+              </CommandItem>
+              {items.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  value={`${item.label} ${item.id}`}
+                  onSelect={() => {
+                    onValueChange(item.id)
+                    setOpen(false)
+                  }}
+                  className="text-xs cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-3.5 w-3.5 text-primary shrink-0",
+                      value === item.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
 }
 
 export default function PegawaiDirectoryPage() {
@@ -111,8 +215,9 @@ export default function PegawaiDirectoryPage() {
   const { data: unitKerjaList } = useQuery({
     queryKey: ["simpeg-unit-kerja", selectedInstansi],
     queryFn: async () => {
-      const param = selectedInstansi !== "all" ? `?instansi_id=${selectedInstansi}` : ""
-      const res = await api.get(`/api/v1/pegawai/unit_kerja${param}`)
+      const res = await api.get("/api/v1/pegawai/unit_kerja", {
+        params: selectedInstansi !== "all" ? { instansi_id: selectedInstansi } : undefined,
+      })
       return (res.data?.data || []) as UnitKerjaItem[]
     },
     staleTime: 10 * 60 * 1000,
@@ -179,6 +284,17 @@ export default function PegawaiDirectoryPage() {
     }
   }
 
+  // Format combobox items
+  const formattedInstansiOptions = (instansiList || []).map((ins) => ({
+    id: ins.id,
+    label: ins.instansi,
+  }))
+
+  const formattedUnitKerjaOptions = (unitKerjaList || []).map((uk) => ({
+    id: uk.id,
+    label: uk.unit_kerja,
+  }))
+
   return (
     <AuthGuard>
       <BaseLayout
@@ -189,66 +305,48 @@ export default function PegawaiDirectoryPage() {
           {/* Filter Bar */}
           <div className="bg-card p-4 rounded-xl border shadow-sm space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {/* Filter Instansi */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5" />
-                  Instansi / Dinas / Badan:
+              {/* Filter Instansi (Searchable Combobox) */}
+              <div className="space-y-1.5 min-w-0">
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 truncate">
+                  <Building2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span>Instansi / Dinas / Badan:</span>
                 </label>
-                <Select
+                <SearchableSelect
                   value={selectedInstansi}
                   onValueChange={(val) => {
                     setSelectedInstansi(val)
                     setSelectedUnitKerja("all")
                     setPage(1)
                   }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue placeholder="Semua Instansi" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-64">
-                    <SelectItem value="all">-- Semua Instansi --</SelectItem>
-                    {(instansiList || []).map((ins) => (
-                      <SelectItem key={ins.id} value={ins.id} className="text-xs">
-                        {ins.instansi}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  items={formattedInstansiOptions}
+                  placeholder="-- Semua Instansi --"
+                  searchPlaceholder="Cari instansi / dinas..."
+                />
               </div>
 
-              {/* Filter Unit Kerja */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                  <Building className="h-3.5 w-3.5" />
-                  Unit Kerja / Bidang / UPTD:
+              {/* Filter Unit Kerja (Searchable Combobox) */}
+              <div className="space-y-1.5 min-w-0">
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 truncate">
+                  <Building className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span>Unit Kerja / Bidang / UPTD:</span>
                 </label>
-                <Select
+                <SearchableSelect
                   value={selectedUnitKerja}
                   onValueChange={(val) => {
                     setSelectedUnitKerja(val)
                     setPage(1)
                   }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue placeholder="Semua Unit Kerja" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-64">
-                    <SelectItem value="all">-- Semua Unit Kerja --</SelectItem>
-                    {(unitKerjaList || []).map((uk) => (
-                      <SelectItem key={uk.id} value={uk.id} className="text-xs">
-                        {uk.unit_kerja}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  items={formattedUnitKerjaOptions}
+                  placeholder="-- Semua Unit Kerja --"
+                  searchPlaceholder="Cari unit kerja / sekolah..."
+                />
               </div>
 
               {/* Filter Status Hak Akses */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Status Hak Akses:
+              <div className="space-y-1.5 min-w-0">
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 truncate">
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span>Status Hak Akses:</span>
                 </label>
                 <Select
                   value={filterAkses}
@@ -257,7 +355,7 @@ export default function PegawaiDirectoryPage() {
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-9 text-xs w-full">
                     <SelectValue placeholder="Status Hak Akses" />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,63 +447,71 @@ export default function PegawaiDirectoryPage() {
                     ) : (
                       pegawaiList.map((item) => (
                         <TableRow key={item.egov_id} className="hover:bg-muted/30">
-                          {/* Nama & NIP */}
+                          {/* Nama, NIP & Akun E-Gov */}
                           <TableCell className="py-3">
-                            <div className="font-semibold text-foreground text-sm">{item.nama}</div>
-                            <div className="text-xs text-muted-foreground font-mono mt-0.5">
-                              NIP: {item.nip}
+                            <div className="font-semibold text-foreground text-sm">
+                              {item.nama}
+                            </div>
+                            <div className="text-xs text-muted-foreground font-mono mt-0.5 space-y-0.5">
+                              <div>NIP: {item.nip}</div>
+                              <div className="text-[11px] text-muted-foreground font-sans flex items-center gap-1">
+                                <span>Akun E-Gov:</span>
+                                <span className="font-mono font-medium text-foreground bg-muted/80 px-1.5 py-0.2 rounded border text-[10.5px]">
+                                  {item.username}
+                                </span>
+                              </div>
                             </div>
                           </TableCell>
 
-                          {/* Instansi & Unit Kerja */}
-                          <TableCell className="py-3">
-                            <div className="text-xs font-medium text-foreground">{item.opd}</div>
-                            <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
-                              <Building className="h-3 w-3 shrink-0" />
-                              <span>{item.unit_kerja}</span>
-                            </div>
-                          </TableCell>
+                            {/* Instansi & Unit Kerja */}
+                            <TableCell className="py-3">
+                              <div className="text-xs font-medium text-foreground">{item.opd}</div>
+                              <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                                <Building className="h-3 w-3 shrink-0" />
+                                <span>{item.unit_kerja}</span>
+                              </div>
+                            </TableCell>
 
-                          {/* Jabatan */}
-                          <TableCell className="py-3 text-xs text-muted-foreground">
-                            {item.jabatan}
-                          </TableCell>
+                            {/* Jabatan */}
+                            <TableCell className="py-3 text-xs text-muted-foreground">
+                              {item.jabatan}
+                            </TableCell>
 
-                          {/* Status Hak Akses */}
-                          <TableCell className="text-center py-3">
-                            {item.role_akses === 1 ? (
-                              <Badge className="bg-amber-600 hover:bg-amber-700 text-white gap-1 text-[11px]">
-                                <Shield className="h-3 w-3" />
-                                Administrator
-                              </Badge>
-                            ) : item.role_akses === 2 ? (
-                              <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1 text-[11px]">
-                                <ShieldCheck className="h-3 w-3" />
-                                Admin OPD
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground text-[11px]">
-                                Belum Diberi Akses
-                              </Badge>
-                            )}
-                          </TableCell>
+                            {/* Status Hak Akses */}
+                            <TableCell className="text-center py-3">
+                              {item.role_akses === 1 ? (
+                                <Badge className="bg-amber-600 hover:bg-amber-700 text-white gap-1 text-[11px]">
+                                  <Shield className="h-3 w-3" />
+                                  Administrator
+                                </Badge>
+                              ) : item.role_akses === 2 ? (
+                                <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1 text-[11px]">
+                                  <ShieldCheck className="h-3 w-3" />
+                                  Admin OPD
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground text-[11px]">
+                                  Belum Diberi Akses
+                                </Badge>
+                              )}
+                            </TableCell>
 
-                          {/* Aksi Button */}
-                          <TableCell className="text-right py-3">
-                            <Button
-                              size="sm"
-                              variant={item.role_akses > 0 ? "outline" : "default"}
-                              className="h-8 text-xs gap-1.5"
-                              onClick={() => openEditModal(item)}
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                              {item.role_akses > 0 ? "Ubah" : "Beri Akses"}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
+                            {/* Aksi Button */}
+                            <TableCell className="text-right py-3">
+                              <Button
+                                size="sm"
+                                variant={item.role_akses > 0 ? "outline" : "default"}
+                                className="h-8 text-xs gap-1.5"
+                                onClick={() => openEditModal(item)}
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                                {item.role_akses > 0 ? "Ubah" : "Beri Akses"}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
                 </Table>
               </div>
 
@@ -448,62 +554,78 @@ export default function PegawaiDirectoryPage() {
                 Atur Hak Akses Pegawai
               </DialogTitle>
               <DialogDescription>
-                Tentukan hak akses akun E-Gov untuk pegawai terpilih
+                Tentukan peran hak akses sistem Konsel Setara untuk akun pegawai ini
               </DialogDescription>
             </DialogHeader>
 
             {targetPegawai && (
               <div className="space-y-4 py-2">
-                {/* Info Pegawai */}
-                <div className="p-3 bg-muted/40 rounded-lg border space-y-1 text-xs">
+                {/* Profile Card Summary */}
+                <div className="p-3 bg-muted/50 rounded-lg border space-y-1">
                   <div className="font-semibold text-sm text-foreground">{targetPegawai.nama}</div>
-                  <div className="text-muted-foreground font-mono">NIP: {targetPegawai.nip}</div>
-                  <div className="text-primary font-medium">{targetPegawai.opd}</div>
-                  <div className="text-muted-foreground">{targetPegawai.unit_kerja}</div>
+                  <div className="text-xs text-muted-foreground font-mono">
+                    {targetPegawai.nip !== targetPegawai.username ? `NIP: ${targetPegawai.nip}` : `Username: ${targetPegawai.username}`}
+                  </div>
+                  <div className="text-xs text-primary font-medium">{targetPegawai.opd}</div>
+                  <div className="text-[11px] text-muted-foreground">{targetPegawai.unit_kerja}</div>
                 </div>
 
-                {/* Role Radio Selection */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">Pilih Tingkat Hak Akses:</Label>
+                {/* Role Radio Group */}
+                <div className="space-y-3">
+                  <Label className="text-xs font-semibold">Pilih Hak Akses:</Label>
                   <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="space-y-2">
-                    {/* Option 2: Admin OPD */}
-                    <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
-                      <RadioGroupItem value="2" id="role-opd" className="mt-0.5" />
+                    {/* Option 1: Admin OPD */}
+                    <div
+                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedRole === "2" ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20" : "hover:bg-muted/40"
+                      }`}
+                      onClick={() => setSelectedRole("2")}
+                    >
+                      <RadioGroupItem value="2" id="role-2" className="mt-0.5" />
                       <div className="space-y-0.5">
-                        <Label htmlFor="role-opd" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-                          <ShieldCheck className="h-4 w-4" />
-                          Admin OPD / Pegawai
+                        <Label htmlFor="role-2" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5">
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                          Admin OPD (Rekomendasi)
                         </Label>
                         <p className="text-[11px] text-muted-foreground">
-                          Hanya dapat mengakses <strong>Dashboard</strong> dan menginput <strong>Realisasi Program Bupati</strong>.
+                          Dapat mengelola data program realisasi khusus untuk instansi {targetPegawai.opd || "terkait"}.
                         </p>
                       </div>
                     </div>
 
-                    {/* Option 1: Administrator */}
-                    <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
-                      <RadioGroupItem value="1" id="role-admin" className="mt-0.5" />
+                    {/* Option 2: Super Admin */}
+                    <div
+                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedRole === "1" ? "border-amber-600 bg-amber-50/50 dark:bg-amber-950/20" : "hover:bg-muted/40"
+                      }`}
+                      onClick={() => setSelectedRole("1")}
+                    >
+                      <RadioGroupItem value="1" id="role-1" className="mt-0.5" />
                       <div className="space-y-0.5">
-                        <Label htmlFor="role-admin" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                          <Shield className="h-4 w-4" />
-                          Super Administrator
+                        <Label htmlFor="role-1" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5">
+                          <Shield className="h-3.5 w-3.5 text-amber-600" />
+                          Administrator (Super Admin)
                         </Label>
                         <p className="text-[11px] text-muted-foreground">
-                          Akses penuh ke seluruh menu (Survei SKM, Konten Slider/Menu, Manajemen Pegawai).
+                          Akses penuh mengelola seluruh data OPD, manajemen menu, banner, dan hak akses user.
                         </p>
                       </div>
                     </div>
 
-                    {/* Option 0: Cabut Akses */}
-                    <div className="flex items-start space-x-3 p-3 rounded-lg border border-destructive/20 hover:bg-destructive/5 cursor-pointer">
-                      <RadioGroupItem value="0" id="role-none" className="mt-0.5" />
+                    {/* Option 3: Cabut Hak Akses */}
+                    <div
+                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedRole === "0" ? "border-destructive bg-destructive/10" : "hover:bg-muted/40"
+                      }`}
+                      onClick={() => setSelectedRole("0")}
+                    >
+                      <RadioGroupItem value="0" id="role-0" className="mt-0.5" />
                       <div className="space-y-0.5">
-                        <Label htmlFor="role-none" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5 text-destructive">
-                          <UserX className="h-4 w-4" />
-                          Cabut Hak Akses (Nonaktif)
+                        <Label htmlFor="role-0" className="font-semibold text-xs cursor-pointer text-destructive">
+                          Cabut Hak Akses (Pegawai Biasa)
                         </Label>
                         <p className="text-[11px] text-muted-foreground">
-                          Pegawai ini tidak akan bisa login ke Admin Panel Konsel Setara.
+                          Akun ini tidak akan memiliki hak akses administratif apapun ke panel admin.
                         </p>
                       </div>
                     </div>
@@ -512,12 +634,12 @@ export default function PegawaiDirectoryPage() {
               </div>
             )}
 
-            <DialogFooter className="pt-3 border-t">
+            <DialogFooter className="pt-2">
               <Button variant="outline" onClick={() => setEditModalOpen(false)} disabled={savingRole}>
                 Batal
               </Button>
               <Button onClick={handleSaveRole} disabled={savingRole}>
-                {savingRole ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <UserCheck className="h-4 w-4 mr-1.5" />}
+                {savingRole && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Simpan Perubahan
               </Button>
             </DialogFooter>

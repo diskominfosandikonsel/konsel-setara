@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Star, Search, ChevronLeft, ChevronRight, Loader2, X, RefreshCw } from "lucide-react"
+import { Star, Search, ChevronLeft, ChevronRight, Loader2, X, RefreshCw, Filter } from "lucide-react"
 import api from "@/lib/api"
 
 interface Ulasan {
@@ -33,6 +40,12 @@ interface FetchUlasanResponse {
   data: Ulasan[]
   jml_data: number
   total: number
+}
+
+interface AplikasiOption {
+  id: string
+  nama: string
+  kategori?: string
 }
 
 function RatingStars({ rating }: { rating: number }) {
@@ -61,10 +74,11 @@ function formatTanggal(dateStr: string) {
 }
 
 // Fetcher function using fast indexed endpoint
-const fetchUlasanApi = async (page: number, search: string): Promise<FetchUlasanResponse> => {
+const fetchUlasanApi = async (page: number, search: string, aplikasiId: string): Promise<FetchUlasanResponse> => {
   const res = await api.post("/api/v1/skm/viewUlasanFast", {
     data_ke: page,
     cari_value: search,
+    aplikasi_id: aplikasiId,
   })
   return {
     data: res.data.data || [],
@@ -73,11 +87,29 @@ const fetchUlasanApi = async (page: number, search: string): Promise<FetchUlasan
   }
 }
 
+const fetchAplikasiList = async (): Promise<AplikasiOption[]> => {
+  try {
+    const res = await api.get("/api/v1/skm/listAplikasi")
+    return res.data?.data || []
+  } catch (err) {
+    console.error("Gagal memuat list aplikasi:", err)
+    return []
+  }
+}
+
 export default function Page() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [searchInput, setSearchInput] = useState("")
   const [activeSearch, setActiveSearch] = useState("")
+  const [selectedLayanan, setSelectedLayanan] = useState("all")
+
+  // Query list aplikasi
+  const { data: aplikasiOptions = [] } = useQuery({
+    queryKey: ["skm_aplikasi_list"],
+    queryFn: fetchAplikasiList,
+    staleTime: 1000 * 60 * 10,
+  })
 
   // TanStack Query with automatic caching & smooth transitions
   const {
@@ -86,10 +118,10 @@ export default function Page() {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["ulasan", page, activeSearch],
-    queryFn: () => fetchUlasanApi(page, activeSearch),
-    placeholderData: keepPreviousData, // Keeps previous data while loading new page to avoid white screen/flicker
-    staleTime: 1000 * 60 * 3,          // Cache for 3 minutes
+    queryKey: ["ulasan", page, activeSearch, selectedLayanan],
+    queryFn: () => fetchUlasanApi(page, activeSearch, selectedLayanan),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 3,
   })
 
   const ulasanList = queryResult?.data || []
@@ -100,17 +132,17 @@ export default function Page() {
   useEffect(() => {
     if (page < totalPages) {
       queryClient.prefetchQuery({
-        queryKey: ["ulasan", page + 1, activeSearch],
-        queryFn: () => fetchUlasanApi(page + 1, activeSearch),
+        queryKey: ["ulasan", page + 1, activeSearch, selectedLayanan],
+        queryFn: () => fetchUlasanApi(page + 1, activeSearch, selectedLayanan),
       })
     }
     if (page > 1) {
       queryClient.prefetchQuery({
-        queryKey: ["ulasan", page - 1, activeSearch],
-        queryFn: () => fetchUlasanApi(page - 1, activeSearch),
+        queryKey: ["ulasan", page - 1, activeSearch, selectedLayanan],
+        queryFn: () => fetchUlasanApi(page - 1, activeSearch, selectedLayanan),
       })
     }
-  }, [page, totalPages, activeSearch, queryClient])
+  }, [page, totalPages, activeSearch, selectedLayanan, queryClient])
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -121,6 +153,11 @@ export default function Page() {
   const handleClearSearch = () => {
     setSearchInput("")
     setActiveSearch("")
+    setPage(1)
+  }
+
+  const handleLayananChange = (val: string) => {
+    setSelectedLayanan(val)
     setPage(1)
   }
 
@@ -137,7 +174,7 @@ export default function Page() {
             )}
 
             <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg font-bold">
@@ -152,42 +189,67 @@ export default function Page() {
                   </CardDescription>
                 </div>
 
-                {/* Filter & Search Bar */}
-                <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-auto">
-                  <div className="relative flex-1 md:w-72">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cari nama, komentar, layanan..."
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      className="pl-8 pr-8 h-9 text-sm"
-                    />
-                    {searchInput && (
-                      <button
-                        type="button"
-                        onClick={handleClearSearch}
-                        className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
+                {/* Filter & Search Controls */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
+                  {/* Filter Dropdown Layanan */}
+                  <div className="w-full sm:w-52 shrink-0">
+                    <Select value={selectedLayanan} onValueChange={handleLayananChange}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <SelectValue placeholder="Semua Layanan" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all" className="text-xs">
+                          Semua Layanan
+                        </SelectItem>
+                        {aplikasiOptions.map((app) => (
+                          <SelectItem key={app.id} value={app.id} className="text-xs">
+                            {app.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Button type="submit" size="sm" className="h-9 px-3 shrink-0" disabled={isFetching}>
-                    {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                    <span className="hidden sm:inline ml-1.5">Cari</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9 shrink-0"
-                    onClick={() => refetch()}
-                    disabled={isFetching}
-                    title="Refresh Data"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-                  </Button>
-                </form>
+
+                  {/* Search Bar */}
+                  <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 flex-1 sm:flex-initial">
+                    <div className="relative flex-1 sm:w-64">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Cari nama, komentar..."
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        className="pl-8 pr-8 h-9 text-sm"
+                      />
+                      {searchInput && (
+                        <button
+                          type="button"
+                          onClick={handleClearSearch}
+                          className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <Button type="submit" size="sm" className="h-9 px-3 shrink-0" disabled={isFetching}>
+                      {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      <span className="hidden sm:inline ml-1.5">Cari</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 shrink-0"
+                      onClick={() => refetch()}
+                      disabled={isFetching}
+                      title="Refresh Data"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+                    </Button>
+                  </form>
+                </div>
               </div>
             </CardHeader>
 
@@ -217,7 +279,9 @@ export default function Page() {
                     ) : ulasanList.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                          {activeSearch ? `Tidak ada ulasan yang cocok dengan kata kunci "${activeSearch}"` : "Belum ada data ulasan tersimpan"}
+                          {activeSearch || selectedLayanan !== "all"
+                            ? "Tidak ada ulasan yang cocok dengan kriteria filter atau pencarian yang dipilih"
+                            : "Belum ada data ulasan tersimpan"}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -227,7 +291,20 @@ export default function Page() {
                             {item.nama || "Anonim"}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
-                            <Badge variant="outline" className="font-medium text-xs bg-muted/50 uppercase">
+                            <Badge
+                              variant="outline"
+                              className="font-medium text-xs bg-muted/50 uppercase cursor-pointer hover:bg-primary/10 hover:border-primary/40 transition-colors"
+                              onClick={() => {
+                                const match = aplikasiOptions.find(
+                                  (a) => a.nama.toLowerCase() === (item.app || "").toLowerCase()
+                                )
+                                if (match) {
+                                  setSelectedLayanan(match.id)
+                                  setPage(1)
+                                }
+                              }}
+                              title="Klik untuk filter layanan ini"
+                            >
                               {item.app || "-"}
                             </Badge>
                           </TableCell>
