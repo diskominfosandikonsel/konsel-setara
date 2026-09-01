@@ -22,74 +22,70 @@
     <!-- Main Content -->
     <div class="main-content">
       <q-pull-to-refresh @refresh="onRefresh">
-        <!-- Filter Tahun Horizontal Chips -->
+        <!-- Filter Tahun Horizontal Pills -->
         <div class="filter-section q-mb-md">
           <div class="row items-center justify-between q-mb-sm">
-            <div class="text-weight-bold text-grey-9 text-subtitle2">Tahun Anggaran</div>
-            <div class="text-caption text-primary text-weight-bold" v-if="selectedYear !== 'all'">
-              Tahun {{ selectedYear }}
+            <div class="text-weight-bold text-slate-800 text-subtitle2">Tahun Anggaran</div>
+            <div class="text-caption text-slate-500 font-medium" v-if="selectedYear !== 'all'">
+              Periode {{ selectedYear }}
             </div>
-            <div class="text-caption text-grey-6" v-else>
+            <div class="text-caption text-slate-400" v-else>
               Semua Periode
             </div>
           </div>
 
           <div class="row q-gutter-x-sm scroll-x no-wrap q-py-xs">
-            <q-chip
-              clickable
-              :color="selectedYear === 'all' ? 'primary' : 'grey-2'"
-              :text-color="selectedYear === 'all' ? 'white' : 'grey-8'"
-              class="year-chip text-weight-bold"
+            <button
+              type="button"
+              :class="['filter-pill', selectedYear === 'all' ? 'filter-pill-active' : 'filter-pill-inactive']"
               @click="setYear('all')"
             >
               Semua Tahun
-            </q-chip>
-            <q-chip
+            </button>
+            <button
               v-for="yr in availableYears"
               :key="yr"
-              clickable
-              :color="selectedYear === yr.toString() ? 'primary' : 'grey-2'"
-              :text-color="selectedYear === yr.toString() ? 'white' : 'grey-8'"
-              class="year-chip text-weight-bold"
+              type="button"
+              :class="['filter-pill', selectedYear === yr.toString() ? 'filter-pill-active' : 'filter-pill-inactive']"
               @click="setYear(yr.toString())"
             >
               {{ yr }}
-            </q-chip>
+            </button>
           </div>
         </div>
 
         <!-- Summary Banner Card -->
-        <div class="summary-card q-pa-md rounded-borders q-mb-lg shadow-2">
+        <div class="summary-card q-pa-md rounded-borders q-mb-lg">
           <div class="row items-center justify-between">
             <div>
-              <div class="text-caption text-blue-1 text-weight-medium">Total Realisasi Anggaran</div>
-              <div class="text-h6 text-weight-bolder text-white q-mt-xs">
+              <div class="text-caption text-slate-300 text-weight-medium">Total Realisasi Anggaran</div>
+              <div class="text-h6 text-weight-bolder text-white q-mt-xs font-mono tracking-tight">
                 {{ formatRupiah(summary.total_realisasi) }}
               </div>
             </div>
             <div class="summary-badge text-center">
-              <div class="text-h6 text-weight-bolder text-amber-3">{{ summary.total_program }}</div>
-              <div class="text-[10px] text-blue-1">Program</div>
+              <div class="text-h6 text-weight-bolder text-white">{{ summary.total_program }}</div>
+              <div class="text-[10px] text-slate-300">Program</div>
             </div>
           </div>
         </div>
 
-        <!-- Alert / Note untuk Tahun Berjalan (2026) -->
-        <div v-if="selectedYear === currentYear.toString() || selectedYear === '2026'" class="provisional-alert q-pa-sm q-mb-md rounded-borders">
-          <div class="row items-center q-gutter-x-xs text-amber-9 text-caption text-weight-bold">
-            <q-icon name="info" size="16px" />
-            <span>* Data Sementara (Tahun Berjalan {{ currentYear }})</span>
+        <!-- Alert / Note untuk Tahun Berjalan -->
+        <div v-if="selectedYear === currentYear.toString() || selectedYear === '2026'" class="provisional-alert q-pa-sm q-mb-md">
+          <div class="row items-center q-gutter-x-xs text-caption text-weight-bold text-amber-800">
+            <q-icon name="info" size="15px" />
+            <span>Data Tahun Berjalan ({{ currentYear }})</span>
           </div>
-          <div class="text-[11px] text-grey-8 q-mt-xs">
-            Angka realisasi anggaran dan penyaluran volume fisik masih terus bergerak dan diperbarui secara berkala.
+          <div class="text-[11px] text-slate-600 q-mt-xs leading-normal">
+            Angka realisasi anggaran dan capaian fisik masih terus diperbarui secara berkala.
           </div>
         </div>
 
         <!-- List Program Prioritas -->
         <div class="program-section">
-          <div class="text-subtitle2 text-weight-bold text-grey-9 q-mb-md flex justify-between items-center">
-            <span>Daftar Program Terpantau</span>
-            <span class="text-caption text-grey-6">{{ programList.length }} Data</span>
+          <div class="row justify-between items-center q-mb-md">
+            <span class="text-subtitle2 text-weight-bold text-slate-800">Daftar Program Terpantau</span>
+            <span class="text-caption text-slate-500 font-medium">{{ programList.length }} Program</span>
           </div>
 
           <!-- Loading State Skeleton -->
@@ -108,11 +104,11 @@
 
           <!-- Empty State -->
           <div v-else-if="programList.length === 0" class="column flex-center q-py-xl text-center">
-            <q-avatar size="72px" color="blue-1" text-color="primary" class="q-mb-md">
-              <q-icon name="folder_open" size="36px" />
+            <q-avatar size="64px" color="slate-100" text-color="slate-500" class="q-mb-md">
+              <q-icon name="folder_open" size="32px" />
             </q-avatar>
-            <div class="text-weight-bold text-grey-8 text-subtitle1">Belum Ada Program</div>
-            <div class="text-caption text-grey-6 max-w-xs q-mt-xs">
+            <div class="text-weight-bold text-slate-800 text-subtitle2">Belum Ada Program</div>
+            <div class="text-caption text-slate-500 max-w-xs q-mt-xs">
               Belum ada data realisasi program prioritas untuk tahun yang dipilih.
             </div>
           </div>
@@ -122,41 +118,39 @@
             <q-card
               v-for="(item, idx) in programList"
               :key="item.id || idx"
-              class="program-card rounded-borders no-shadow border-card transition-card"
+              class="program-card rounded-borders no-shadow border-card"
             >
               <q-card-section class="q-pa-md">
                 <!-- Program Header & Year -->
                 <div class="row items-start justify-between no-wrap q-mb-sm">
-                  <div class="col text-weight-bold text-dark text-subtitle2 program-title">
+                  <div class="col program-title">
                     {{ item.nama_program }}
                   </div>
                   <div class="row items-center q-gutter-x-xs shrink-0 q-ml-sm">
-                    <q-badge color="indigo-1" text-color="indigo-9" class="text-weight-bold q-px-sm py-1 font-mono">
+                    <span class="year-badge">
                       {{ item.tahun }}
-                    </q-badge>
-                    <q-badge
+                    </span>
+                    <span
                       v-if="item.tahun >= currentYear"
-                      color="amber-1"
-                      text-color="amber-9"
-                      class="text-weight-bold text-[10px] q-px-xs py-1"
+                      class="provisional-badge"
                     >
-                      * Sementara
-                    </q-badge>
+                      Sementara
+                    </span>
                   </div>
                 </div>
 
-                <q-separator class="q-my-sm bg-grey-3" />
+                <q-separator class="q-my-sm bg-slate-100" />
 
                 <!-- Grid Details: Anggaran & Volume -->
                 <div class="row q-col-gutter-sm q-mt-xs">
                   <!-- Realisasi Anggaran -->
                   <div class="col-12 col-sm-6">
-                    <div class="detail-box q-pa-sm rounded-borders bg-emerald-light">
-                      <div class="row items-center q-gutter-x-xs text-caption text-emerald-dark text-weight-medium">
-                        <q-icon name="account_balance_wallet" size="14px" />
+                    <div class="metric-box q-pa-sm">
+                      <div class="row items-center q-gutter-x-xs text-caption text-slate-500 font-medium">
+                        <q-icon name="account_balance_wallet" size="14px" class="text-emerald-600" />
                         <span>Realisasi Anggaran</span>
                       </div>
-                      <div class="text-subtitle2 text-weight-bolder text-emerald-dark q-mt-xs font-mono">
+                      <div class="text-subtitle2 metric-value-emerald q-mt-xs font-mono">
                         {{ formatRupiah(item.realisasi_anggaran) }}
                       </div>
                     </div>
@@ -164,22 +158,41 @@
 
                   <!-- Volume & Satuan Dinamis -->
                   <div class="col-12 col-sm-6">
-                    <div class="detail-box q-pa-sm rounded-borders bg-amber-light">
-                      <div class="row items-center q-gutter-x-xs text-caption text-amber-dark text-weight-medium">
-                        <q-icon name="assessment" size="14px" />
+                    <div class="metric-box q-pa-sm">
+                      <div class="row items-center q-gutter-x-xs text-caption text-slate-500 font-medium">
+                        <q-icon name="layers" size="14px" class="text-sky-600" />
                         <span>Volume / Penyaluran</span>
                       </div>
-                      <div class="text-subtitle2 text-weight-bolder text-amber-dark q-mt-xs">
-                        {{ formatNumber(item.volume) }} <span class="text-caption text-weight-bold">{{ item.satuan }}</span>
+                      <div class="text-subtitle2 metric-value-sky q-mt-xs">
+                        {{ formatNumber(item.volume) }} <span class="metric-unit-sky">{{ item.satuan }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                <!-- Sub Breakdown (Rincian Indikator) -->
+                <div v-if="getRincianList(item).length > 0" class="rincian-box q-pa-sm q-mt-sm">
+                  <div class="row items-center q-gutter-x-xs text-[11px] text-slate-600 font-semibold q-mb-xs">
+                    <q-icon name="subdirectory_arrow_right" size="13px" class="text-purple-600" />
+                    <span>Rincian Sub-Capaian:</span>
+                  </div>
+                  <div class="row q-gutter-xs">
+                    <div
+                      v-for="(sub, subIdx) in getRincianList(item)"
+                      :key="subIdx"
+                      class="rincian-chip col-auto"
+                    >
+                      <span class="text-slate-500">{{ sub.label }}:</span>
+                      <strong class="text-purple-700 q-ml-xs font-mono font-bold">{{ formatNumber(sub.nilai) }}</strong>
+                      <span class="text-[10px] text-slate-400 q-ml-xs">{{ sub.satuan || item.satuan }}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Footnote if current year -->
-                <div v-if="item.tahun >= currentYear" class="text-[11px] text-amber-9 text-italic q-mt-sm flex items-center gap-1">
-                  <q-icon name="schedule" size="12px" />
-                  <span>* Data capaian tahun berjalan (sementara)</span>
+                <div v-if="item.tahun >= currentYear" class="footnote-text q-mt-sm flex items-center gap-1">
+                  <q-icon name="update" size="12px" />
+                  <span>Data capaian tahun berjalan (berkala)</span>
                 </div>
               </q-card-section>
             </q-card>
@@ -219,6 +232,20 @@ export default {
     const formatNumber = (val) => {
       const num = Number(val) || 0
       return new Intl.NumberFormat('id-ID').format(num)
+    }
+
+    const getRincianList = (item) => {
+      if (!item || !item.rincian) return []
+      if (Array.isArray(item.rincian)) return item.rincian
+      if (typeof item.rincian === 'string') {
+        try {
+          const parsed = JSON.parse(item.rincian)
+          return Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          return []
+        }
+      }
+      return []
     }
 
     const fetchYears = async () => {
@@ -285,6 +312,7 @@ export default {
       summary,
       formatRupiah,
       formatNumber,
+      getRincianList,
       setYear,
       fetchData,
       onRefresh,
@@ -294,17 +322,13 @@ export default {
 </script>
 
 <style scoped>
+/* Page & Canvas */
 .realisasi-bg {
   background-color: #f8fafc;
   min-height: 100vh;
 }
 
-.provisional-alert {
-  background-color: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #92400e;
-}
-
+/* Header Banner */
 .realisasi-header-banner {
   position: relative;
   width: 100%;
@@ -352,14 +376,15 @@ export default {
   letter-spacing: 0.5px;
 }
 
+/* Main Container Card */
 .main-content {
-  padding: 16px;
+  padding: 18px 16px;
   margin-top: -22px;
   border-radius: 22px 22px 0 0;
   background: #f8fafc;
   position: relative;
   z-index: 10;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.04);
 }
 
 .scroll-x {
@@ -370,55 +395,151 @@ export default {
   display: none;
 }
 
-.year-chip {
-  transition: all 0.2s ease;
-  font-size: 13px;
-  padding: 8px 14px;
+/* Modern Filter Pills */
+.filter-pill {
+  border: none;
+  outline: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
 
+.filter-pill-active {
+  background-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+.filter-pill-inactive {
+  background-color: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+.filter-pill-inactive:active {
+  background-color: #f1f5f9;
+}
+
+/* Summary Card */
 .summary-card {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: white;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.12);
 }
 
 .summary-badge {
   background: rgba(255, 255, 255, 0.08);
-  padding: 6px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* Alert Box */
+.provisional-alert {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 10px;
+}
+
+/* Program Card */
 .border-card {
   border: 1px solid #e2e8f0;
   background: #ffffff;
   border-radius: 14px;
-}
-
-.transition-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.transition-card:active {
-  transform: scale(0.99);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .program-title {
   font-size: 14.5px;
+  font-weight: 700;
   line-height: 1.35;
+  color: #1d4ed8; /* Vibrant Royal Blue */
 }
 
-.bg-emerald-light {
-  background-color: #ecfdf5;
-}
-.text-emerald-dark {
-  color: #065f46;
+/* Metric Values with Focused Colors */
+.metric-value-emerald {
+  color: #059669; /* Emerald Green for Budget */
+  font-weight: 800;
+  font-size: 14.5px;
 }
 
-.bg-amber-light {
-  background-color: #fffbeb;
+.metric-value-sky {
+  color: #0284c7; /* Sky Blue for Volume */
+  font-weight: 800;
+  font-size: 14.5px;
 }
-.text-amber-dark {
-  color: #92400e;
+
+.metric-unit-sky {
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 700;
 }
+
+/* Year & Status Badges */
+.year-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.provisional-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #b45309;
+  background-color: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+/* Unified Neutral Metric Box */
+.metric-box {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+}
+
+/* Sub Rincian */
+.rincian-box {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+}
+
+.rincian-chip {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footnote-text {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Custom Tailwind-like Text Helpers */
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-700 { color: #334155; }
+.text-slate-600 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.text-slate-300 { color: #cbd5e1; }
+.bg-slate-100 { background-color: #f1f5f9; }
 </style>
+
