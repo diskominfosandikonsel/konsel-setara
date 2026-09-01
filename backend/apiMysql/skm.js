@@ -375,85 +375,11 @@ router.get('/listAplikasi', (req, res) => {
     });
 });
 
-const { MongoClient } = require('mongodb');
-const uriMongoWB = "mongodb://diskominfosandi:Kominfo2018@121.52.72.101:27017/warga_bicara?authSource=admin";
-
-// Fungsi sinkronisasi realtime dari MongoDB Warga Bicara ke MySQL konsel_setara
-async function syncWargaBicaraRatings() {
-    try {
-        const client = new MongoClient(uriMongoWB, { serverSelectionTimeoutMS: 5000 });
-        await client.connect();
-        const mongoDb = client.db('warga_bicara');
-
-        const pipeline = [
-            {
-                $lookup: {
-                    from: 'post',
-                    localField: 'post_id',
-                    foreignField: 'id',
-                    as: 'post_info'
-                }
-            },
-            { $unwind: { path: '$post_info', preserveNullAndEmptyArrays: true } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'created_by',
-                    foreignField: 'id',
-                    as: 'user_info'
-                }
-            },
-            { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
-            {
-                $project: {
-                    _id: 1,
-                    id: 1,
-                    post_id: 1,
-                    nilai: 1,
-                    ulasan: 1,
-                    created_at: 1,
-                    created_by: 1,
-                    post_title: '$post_info.title',
-                    pelapor_nama: { $ifNull: ['$user_info.nama', '$user_info.username', 'Pelapor'] }
-                }
-            },
-            { $sort: { created_at: -1 } }
-        ];
-
-        const ratings = await mongoDb.collection('rating').aggregate(pipeline).toArray();
-        await client.close();
-
-        if (!ratings || ratings.length === 0) return;
-
-        db.query("SELECT id FROM aplikasi WHERE nama LIKE '%WARGA BICARA%' LIMIT 1", (err, apps) => {
-            if (err || !apps || apps.length === 0) return;
-            const appId = apps[0].id;
-
-            db.query("DELETE FROM ulasan WHERE aplikasi_id = ?", [appId], () => {
-                for (const r of ratings) {
-                    const ulasanId = r._id.toString();
-                    const ratingVal = Number(r.nilai) || 5;
-                    const komentar = r.ulasan ? r.ulasan.trim() : (r.post_title ? `Aduan: ${r.post_title}` : '-');
-                    const createdBy = r.pelapor_nama;
-                    const createdAt = r.created_at ? new Date(r.created_at) : new Date();
-
-                    db.query(
-                        "INSERT INTO ulasan (id, aplikasi_id, rating, komentar, createdBy, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
-                        [ulasanId, appId, ratingVal, komentar, createdBy, createdAt]
-                    );
-                }
-            });
-        });
-    } catch (err) {
-        console.warn("Sync Warga Bicara MongoDB notice:", err.message);
-    }
-}
-
-// Endpoint manual sync jika dibutuhkan
-router.get('/syncWargaBicara', async (req, res) => {
-    await syncWargaBicaraRatings();
-    res.json({ success: true, message: "Sinkronisasi Warga Bicara berhasil" });
+// Endpoint manual sync Warga Bicara (opsional / stub)
+router.get('/syncWargaBicara', (req, res) => {
+    res.json({ success: true, message: "Sinkronisasi Warga Bicara siap (Pure MySQL)" });
 });
+
 
 // ═══════════════════════════════════════════════════════════════
 // ENDPOINT BARU KHUSUS ADMIN (CEPAT & TERINDEX)
