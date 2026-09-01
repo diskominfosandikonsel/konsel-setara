@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-var path = require("path");
-require('dotenv').config({ debug: false })
+const path = require('path');
+require('dotenv').config({ debug: false });
 
 const middleware = require('./auth/middlewares');
 const auth = require('./auth');
@@ -14,27 +14,19 @@ app.use(express.json());
 
 app.use(middleware.checkTokenSeetUser);
 
-app.use((req, res, next) => {
-  console.log('==========================')
-  // console.log('🌐 REQUEST:', req.method, req.url)
-  // console.log('📦 BODY:', req.body)
-  // console.log('🔑 AUTH:', req.headers.authorization)
-  console.log('==========================')
-  next()
-})
-
+// Rute dasar / Health check
 app.get('/', (req, res) => {
   res.json({
-    message: '🦄🌈✨Hello pengunjung,,, Anda mengunjugi alamat yg salah... mungkin maksud anda http://konaweselatankab.go.id ! 🌈✨🦄',
+    message: 'Server Konsel Setara API Running 🚀',
     user: req.user
   });
 });
 
-// API ENDPOINTS
-
+// Autentikasi & Media Statis
 app.use('/auth', auth);
-app.use('/uploads', express.static(path.join(__dirname, './uploads')))
+app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 
+// Sektoral & Core Layanan API
 const checkAuth = require('./apiMysql/checkAuth');
 app.use('/api/v1/checkAuth', checkAuth);
 
@@ -44,16 +36,16 @@ app.use('/api/v1/profile', profile);
 const sippaduBerita = require('./apiMysql/sippadu/berita');
 app.use('/api/v1/sippadu_berita', sippaduBerita);
 
-const notificationRoutes = require('./routes/notification')
-app.use('/notification', notificationRoutes)
+const notificationRoutes = require('./routes/notification');
+app.use('/notification', notificationRoutes);
 
-const fcmRoutes = require('./routes/fcm')
-app.use('/fcm', fcmRoutes)
+const fcmRoutes = require('./routes/fcm');
+app.use('/fcm', fcmRoutes);
 
 const slider = require('./apiMysql/slider');
 app.use('/api/v1/slider', slider);
 
-// STATIC LEGAL PAGES FOR PLAY STORE
+// Halaman Statis Kebijakan & Syarat (Syarat Google Play Store)
 app.get('/kebijakan-privasi', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/html/kebijakan-privasi.html'));
 });
@@ -62,43 +54,39 @@ app.get('/syarat-ketentuan', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/html/syarat-ketentuan.html'));
 });
 
-// APP VERSION ENDPOINT
+// Pengecekan Versi Aplikasi Mobile
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
-    latestVersion: '1.4.0', // Updated to match the new release version
+    latestVersion: '1.4.0',
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
-    forceUpdate: true // Ubah jadi true jika update ini sifatnya WAJIB (user tidak bisa skip)
+    forceUpdate: true
   });
 });
 
-// API ENDPOINTS
-
-// SKM ENDPOINTS
+// Modul Survei Kepuasan Masyarakat (SKM) & IKM
 const skm = require('./apiMysql/skm');
 app.use('/api/v1/skm', skm);
-// SKM ENDPOINTS
 
-// DYNAMIC MENU ENDPOINTS
+// Modul Menu Dinamis
 const menu = require('./apiMysql/menu');
 app.use('/api/v1/menu', menu);
 
-// USERS MANAGEMENT ENDPOINTS
+// Modul Manajemen Pengguna
 const users = require('./apiMysql/users');
 app.use('/api/v1/users', users);
 
-// REALISASI SETARA (PROGRAM PRIORITAS BUPATI) ENDPOINTS
+// Modul Tracking Realisasi Permohonan
 const realisasi = require('./apiMysql/realisasi');
 app.use('/api/v1/realisasi', realisasi);
 
-// PEGAWAI ACCESS & E-GOV SSO ENDPOINTS
+// Modul Data Pegawai & Petugas Pelayanan
 const pegawai = require('./apiMysql/pegawai');
 app.use('/api/v1/pegawai', pegawai);
 
-// ERROR HANDLER
-
+// Error Handling Middleware
 function notFound(req, res, next) {
   res.status(404);
-  const error = new Error('Not Found data - ' + req.originalUrl);
+  const error = new Error('Not Found - ' + req.originalUrl);
   next(error);
 }
 
@@ -113,10 +101,8 @@ function errorHandler(err, req, res, next) {
 app.use(notFound);
 app.use(errorHandler);
 
-// ERROR HANDLER
-
+// Server Listener
 const port = process.env.PORT || 5025;
-
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
@@ -124,3 +110,4 @@ const server = app.listen(port, '0.0.0.0', () => {
 server.on('error', (err) => {
   console.error('Server failed:', err);
 });
+

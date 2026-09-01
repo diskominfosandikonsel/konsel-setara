@@ -35,7 +35,7 @@
         </div>
 
         <!-- Form Section -->
-        <div class="form-section" style="position: relative; padding-bottom: 80px;">
+        <div class="form-section" style="padding-bottom: 30px;">
             <p class="instruction-text">Silakan login menggunakan akun anda</p>
 
             <div class="input-group" style="text-align: left;">
@@ -59,18 +59,20 @@
                 <a @click="$router.push('/lupa-password')" class="forgot-password" style="margin-top: 0;">Lupa Password Anda ?</a>
             </div>
 
-            <div class="button-group">
+            <div class="button-group" style="margin-bottom: 24px;">
                 <button class="btn btn-primary" @click="doLogin">Masuk</button>
                 <button class="btn btn-outline" @click="$router.push('/register')">Daftar</button>
             </div>
 
             <!-- Footer Aplikasi -->
             <div
-                style="position: absolute; bottom: 10px; left: 0; width: 100%; font-size: 0.78rem; color: rgba(255, 255, 255, 1); font-weight: 500; letter-spacing: 0.5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
-                <div>@copyright : DiskominfoSandi Konawe Selatan 2026</div>
-                <div style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.85); font-weight: 600; letter-spacing: 0.8px;">Versi {{ appVersion }}</div>
+                style="margin-top: 24px; font-size: 0.76rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; letter-spacing: 0.3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+                <div>© 2026 DiskominfoSandi Konawe Selatan</div>
+                <div style="background: rgba(255, 255, 255, 0.15); padding: 2px 10px; border-radius: 12px; font-size: 0.72rem; color: #ffffff; font-weight: 600; letter-spacing: 0.5px;">
+                    Versi {{ appVersion }}
+                </div>
                 <img src="/img/setara.png" alt="Logo Setara"
-                    style="height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+                    style="height: 30px; margin-top: 4px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
             </div>
         </div>
     </div>
