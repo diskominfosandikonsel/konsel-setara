@@ -170,21 +170,48 @@
                   </div>
                 </div>
 
-                <!-- Sub Breakdown (Rincian Indikator) -->
-                <div v-if="getRincianList(item).length > 0" class="rincian-box q-pa-sm q-mt-sm">
-                  <div class="row items-center q-gutter-x-xs text-[11px] text-slate-600 font-semibold q-mb-xs">
-                    <q-icon name="subdirectory_arrow_right" size="13px" class="text-purple-600" />
-                    <span>Rincian Sub-Capaian:</span>
+                <!-- Sub Breakdown (Rincian Sub-Kegiatan / Sub-Capaian) Accordion -->
+                <div v-if="getRincianList(item).length > 0" class="q-mt-sm">
+                  <!-- Accordion Toggle Button -->
+                  <div
+                    class="rincian-trigger-btn row items-center justify-between cursor-pointer"
+                    @click="toggleRincian(item.id || idx)"
+                  >
+                    <div class="row items-center q-gutter-x-xs text-[11.5px] text-slate-700 font-semibold">
+                      <q-icon name="subdirectory_arrow_right" size="14px" class="text-purple-600" />
+                      <span>Rincian Sub-Kegiatan</span>
+                    </div>
+                    <div class="row items-center q-gutter-x-xs text-slate-400">
+                      <span class="text-[11px] text-slate-500 font-medium">
+                        {{ isExpanded(item.id || idx) ? 'Tutup' : 'Lihat Rincian' }}
+                      </span>
+                      <q-icon
+                        name="expand_more"
+                        size="18px"
+                        :class="['chevron-icon', { 'rotate-180': isExpanded(item.id || idx) }]"
+                      />
+                    </div>
                   </div>
-                  <div class="row q-gutter-xs">
-                    <div
-                      v-for="(sub, subIdx) in getRincianList(item)"
-                      :key="subIdx"
-                      class="rincian-chip col-auto"
-                    >
-                      <span class="text-slate-500">{{ sub.label }}:</span>
-                      <strong class="text-purple-700 q-ml-xs font-mono font-bold">{{ formatNumber(sub.nilai) }}</strong>
-                      <span class="text-[10px] text-slate-400 q-ml-xs">{{ sub.satuan || item.satuan }}</span>
+
+                  <!-- Accordion Dropdown Content (Hardware-accelerated CSS Grid) -->
+                  <div
+                    class="rincian-collapse-wrapper"
+                    :class="{ 'is-open': isExpanded(item.id || idx) }"
+                  >
+                    <div class="rincian-collapse-inner">
+                      <div class="rincian-box q-pa-sm q-mt-xs">
+                        <div class="row q-gutter-xs">
+                          <div
+                            v-for="(sub, subIdx) in getRincianList(item)"
+                            :key="subIdx"
+                            class="rincian-chip col-auto"
+                          >
+                            <span class="text-slate-500">{{ sub.label }}:</span>
+                            <strong class="text-purple-700 q-ml-xs font-mono font-bold">{{ formatNumber(sub.nilai) }}</strong>
+                            <span class="text-[10px] text-slate-400 q-ml-xs">{{ sub.satuan || item.satuan }}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -234,18 +261,25 @@ export default {
       return new Intl.NumberFormat('id-ID').format(num)
     }
 
-    const getRincianList = (item) => {
-      if (!item || !item.rincian) return []
-      if (Array.isArray(item.rincian)) return item.rincian
-      if (typeof item.rincian === 'string') {
+    const parseRincian = (raw) => {
+      if (!raw) return []
+      if (Array.isArray(raw)) return raw
+      if (typeof raw === 'string') {
         try {
-          const parsed = JSON.parse(item.rincian)
+          const parsed = JSON.parse(raw)
           return Array.isArray(parsed) ? parsed : []
         } catch (e) {
           return []
         }
       }
       return []
+    }
+
+    const getRincianList = (item) => {
+      if (!item) return []
+      if (item._parsedRincian !== undefined) return item._parsedRincian
+      item._parsedRincian = parseRincian(item.rincian)
+      return item._parsedRincian
     }
 
     const fetchYears = async () => {
@@ -292,6 +326,16 @@ export default {
       fetchData()
     }
 
+    const expandedItems = ref({})
+
+    const toggleRincian = (id) => {
+      expandedItems.value[id] = !expandedItems.value[id]
+    }
+
+    const isExpanded = (id) => {
+      return !!expandedItems.value[id]
+    }
+
     const onRefresh = async (done) => {
       await fetchYears()
       await fetchData()
@@ -313,6 +357,9 @@ export default {
       formatRupiah,
       formatNumber,
       getRincianList,
+      expandedItems,
+      toggleRincian,
+      isExpanded,
       setYear,
       fetchData,
       onRefresh,
@@ -509,7 +556,60 @@ export default {
   border-radius: 10px;
 }
 
-/* Sub Rincian */
+/* Sub Rincian Accordion */
+.rincian-trigger-btn {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.rincian-trigger-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.rincian-trigger-btn:active {
+  transform: scale(0.99);
+}
+
+.rincian-count-badge {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  margin-left: 4px;
+}
+
+.chevron-icon {
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Sub Rincian Accordion Animation (Hardware-accelerated) */
+.rincian-collapse-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: grid-template-rows;
+}
+
+.rincian-collapse-wrapper.is-open {
+  grid-template-rows: 1fr;
+}
+
+.rincian-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 .rincian-box {
   background-color: #f8fafc;
   border: 1px dashed #cbd5e1;

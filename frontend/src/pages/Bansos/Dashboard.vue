@@ -22,6 +22,30 @@
           </div>
         </div>
       </div>
+
+      <!-- BANNER CEK PENERIMA BANTUAN (NIK) -->
+      <div class="q-px-md q-pt-md">
+        <div class="card-cek-nik" @click="dialogSearch = true" v-ripple>
+          <div class="row items-center no-wrap">
+            <div class="cek-nik-icon-box flex flex-center q-mr-md">
+              <q-icon name="person_search" size="26px" color="primary" />
+            </div>
+            <div class="col">
+              <div class="row items-center no-wrap">
+                <span class="text-subtitle2 text-weight-bold text-grey-9">Cek Penerima Bantuan</span>
+                <span class="badge-nik q-ml-xs">NIK</span>
+              </div>
+              <div class="text-caption text-grey-7" style="font-size: 11px; line-height: 1.3">
+                Ketik NIK untuk cek bantuan yang Anda terima
+              </div>
+            </div>
+            <div class="q-pl-xs">
+              <q-btn round dense unelevated color="primary" icon="search" size="sm" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="q-px-md q-pt-md">
         <div class="row q-col-gutter-sm">
           <div class="col-4" v-for="item in cards" :key="item.title">
@@ -99,10 +123,27 @@
 
           <!-- INPUT -->
           <q-card-section>
-            <q-input v-model="searchNik" label="Masukkan NIK Untuk Cek Data Anda" dense outlined debounce="500"
-              @keyup.enter="searchData">
+            <q-input
+              v-model="searchNik"
+              label="Masukkan NIK Anda (16 Digit)"
+              dense
+              outlined
+              autofocus
+              type="tel"
+              maxlength="16"
+              debounce="300"
+              @keyup.enter="searchData"
+            >
               <template v-slot:append>
-                <q-icon name="search" class="cursor-pointer" @click="searchData" />
+                <q-btn
+                  round
+                  dense
+                  flat
+                  icon="search"
+                  color="primary"
+                  :loading="searchLoading"
+                  @click="searchData"
+                />
               </template>
             </q-input>
           </q-card-section>
@@ -187,11 +228,6 @@
           </q-card-section>
         </q-card>
       </q-dialog>
-
-      <!-- FAB -->
-      <q-page-sticky position="bottom-right" :offset="[16, 16]">
-        <q-btn fab color="primary" icon="search" @click="dialogSearch = true" />
-      </q-page-sticky>
     </q-pull-to-refresh>
 
     <!-- ════════════════════════════ -->
@@ -824,5 +860,40 @@ export default {
   font-size: 10px;
   padding: 4px 8px;
   border-radius: 10px;
+}
+
+/* CEK NIK BANNER CARD */
+.card-cek-nik {
+  background: white;
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 16px rgba(69, 110, 254, 0.12);
+  border: 1px solid rgba(69, 110, 254, 0.16);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-cek-nik:hover,
+.card-cek-nik:active {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(69, 110, 254, 0.22);
+}
+
+.cek-nik-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eef4ff;
+  flex-shrink: 0;
+}
+
+.badge-nik {
+  background: #e0edff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
 }
 </style>
