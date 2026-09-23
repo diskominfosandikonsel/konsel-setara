@@ -54,6 +54,15 @@ app.get('/syarat-ketentuan', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/html/syarat-ketentuan.html'));
 });
 
+// Swagger API Documentation (OpenAPI 3.0 Interactive Docs)
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/html/swagger.html'));
+});
+
+app.get('/openapi.json', (req, res) => {
+  res.sendFile(path.join(__dirname, '../openapi.json'));
+});
+
 // Pengecekan Versi Aplikasi Mobile
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
@@ -82,6 +91,10 @@ app.use('/api/v1/realisasi', realisasi);
 // Modul Data Pegawai & Petugas Pelayanan
 const pegawai = require('./apiMysql/pegawai');
 app.use('/api/v1/pegawai', pegawai);
+
+// Modul RUP (Rencana Umum Pengadaan) - Proxy ke inaproc API
+const rup = require('./apiMysql/rup');
+app.use('/api/v1/rup', rup);
 
 // Error Handling Middleware
 function notFound(req, res, next) {

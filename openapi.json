@@ -1,0 +1,798 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Konsel Setara — Hub Interoperabilitas & REST API Dokumentasi",
+    "description": "Dokumentasi Resmi Swagger / OpenAPI 3.0 untuk pertukaran data API seluruh layanan sektoral OPD terintegrasi di lingkungan Pemerintah Kabupaten Konawe Selatan.\n\n### Standar Keamanan & Autentikasi\n- **Bearer Token (`kikensbatara`)**: Digunakan untuk hampir semua endpoint terproteksi.\n- **Firetap Token (`xxx`)**: Digunakan khusus untuk layanan Damkar Firetap.\n- **API Key (`x-api-key`)**: Digunakan untuk push notifikasi antar-server via FCM Gateway.\n- **Public Access**: Endpoint terbuka untuk keterbukaan informasi publik (Berita, JDIH, Satu Data).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Dinas Komunikasi, Informatika dan Persandian Kab. Konawe Selatan",
+      "url": "https://konsel-setara.konaweselatankab.go.id"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://konsel-setara.konaweselatankab.go.id",
+      "description": "Core Server & Gateway (Production)"
+    },
+    {
+      "url": "https://serverperak.konaweselatankab.go.id/api/v1",
+      "description": "Server Layanan PERAK - Ketenagakerjaan (Disnakertrans)"
+    },
+    {
+      "url": "https://server-sippadu.konaweselatankab.go.id/api/v1",
+      "description": "Server Layanan SIPPADU - Perizinan (DPMPTSP)"
+    },
+    {
+      "url": "https://serversapakonsel.konaweselatankab.go.id/api/v1",
+      "description": "Server Layanan SAPA KONSEL - Pengaduan Masyarakat"
+    },
+    {
+      "url": "https://server-firetap.konaweselatankab.go.id",
+      "description": "Server Layanan FIRETAP - Tanggap Darurat Damkar"
+    },
+    {
+      "url": "https://server-erida.konaweselatankab.go.id/api/v1",
+      "description": "Server Layanan e-RIDA - Riset & Inovasi (BRIDA/Bappeda)"
+    },
+    {
+      "url": "https://server.hibah.konaweselatankab.go.id",
+      "description": "Server Layanan BANSOS & Hibah (BPKAD/Kesra)"
+    },
+    {
+      "url": "https://server.jdih.konaweselatankab.go.id/api/v1",
+      "description": "Server Layanan JDIH - Dokumentasi Hukum"
+    },
+    {
+      "url": "https://server-csr.konaweselatankab.go.id",
+      "description": "Server Layanan CSR - Kemitraan Sosial Perusahaan"
+    },
+    {
+      "url": "https://server-web.konaweselatankab.go.id/api/v1",
+      "description": "Server Portal Berita & Humas Pemkab Konsel"
+    },
+    {
+      "url": "http://81.17.99.110:5005/api/public",
+      "description": "Server Satu Data Konsel (Open Data Daerah)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth & SSO",
+      "description": "Autentikasi terpusat, registrasi, OTP email verification, dan Single Sign-On (SSO)"
+    },
+    {
+      "name": "Ketenagakerjaan (PERAK)",
+      "description": "Layanan Kartu Kuning AK.1, master wilayah, kualifikasi pendidikan & biodata pencari kerja (Disnakertrans)"
+    },
+    {
+      "name": "Perizinan (SIPPADU)",
+      "description": "Pelayanan Terpadu Satu Pintu, regulasi Perda/Perkada, dan upload berkas izin (DPMPTSP)"
+    },
+    {
+      "name": "Pengaduan (SAPA KONSEL)",
+      "description": "Aspirasi, pengaduan masyarakat, tombol emergency, dan tracking tindak lanjut"
+    },
+    {
+      "name": "Tanggap Darurat (FIRETAP)",
+      "description": "Pelaporan insiden kebakaran dengan GPS, upload bukti kejadian, dan direktori posko Damkar"
+    },
+    {
+      "name": "Riset & Inovasi (e-RIDA)",
+      "description": "Pengusulan Krenova, perlindungan HAKI, Indeks Inovasi Daerah (IID), dan IPKD"
+    },
+    {
+      "name": "Bantuan Sosial & Hibah",
+      "description": "Pengecekan NIK penerima bansos, rekapitulasi realisasi per sektor dan kecamatan"
+    },
+    {
+      "name": "Dokumentasi Hukum (JDIH)",
+      "description": "Pencarian regulasi Perda, Perbup, SK Bupati, dan unduh naskah peraturan resmi"
+    },
+    {
+      "name": "Kemitraan Perusahaan (CSR)",
+      "description": "Publikasi program CSR perusahaan, daftar mitra resmi, dan lokasi desa sasaran"
+    },
+    {
+      "name": "Portal Berita Resmi",
+      "description": "Sindikasi berita pembangunan Pemkab Konsel, liputan video, dan pengumuman resmi"
+    },
+    {
+      "name": "Satu Data Konsel",
+      "description": "Portal Satu Data terpadu: indikator makro, data sektoral OPD, dan kewilayahan"
+    },
+    {
+      "name": "Survei Kepuasan (SKM)",
+      "description": "Kuisioner SKM, evaluasi mutu pelayanan publik, dan perhitungan Indeks Kepuasan Masyarakat (IKM)"
+    },
+    {
+      "name": "Push Notifikasi (FCM Gateway)",
+      "description": "Gateway notifikasi antar-server OPD ke perangkat Android warga via Firebase Cloud Messaging"
+    }
+  ],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "tags": ["Auth & SSO"],
+        "summary": "Registrasi Pengguna Baru & Kirim OTP",
+        "description": "Mendaftarkan akun masyarakat baru ke database utama dan mengirim 6-digit kode OTP ke email pendaftar via SMTP TLS 465.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password", "nama", "email", "hp"],
+                "properties": {
+                  "username": { "type": "string", "example": "budi_konsel" },
+                  "password": { "type": "string", "format": "password", "example": "AmanKonsel2026!" },
+                  "nama": { "type": "string", "example": "Budi Santoso" },
+                  "email": { "type": "string", "format": "email", "example": "budi@gmail.com" },
+                  "hp": { "type": "string", "example": "081234567890" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pendaftaran berhasil, OTP dikirimkan ke email",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Kode OTP pendaftaran telah dikirim ke email budi@gmail.com"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal (Username sudah terpakai atau format data salah)"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth & SSO"],
+        "summary": "Login Pengguna & Penerbitan Token JWT",
+        "description": "Memvalidasi kredensial pengguna dan menerbitkan JWT token yang digunakan untuk otorisasi seluruh layanan sektoral.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string", "example": "budi_konsel" },
+                  "password": { "type": "string", "format": "password", "example": "AmanKonsel2026!" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil, mengembalikan token JWT",
+            "content": {
+              "application/json": {
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "user": {
+                    "id": "usr_99120",
+                    "username": "budi_konsel",
+                    "nama": "Budi Santoso",
+                    "email": "budi@gmail.com",
+                    "hp": "081234567890"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Kombinasi username atau password salah"
+          }
+        }
+      }
+    },
+    "/api/v1/checkAuth": {
+      "get": {
+        "tags": ["Auth & SSO"],
+        "summary": "Validasi Status Token Sesi Aktif",
+        "security": [{ "KikensbataraAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Token valid dan sesi aktif",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "user": {
+                    "id": "usr_99120",
+                    "username": "budi_konsel"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token kedaluwarsa atau tidak terotorisasi"
+          }
+        }
+      }
+    },
+    "/api/v1/m_kecamatan/list": {
+      "post": {
+        "tags": ["Ketenagakerjaan (PERAK)"],
+        "summary": "Daftar Seluruh Kecamatan di Kab. Konawe Selatan",
+        "security": [{ "KikensbataraAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Berhasil mengambil master kecamatan",
+            "content": {
+              "application/json": {
+                "example": [
+                  { "id": 1, "nama_kecamatan": "Andoolo" },
+                  { "id": 2, "nama_kecamatan": "Kolono" },
+                  { "id": 3, "nama_kecamatan": "Moramo" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/m_des_kel/list": {
+      "post": {
+        "tags": ["Ketenagakerjaan (PERAK)"],
+        "summary": "Daftar Desa / Kelurahan per Kecamatan",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["kecamatan_id"],
+                "properties": {
+                  "kecamatan_id": { "type": "integer", "example": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daftar desa/kelurahan berhasil diambil",
+            "content": {
+              "application/json": {
+                "example": [
+                  { "id": 101, "kecamatan_id": 1, "nama_des_kel": "Alenggeo" },
+                  { "id": 102, "kecamatan_id": 1, "nama_des_kel": "Andoolo Utama" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/keterangan_umum/addData": {
+      "post": {
+        "tags": ["Ketenagakerjaan (PERAK)"],
+        "summary": "Pendaftaran Biodata Pencari Kerja (Kartu Kuning AK.1)",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nik", "nama_lengkap", "kecamatan_id", "des_kel_id"],
+                "properties": {
+                  "nik": { "type": "string", "example": "7405011203980001" },
+                  "nama_lengkap": { "type": "string", "example": "Ahmad Fauzi" },
+                  "tmp_lahir": { "type": "string", "example": "Andoolo" },
+                  "tgl_lahir": { "type": "string", "format": "date", "example": "1998-03-12" },
+                  "jenis_kelamin": { "type": "string", "enum": ["L", "P"], "example": "L" },
+                  "kecamatan_id": { "type": "integer", "example": 1 },
+                  "des_kel_id": { "type": "integer", "example": 102 },
+                  "alamat": { "type": "string", "example": "Jl. Poros Andoolo No. 12" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Biodata berhasil disimpan",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Biodata pencari kerja berhasil didaftarkan",
+                  "id": 4821
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_peraturan/perda": {
+      "get": {
+        "tags": ["Perizinan (SIPPADU)"],
+        "summary": "Daftar Peraturan Daerah Bidang Perizinan & Investasi",
+        "responses": {
+          "200": {
+            "description": "Katalog regulasi Perda berhasil diambil",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 12,
+                    "nomor": "03",
+                    "tahun": "2024",
+                    "judul": "Penyelenggaraan Perizinan Berusaha di Daerah",
+                    "file_url": "https://server-sippadu.konaweselatankab.go.id/uploads/perda_03_2024.pdf"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_laporan/addData": {
+      "post": {
+        "tags": ["Perizinan (SIPPADU)"],
+        "summary": "Pengajuan Permohonan / Laporan Izin Baru",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["jenis_izin", "uraian"],
+                "properties": {
+                  "jenis_izin": { "type": "string", "example": "Izin Praktik Nakes" },
+                  "uraian": { "type": "string", "example": "Permohonan perpanjangan SIP Perawat di RSUD Konawe Selatan" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Laporan izin berhasil diserahkan",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Permohonan berhasil disubmit",
+                  "kode_tracking": "IZN-2026-9901"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_beranda/infografis": {
+      "get": {
+        "tags": ["Pengaduan (SAPA KONSEL)"],
+        "summary": "Infografis & Statistik Aduan Publik Terkini",
+        "responses": {
+          "200": {
+            "description": "Statistik laporan berhasil dimuat",
+            "content": {
+              "application/json": {
+                "example": {
+                  "total_laporan": 1420,
+                  "selesai": 1380,
+                  "diproses": 40
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_laporan/uploadEmergency": {
+      "post": {
+        "tags": ["Pengaduan (SAPA KONSEL)"],
+        "summary": "Pengaduan Darurat Cepat (SOS Report)",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "judul": { "type": "string", "example": "Jembatan Ambles Tergerus Banjir" },
+                  "lokasi": { "type": "string", "example": "Kecamatan Kolono Timur" },
+                  "foto": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Laporan darurat berhasil disiarkan"
+          }
+        }
+      }
+    },
+    "/api/v1/server_kasus/addMobile": {
+      "post": {
+        "tags": ["Tanggap Darurat (FIRETAP)"],
+        "summary": "Kirim Sinyal Kejadian Kebakaran dengan Titik Koordinat GPS",
+        "security": [{ "FiretapAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["latitude", "longitude", "alamat_kejadian"],
+                "properties": {
+                  "latitude": { "type": "number", "example": -4.241512 },
+                  "longitude": { "type": "number", "example": 122.389121 },
+                  "alamat_kejadian": { "type": "string", "example": "Desa Motaha, Kec. Angata" },
+                  "deskripsi": { "type": "string", "example": "Kebakaran alang-alang mendekati perkampungan" },
+                  "pelapor_hp": { "type": "string", "example": "081244556677" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Kasus kebakaran tersimpan dan alarm posko terpicu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "incident_id": "DAMKAR-2026-089",
+                  "posko_terdekat": "Posko Sektor Angata"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_manis/krenova": {
+      "post": {
+        "tags": ["Riset & Inovasi (e-RIDA)"],
+        "summary": "Pendaftaran Proposal Karya Inovasi Daerah (Krenova)",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["judul_inovasi", "kategori", "nama_inovator"],
+                "properties": {
+                  "judul_inovasi": { "type": "string", "example": "Alat Pemipil Jagung Bertenaga Surya" },
+                  "kategori": { "type": "string", "enum": ["Masyarakat", "ASN / OPD", "Pelajar"], "example": "Masyarakat" },
+                  "nama_inovator": { "type": "string", "example": "Kelompok Pemuda Tani Konda" },
+                  "abstrak": { "type": "string", "example": "Inovasi mekanisasi pascapanen jagung hemat energi..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proposal berhasil disubmit",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success",
+                  "message": "Proposal Krenova berhasil disubmit untuk dinilai",
+                  "krenova_id": 94
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/v1/dashboard/searchNik": {
+      "post": {
+        "tags": ["Bantuan Sosial & Hibah"],
+        "summary": "Pengecekan NIK KTP Penerima Manfaat Bansos & Hibah",
+        "security": [{ "KikensbataraAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nik"],
+                "properties": {
+                  "nik": { "type": "string", "example": "7405011002950001" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data penerima bansos ditemukan",
+            "content": {
+              "application/json": {
+                "example": {
+                  "ditemukan": true,
+                  "data": {
+                    "nama": "Sitti Nurhaliza",
+                    "program": "Bantuan Bibit Perkebunan 2026",
+                    "status_penyaluran": "Telah Disalurkan",
+                    "tanggal": "2026-08-15"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish_produk_hukum/views": {
+      "post": {
+        "tags": ["Dokumentasi Hukum (JDIH)"],
+        "summary": "Pencarian Katalog Produk Hukum (Perda, Perbup, SK)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "search": { "type": "string", "example": "Pajak Daerah" },
+                  "tahun": { "type": "string", "example": "2025" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daftar produk hukum ditemukan",
+            "content": {
+              "application/json": {
+                "example": {
+                  "rows": [
+                    {
+                      "id": 142,
+                      "tipe": "Peraturan Daerah",
+                      "nomor": "1",
+                      "tahun": "2025",
+                      "tentang": "Pajak Daerah dan Retribusi Daerah",
+                      "status_berlaku": "Berlaku"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publish/homeCSR/homeCSRview": {
+      "post": {
+        "tags": ["Kemitraan Perusahaan (CSR)"],
+        "summary": "Daftar Realisasi Program Kegiatan CSR Perusahaan",
+        "security": [{ "KikensbataraAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Daftar kegiatan CSR berhasil dimuat",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 67,
+                    "nama_perusahaan": "PT. Konsel Mineral Mandiri",
+                    "program": "Pemberian Beasiswa Santri",
+                    "anggaran_realisasi": 150000000,
+                    "lokasi": "Kecamatan Kolono"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web_publish_berita/view": {
+      "post": {
+        "tags": ["Portal Berita Resmi"],
+        "summary": "Feed Berita Resmi Pembangunan Daerah Pemkab Konsel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page": { "type": "integer", "example": 1 },
+                  "limit": { "type": "integer", "example": 6 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Koleksi berita terbaru berhasil dimuat",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 912,
+                    "judul": "Bupati Konawe Selatan Resmikan Sentra UMKM Terpadu",
+                    "kategori": "Perekonomian",
+                    "gambar_utama": "https://server-web.konaweselatankab.go.id/uploads/berita_912.jpg",
+                    "created_at": "2026-09-21T09:00:00.000Z"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/dashboard": {
+      "get": {
+        "tags": ["Satu Data Konsel"],
+        "summary": "Ringkasan Indikator Makro Ekonomi & Statistik OPD",
+        "parameters": [
+          {
+            "name": "tahun",
+            "in": "query",
+            "schema": { "type": "integer", "example": 2026 },
+            "description": "Filter tahun capaian indikator"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indikator makro daerah berhasil diambil",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success",
+                  "data": {
+                    "ipm": 71.45,
+                    "pertumbuhan_ekonomi": 5.82,
+                    "kemiskinan": 9.12,
+                    "total_opd_produsen": 34
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/skm/getDashboard": {
+      "get": {
+        "tags": ["Survei Kepuasan (SKM)"],
+        "summary": "Dashboard Skor IKM (Indeks Kepuasan Masyarakat)",
+        "responses": {
+          "200": {
+            "description": "Ringkasan skor kepuasan layanan publik",
+            "content": {
+              "application/json": {
+                "example": {
+                  "skorKepuasan": 4.6,
+                  "totalResponden": 3420,
+                  "totalLayanan": 12,
+                  "tren": [
+                    { "bulan": "Apr", "skor": 4.4 },
+                    { "bulan": "Mei", "skor": 4.5 },
+                    { "bulan": "Jun", "skor": 4.6 }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fcm/save-token": {
+      "post": {
+        "tags": ["Push Notifikasi (FCM Gateway)"],
+        "summary": "Pendaftaran Device Token Mobile Android",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId", "token"],
+                "properties": {
+                  "userId": { "type": "string", "example": "usr_99120" },
+                  "token": { "type": "string", "example": "fcm_token_device_android_xyz..." },
+                  "device": { "type": "string", "example": "android" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token perangkat berhasil disimpan"
+          }
+        }
+      }
+    },
+    "/notification/send": {
+      "post": {
+        "tags": ["Push Notifikasi (FCM Gateway)"],
+        "summary": "Kirim Notifikasi Push Lintas Server OPD ke Warga",
+        "description": "Dipanggil oleh server sektoral dinas untuk mengirim notifikasi status izin, tanggap darurat, atau bansos langsung ke layar ponsel warga.",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId", "title", "body"],
+                "properties": {
+                  "userId": { "type": "string", "example": "usr_99120" },
+                  "title": { "type": "string", "example": "Status Izin Terbit" },
+                  "body": { "type": "string", "example": "Permohonan Izin Usaha Anda telah selesai diproses oleh DPMPTSP." },
+                  "data": {
+                    "type": "object",
+                    "example": { "module": "SIPPADU", "permohonanId": "IZIN-7781" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifikasi terkirim ke FCM Google Server",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "tokensCount": 1,
+                  "response": { "name": "projects/konselsetara/messages/..." }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Akses ditolak: x-api-key tidak valid"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "KikensbataraAuth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Format: `kikensbatara <JWT_TOKEN>`"
+      },
+      "FiretapAuth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Format: `xxx <TOKEN>`"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header",
+        "description": "Secret key untuk otorisasi server-to-server gateway notifikasi"
+      }
+    }
+  }
+}
