@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Soft Outer Glow / Background Circle -->
+  <circle cx="40" cy="40" r="38" fill="#E8F8F0" />
+
+  <!-- Speech Bubble Top Right -->
+  <path d="M26 18C26 14.6863 28.6863 12 32 12H52C55.3137 12 58 14.6863 58 18V28C58 31.3137 55.3137 34 52 34H44L36 39V34H32C28.6863 34 26 31.3137 26 28V18Z" fill="#10B981" />
+  
+  <!-- Dots in Speech Bubble -->
+  <circle cx="36" cy="23" r="2.5" fill="#FFFFFF" />
+  <circle cx="42" cy="23" r="2.5" fill="#FFFFFF" />
+  <circle cx="48" cy="23" r="2.5" fill="#FFFFFF" />
+
+  <!-- Center Person (Main) -->
+  <circle cx="40" cy="45" r="7" fill="#047857" />
+  <path d="M30 65C30 58.3726 34.4772 54 40 54C45.5228 54 50 58.3726 50 65H30Z" fill="#047857" />
+
+  <!-- Left Person -->
+  <circle cx="25" cy="48" r="6" fill="#059669" />
+  <path d="M16 65C16 59.4772 20.0294 56 25 56C28.32 56 31.2 57.56 32.8 60C31.7 61.4 31.1 63.1 31 65H16Z" fill="#059669" />
+
+  <!-- Right Person -->
+  <circle cx="55" cy="48" r="6" fill="#059669" />
+  <path d="M64 65C64 59.4772 59.9706 56 55 56C51.68 56 48.8 57.56 47.2 60C48.3 61.4 48.9 63.1 49 65H64Z" fill="#059669" />
+</svg>

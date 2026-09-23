@@ -348,6 +348,7 @@ export default {
       { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
       { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
       { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
+      { label: 'RUP', img: 'img/rup/rup-icon.svg', route: '/rup' },
     ])
 
     const fetchDynamicMenu = async () => {

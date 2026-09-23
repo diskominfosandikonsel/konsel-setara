@@ -614,6 +614,27 @@ const routes = [
         component: () => import('pages/Data/DetailOpd.vue'),
         meta: { showBottomNav: false, requiresAuth: false }
       },
+      // RUP (Rencana Umum Pengadaan)
+      {
+        path: 'rup',
+        component: () => import('pages/Rup/IndexPage.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'rup_dashboard',
+        component: () => import('pages/Rup/IndexPage.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'rup/daftar',
+        component: () => import('pages/Rup/DaftarRup.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'rup/konsultasi',
+        component: () => import('pages/Rup/Konsultasi.vue'),
+        meta: { showBottomNav: false }
+      },
       // ADMIN SECTION
       {
         path: 'admin/slider',
