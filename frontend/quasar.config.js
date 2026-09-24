@@ -65,6 +65,13 @@ export default defineConfig((/* ctx */) => {
     devServer: {
       // https: true,
       open: true, // opens browser window automatically
+      proxy: {
+        '/inaproc-proxy': {
+          target: 'https://data.inaproc.id',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/inaproc-proxy/, '')
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
