@@ -7,9 +7,12 @@
         <q-toolbar-title class="text-subtitle1 text-weight-bold">
           Daftar RUP Konsel
         </q-toolbar-title>
+        <q-btn flat round dense icon="refresh" :loading="isLoading" @click="refreshPage">
+          <q-tooltip>Refresh Data RUP</q-tooltip>
+        </q-btn>
         <q-btn flat round dense icon="filter_alt" @click="showFilterDialog = true">
           <q-badge
-            v-if="selectedTahun !== '2025' || selectedOpdFilter !== 'Semua OPD'"
+            v-if="isFilterActive"
             color="amber-7"
             floating
             rounded
@@ -24,7 +27,7 @@
           dense
           outlined
           bg-color="white"
-          placeholder="Cari paket (cth: Jalan, Puskesmas, Obat)..."
+          placeholder="Cari nama paket atau kode RUP (cth: 58616940)..."
           class="search-input"
           clearable
           @update:model-value="onSearchInput"
@@ -48,7 +51,7 @@
               <div class="row items-center q-gutter-x-xs">
                 <span class="pulse-indicator"></span>
                 <span class="text-caption text-weight-bold uppercase tracking-wider text-blue-1">
-                  {{ dataSource === 'inaproc-live' ? 'DATA LIVE INAPROC' : 'DATA RUP LOKAL' }}
+                  DATA LIVE INAPROC
                 </span>
               </div>
               <q-badge color="white" text-color="primary" class="text-weight-bold q-px-sm">
@@ -73,91 +76,8 @@
           </q-card-section>
         </q-card>
 
-        <!-- Filter Cara Pengadaan (Penyedia / Swakelola) -->
-        <div class="text-caption text-grey-6 q-mb-xs text-weight-medium">Cara Pengadaan</div>
-        <div class="metode-scroll-container q-mb-sm">
-          <div class="row no-wrap q-gutter-xs">
-            <q-chip
-              v-for="cara in caraPengadaanList"
-              :key="cara.kode"
-              clickable
-              :outline="selectedCara !== cara.kode"
-              :color="cara.kode === 'Penyedia' ? 'indigo-7' : 'teal-7'"
-              text-color="white"
-              @click="onSelectCara(cara.kode)"
-              size="sm"
-              class="filter-chip"
-            >
-              {{ cara.nama }}
-            </q-chip>
-          </div>
-        </div>
 
-        <!-- Filter Metode Pemilihan (hanya untuk Penyedia) -->
-        <template v-if="selectedCara !== 'Swakelola'">
-          <div class="text-caption text-grey-6 q-mb-xs text-weight-medium">Metode Pemilihan</div>
-          <div class="metode-scroll-container q-mb-sm">
-            <div class="row no-wrap q-gutter-xs">
-              <q-chip
-                clickable
-                :outline="selectedMetode !== 'Semua'"
-                color="primary"
-                text-color="white"
-                @click="onSelectMetode('Semua')"
-                size="sm"
-                class="filter-chip"
-              >
-                Semua
-              </q-chip>
-              <q-chip
-                v-for="metode in metodeList"
-                :key="metode"
-                clickable
-                :outline="selectedMetode !== metode"
-                color="primary"
-                text-color="white"
-                @click="onSelectMetode(metode)"
-                size="sm"
-                class="filter-chip"
-              >
-                {{ metode }}
-              </q-chip>
-            </div>
-          </div>
-        </template>
-
-        <!-- Filter Jenis Pengadaan -->
-        <div class="text-caption text-grey-6 q-mb-xs text-weight-medium">Jenis Pengadaan</div>
-        <div class="metode-scroll-container q-mb-md">
-          <div class="row no-wrap q-gutter-xs">
-            <q-chip
-              clickable
-              :outline="selectedJenis !== 'Semua'"
-              color="grey-7"
-              text-color="white"
-              @click="onSelectJenis('Semua')"
-              size="sm"
-              class="filter-chip"
-            >
-              Semua Jenis
-            </q-chip>
-            <q-chip
-              v-for="jenis in jenisList"
-              :key="jenis.kode"
-              clickable
-              :outline="selectedJenis !== jenis.kode"
-              :color="getJenisBadgeColor(jenis.kode)"
-              text-color="white"
-              @click="onSelectJenis(jenis.kode)"
-              size="sm"
-              class="filter-chip"
-            >
-              {{ jenis.nama }}
-            </q-chip>
-          </div>
-        </div>
-
-        <!-- Info Hasil Filter -->
+        <!-- Info Hasil Filter + Active Filter Badges -->
         <div class="row justify-between items-center q-mb-sm text-caption text-grey-7">
           <span>
             Menampilkan <strong>{{ allPaket.length }}</strong> dari
@@ -173,8 +93,16 @@
             <q-badge v-if="selectedJenis !== 'Semua'" color="orange-2" text-color="orange-9" class="text-weight-medium">
               {{ jenisList.find(j => j.kode === selectedJenis)?.nama || selectedJenis }}
             </q-badge>
+            <q-btn
+              v-if="selectedCara !== 'Semua' || selectedMetode !== 'Semua' || selectedJenis !== 'Semua'"
+              flat round dense size="xs" icon="close" color="grey-7"
+              @click="resetFilter"
+            >
+              <q-tooltip>Reset filter</q-tooltip>
+            </q-btn>
           </div>
         </div>
+
 
         <!-- Loading State Skeletons -->
         <div v-if="isLoading" class="q-gutter-y-sm">
@@ -193,10 +121,18 @@
 
         <!-- Error State -->
         <div v-else-if="loadError" class="text-center q-pa-xl">
-          <q-icon name="cloud_off" size="56px" color="orange-7" />
-          <div class="text-subtitle1 text-weight-bold q-mt-sm text-grey-9">Gagal Memuat Data RUP</div>
+          <q-icon name="cloud_off" size="56px" color="negative" />
+          <div class="text-subtitle1 text-weight-bold q-mt-sm text-grey-9">Data RUP Tidak Dapat Dimuat</div>
           <div class="text-caption text-grey-6 q-mb-md">{{ loadError }}</div>
-          <q-btn unelevated color="primary" label="Coba Lagi" icon="refresh" @click="fetchData(1, false)" />
+          <q-btn
+            unelevated
+            color="primary"
+            label="Refresh Halaman"
+            icon="refresh"
+            class="q-px-lg shadow-1"
+            :loading="isLoading"
+            @click="refreshPage"
+          />
         </div>
 
         <!-- List of RUP Packages -->
@@ -210,7 +146,7 @@
             <q-card-section class="q-pa-md">
               <!-- Top Row: Cara + Metode Badge + PDN Badge + Pagu -->
               <div class="row justify-between items-start no-wrap q-mb-xs">
-                <div class="row items-center q-gutter-x-xs">
+                <div class="row items-center q-gutter-x-xs no-wrap ellipsis badge-row">
                   <q-badge
                     :color="item.cara_pengadaan === 'Swakelola' ? 'teal-7' : getMetodeBadgeColor(item.metode)"
                     class="q-px-sm q-py-xs text-weight-bold metode-badge"
@@ -221,13 +157,13 @@
                     v-if="item.jenis"
                     :color="getJenisBadgeColor(item.jenis)"
                     outline
-                    class="text-weight-medium jenis-badge"
+                    class="text-weight-medium jenis-badge ellipsis"
                   >
                     {{ item.jenis }}
                   </q-badge>
                 </div>
-                <div class="text-right">
-                  <span class="text-subtitle2 text-weight-bolder text-primary">
+                <div class="text-right harga-container">
+                  <span class="text-subtitle2 text-weight-bolder text-primary no-wrap harga-text">
                     {{ formatRupiah(item.pagu) }}
                   </span>
                 </div>
@@ -275,7 +211,9 @@
         <div v-else class="text-center q-pa-xl text-grey-6">
           <q-icon name="search_off" size="64px" color="grey-4" />
           <div class="text-subtitle2 text-weight-bold q-mt-sm">Paket Tidak Ditemukan</div>
-          <div class="text-caption q-mb-md">Coba ubah kata kunci atau ganti filter kategori.</div>
+          <div class="text-caption q-mb-md">
+            {{ searchQuery ? `Tidak ditemukan paket atau kode RUP "${searchQuery}" pada T.A. ${selectedTahun}.` : 'Coba ubah kata kunci atau ganti filter kategori.' }}
+          </div>
           <q-btn flat color="primary" label="Reset Pencarian" @click="resetFilter" />
         </div>
       </div>
@@ -385,7 +323,7 @@
         <q-card-section class="q-gutter-y-md q-pt-md">
           <q-select
             v-model="tempTahun"
-            :options="['2026', '2025', '2024', '2023', '2022']"
+            :options="opsiTahun"
             label="Tahun Anggaran"
             outlined
             dense
@@ -444,7 +382,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { getDaftarRup, getRupSummary } from 'src/api/apiRup'
 
@@ -453,6 +391,16 @@ export default {
   setup() {
     const $q = useQuasar()
 
+    const currentYear = String(new Date().getFullYear())
+    const tahunSekarangNum = new Date().getFullYear()
+    const opsiTahun = [
+      String(tahunSekarangNum),
+      String(tahunSekarangNum - 1),
+      String(tahunSekarangNum - 2),
+      String(tahunSekarangNum - 3),
+      String(tahunSekarangNum - 4)
+    ]
+
     const searchQuery = ref('')
     const isSearching = ref(false)
     let searchDebounceTimer = null
@@ -460,13 +408,21 @@ export default {
     const selectedCara = ref('Semua')   // Semua | Penyedia | Swakelola
     const selectedMetode = ref('Semua') // Semua | Tender | Pengadaan Langsung | E-Purchasing | Penunjukan Langsung
     const selectedJenis = ref('Semua')  // Semua | Barang | Jasa Konsultansi | Jasa Lainnya | Pekerjaan Konstruksi
-    const selectedTahun = ref('2025')
+    const selectedTahun = ref(currentYear)
     const tempCara = ref('Semua')
-    const tempTahun = ref('2025')
+    const tempTahun = ref(currentYear)
     const tempMetode = ref('Semua')
     const tempJenis = ref('Semua')
     const selectedOpdFilter = ref('Semua OPD')
     const tempOpdFilter = ref('Semua OPD')
+
+    const isFilterActive = computed(() => {
+      return selectedTahun.value !== currentYear ||
+        selectedOpdFilter.value !== 'Semua OPD' ||
+        selectedCara.value !== 'Semua' ||
+        selectedMetode.value !== 'Semua' ||
+        selectedJenis.value !== 'Semua'
+    })
 
     const showFilterDialog = ref(false)
     const detailDialog = ref(false)
@@ -482,9 +438,10 @@ export default {
     const currentPage = ref(1)
     const hasMore = ref(false)
 
+    // Nilai default 0 — tidak menggunakan data dummy
     const summaryData = ref({
-      total_rup: 4656,
-      total_pagu: 644586512551
+      total_rup: 0,
+      total_pagu: 0
     })
 
     const opdList = ref(['Semua OPD'])
@@ -548,10 +505,52 @@ export default {
           currentPage.value = page
           hasMore.value = allPaket.value.length < totalItems.value
         } else {
-          loadError.value = result.error || 'Gagal memuat data RUP'
+          allPaket.value = []
+          totalItems.value = 0
+          const errMsg = result.error || 'Gagal memuat data RUP dari INAPROC. Periksa koneksi internet Anda.'
+          loadError.value = errMsg
+          $q.notify({
+            type: 'negative',
+            message: errMsg,
+            caption: 'Ketuk tombol Refresh untuk mencoba memuat kembali',
+            position: 'top',
+            icon: 'wifi_off',
+            timeout: 6000,
+            actions: [
+              {
+                label: 'Refresh',
+                color: 'white',
+                class: 'text-weight-bold',
+                handler: () => {
+                  refreshPage()
+                }
+              }
+            ]
+          })
         }
       } catch (err) {
-        loadError.value = err.message || 'Terjadi kesalahan saat memuat data'
+        allPaket.value = []
+        totalItems.value = 0
+        const errMsg = err.message || 'Terjadi kesalahan saat memuat data RUP'
+        loadError.value = errMsg
+        $q.notify({
+          type: 'negative',
+          message: errMsg,
+          caption: 'Ketuk tombol Refresh untuk mencoba memuat kembali',
+          position: 'top',
+          icon: 'error_outline',
+          timeout: 6000,
+          actions: [
+            {
+              label: 'Refresh',
+              color: 'white',
+              class: 'text-weight-bold',
+              handler: () => {
+                refreshPage()
+              }
+            }
+          ]
+        })
       } finally {
         isLoading.value = false
         isLoadingMore.value = false
@@ -559,16 +558,35 @@ export default {
       }
     }
 
+    const refreshPage = async () => {
+      loadError.value = ''
+      await Promise.all([
+        fetchData(1, false),
+        loadSummary()
+      ])
+      if (!loadError.value) {
+        $q.notify({
+          type: 'positive',
+          message: 'Data RUP berhasil dimuat ulang',
+          position: 'top',
+          timeout: 1500
+        })
+      }
+    }
+
     const loadSummary = async () => {
       try {
         const res = await getRupSummary(selectedTahun.value)
-        if (res.success) {
+        if (res && res.success) {
           summaryData.value = {
             total_rup: res.total_rup || 0,
             total_pagu: res.total_pagu || 0
           }
+        } else {
+          summaryData.value = { total_rup: 0, total_pagu: 0 }
         }
       } catch (e) {
+        summaryData.value = { total_rup: 0, total_pagu: 0 }
         console.warn('Gagal memuat summary RUP:', e)
       }
     }
@@ -629,8 +647,8 @@ export default {
     }
 
     const resetFilter = () => {
-      selectedTahun.value = '2025'
-      tempTahun.value = '2025'
+      selectedTahun.value = currentYear
+      tempTahun.value = currentYear
       selectedCara.value = 'Semua'
       tempCara.value = 'Semua'
       selectedMetode.value = 'Semua'
@@ -671,25 +689,30 @@ export default {
       return 'grey-7'
     }
 
+    // Menggunakan non-breaking space (\u00a0) agar nominal angka dan satuan (Jt, M) tidak pernah terpisah baris
     const formatRupiah = (val) => {
-      if (!val) return 'Rp 0'
+      if (!val) return 'Rp\u00a00'
       const n = Number(val)
-      if (n >= 1_000_000_000) return `Rp ${(n / 1_000_000_000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} M`
-      if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} Jt`
-      return 'Rp ' + n.toLocaleString('id-ID')
+      if (n >= 1_000_000_000) {
+        return `Rp\u00a0${(n / 1_000_000_000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}\u00a0M`
+      }
+      if (n >= 1_000_000) {
+        return `Rp\u00a0${(n / 1_000_000).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 1 })}\u00a0Jt`
+      }
+      return 'Rp\u00a0' + n.toLocaleString('id-ID')
     }
 
     const formatRupiahSingkat = (val) => {
-      if (!val) return 'Rp 0'
+      if (!val) return 'Rp\u00a00'
       const n = Number(val)
-      if (n >= 1_000_000_000_000) return `Rp ${(n / 1_000_000_000_000).toFixed(2)} T`
-      if (n >= 1_000_000_000) return `Rp ${(n / 1_000_000_000).toFixed(1)} Miliar`
-      return 'Rp ' + n.toLocaleString('id-ID')
+      if (n >= 1_000_000_000_000) return `Rp\u00a0${(n / 1_000_000_000_000).toFixed(2)}\u00a0T`
+      if (n >= 1_000_000_000) return `Rp\u00a0${(n / 1_000_000_000).toFixed(1)}\u00a0Miliar`
+      return 'Rp\u00a0' + n.toLocaleString('id-ID')
     }
 
     const formatRupiahLengkap = (val) => {
-      if (!val) return 'Rp 0'
-      return 'Rp ' + Number(val).toLocaleString('id-ID')
+      if (!val) return 'Rp\u00a00'
+      return 'Rp\u00a0' + Number(val).toLocaleString('id-ID')
     }
 
     const openDetail = (item) => {
@@ -716,7 +739,8 @@ export default {
     }
 
     onMounted(() => {
-      tempTahun.value = selectedTahun.value
+      selectedTahun.value = currentYear
+      tempTahun.value = currentYear
       tempOpdFilter.value = selectedOpdFilter.value
       fetchData(1, false)
       loadSummary()
@@ -735,6 +759,8 @@ export default {
       tempJenis,
       selectedOpdFilter,
       tempOpdFilter,
+      isFilterActive,
+      opsiTahun,
       caraPengadaanList,
       metodeList,
       jenisList,
@@ -759,6 +785,7 @@ export default {
       copyKodeRup,
       openSirup,
       resetFilter,
+      refreshPage,
       fetchData,
       loadMore,
       onPullRefresh,
@@ -869,5 +896,28 @@ export default {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
+}
+
+.badge-row {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.harga-container {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  margin-left: 8px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.harga-text {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  display: inline-block !important;
+  letter-spacing: -0.2px;
 }
 </style>

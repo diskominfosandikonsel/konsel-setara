@@ -5,60 +5,6 @@ const BACKEND_BASE = '/api/v1/rup'
 const INSTANSI_KONSEL = 'D438'
 const JENIS_KLPD = '4'
 
-// Fallback data lokal jika internet offline total
-const DUMMY_DATA_2025 = [
-  {
-    kode_rup: '58301928', nama_paket: 'Pengadaan Perangkat Server dan Penyimpanan Data Center SPBE',
-    opd: 'Dinas Komunikasi, Informatika dan Persandian', metode: 'E-Purchasing',
-    pagu: 450000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Pengadaan Barang', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301933', nama_paket: 'Peningkatan Jalan Poros Motaha - Alenggeo (Hotmix)',
-    opd: 'Dinas Pekerjaan Umum dan Penataan Ruang', metode: 'Tender',
-    pagu: 3200000000, sumber_dana: 'DAK Fisik 2025', tahun: '2025', jenis: 'Pekerjaan Konstruksi', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301940', nama_paket: 'Pengadaan Obat-obatan dan Perbekalan Kesehatan Esensial Puskesmas',
-    opd: 'Dinas Kesehatan', metode: 'E-Purchasing',
-    pagu: 850000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Pengadaan Barang', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301955', nama_paket: 'Rehabilitasi Ruang Kelas SDN 3 Kolono',
-    opd: 'Dinas Pendidikan dan Kebudayaan', metode: 'Pengadaan Langsung',
-    pagu: 180000000, sumber_dana: 'DAU 2025', tahun: '2025', jenis: 'Pekerjaan Konstruksi', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301962', nama_paket: 'Pembangunan Jembatan Gantung Penghubung Antar Desa Landono',
-    opd: 'Dinas Pekerjaan Umum dan Penataan Ruang', metode: 'Tender',
-    pagu: 1450000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Pekerjaan Konstruksi', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301977', nama_paket: 'Pemeliharaan Rutin Sarana Jaringan Fiber Optik Perkantoran',
-    opd: 'Dinas Komunikasi, Informatika dan Persandian', metode: 'Swakelola',
-    pagu: 75000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Jasa Lainnya', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301985', nama_paket: 'Pengadaan Kendaraan Dinas Operasional Roda 4',
-    opd: 'Sekretariat Daerah', metode: 'E-Purchasing',
-    pagu: 380000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Pengadaan Barang', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58301992', nama_paket: 'Pembangunan Gedung Puskesmas Baito',
-    opd: 'Dinas Kesehatan', metode: 'Tender',
-    pagu: 2100000000, sumber_dana: 'DAK Fisik 2025', tahun: '2025', jenis: 'Pekerjaan Konstruksi', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58302010', nama_paket: 'Pengadaan Buku Teks Pelajaran SD dan SMP',
-    opd: 'Dinas Pendidikan dan Kebudayaan', metode: 'E-Purchasing',
-    pagu: 320000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Pengadaan Barang', pdn: 'Ya'
-  },
-  {
-    kode_rup: '58302025', nama_paket: 'Pelatihan Kapasitas Aparatur Desa',
-    opd: 'Dinas Pemberdayaan Masyarakat dan Desa', metode: 'Swakelola',
-    pagu: 125000000, sumber_dana: 'APBD', tahun: '2025', jenis: 'Jasa Lainnya', pdn: 'Ya'
-  }
-]
-
 /**
  * Buat signature validasi untuk data.inaproc.id
  */
@@ -79,7 +25,7 @@ async function fetchDirectInaproc(path, params = {}) {
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const isCapacitor = !!window.Capacitor?.isNativePlatform?.()
 
-  // Di dev web gunakan proxy Vite, di Capacitor Android bisa langsung
+  // Di dev web gunakan proxy Vite, di Capacitor Android langsung ke INAPROC
   const baseUrl = (isDev && !isCapacitor)
     ? '/inaproc-proxy/dashboard-api/rup'
     : 'https://data.inaproc.id/dashboard-api/rup'
@@ -96,11 +42,13 @@ async function fetchDirectInaproc(path, params = {}) {
 /**
  * Ambil ringkasan pagu dan jumlah paket RUP
  */
-export async function getRupSummary(tahun = '2025') {
+export async function getRupSummary(tahun) {
+  const currentYear = tahun || String(new Date().getFullYear())
+
   // 1. Coba backend server
   try {
     const res = await api.get(`${BACKEND_BASE}/summary`, {
-      params: { tahun },
+      params: { tahun: currentYear },
       timeout: 5000
     })
     if (res.data?.success && res.data.summary) {
@@ -112,13 +60,13 @@ export async function getRupSummary(tahun = '2025') {
       }
     }
   } catch {
-    // continue to direct web
+    // lanjut ke direct web
   }
 
   // 2. Coba direct web INAPROC
   try {
     const res = await fetchDirectInaproc('summary', {
-      tahun: String(tahun),
+      tahun: currentYear,
       jenis_klpd: JENIS_KLPD,
       instansi: INSTANSI_KONSEL
     })
@@ -131,23 +79,18 @@ export async function getRupSummary(tahun = '2025') {
       }
     }
   } catch {
-    // continue to fallback
+    // gagal
   }
 
-  // Fallback summary
-  return {
-    success: true,
-    source: 'lokal',
-    total_rup: DUMMY_DATA_2025.length,
-    total_pagu: DUMMY_DATA_2025.reduce((acc, curr) => acc + (curr.pagu || 0), 0)
-  }
+  // Tidak ada data
+  return { success: false, error: 'Tidak dapat terhubung ke data INAPROC' }
 }
 
 /**
  * Ambil daftar paket RUP Konawe Selatan
  */
 export async function getDaftarRup({
-  tahun = '2025',
+  tahun,
   page = 1,
   limit = 20,
   cara = '',       // 'Penyedia' | 'Swakelola' | '' (semua)
@@ -156,56 +99,62 @@ export async function getDaftarRup({
   search = '',
   satker = ''
 } = {}) {
+  const currentYear = tahun || String(new Date().getFullYear())
+
   // 1. Coba backend server terlebih dahulu
   try {
     const res = await api.get(`${BACKEND_BASE}/paket-penyedia`, {
-      params: { tahun, page, limit, cara, metode, jenis, search, satker },
+      params: { tahun: currentYear, page, limit, cara, metode, jenis, search, satker },
       timeout: 6000
     })
     if (res.data?.success && Array.isArray(res.data.data)) {
-      return {
-        success: true,
-        source: 'inaproc-live',
-        ...res.data
-      }
+      return { success: true, source: 'inaproc-live', ...res.data }
     }
   } catch {
-    // Fallback ke direct web INAPROC
+    // lanjut ke direct web
   }
 
-  // 2. Coba langsung ke web INAPROC (didukung di dev server & Capacitor Android)
+  // 2. Coba langsung ke web INAPROC (proxy dev / Capacitor Android)
   try {
     const queryParams = {
-      tahun: String(tahun),
+      tahun: currentYear,
       jenis_klpd: JENIS_KLPD,
       instansi: INSTANSI_KONSEL,
       page: String(page),
       limit: String(limit)
     }
 
-    // cara pengadaan: 'Penyedia' | 'Swakelola' (parameter 'sumber' di INAPROC)
-    if (cara && cara !== 'Semua') {
-      queryParams.sumber = cara
-    }
+    if (cara && cara !== 'Semua') queryParams.sumber = cara
+    if (metode && metode !== 'Semua' && cara !== 'Swakelola') queryParams.filter_metode = metode
+    if (jenis && jenis !== 'Semua') queryParams.filter_jenis = jenis
+    const querySearch = search ? String(search).trim() : ''
+    const isNumericSearch = /^\d+$/.test(querySearch)
 
-    // filter_metode hanya berlaku jika cara = Penyedia
-    if (metode && metode !== 'Semua' && cara !== 'Swakelola') {
-      queryParams.filter_metode = metode
+    if (querySearch) {
+      if (isNumericSearch) {
+        queryParams.search_rup = querySearch
+      } else {
+        queryParams.search_paket = querySearch
+      }
     }
+    if (satker && satker !== 'Semua OPD') queryParams.satker = satker
 
-    // jenis pengadaan (filter_jenis)
-    if (jenis && jenis !== 'Semua') {
-      queryParams.filter_jenis = jenis
-    }
+    let res = await fetchDirectInaproc('table', queryParams)
 
-    if (search && search.trim()) {
-      queryParams.search_paket = search.trim()
+    // Jika pencarian angka dengan search_rup tidak menemukan hasil, coba fallback search_paket
+    if (isNumericSearch && querySearch && (!res.data?.tableRows || res.data.tableRows.length === 0)) {
+      const fallbackParams = { ...queryParams }
+      delete fallbackParams.search_rup
+      fallbackParams.search_paket = querySearch
+      try {
+        const fallbackRes = await fetchDirectInaproc('table', fallbackParams)
+        if (fallbackRes.data?.tableRows?.length > 0) {
+          res = fallbackRes
+        }
+      } catch {
+        // Abaikan dan gunakan res awal
+      }
     }
-    if (satker && satker !== 'Semua OPD') {
-      queryParams.satker = satker
-    }
-
-    const res = await fetchDirectInaproc('table', queryParams)
 
     if (res.data && Array.isArray(res.data.tableRows)) {
       const rows = res.data.tableRows
@@ -214,20 +163,20 @@ export async function getDaftarRup({
       return {
         success: true,
         source: 'inaproc-live',
-        tahun: String(tahun),
+        tahun: currentYear,
         total,
         page,
         limit,
         data: rows.map((item, idx) => ({
           id: item.kode_rup || `${page}-${idx + 1}`,
           kode_rup: String(item.kode_rup || ''),
-          nama_paket: item.nama_paket || 'Tanpa Nama Paket',
-          opd: item.nama_satker || item.nama_instansi || 'Pemerintah Kab. Konawe Selatan',
-          metode: item.metode_pengadaan || item.cara_pengadaan_label || 'Penyedia',
+          nama_paket: item.nama_paket || '',
+          opd: item.nama_satker || item.nama_instansi || '',
+          metode: item.metode_pengadaan || item.cara_pengadaan_label || '',
           pagu: parseFloat(item.total_nilai || 0),
           sumber_dana: item.sumber_dana || 'APBD',
-          tahun: String(item.tahun_anggaran || tahun),
-          jenis: item.jenis_pengadaan || 'Pengadaan',
+          tahun: String(item.tahun_anggaran || currentYear),
+          jenis: item.jenis_pengadaan || '',
           cara_pengadaan: item.cara_pengadaan || '',
           pdn: item.produk_dalam_negeri || 'Ya',
           status: 'Aktif'
@@ -235,29 +184,13 @@ export async function getDaftarRup({
       }
     }
   } catch (err) {
-    console.warn('Direct Inaproc fetch failed, using local fallback:', err.message)
+    console.warn('Gagal fetch dari web INAPROC:', err.message)
   }
 
-  // 3. Fallback ke data lokal jika semua koneksi gagal
-  let filtered = DUMMY_DATA_2025.filter(d => !tahun || d.tahun === String(tahun))
-  if (metode && metode !== 'Semua') {
-    filtered = filtered.filter(d => (d.metode || '').toLowerCase().includes(metode.toLowerCase()))
-  }
-  if (search && search.trim()) {
-    const q = search.toLowerCase()
-    filtered = filtered.filter(d => (d.nama_paket || '').toLowerCase().includes(q) || (d.opd || '').toLowerCase().includes(q))
-  }
-
-  const start = (page - 1) * limit
-  const paged = filtered.slice(start, start + limit)
-
+  // Semua koneksi gagal — kembalikan error, tidak ada data dummy
   return {
-    success: true,
-    source: 'lokal',
-    tahun: String(tahun),
-    total: filtered.length,
-    page,
-    limit,
-    data: paged.map((d, i) => ({ ...d, id: d.kode_rup || i + 1 }))
+    success: false,
+    error: 'Tidak dapat terhubung ke data INAPROC. Periksa koneksi internet Anda.'
   }
 }
+
