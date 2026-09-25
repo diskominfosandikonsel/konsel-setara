@@ -117,11 +117,33 @@ router.get('/paket-penyedia', async (req, res) => {
       queryParams.filter_jenis = jenis;
     }
 
-    if (search) {
-      queryParams.search_paket = search;
+    const querySearch = search ? String(search).trim() : '';
+    const isNumericSearch = /^\d+$/.test(querySearch);
+
+    if (querySearch) {
+      if (isNumericSearch) {
+        queryParams.search_rup = querySearch;
+      } else {
+        queryParams.search_paket = querySearch;
+      }
     }
 
-    const result = await fetchInaprocWeb('table', queryParams);
+    let result = await fetchInaprocWeb('table', queryParams);
+
+    // Jika pencarian angka dengan search_rup tidak menemukan hasil, coba fallback search_paket
+    if (isNumericSearch && querySearch && (!result.data?.tableRows || result.data.tableRows.length === 0)) {
+      const fallbackParams = { ...queryParams };
+      delete fallbackParams.search_rup;
+      fallbackParams.search_paket = querySearch;
+      try {
+        const fallbackResult = await fetchInaprocWeb('table', fallbackParams);
+        if (fallbackResult.status === 200 && fallbackResult.data?.tableRows?.length > 0) {
+          result = fallbackResult;
+        }
+      } catch {
+        // Abaikan dan gunakan result awal
+      }
+    }
 
     if (result.status === 200 && result.data && Array.isArray(result.data.tableRows)) {
       const rows = result.data.tableRows;
