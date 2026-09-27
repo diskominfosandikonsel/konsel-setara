@@ -60,8 +60,7 @@ router.get('/getDashboard', async (req, res) => {
             FROM aplikasi
             LEFT JOIN ulasan ON ulasan.aplikasi_id = aplikasi.id
             GROUP BY aplikasi.id
-            ORDER BY aplikasi.id DESC
-            LIMIT 5
+            ORDER BY skor DESC, responden DESC
         `;
 
         // Query 5: 5 Komentar Terbaru
@@ -134,7 +133,7 @@ router.post('/viewAplikasi', (req, res) => {
         LEFT JOIN ulasan ON ulasan.aplikasi_id = aplikasi.id
         ${whereClause}
         GROUP BY aplikasi.id
-        ORDER BY aplikasi.id DESC
+        ORDER BY skor DESC, responden DESC
         LIMIT ${data_star}, ${data_batas}
     `;
 
@@ -242,9 +241,10 @@ router.post('/listAplikasi', (req, res) => {
 
 // ULASAN
 router.post('/viewUlasan', (req, res) => {
+    console.log(req.body)
     var data_batas = 10;
     var data_star = (req.body.data_ke - 1) * data_batas;
-    var cari = req.body.cari_value;
+    var aplikasi_id = req.body.aplikasi_id;
     var halaman = 1;
 
     let jml_data = `
@@ -256,6 +256,8 @@ router.post('/viewUlasan', (req, res) => {
 
         LEFT JOIN users ON users.id = ulasan.createdBy
         LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+
+        WHERE ulasan.aplikasi_id LIKE '%${aplikasi_id}%'
 
         ORDER BY ulasan.createdAt DESC
     `;
@@ -269,6 +271,8 @@ router.post('/viewUlasan', (req, res) => {
 
         LEFT JOIN users ON users.id = ulasan.createdBy
         LEFT JOIN aplikasi ON aplikasi.id = ulasan.aplikasi_id
+
+        WHERE ulasan.aplikasi_id LIKE '%${aplikasi_id}%'
 
         ORDER BY ulasan.createdAt DESC
 
