@@ -16,16 +16,40 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ---
 
-## 🚀 DAFTAR ANTREAN PLAN PENGEMBANGAN SELANJUTNYA
+## 🚀 ALUR & PRIORITAS KERJA SELANJUTNYA
 
 ```mermaid
-graph LR
-    A[Rilis v1.5.0 di Play Store] --> B[PLAN 1: Logo & Menu Dinamis 100%]
-    B --> C[PLAN 2: Dashboard Analitik Web Admin]
-    C --> D[PLAN 3: Aktivasi forceUpdate di Backend Server]
+flowchart TD
+    A[1. Upload app-release.aab ke Play Console] --> B[2. Tunggu Peninjauan Google Selesai]
+    B -->|SUDAH DITERIMA & LIVE| C[⚡ PRIORITAS UTAMA: Buka forceUpdate di backend/index.js]
+    C --> D[3. Warga Otomatis Terarah Update ke v1.5.0]
+    D --> E[4. Lanjutkan Fitur: Upload Logo Dinamis di Admin]
+    E --> F[5. Lanjutkan Fitur: Dashboard Analitik Pengunjung]
 ```
 
 ---
+
+### ⚡ LANGKAH TERDEKAT (SEGERA SETELAH v1.5.0 DITERIMA GOOGLE)
+> **Pemicu**: Status rilis di Google Play Console berubah menjadi **"Tersedia di Google Play" (Aktif)**.
+
+1. Buka [backend/index.js](file:///Users/simplephi/Documents/riswan/konsel-setara/backend/index.js#L67-L74) di server produksi.
+2. Aktifkan baris versi `1.5.0`:
+   ```javascript
+   // Pengecekan Versi Aplikasi Mobile
+   app.get('/api/v1/app-version', (req, res) => {
+     res.json({
+       latestVersion: '1.5.0', // <-- BUKA AKTIFKAN BARIS INI
+       storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
+       forceUpdate: true
+     });
+   });
+   ```
+3. Restart backend di server: `pm2 restart all`.
+4. **Hasil**: Seluruh pengguna yang masih membuka aplikasi versi lama (`1.4.0` ke bawah) langsung terkunci modal update wajib untuk memperbarui ke versi `1.5.0`.
+
+---
+
+## 🛠️ ROADMAP PENGEMBANGAN FITUR SELANJUTNYA
 
 ### 🎯 PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin & Backend)
 > **Tujuan Utama**: Admin dapat menambah menu layanan baru (misal: website OPD, portal berita, atau direct link lain) beserta logonya **langsung dari Dashboard Web Admin, tanpa perlu build `.aab` ulang dan tanpa perlu update versi di Play Store**.
@@ -71,19 +95,6 @@ graph LR
   - **Tabel Log Kunjungan**: Rincian harian beserta jumlah hit per tanggal.
 
 ---
-
-### 🎯 PLAN 3: Prosedur Pasca-Rilis Play Store (Aktivasi `forceUpdate`)
-> **Waktu Eksekusi**: Dijalankan **SETELAH** aplikasi versi 1.5.0 disetujui Google dan status di Google Play Console menjadi *Tersedia di Google Play (Aktif)*.
-
-* **Langkah Kerja**:
-  1. Buka [backend/index.js](file:///Users/simplephi/Documents/riswan/konsel-setara/backend/index.js) di server produksi.
-  2. Aktifkan baris:
-     ```javascript
-     latestVersion: '1.5.0',
-     forceUpdate: true
-     ```
-  3. Restart backend server: `pm2 restart all`.
-  4. Pengguna lama (v1.4.0) otomatis mendapatkan modal pembaruan wajib untuk beralih ke v1.5.0.
 
 ---
 
