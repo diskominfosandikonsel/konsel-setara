@@ -43,14 +43,14 @@
 
         <!-- Menu Grid -->
         <div class="row q-col-gutter-y-lg justify-center menu-grid">
-          <div class="menu-item text-center cursor-pointer" v-for="(item, index) in menuItems" :key="index"
-            @click="goToRoute(item.route)">
-            <div :class="['menu-icon-wrap', item.label === 'Lainnya' ? 'is-lainnya' : '', 'q-mb-sm']">
+          <div class="menu-item text-center cursor-pointer" v-for="(item, index) in displayMenuItems" :key="index"
+            @click="onSelectMenuItem(item)">
+            <div :class="['menu-icon-wrap', item.isLainnya ? 'is-lainnya' : '', 'q-mb-sm']">
               <template v-if="item.img">
                 <img :src="item.img" class="menu-icon-img" />
               </template>
               <template v-else>
-                <q-icon :name="item.icon" color="indigo-5" class="menu-icon-q" />
+                <q-icon :name="item.icon || 'apps'" :color="item.isLainnya ? 'primary' : 'indigo-5'" class="menu-icon-q" />
               </template>
             </div>
             <div class="menu-label text-weight-bold text-grey-9">{{ item.label }}</div>
@@ -113,6 +113,42 @@
         </q-card>
       </q-dialog>
 
+      <!-- Modal Menu Lainnya (Bottom Sheet) -->
+      <q-dialog v-model="showLainnyaModal" position="bottom">
+        <q-card class="q-pa-md q-pb-xl rounded-borders-top bg-white" style="width: 100%; max-width: 500px; margin: 0 auto; border-radius: 24px 24px 0 0;">
+          <div class="row items-center justify-between q-mb-md">
+            <div class="row items-center">
+              <q-avatar size="36px" color="blue-1" text-color="primary" class="q-mr-sm">
+                <q-icon name="apps" size="22px" />
+              </q-avatar>
+              <div>
+                <div class="text-subtitle1 text-weight-bold text-grey-9 lh-tight">Layanan Lainnya</div>
+                <div class="text-caption text-grey-6">Pilihan aplikasi & layanan publik lainnya</div>
+              </div>
+            </div>
+            <q-btn icon="close" flat round dense v-close-popup color="grey-6" />
+          </div>
+
+          <q-separator class="q-mb-lg" />
+
+          <!-- Grid Menu Tambahan -->
+          <div class="row q-col-gutter-y-lg justify-start menu-grid">
+            <div class="menu-item text-center cursor-pointer" v-for="(item, index) in overflowMenuItems" :key="'more-' + index"
+              @click="onSelectMenuItem(item)">
+              <div class="menu-icon-wrap q-mb-sm">
+                <template v-if="item.img">
+                  <img :src="item.img" class="menu-icon-img" />
+                </template>
+                <template v-else>
+                  <q-icon :name="item.icon || 'apps'" color="indigo-5" class="menu-icon-q" />
+                </template>
+              </div>
+              <div class="menu-label text-weight-bold text-grey-9">{{ item.label }}</div>
+            </div>
+          </div>
+        </q-card>
+      </q-dialog>
+
       <!-- Berita Terbaru -->
       <div class="q-mb-sm">
         <div class="text-subtitle1 text-weight-bold q-mb-md text-grey-9">Berita terbaru</div>
@@ -158,6 +194,26 @@
         </template>
       </div>
 
+      <!-- Statistik Pengunjung (Pelengkap / Subtle Minimalist Strip) -->
+      <div class="q-mb-xl visitor-subtle-container">
+        <div class="visitor-subtle-bar">
+          <div class="subtle-item">
+            <span class="subtle-label">Hari Ini</span>
+            <span class="subtle-val text-primary">{{ formatNumber(visitorStats.today) }}</span>
+          </div>
+          <div class="subtle-sep"></div>
+          <div class="subtle-item">
+            <span class="subtle-label">Bulan Ini</span>
+            <span class="subtle-val text-indigo-9">{{ formatNumber(visitorStats.thisMonth) }}</span>
+          </div>
+          <div class="subtle-sep"></div>
+          <div class="subtle-item">
+            <span class="subtle-label">Total Kunjungan</span>
+            <span class="subtle-val text-dark">{{ formatNumber(visitorStats.total) }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </q-page>
 </template>
@@ -172,6 +228,7 @@ import { useBeritaStore } from 'src/stores/berita'
 import { useSliderStore } from 'src/stores/slider'
 import { getImageBerita, formatDate } from 'src/utils/helper'
 import { api } from 'src/api/api'
+import { apiVisitors } from 'src/api/apiVisitors'
 
 export default {
   name: 'IndexPage',
@@ -348,7 +405,7 @@ export default {
       { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
       { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
       { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
-      { label: 'RUP', img: 'img/rup/rup-icon.svg', route: '/rup' },
+      { label: 'RUP', img: 'icons/rup.png', route: '/rup' },
     ])
 
     const fetchDynamicMenu = async () => {
@@ -367,11 +424,23 @@ export default {
       }
     }
 
+    const fetchVisitorStats = async () => {
+      try {
+        const res = await apiVisitors.getStats()
+        if (res.data?.success && res.data?.data) {
+          visitorStats.value = res.data.data
+        }
+      } catch (err) {
+        console.warn('Gagal memuat statistik pengunjung:', err)
+      }
+    }
+
     onMounted(() => {
       fetchCarousel()
       fetchVideoBerita()
       fetchBeritaTerbaru()
       fetchDynamicMenu()
+      fetchVisitorStats()
     })
 
     const goToRoute = (route) => {
@@ -399,6 +468,52 @@ export default {
       showVideoSocials.value = false
     }
 
+    // Statistik Pengunjung (Terkoneksi Realtime ke API Database)
+    const visitorStats = ref({
+      today: 0,
+      thisMonth: 0,
+      total: 0
+    })
+
+    const formatNumber = (num) => {
+      return new Intl.NumberFormat('id-ID').format(num || 0)
+    }
+
+    const showLainnyaModal = ref(false)
+
+    // Jika total menu > 12: hanya 11 menu pertama yang tampil di home, slot ke-12 menjadi tombol "Lainnya"
+    const displayMenuItems = computed(() => {
+      if (menuItems.value.length <= 12) {
+        return menuItems.value
+      }
+      return [
+        ...menuItems.value.slice(0, 11),
+        {
+          label: 'Lainnya',
+          icon: 'apps',
+          isLainnya: true,
+          route: ''
+        }
+      ]
+    })
+
+    // Menu yang tidak muat di beranda (mulai dari urutan ke-12 ke atas)
+    const overflowMenuItems = computed(() => {
+      if (menuItems.value.length <= 12) {
+        return []
+      }
+      return menuItems.value.slice(11)
+    })
+
+    const onSelectMenuItem = (item) => {
+      if (item.isLainnya) {
+        showLainnyaModal.value = true
+      } else {
+        showLainnyaModal.value = false
+        goToRoute(item.route)
+      }
+    }
+
     return {
       modules: [Autoplay],
       swiperRef,
@@ -416,7 +531,13 @@ export default {
       showVideoSocials,
       openSocialLink,
       search: ref(''),
-      menuItems
+      menuItems,
+      showLainnyaModal,
+      displayMenuItems,
+      overflowMenuItems,
+      onSelectMenuItem,
+      visitorStats,
+      formatNumber
     }
   }
 }
@@ -517,9 +638,17 @@ export default {
 }
 
 .menu-icon-wrap.is-lainnya {
-  background: #e0e0e0;
-  border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: #e0f2fe;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.menu-icon-wrap.is-lainnya:active {
+  transform: scale(0.92);
+  background: #bae6fd;
 }
 
 .video-scroll-container {
@@ -675,5 +804,54 @@ export default {
   .menu-container .text-subtitle1 {
     font-size: 1.2rem;
   }
+}
+
+/* ================= Visitor Statistics - Subtle Minimalist Strip ================= */
+.visitor-subtle-container {
+  margin-top: 14px;
+}
+
+.visitor-subtle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.subtle-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.subtle-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.subtle-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.subtle-sep {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+  margin: 0 4px;
 }
 </style>

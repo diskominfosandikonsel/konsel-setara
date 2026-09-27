@@ -1,8 +1,13 @@
 <template>
   <!-- ══════════════════════════════════════════════ -->
-  <!-- FLOATING BUTTON SKM (Hanya tampil jika belum isi survei) -->
+  <!-- FLOATING BUTTON SKM                           -->
   <!-- ══════════════════════════════════════════════ -->
-  <div v-if="!hasSubmitted" class="skm-fab-wrapper">
+  <q-page-sticky
+    position="bottom-right"
+    :offset="[18, 18]"
+    class="skm-page-sticky"
+    style="z-index: 9999;"
+  >
     <q-btn
       id="skm-fab-btn"
       round
@@ -15,7 +20,7 @@
       </div>
       <div class="skm-fab-label">SURVEY</div>
     </q-btn>
-  </div>
+  </q-page-sticky>
 
   <!-- ══════════════════════════════════════════════ -->
   <!-- DIALOG FORM SURVEY SKM                         -->
@@ -143,8 +148,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Notify } from 'quasar'
 import { apiSkm } from 'src/api/apiSkm'
+import { useAuthStore } from 'stores/auth'
+
+// ─── Router & Store ───────────────────────────────────
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
 // ─── Props ────────────────────────────────────────────
 const props = defineProps({
@@ -167,6 +179,10 @@ const namaAplikasiDisplay = ref(props.namaAplikasi)
 const hasSubmitted = ref(false)
 
 // ─── Helpers ──────────────────────────────────────────
+const isLoggedIn = () => {
+  return Boolean(authStore.token || localStorage.getItem('token'))
+}
+
 const ratingLabel = (r) => {
   const labels = ['', 'Sangat Tidak Puas', 'Tidak Puas', 'Cukup Puas', 'Puas', 'Sangat Puas']
   return labels[r] || ''
@@ -192,11 +208,15 @@ const ratingColorHex = (r) => {
 const SKM_KEY = computed(() => `skm_submitted_${props.namaAplikasi}`)
 
 const getUserId = () => {
+  if (authStore.user) {
+    // Prioritaskan nama lengkap agar di dashboard Admin SKM tercatat nama asli pengulas
+    return authStore.user.nama || authStore.user.username || String(authStore.user._id || authStore.user.id || 'anonim')
+  }
   try {
     const storedUser = localStorage.getItem('user')
     if (storedUser && storedUser !== 'undefined') {
       const user = JSON.parse(storedUser)
-      return user._id || user.id || user.username || user.nama || 'anonim'
+      return user.nama || user.username || String(user._id || user.id || 'anonim')
     }
   } catch (e) {
     // ignore
@@ -206,14 +226,8 @@ const getUserId = () => {
 
 // ─── Cek Status Sudah Isi Survei atau Belum ──────────
 const checkSubmissionStatus = async () => {
-  // 1. Cek LocalStorage
-  const localFlag = localStorage.getItem(SKM_KEY.value)
-  if (localFlag) {
-    hasSubmitted.value = true
-  }
-
-  // 2. Cek ke Database jika user login
   const userId = getUserId()
+  // Jika user sudah login, jadikan database sebagai sumber kebenaran utama
   if (userId && userId !== 'anonim') {
     try {
       const res = await apiSkm.checkStatus({
@@ -223,10 +237,22 @@ const checkSubmissionStatus = async () => {
       if (res.data?.hasSubmitted) {
         hasSubmitted.value = true
         localStorage.setItem(SKM_KEY.value, '1')
+        if (res.data?.review) {
+          rating.value = Number(res.data.review.rating) || 0
+          komentar.value = res.data.review.komentar || ''
+        }
+      } else {
+        // Jika di database belum ada, bersihkan flag localStorage
+        hasSubmitted.value = false
+        localStorage.removeItem(SKM_KEY.value)
       }
     } catch (e) {
       console.warn('[SKM] Gagal cek status ulasan:', e)
     }
+  } else {
+    // Jika user anonim / belum login, gunakan localStorage
+    const localFlag = localStorage.getItem(SKM_KEY.value)
+    hasSubmitted.value = Boolean(localFlag)
   }
 }
 
@@ -252,16 +278,37 @@ const fetchAplikasiId = async () => {
 }
 
 // ─── Buka dialog ──────────────────────────────────────
-const openDialog = () => {
+const openDialog = async () => {
+  // 1. Validasi Status Login
+  if (!isLoggedIn()) {
+    Notify.create({
+      message: 'Silakan login terlebih dahulu untuk mengisi survei kepuasan.',
+      color: 'warning',
+      icon: 'lock',
+      position: 'top',
+      timeout: 2500
+    })
+    const currentPath = route?.fullPath || '/'
+    router.push({ path: '/login', query: { redirect: currentPath } })
+    return
+  }
+
+  // 2. Sinkronkan status dari database secara realtime
+  await checkSubmissionStatus()
+
+  // 3. Jika sudah pernah mengisi survei, tampilkan notifikasi sesuai aturan backend tim
   if (hasSubmitted.value) {
     Notify.create({
-      message: 'Anda sudah mengisi survei kepuasan untuk layanan ini.',
+      message: 'Anda sudah pernah mengisi survei kepuasan untuk layanan ini. Terima kasih atas partisipasi Anda!',
       color: 'info',
       icon: 'check_circle',
-      position: 'top'
+      position: 'top',
+      timeout: 3000
     })
     return
   }
+
+  // 4. Jika belum mengisi, siapkan form kosong dan buka dialog
   rating.value = 0
   hoveredStar.value = 0
   komentar.value = ''
@@ -270,7 +317,7 @@ const openDialog = () => {
 
 // ─── Submit ulasan ────────────────────────────────────
 const submitUlasan = async () => {
-  if (rating.value === 0 || hasSubmitted.value) return
+  if (rating.value === 0) return
 
   submitting.value = true
   try {
@@ -322,15 +369,8 @@ onMounted(() => {
 
 <style scoped>
 /* ─── FLOATING BUTTON ─── */
-.skm-fab-wrapper {
-  position: fixed;
-  bottom: 80px;
-  right: 18px;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+.skm-page-sticky {
+  z-index: 9999 !important;
 }
 
 .skm-fab-btn {

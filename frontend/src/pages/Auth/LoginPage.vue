@@ -94,7 +94,7 @@ export default {
             showPassword: false,
             logoLoading: true,
             rememberMe: false,
-            appVersion: '1.4.0'
+            appVersion: '1.5.0'
         }
     },
     async mounted() {
@@ -141,7 +141,8 @@ export default {
 
                 // Beri jeda render sesaat agar Notify & Loading context selesai dibersihkan
                 setTimeout(() => {
-                    this.$router.push('/')
+                    const redirect = this.$route.query.redirect || '/'
+                    this.$router.push(redirect)
                 }, 50)
             }
         }

@@ -72,6 +72,7 @@
 <script>
 import { PushNotifications } from "@capacitor/push-notifications";
 import { api } from "src/api/api";
+import { apiVisitors } from "src/api/apiVisitors";
 import { useNotifikasiStore } from "src/stores/notifikasi";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
@@ -93,9 +94,27 @@ export default {
   async mounted() {
     await this.initPush();
     await this.checkAppVersion();
+    this.recordDailyVisit();
   },
 
   methods: {
+    async recordDailyVisit() {
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const lastVisit = localStorage.getItem("konsel_last_visit_date");
+
+        if (lastVisit !== today) {
+          const platform = Capacitor.isNativePlatform()
+            ? Capacitor.getPlatform()
+            : "web";
+          await apiVisitors.hit({ platform });
+          localStorage.setItem("konsel_last_visit_date", today);
+        }
+      } catch (err) {
+        console.warn("[VISITORS] Background hit error:", err);
+      }
+    },
+
     async checkAppVersion() {
       // Hanya cek versi di perangkat Android/iOS native, tidak di browser
       if (!Capacitor.isNativePlatform()) {
