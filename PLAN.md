@@ -4,48 +4,25 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ---
 
-## 🏆 STATUS TERAKHIR (RILIS v1.5.0)
+## 🏆 STATUS TERAKHIR (RILIS v1.5.0 - SUDAH TAYANG & AKTIF)
 
 | Komponen | Status | Catatan Rilis |
 | :--- | :---: | :--- |
-| **Mobile Android** | ✅ **SELESAI (v1.5.0)** | Bundle `app-release.aab` (kode versi `8`) siap diunggah ke Google Play Console. |
-| **Database Pengunjung** | ✅ **SELESAI** | Tabel `app_visitors` terpasang di MySQL `konsel_setara`. |
-| **Backend Visitor API** | ✅ **SELESAI** | Endpoint `/api/v1/visitors/hit` & `/api/v1/visitors/stats` aktif. |
-| **Menu RUP & Ikon 3D** | ✅ **SELESAI** | Terpasang di aplikasi mobile dan database menu. |
-| **Dokumentasi SOP Rilis** | ✅ **SELESAI** | Tersimpan di [docs/panduan-rilis-playstore.md](file:///Users/simplephi/Documents/riswan/konsel-setara/docs/panduan-rilis-playstore.md). |
+| **Mobile Android** | 🚀 **LIVE DI GOOGLE PLAY** | Versi `1.5.0` (kode versi `8`) resmi disetujui Google dan tayang di Play Store. |
+| **Force Update Server** | ⚡ **AKTIF DI PRODUCTION** | Endpoint `/api/v1/app-version` sudah mengarah ke `1.5.0` (`forceUpdate: true`). Pengguna versi lama otomatis terarah untuk memperbarui aplikasi. |
+| **Database Pengunjung** | ✅ **SELESAI** | Tabel `app_visitors` aktif menampung statistik kunjungan warga. |
+| **Backend Visitor API** | ✅ **SELESAI** | Endpoint `/api/v1/visitors/hit` & `/api/v1/visitors/stats` aktif melayani aplikasi. |
+| **Menu RUP & Ikon 3D** | ✅ **SELESAI** | Terpasang resmi di aplikasi mobile dan database menu. |
 
 ---
 
-## 🚀 ALUR & PRIORITAS KERJA SELANJUTNYA
+## 🚀 PRIORITAS PENGEMBANGAN BERIKUTNYA
 
 ```mermaid
-flowchart TD
-    A[1. Upload app-release.aab ke Play Console] --> B[2. Tunggu Peninjauan Google Selesai]
-    B -->|SUDAH DITERIMA & LIVE| C[⚡ PRIORITAS UTAMA: Buka forceUpdate di backend/index.js]
-    C --> D[3. Warga Otomatis Terarah Update ke v1.5.0]
-    D --> E[4. Lanjutkan Fitur: Upload Logo Dinamis di Admin]
-    E --> F[5. Lanjutkan Fitur: Dashboard Analitik Pengunjung]
+flowchart LR
+    A[v1.5.0 Sukses Tayang di Play Store] --> B[🎯 PLAN 1: Upload Logo Menu Dinamis di Admin]
+    B --> C[🎯 PLAN 2: Dashboard Analitik Pengunjung di Admin]
 ```
-
----
-
-### ⚡ LANGKAH TERDEKAT (SEGERA SETELAH v1.5.0 DITERIMA GOOGLE)
-> **Pemicu**: Status rilis di Google Play Console berubah menjadi **"Tersedia di Google Play" (Aktif)**.
-
-1. Buka [backend/index.js](file:///Users/simplephi/Documents/riswan/konsel-setara/backend/index.js#L67-L74) di server produksi.
-2. Aktifkan baris versi `1.5.0`:
-   ```javascript
-   // Pengecekan Versi Aplikasi Mobile
-   app.get('/api/v1/app-version', (req, res) => {
-     res.json({
-       latestVersion: '1.5.0', // <-- BUKA AKTIFKAN BARIS INI
-       storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
-       forceUpdate: true
-     });
-   });
-   ```
-3. Restart backend di server: `pm2 restart all`.
-4. **Hasil**: Seluruh pengguna yang masih membuka aplikasi versi lama (`1.4.0` ke bawah) langsung terkunci modal update wajib untuk memperbarui ke versi `1.5.0`.
 
 ---
 
