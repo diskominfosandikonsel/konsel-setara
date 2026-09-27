@@ -1,172 +1,92 @@
-# 📌 RENCANA PENGEMBANGAN: SISTEM STATISTIK PENGUNJUNG (VISITOR COUNTER & ANALYTICS)
-Proyek: **Konsel Setara (Konawe Selatan)**  
-Status: **DRAFT / PERENCANAAN**  
-Tanggal: **27 September 2026**
+# 📌 MASTER ROADMAP & PLAN PENGEMBANGAN: KONSEL SETARA
+
+Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memulai sesi kerja dan menanyakan *"apa plan selanjutnya?"*, dokumen ini menjadi acuan status pekerjaan yang sudah selesai dan antrean fitur yang siap dikerjakan.
 
 ---
 
-## 1. 🎯 Tujuan & Lingkup Fitur
+## 🏆 STATUS TERAKHIR (RILIS v1.5.0)
 
-Fitur statistik pengunjung dirancang untuk memantau trafik penggunaan aplikasi Konsel Setara secara akurat, transparan, dan terarah dengan pembagian peran:
-
-1. **Aplikasi Android (`frontend/`)**:
-   - Pencatatan otomatis (*hit*) di latar belakang saat aplikasi pertama kali dibuka tiap hari.
-   - Menampilkan angka ringkas (*Hari Ini*, *Bulan Ini*, *Total*) sebagai pelengkap pada *subtle minimalist strip* di beranda.
-2. **Web Admin Dashboard (`admin/`)**:
-   - Modul khusus analitik yang komprehensif.
-   - Grafik tren kunjungan (harian/bulanan), persentase kenaikan, perbandingan platform, dan log berkala.
-3. **Backend API (`backend/`)**:
-   - Penyedia endpoint pencatatan anti-spam & kalkulasi statistik yang efisien di database MySQL.
+| Komponen | Status | Catatan Rilis |
+| :--- | :---: | :--- |
+| **Mobile Android** | ✅ **SELESAI (v1.5.0)** | Bundle `app-release.aab` (kode versi `8`) siap diunggah ke Google Play Console. |
+| **Database Pengunjung** | ✅ **SELESAI** | Tabel `app_visitors` terpasang di MySQL `konsel_setara`. |
+| **Backend Visitor API** | ✅ **SELESAI** | Endpoint `/api/v1/visitors/hit` & `/api/v1/visitors/stats` aktif. |
+| **Menu RUP & Ikon 3D** | ✅ **SELESAI** | Terpasang di aplikasi mobile dan database menu. |
+| **Dokumentasi SOP Rilis** | ✅ **SELESAI** | Tersimpan di [docs/panduan-rilis-playstore.md](file:///Users/simplephi/Documents/riswan/konsel-setara/docs/panduan-rilis-playstore.md). |
 
 ---
 
-## 2. 🏗️ Arsitektur & Alur Kerja Data
+## 🚀 DAFTAR ANTREAN PLAN PENGEMBANGAN SELANJUTNYA
 
 ```mermaid
-flowchart TD
-    subgraph Mobile_Android [Aplikasi Mobile Android]
-        A[User Buka Aplikasi] --> B{Cek localStorage: Hari ini sudah tercatat?}
-        B -- Belum --> C[Hit API: POST /api/v1/visitors/hit]
-        B -- Sudah --> D[Lewati Hit]
-        C --> E[Simpan Tanggal ke localStorage]
-        D --> F[Ambil Data: GET /api/v1/visitors/stats]
-        E --> F
-        F --> G[Tampilkan di Subtle Strip IndexPage]
-    end
-
-    subgraph Backend_Express [Backend Express API]
-        C --> H[Validasi & Catat ke MySQL]
-        F --> I[Query Ringkas: Today, Month, Total]
-        J[Admin Request: GET /api/v1/visitors/analytics] --> K[Query Agregasi Grafik & Tren]
-    end
-
-    subgraph Database_MySQL [Database: konsel_setara]
-        H --> L[(Tabel: app_visitors)]
-        I --> L
-        K --> L
-    end
-
-    subgraph Web_Admin [Web Admin Dashboard]
-        J --> M[Halaman Analitik Pengunjung]
-        M --> N[Kartu Ringkasan KPI]
-        M --> O[Grafik Tren Recharts]
-        M --> P[Tabel Rincian Harian]
-    end
+graph LR
+    A[Rilis v1.5.0 di Play Store] --> B[PLAN 1: Logo & Menu Dinamis 100%]
+    B --> C[PLAN 2: Dashboard Analitik Web Admin]
+    C --> D[PLAN 3: Aktivasi forceUpdate di Backend Server]
 ```
 
 ---
 
-## 3. 🗄️ Spesifikasi Database MySQL
+### 🎯 PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin & Backend)
+> **Tujuan Utama**: Admin dapat menambah menu layanan baru (misal: website OPD, portal berita, atau direct link lain) beserta logonya **langsung dari Dashboard Web Admin, tanpa perlu build `.aab` ulang dan tanpa perlu update versi di Play Store**.
 
-Tabel baru dibuat pada database `konsel_setara`:
+#### 1. Sisi Backend (`backend/`):
+* **Library**: Menggunakan `multer` untuk menangani multipart/form-data upload gambar (PNG, JPG, SVG, WebP).
+* **Penyimpanan**: Direktori publik server `backend/public/uploads/menu/`.
+* **Endpoint Baru**:
+  - `POST /api/v1/menu/upload`: Mengunggah gambar logo dan mengembalikan path/URL publik:  
+    `https://konsel-setara.konaweselatankab.go.id/uploads/menu/nama-file.png`
+* **Model Database**:
+  - Kolom `img` pada tabel `menu_items` mendukung penyimpanan URL lengkap (`https://...`) selain path lokal.
 
-```sql
-CREATE TABLE IF NOT EXISTS `app_visitors` (
-  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `platform` VARCHAR(20) NOT NULL DEFAULT 'android', -- android, ios, web
-  `ip_address` VARCHAR(45) NULL,
-  `device_id` VARCHAR(100) NULL,
-  `user_id` INT NULL,                               -- jika sudah login
-  `visit_date` DATE NOT NULL,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_visit_date (`visit_date`),
-  INDEX idx_platform (`platform`),
-  INDEX idx_visit_user (`visit_date`, `ip_address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
+#### 2. Sisi Web Admin (`admin/`):
+* **Lokasi**: [admin/src/app/menu/page.tsx](file:///Users/simplephi/Documents/riswan/konsel-setara/admin/src/app/menu/page.tsx)
+* **Penyempurnaan Form Tambah/Edit Menu**:
+  - Ganti input teks biasa menjadi **Komponen Upload Logo (Drag & Drop + Image Preview)**.
+  - Opsi ganda: Admin bisa **upload file logo dari laptop** ATAU memilih **Material Icons** jika tidak memiliki logo.
 
----
-
-## 4. ⚙️ Spesifikasi Backend API (`backend/`)
-
-File baru: [backend/apiMysql/visitors.js](file:///Users/simplephi/Documents/riswan/konsel-setara/backend/apiMysql/visitors.js)
-
-### Endpoint 1: Pencatatan Kunjungan (Hit)
-* **Method & Path:** `POST /api/v1/visitors/hit`
-* **Body:**
-  ```json
-  {
-    "platform": "android",
-    "deviceId": "optional-uuid"
-  }
-  ```
-* **Mekanisme Proteksi Anti-Spam:**
-  - Pengecekan kombinasi IP + `visit_date` (atau deviceId jika tersedia). Jika dalam hari yang sama sudah pernah tercatat, backend tidak menduplikasi baris (idempotent).
-* **Response:** `{ "success": true, "message": "Hit recorded" }`
-
-### Endpoint 2: Statistik Ringkas untuk Mobile Android
-* **Method & Path:** `GET /api/v1/visitors/stats`
-* **Response:**
-  ```json
-  {
-    "success": true,
-    "data": {
-      "today": 142,
-      "thisMonth": 3820,
-      "total": 28450
-    }
-  }
-  ```
-
-### Endpoint 3: Analitik Lengkap untuk Web Admin
-* **Method & Path:** `GET /api/v1/visitors/analytics?range=30`
-* **Query Params:** `range` (7 hari, 30 hari, atau bulan berjalan)
-* **Response:**
-  ```json
-  {
-    "success": true,
-    "summary": {
-      "totalVisitors": 28450,
-      "todayVisitors": 142,
-      "monthVisitors": 3820,
-      "avgDailyVisitors": 127,
-      "peakDay": { "date": "2026-09-21", "count": 245 }
-    },
-    "dailyTrends": [
-      { "date": "2026-09-20", "count": 115 },
-      { "date": "2026-09-21", "count": 245 },
-      { "date": "2026-09-22", "count": 130 }
-    ],
-    "platformBreakdown": {
-      "android": 26800,
-      "ios": 1200,
-      "web": 450
-    }
-  }
-  ```
+#### 3. Sisi Mobile Android (`frontend/`):
+* **Lokasi**: [frontend/src/pages/IndexPage.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/pages/IndexPage.vue)
+* **Normalisasi Gambar**:
+  - Helper cerdas untuk me-load logo: jika berawalan `http://` atau `https://`, gambar langsung di-load secara dinamis dari server internet.
 
 ---
 
-## 5. 📱 Spesifikasi Frontend Android (`frontend/`)
+### 🎯 PLAN 2: Modul Analitik & Statistik Pengunjung di Web Admin (`admin/`)
+> **Tujuan Utama**: Menyajikan dashboard pemantauan statistik pengunjung aplikasi Konsel Setara secara komprehensif bagi pimpinan dan pengelola sistem Diskominfo.
 
-1. **Trigger Pencatatan di [frontend/src/App.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/App.vue)**:
-   - Dijalankan di fungsi `mounted()` aplikasi.
-   - Memeriksa `localStorage.getItem('last_visit_date') === today`.
-   - Mengirim request `POST /api/v1/visitors/hit` hanya jika belum tercatat hari ini.
-2. **Penyajian Data di [frontend/src/pages/IndexPage.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/pages/IndexPage.vue)**:
-   - Menggunakan komponen **Subtle Minimalist Strip** yang sudah disetujui (tinggi ~38px, proporsional, netral).
-   - Memanggil `GET /api/v1/visitors/stats` saat `onMounted` dan mengisi variabel `visitorStats`.
+#### 1. Sisi Backend (`backend/`):
+* **Endpoint Baru**: `GET /api/v1/visitors/analytics?range=7|30|year`
+* **Payload Respons**:
+  - Ringkasan KPI: Total Pengunjung, Pengunjung Hari Ini, Bulan Ini, Rata-rata Harian, Hari Puncak (*Peak Day*).
+  - Data Tren Harian: Array `{ date: '2026-09-28', count: 145 }` untuk kebutuhan grafik.
+  - Komposisi Platform: Breakdown jumlah kunjungan dari `android`, `ios`, dan `web`.
 
----
-
-## 6. 💻 Spesifikasi Web Admin Dashboard (`admin/`)
-
-1. **Halaman Khusus Analitik**:
-   - Menu Sidebar baru: **Statistik Pengunjung** (`/analytics` atau `/visitors`).
-2. **Komponen Visual**:
-   - **Kartu Metrik KPI**: Total Kunjungan, Kunjungan Hari Ini, Kunjungan Bulan Ini, Rata-rata Harian.
-   - **Grafik Garis/Area Tren Kunjungan**: Menggunakan library `recharts` (sudah terpasang di package admin).
-   - **Filter Waktu**: Pilihan cepat *7 Hari Terakhir*, *30 Hari Terakhir*, *Tahun Ini*.
-   - **Tabel Log Ringkasan Harian**: Menampilkan tanggal, jumlah pengunjung, dan persentase perubahan dari hari sebelumnya.
+#### 2. Sisi Web Admin (`admin/`):
+* **Menu Baru Sidebar**: **Statistik Pengunjung** (`/visitors` atau `/analytics`).
+* **Komponen Visual**:
+  - **4 Kartu KPI Ringkasan**: Desain modern dengan badge persentase tren naik/turun.
+  - **Grafik Tren Interaktif**: Visualisasi Area/Line Chart menggunakan library `recharts`.
+  - **Filter Rentang Waktu**: Tombol cepat *7 Hari*, *30 Hari*, *Bulan Ini*, *Tahun Ini*.
+  - **Tabel Log Kunjungan**: Rincian harian beserta jumlah hit per tanggal.
 
 ---
 
-## 7. 🗓️ Roadmap Tahapan Eksekusi
+### 🎯 PLAN 3: Prosedur Pasca-Rilis Play Store (Aktivasi `forceUpdate`)
+> **Waktu Eksekusi**: Dijalankan **SETELAH** aplikasi versi 1.5.0 disetujui Google dan status di Google Play Console menjadi *Tersedia di Google Play (Aktif)*.
 
-| Tahap | Modul | Deskripsi Pekerjaan |
-| :--- | :--- | :--- |
-| **Fase 1** | Database & Backend | Pembuatan tabel `app_visitors` di MySQL & implementasi endpoint `/hit` serta `/stats`. |
-| **Fase 2** | Mobile Android | Menghubungkan trigger background di `App.vue` dan data asli ke `IndexPage.vue`. |
-| **Fase 3** | Backend Admin API | Menyiapkan endpoint agregasi `/analytics` dengan filter rentang tanggal. |
-| **Fase 4** | Web Admin | Membuat halaman modul statistik (Kartu KPI, Grafik Tren Recharts, & Tabel Rincian). |
-| **Fase 5** | Review & Testing | Pengujian beban, verifikasi anti-spam harian, dan validasi visual akhir. |
+* **Langkah Kerja**:
+  1. Buka [backend/index.js](file:///Users/simplephi/Documents/riswan/konsel-setara/backend/index.js) di server produksi.
+  2. Aktifkan baris:
+     ```javascript
+     latestVersion: '1.5.0',
+     forceUpdate: true
+     ```
+  3. Restart backend server: `pm2 restart all`.
+  4. Pengguna lama (v1.4.0) otomatis mendapatkan modal pembaruan wajib untuk beralih ke v1.5.0.
+
+---
+
+## 📌 CARA PENGGUNAAN PLAN INI
+Setiap kali membuka sesi proyek berikutnya, Anda cukup mengatakan:  
+👉 *"Lanjutkan Plan 1 (Upload Logo Dinamis)"* atau *"Lanjutkan Plan 2 (Dashboard Analitik Admin)"*, dan kita bisa langsung eksekusi tanpa perlu merancang ulang dari nol.
