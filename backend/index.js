@@ -67,6 +67,7 @@ app.get('/openapi.json', (req, res) => {
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
     latestVersion: '1.4.0',
+    // latestVersion: '1.5.0', /// BUKA JIKA SUDAH UP DI PLAYSTORE
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: true
   });
@@ -95,6 +96,10 @@ app.use('/api/v1/pegawai', pegawai);
 // Modul RUP (Rencana Umum Pengadaan) - Proxy ke inaproc API
 const rup = require('./apiMysql/rup');
 app.use('/api/v1/rup', rup);
+
+// Modul Statistik Pengunjung (Visitor Counter)
+const visitors = require('./apiMysql/visitors');
+app.use('/api/v1/visitors', visitors);
 
 // Error Handling Middleware
 function notFound(req, res, next) {

@@ -142,8 +142,7 @@ dump.rdb
 
 /src/generated/prisma
 
-# Dokumentasi lokal (tidak perlu di-push ke GitHub)
-docs/
+# Dokumentasi proyek (diizinkan terlacak di Git)
 
 .DS_Store.quasar
 
