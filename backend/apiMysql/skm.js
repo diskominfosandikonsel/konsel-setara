@@ -534,5 +534,142 @@ router.post('/viewUlasanFast', (req, res) => {
     });
 });
 
+// ═══════════════════════════════════════════════════════════════
+// ENDPOINT PUBLIK KHUSUS SKM LAYANAN RUP (RENCANA UMUM PENGADAAN)
+// Dapat diakses secara publik tanpa login (GET & POST)
+// URL: /api/v1/skm/rup atau /api/v1/skm/public/rup
+// ═══════════════════════════════════════════════════════════════
+const handlerSkmRup = (req, res) => {
+    try {
+        const query = req.query || {};
+        const body = req.body || {};
+
+        const page = Math.max(1, parseInt(query.page || body.page || query.data_ke || body.data_ke || 1, 10));
+        const limitParam = query.limit !== undefined ? query.limit : (body.limit !== undefined ? body.limit : (query.page_limit !== undefined ? query.page_limit : body.page_limit));
+        const limit = limitParam !== undefined ? Math.max(0, parseInt(limitParam, 10)) : 10;
+        const offset = (page - 1) * limit;
+
+        // 1. Cari data aplikasi RUP
+        const qApp = `SELECT id, nama, keterangan FROM aplikasi WHERE nama = 'RUP' OR id = '2bm7uleo9f8muidiqay' OR nama LIKE '%rencana umum pengadaan%' LIMIT 1`;
+
+        db.query(qApp, (errApp, apps) => {
+            if (errApp) {
+                console.error("handlerSkmRup app error:", errApp);
+                return res.status(500).json({ success: false, message: errApp.message });
+            }
+
+            const app = (apps && apps.length > 0) 
+                ? apps[0] 
+                : { id: '2bm7uleo9f8muidiqay', nama: 'RUP', keterangan: 'Layanan Rencana Umum Pengadaan (RUP)' };
+
+            // 2. Query Summary & Distribusi Rating untuk RUP
+            const qSummary = `
+                SELECT 
+                    COUNT(id) AS totalResponden,
+                    COALESCE(ROUND(AVG(rating), 1), 0) AS skor,
+                    SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS bintang_5,
+                    SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS bintang_4,
+                    SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS bintang_3,
+                    SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS bintang_2,
+                    SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS bintang_1
+                FROM ulasan
+                WHERE ulasan.aplikasi_id IN ('2bm7uleo9f8muidiqay', 'RUP')
+            `;
+
+            db.query(qSummary, (errSummary, summaryResult) => {
+                if (errSummary) {
+                    console.error("handlerSkmRup summary error:", errSummary);
+                    return res.status(500).json({ success: false, message: errSummary.message });
+                }
+
+                const s = summaryResult[0] || {};
+                const total = Number(s.totalResponden) || 0;
+                const skor = Number(s.skor) || 0;
+
+                // Hitung predikat mutu SKM
+                let mutu = 'Tidak Baik (D)';
+                if (skor >= 4.5) mutu = 'Sangat Baik (A)';
+                else if (skor >= 4.0) mutu = 'Baik (B)';
+                else if (skor >= 3.0) mutu = 'Kurang Baik (C)';
+
+                const b5 = Number(s.bintang_5) || 0;
+                const b4 = Number(s.bintang_4) || 0;
+                const b3 = Number(s.bintang_3) || 0;
+                const b2 = Number(s.bintang_2) || 0;
+                const b1 = Number(s.bintang_1) || 0;
+                const puasCount = b5 + b4;
+                const persentasePuas = total > 0 ? Number(((puasCount / total) * 100).toFixed(1)) : 0;
+
+                const distribusiRating = [
+                    { bintang: 5, label: 'Sangat Puas', jumlah: b5, persentase: total > 0 ? Number(((b5 / total) * 100).toFixed(1)) : 0, fill: '#10b981' },
+                    { bintang: 4, label: 'Puas', jumlah: b4, persentase: total > 0 ? Number(((b4 / total) * 100).toFixed(1)) : 0, fill: '#60a5fa' },
+                    { bintang: 3, label: 'Cukup', jumlah: b3, persentase: total > 0 ? Number(((b3 / total) * 100).toFixed(1)) : 0, fill: '#facc15' },
+                    { bintang: 2, label: 'Kurang', jumlah: b2, persentase: total > 0 ? Number(((b2 / total) * 100).toFixed(1)) : 0, fill: '#f97316' },
+                    { bintang: 1, label: 'Kecewa', jumlah: b1, persentase: total > 0 ? Number(((b1 / total) * 100).toFixed(1)) : 0, fill: '#ef4444' }
+                ];
+
+                // 3. Query Daftar Ulasan RUP
+                let qList = `
+                    SELECT 
+                        ulasan.id,
+                        ulasan.rating,
+                        ulasan.komentar,
+                        ulasan.createdAt,
+                        COALESCE(NULLIF(users.nama, ''), NULLIF(ulasan.createdBy, ''), 'Masyarakat') AS nama
+                    FROM ulasan
+                    LEFT JOIN users ON users.id = ulasan.createdBy
+                    WHERE ulasan.aplikasi_id IN ('2bm7uleo9f8muidiqay', 'RUP')
+                    ORDER BY ulasan.createdAt DESC
+                `;
+
+                const listParams = [];
+                if (limit > 0) {
+                    qList += ` LIMIT ?, ?`;
+                    listParams.push(offset, limit);
+                }
+
+                db.query(qList, listParams, (errList, reviews) => {
+                    if (errList) {
+                        console.error("handlerSkmRup list error:", errList);
+                        return res.status(500).json({ success: false, message: errList.message });
+                    }
+
+                    const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+
+                    res.json({
+                        success: true,
+                        aplikasi: {
+                            id: app.id,
+                            nama: app.nama,
+                            keterangan: app.keterangan
+                        },
+                        summary: {
+                            skor: skor,
+                            totalResponden: total,
+                            mutu: mutu,
+                            persentasePuas: persentasePuas,
+                            distribusiRating: distribusiRating
+                        },
+                        pagination: {
+                            page: page,
+                            limit: limit,
+                            totalPages: totalPages,
+                            totalData: total
+                        },
+                        data: reviews || []
+                    });
+                });
+            });
+        });
+    } catch (error) {
+        console.error("handlerSkmRup exception:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+router.get('/rup', handlerSkmRup);
+router.post('/rup', handlerSkmRup);
+router.get('/public/rup', handlerSkmRup);
+router.post('/public/rup', handlerSkmRup);
 
 module.exports = router;
