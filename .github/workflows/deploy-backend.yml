@@ -20,23 +20,20 @@ jobs:
       - name: Execute Remote SSH Commands on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
           script: |
             echo "🚀 [1/4] Memulai proses deployment backend..."
-            cd ~/App/konsel_setara
+            # Masuk ke root folder project dengan nama yang baru
+            cd ~/App/konsel-setara
             
             echo "⬇️ [2/4] Menarik perubahan kode terbaru dari Git..."
             git pull origin main
             
-            # Jika repo monorepo (ada folder backend), masuk ke folder backend
-            if [ -d "backend" ]; then
-              cd backend
-            fi
+            # Masuk ke folder backend untuk install dan PM2
+            cd backend
             
             echo "📦 [3/4] Memasang dependensi baru (jika ada)..."
             npm install --omit=dev
