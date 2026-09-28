@@ -4,15 +4,13 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ---
 
-## 🏆 STATUS TERAKHIR (RILIS v1.5.0 - SUDAH TAYANG & AKTIF)
+## 🏆 STATUS TERAKHIR (RILIS v1.6.0 / v1.6.1)
 
 | Komponen | Status | Catatan Rilis |
 | :--- | :---: | :--- |
-| **Mobile Android** | 🚀 **LIVE DI GOOGLE PLAY** | Versi `1.5.0` (kode versi `8`) resmi disetujui Google dan tayang di Play Store. |
-| **Force Update Server** | ⚡ **AKTIF DI PRODUCTION** | Endpoint `/api/v1/app-version` sudah mengarah ke `1.5.0` (`forceUpdate: true`). Pengguna versi lama otomatis terarah untuk memperbarui aplikasi. |
-| **Database Pengunjung** | ✅ **SELESAI** | Tabel `app_visitors` aktif menampung statistik kunjungan warga. |
-| **Backend Visitor API** | ✅ **SELESAI** | Endpoint `/api/v1/visitors/hit` & `/api/v1/visitors/stats` aktif melayani aplikasi. |
-| **Menu RUP & Ikon 3D** | ✅ **SELESAI** | Terpasang resmi di aplikasi mobile dan database menu. |
+| **Mobile Android** | 🚀 **LIVE & UPDATE** | Versi `1.6.0` (kode `9`) live di Play Store. Bundle versi `1.6.1` (kode `10`, dukungan logo dinamis) sudah diunggah ke Google Play Console. |
+| **Backend Visitor & Menu** | ✅ **SELESAI** | Endpoint `/api/v1/visitors/*` & `/api/v1/menu/upload` aktif melayani aplikasi & admin. |
+| **Plan 1: Upload Logo Dinamis** | ✅ **SELESAI** | Admin web bisa upload logo gambar mandiri, backend melayani static storage & mobile `IndexPage.vue` otomatis render logo remote. |
 
 ---
 
@@ -20,46 +18,20 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ```mermaid
 flowchart LR
-    A[v1.6.0 Siap / Rilis] --> B[✅ PLAN 1: Upload Logo Menu Dinamis SELESAI]
-    B --> C[🎯 PLAN 2: Dashboard Analitik Pengunjung di Admin]
+    A[v1.6.1 Diunggah ke Play Store] --> B[✅ PLAN 1: Upload Logo Dinamis SELESAI]
+    B --> C[🎯 FOKUS SEKARANG: PLAN 2 Dashboard Analitik Pengunjung di Admin]
 ```
 
 ---
 
 ## 🛠️ ROADMAP PENGEMBANGAN FITUR SELANJUTNYA
 
-### ✅ PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin & Backend) — [SELESAI]
-> **Tujuan Utama**: Admin dapat menambah menu layanan baru (misal: website OPD, portal berita, atau direct link lain) beserta logonya **langsung dari Dashboard Web Admin, tanpa perlu build `.aab` ulang dan tanpa perlu update versi di Play Store**.
-
-* **Backend (`backend/apiMysql/menu.js`)**: Endpoint `POST /api/v1/menu/upload` aktif dengan multer (simpan ke `backend/uploads/menu/`).
-* **Admin (`admin/src/app/menu/page.tsx`)**: Form tambah/edit menu kini dilengkapi dropzone upload file logo (PNG, JPG, SVG, WebP) dengan live preview instan, thumbnail avatar di tabel, dan rendering logo di preview live Android mock.
-* **Mobile Android (`frontend/src/pages/IndexPage.vue`)**: Helper `getMenuIconSrc` cerdas menormalisasi URL gambar remote (`uploads/...`), URL web (`https://...`), maupun aset ikon lokal (`icons/...`).
+### ✅ PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin, Backend & Mobile) — [SELESAI]
+> **Status**: **100% Selesai**. Backend endpoint upload aktif, Web Admin memiliki picker upload & preview live mock, dan Mobile Android v1.6.1 telah mendukung pembacaan URL remote.
 
 ---
 
-#### 1. Sisi Backend (`backend/`):
-* **Library**: Menggunakan `multer` untuk menangani multipart/form-data upload gambar (PNG, JPG, SVG, WebP).
-* **Penyimpanan**: Direktori publik server `backend/public/uploads/menu/`.
-* **Endpoint Baru**:
-  - `POST /api/v1/menu/upload`: Mengunggah gambar logo dan mengembalikan path/URL publik:  
-    `https://konsel-setara.konaweselatankab.go.id/uploads/menu/nama-file.png`
-* **Model Database**:
-  - Kolom `img` pada tabel `menu_items` mendukung penyimpanan URL lengkap (`https://...`) selain path lokal.
-
-#### 2. Sisi Web Admin (`admin/`):
-* **Lokasi**: [admin/src/app/menu/page.tsx](file:///Users/simplephi/Documents/riswan/konsel-setara/admin/src/app/menu/page.tsx)
-* **Penyempurnaan Form Tambah/Edit Menu**:
-  - Ganti input teks biasa menjadi **Komponen Upload Logo (Drag & Drop + Image Preview)**.
-  - Opsi ganda: Admin bisa **upload file logo dari laptop** ATAU memilih **Material Icons** jika tidak memiliki logo.
-
-#### 3. Sisi Mobile Android (`frontend/`):
-* **Lokasi**: [frontend/src/pages/IndexPage.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/pages/IndexPage.vue)
-* **Normalisasi Gambar**:
-  - Helper cerdas untuk me-load logo: jika berawalan `http://` atau `https://`, gambar langsung di-load secara dinamis dari server internet.
-
----
-
-### 🎯 PLAN 2: Modul Analitik & Statistik Pengunjung di Web Admin (`admin/`)
+### 🎯 PLAN 2: Modul Analitik & Statistik Pengunjung di Web Admin (`admin/`) — [FOKUS SAAT INI]
 > **Tujuan Utama**: Menyajikan dashboard pemantauan statistik pengunjung aplikasi Konsel Setara secara komprehensif bagi pimpinan dan pengelola sistem Diskominfo.
 
 #### 1. Sisi Backend (`backend/`):
@@ -79,8 +51,7 @@ flowchart LR
 
 ---
 
----
-
 ## 📌 CARA PENGGUNAAN PLAN INI
 Setiap kali membuka sesi proyek berikutnya, Anda cukup mengatakan:  
-👉 *"Lanjutkan Plan 1 (Upload Logo Dinamis)"* atau *"Lanjutkan Plan 2 (Dashboard Analitik Admin)"*, dan kita bisa langsung eksekusi tanpa perlu merancang ulang dari nol.
+👉 **"Lanjutkan Plan 2 (Dashboard Analitik Pengunjung di Admin)"**, dan kita langsung mengeksekusi modul analitik ini!
+
