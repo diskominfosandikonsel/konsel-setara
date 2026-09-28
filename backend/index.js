@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 // Autentikasi & Media Statis
 app.use('/auth', auth);
 app.use('/uploads', express.static(path.join(__dirname, './uploads')));
+app.use('/icons', express.static(path.join(__dirname, '../frontend/public/icons')));
 
 // Sektoral & Core Layanan API
 const checkAuth = require('./apiMysql/checkAuth');

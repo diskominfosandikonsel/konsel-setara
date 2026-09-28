@@ -166,3 +166,9 @@ Worksheet_*
 # Ignore worksheet & utility generator scripts
 generate_worksheet.py
 generate_all_worksheets.py
+
+# Ignore uploaded media files
+backend/uploads/*
+!backend/uploads/.gitkeep
+!backend/uploads/menu/
+!backend/uploads/menu/.gitkeep

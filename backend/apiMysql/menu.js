@@ -1,8 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const db = require('../db/MySql/utama');
 const uniqid = require('uniqid');
 const middleware = require('../auth/middlewares');
+
+// Konfigurasi penyimpanan upload logo menu
+const menuUploadDir = path.join(__dirname, '../uploads/menu');
+if (!fs.existsSync(menuUploadDir)) {
+  fs.mkdirSync(menuUploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, menuUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `menu_${Date.now()}_${Math.round(Math.random() * 1e4)}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp|svg\+xml|svg/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname || mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error('Hanya format gambar (PNG, JPG, JPEG, WEBP, SVG) yang diperbolehkan!'));
+    }
+  }
+});
+
 
 // Inisialisasi tabel jika belum ada
 const createTableQuery = `
@@ -95,6 +130,34 @@ router.post('/view', (req, res) => {
     });
   });
 });
+
+// ═══════════════════════════════════════════════
+// POST /api/v1/menu/upload — Upload Gambar Logo Menu (Admin Only)
+// ═══════════════════════════════════════════════
+router.post('/upload',
+  middleware.isLoggedIn,
+  (req, res, next) => {
+    upload.single('logo')(req, res, (err) => {
+      if (err) return res.status(422).json({ success: false, message: 'Gagal upload logo: ' + err.message });
+      next();
+    });
+  },
+  (req, res) => {
+    if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
+    if (!req.file) return res.status(422).json({ success: false, message: 'File gambar logo wajib disertakan' });
+
+    const relativePath = `uploads/menu/${req.file.filename}`;
+    return res.json({
+      success: true,
+      message: 'Logo menu berhasil diunggah',
+      data: {
+        filename: req.file.filename,
+        path: relativePath,
+        url: `/${relativePath}`
+      }
+    });
+  }
+);
 
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/add — Tambah Menu Baru
