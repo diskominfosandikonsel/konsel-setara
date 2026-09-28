@@ -20,7 +20,7 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ```mermaid
 flowchart LR
-    A[v1.5.0 Sukses Tayang di Play Store] --> B[🎯 PLAN 1: Upload Logo Menu Dinamis di Admin]
+    A[v1.6.0 Siap / Rilis] --> B[✅ PLAN 1: Upload Logo Menu Dinamis SELESAI]
     B --> C[🎯 PLAN 2: Dashboard Analitik Pengunjung di Admin]
 ```
 
@@ -28,8 +28,14 @@ flowchart LR
 
 ## 🛠️ ROADMAP PENGEMBANGAN FITUR SELANJUTNYA
 
-### 🎯 PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin & Backend)
+### ✅ PLAN 1: Sistem Upload Logo & Menu Dinamis (Admin & Backend) — [SELESAI]
 > **Tujuan Utama**: Admin dapat menambah menu layanan baru (misal: website OPD, portal berita, atau direct link lain) beserta logonya **langsung dari Dashboard Web Admin, tanpa perlu build `.aab` ulang dan tanpa perlu update versi di Play Store**.
+
+* **Backend (`backend/apiMysql/menu.js`)**: Endpoint `POST /api/v1/menu/upload` aktif dengan multer (simpan ke `backend/uploads/menu/`).
+* **Admin (`admin/src/app/menu/page.tsx`)**: Form tambah/edit menu kini dilengkapi dropzone upload file logo (PNG, JPG, SVG, WebP) dengan live preview instan, thumbnail avatar di tabel, dan rendering logo di preview live Android mock.
+* **Mobile Android (`frontend/src/pages/IndexPage.vue`)**: Helper `getMenuIconSrc` cerdas menormalisasi URL gambar remote (`uploads/...`), URL web (`https://...`), maupun aset ikon lokal (`icons/...`).
+
+---
 
 #### 1. Sisi Backend (`backend/`):
 * **Library**: Menggunakan `multer` untuk menangani multipart/form-data upload gambar (PNG, JPG, SVG, WebP).

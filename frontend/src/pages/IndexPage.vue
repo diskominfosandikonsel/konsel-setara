@@ -47,7 +47,7 @@
             @click="onSelectMenuItem(item)">
             <div :class="['menu-icon-wrap', item.isLainnya ? 'is-lainnya' : '', 'q-mb-sm']">
               <template v-if="item.img">
-                <img :src="item.img" class="menu-icon-img" />
+                <img :src="getMenuIconSrc(item.img)" class="menu-icon-img" />
               </template>
               <template v-else>
                 <q-icon :name="item.icon || 'apps'" :color="item.isLainnya ? 'primary' : 'indigo-5'" class="menu-icon-q" />
@@ -137,7 +137,7 @@
               @click="onSelectMenuItem(item)">
               <div class="menu-icon-wrap q-mb-sm">
                 <template v-if="item.img">
-                  <img :src="item.img" class="menu-icon-img" />
+                  <img :src="getMenuIconSrc(item.img)" class="menu-icon-img" />
                 </template>
                 <template v-else>
                   <q-icon :name="item.icon || 'apps'" color="indigo-5" class="menu-icon-q" />
@@ -408,13 +408,26 @@ export default {
       { label: 'RUP', img: 'icons/Logolpse.png', route: '/rup' },
     ])
 
+    const getMenuIconSrc = (img) => {
+      if (!img) return ''
+      if (img.startsWith('http://') || img.startsWith('https://')) {
+        return img
+      }
+      if (img.startsWith('uploads/') || img.startsWith('/uploads/')) {
+        const cleanPath = img.startsWith('/') ? img.slice(1) : img
+        const base = (api.defaults.baseURL || 'https://konsel-setara.konaweselatankab.go.id').replace(/\/$/, '')
+        return `${base}/${cleanPath}`
+      }
+      return img.startsWith('/') ? img : `/${img}`
+    }
+
     const fetchDynamicMenu = async () => {
       try {
         const res = await api.get('/api/v1/menu/list')
         if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
           menuItems.value = res.data.data.map(item => ({
             label: item.label,
-            img: (item.route === '/rup' || item.label?.toLowerCase() === 'rup') ? 'icons/Logolpse.png' : (item.img || ''),
+            img: item.img || ((item.route === '/rup' || item.label?.toLowerCase() === 'rup') ? 'icons/Logolpse.png' : ''),
             icon: item.icon || 'apps',
             route: item.route
           }))
@@ -537,7 +550,8 @@ export default {
       overflowMenuItems,
       onSelectMenuItem,
       visitorStats,
-      formatNumber
+      formatNumber,
+      getMenuIconSrc
     }
   }
 }
