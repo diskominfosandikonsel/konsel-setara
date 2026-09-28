@@ -94,7 +94,7 @@ export default {
             showPassword: false,
             logoLoading: true,
             rememberMe: false,
-            appVersion: '1.5.0'
+            appVersion: '1.6.0'
         }
     },
     async mounted() {
