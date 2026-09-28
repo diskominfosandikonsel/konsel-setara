@@ -174,7 +174,8 @@ export default {
     const banners = ref([
       { id: 1, src: '/img/rup/banner-rup-1.jpg?v=5', alt: 'RUP UKPBJ Kabupaten Konawe Selatan' },
       { id: 2, src: '/img/rup/banner-rup-2.jpg?v=5', alt: 'Konsultasi & Partisipasi Publik Pengadaan' },
-      { id: 3, src: '/img/rup/banner3.png?v=5', alt: 'Aplikasi mengelola proses pengadaan barang dan jasa pemerintah secara online' },
+      { id: 3, src: '/img/rup/banner3.png?v=5', alt: 'Aplikasi SPSE INAPROC Kabupaten Konawe Selatan' },
+      { id: 4, src: '/img/rup/banner-ekatalog.jpg?v=1', alt: 'E-Katalog Pengadaan Barang dan Jasa Pemerintah Kabupaten Konawe Selatan' },
     ])
 
     const onSwiper = (swiper) => {
