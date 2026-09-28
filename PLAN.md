@@ -20,6 +20,7 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 flowchart LR
     A[v1.6.1 Diunggah ke Play Store] --> B[✅ PLAN 1: Upload Logo Dinamis SELESAI]
     B --> C[🎯 FOKUS SEKARANG: PLAN 2 Dashboard Analitik Pengunjung di Admin]
+    C --> D[🛠️ PLAN 3: DEX Obfuscation R8 & Optimasi Android]
 ```
 
 ---
@@ -55,7 +56,24 @@ flowchart LR
 
 ---
 
+### 🛠️ PLAN 3: Optimalisasi Kode DEX & Obfuscation R8 (`frontend/android`)
+> **Tujuan Utama**: Memenuhi standar kualitas DEX Google Play Console (tenggat Feb 2027) dengan menaikkan persentase DEX Obfuscation di atas 25% dan memperkecil ukuran bundle aplikasi.
+
+#### Rincian Tindakan:
+1. **Konfigurasi `build.gradle`**:
+   - Aktifkan `minifyEnabled true` dan `shrinkResources true` pada `buildTypes.release`.
+2. **Aturan ProGuard (`proguard-rules.pro`)**:
+   - Lindungi antarmuka JavaScript-to-Native Capacitor (`@JavascriptInterface`).
+   - Pertahankan plugin Capacitor (App, Browser, Device, Splash, dll.) agar tidak hilang/error saat di-obfuscate R8.
+3. **Penyusutan Ukuran**:
+   - Menyusutkan ukuran DEX uncompressed dari 15.3 MB menjadi jauh lebih ramping.
+4. **Opsional (UI Layout)**:
+   - Evaluasi peringatan deprecated API fullscreen/window insets untuk kompatibilitas Android 15+.
+
+---
+
 ## 📌 CARA PENGGUNAAN PLAN INI
 
 Setiap kali membuka sesi proyek berikutnya, Anda cukup mengatakan:  
-👉 **"Lanjutkan Plan 2 (Dashboard Analitik Pengunjung di Admin)"**, dan kita langsung mengeksekusi modul analitik ini!
+👉 **"Lanjutkan Plan 2 (Dashboard Analitik Pengunjung di Admin)"** atau **"Lanjutkan Plan 3 (Optimalisasi DEX R8 Android)"**, dan kita langsung mengeksekusi sesuai prioritas!
+
