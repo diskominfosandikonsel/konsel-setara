@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { BaseLayout } from "@/components/layouts/base-layout"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -14,9 +14,12 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Smartphone, Loader2, Sparkles } from "lucide-react"
+import {
+  Plus, Pencil, Trash2, ArrowUp, ArrowDown, Smartphone, Loader2, Sparkles,
+  UploadCloud, X, ExternalLink
+} from "lucide-react"
 import { toast } from "sonner"
-import api from "@/lib/api"
+import api, { UPLOAD_URL } from "@/lib/api"
 
 interface MenuItem {
   id: string
@@ -34,6 +37,9 @@ export default function Page() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<MenuItem | null>(null)
   const [saving, setSaving] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string>("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form State
   const [form, setForm] = useState({
@@ -44,6 +50,19 @@ export default function Page() {
     urutan: 0,
     is_active: 1,
   })
+
+  // Helper resolusi path gambar
+  const getAdminImageSrc = (img: string) => {
+    if (!img) return ""
+    if (img.startsWith("http://") || img.startsWith("https://")) return img
+    const cleanPath = img.replace(/\/+/g, "/").replace(/^\//, "")
+    if (cleanPath.startsWith("uploads/")) {
+      const clean = cleanPath.replace(/^uploads\//, "")
+      return `${UPLOAD_URL}/${clean}`
+    }
+    // Aset lokal icons di admin public atau local server
+    return `/${cleanPath}`
+  }
 
   const fetchMenus = async () => {
     setLoading(true)
@@ -67,6 +86,7 @@ export default function Page() {
 
   const openAdd = () => {
     setEditing(null)
+    setImagePreview("")
     setForm({
       label: "",
       icon: "apps",
@@ -80,6 +100,7 @@ export default function Page() {
 
   const openEdit = (item: MenuItem) => {
     setEditing(item)
+    setImagePreview(item.img ? getAdminImageSrc(item.img) : "")
     setForm({
       label: item.label,
       icon: item.icon || "",
@@ -89,6 +110,47 @@ export default function Page() {
       is_active: item.is_active,
     })
     setModalOpen(true)
+  }
+
+  // Upload Logo ke Server
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validasi ukuran (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file logo maksimal 5 MB")
+      return
+    }
+
+    setUploadingLogo(true)
+    try {
+      const formData = new FormData()
+      formData.append("logo", file)
+
+      const res = await api.post("/api/v1/menu/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      })
+
+      if (res.data?.success && res.data?.data?.path) {
+        const uploadedPath = res.data.data.path
+        setForm(prev => ({ ...prev, img: uploadedPath }))
+        setImagePreview(getAdminImageSrc(uploadedPath))
+        toast.success("Logo berhasil diunggah!")
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Gagal mengunggah logo"
+      toast.error(msg)
+    } finally {
+      setUploadingLogo(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setForm(prev => ({ ...prev, img: "" }))
+    setImagePreview("")
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   const handleSave = async () => {
@@ -166,7 +228,7 @@ export default function Page() {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-lg">Daftar Menu Grid ({menus.length})</CardTitle>
-                      <CardDescription>Atur urutan, ikon, dan status aktif menu</CardDescription>
+                      <CardDescription>Atur urutan, ikon/logo, dan status aktif menu</CardDescription>
                     </div>
                     <Button onClick={openAdd}>
                       <Plus className="h-4 w-4 mr-2" /> Tambah Menu
@@ -181,7 +243,7 @@ export default function Page() {
                           <TableHead className="w-16">Urut</TableHead>
                           <TableHead>Label</TableHead>
                           <TableHead>Route / Path</TableHead>
-                          <TableHead>Ikon / Gambar</TableHead>
+                          <TableHead>Ikon / Logo</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Aksi</TableHead>
                         </TableRow>
@@ -226,15 +288,49 @@ export default function Page() {
                                   </Button>
                                 </div>
                               </TableCell>
-                              <TableCell className="font-medium">{item.label}</TableCell>
-                              <TableCell className="text-xs text-muted-foreground font-mono">{item.route}</TableCell>
-                              <TableCell>
-                                <div className="text-xs">
-                                  {item.img ? (
-                                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[11px] font-mono">{item.img}</span>
-                                  ) : (
-                                    <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[11px] font-mono">{item.icon || '-'}</span>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  {item.label}
+                                  {(item.route?.startsWith('http://') || item.route?.startsWith('https://')) && (
+                                    <span title="External Link">
+                                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                    </span>
                                   )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground font-mono max-w-[140px] truncate" title={item.route}>
+                                {item.route}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 border p-1 shrink-0 flex items-center justify-center relative overflow-hidden">
+                                    {item.img ? (
+                                      <img
+                                        src={getAdminImageSrc(item.img)}
+                                        alt={item.label}
+                                        className="h-full w-full object-contain"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = "none"
+                                          const fallback = e.currentTarget.parentElement?.querySelector('.icon-fallback') as HTMLElement
+                                          if (fallback) fallback.style.display = "flex"
+                                        }}
+                                      />
+                                    ) : null}
+                                    <div className={`icon-fallback h-full w-full items-center justify-center ${item.img ? 'hidden' : 'flex'}`}>
+                                      <Sparkles className="h-4 w-4 text-amber-500" />
+                                    </div>
+                                  </div>
+                                  <div className="text-xs">
+                                    {item.img ? (
+                                      <span className="text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400 px-1.5 py-0.5 rounded text-[11px] font-mono block max-w-[150px] truncate" title={item.img}>
+                                        {item.img}
+                                      </span>
+                                    ) : (
+                                      <span className="text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 px-1.5 py-0.5 rounded text-[11px] font-mono">
+                                        {item.icon || 'apps'}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </TableCell>
                               <TableCell>
@@ -284,13 +380,27 @@ export default function Page() {
                     </div>
 
                     {/* Section Menu Mock */}
-                    <div className="rounded-2xl bg-slate-100 dark:bg-slate-800 p-3 shadow-inner">
+                    <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-3 shadow-inner border">
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-3">Menu Layanan</div>
                       <div className="grid grid-cols-4 gap-2">
                         {activeMenus.map((item) => (
                           <div key={item.id} className="flex flex-col items-center gap-1 text-center">
-                            <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center border border-slate-200 dark:border-slate-600 text-primary">
-                              <Sparkles className="h-5 w-5 text-indigo-500" />
+                            <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center border border-slate-200 dark:border-slate-600 overflow-hidden p-1.5 relative">
+                              {item.img ? (
+                                <img
+                                  src={getAdminImageSrc(item.img)}
+                                  alt={item.label}
+                                  className="h-full w-full object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                    const fallback = e.currentTarget.parentElement?.querySelector('.preview-fallback') as HTMLElement
+                                    if (fallback) fallback.style.display = 'flex'
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`preview-fallback h-full w-full items-center justify-center ${item.img ? 'hidden' : 'flex'}`}>
+                                <Sparkles className="h-5 w-5 text-indigo-500" />
+                              </div>
                             </div>
                             <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight line-clamp-1">
                               {item.label}
@@ -313,46 +423,127 @@ export default function Page() {
 
         {/* Modal Add/Edit Menu */}
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Menu Item" : "Tambah Menu Item"}</DialogTitle>
               <DialogDescription>
-                Atur label, route halaman, dan ikon untuk menu aplikasi mobile
+                Atur label, route halaman, dan upload logo ikon untuk aplikasi mobile
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-4 max-h-[75vh] overflow-y-auto px-1">
               <div className="grid gap-2">
-                <Label htmlFor="label">Label Menu</Label>
+                <Label htmlFor="label">Label Menu <span className="text-destructive">*</span></Label>
                 <Input
                   id="label"
-                  placeholder="Misal: SKM, Sippadu, Firetap"
+                  placeholder="Misal: Portal OPD, SKM, Sippadu, Firetap"
                   value={form.label}
                   onChange={(e) => setForm({ ...form, label: e.target.value })}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="route">Route / Path Halaman</Label>
+                <Label htmlFor="route">Route Halaman / External URL <span className="text-destructive">*</span></Label>
                 <Input
                   id="route"
-                  placeholder="Misal: skm, sippadu, sapa_dashboard"
+                  placeholder="Misal: /rup, /skm, atau https://diskominfo.konaweselatankab.go.id"
                   value={form.route}
                   onChange={(e) => setForm({ ...form, route: e.target.value })}
                 />
+                <p className="text-[11px] text-muted-foreground">
+                  Gunakan path internal (misal: <code>/rup</code>) atau link eksternal web (dimulai <code>https://</code>).
+                </p>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="img">Path Gambar Asset (Opsional)</Label>
-                <Input
-                  id="img"
-                  placeholder="Misal: icons/skm.png"
-                  value={form.img}
-                  onChange={(e) => setForm({ ...form, img: e.target.value })}
+              {/* Upload Logo File dengan Preview */}
+              <div className="grid gap-2 border rounded-lg p-3 bg-muted/20">
+                <Label className="text-sm font-semibold flex items-center justify-between">
+                  <span>Upload Logo Gambar</span>
+                  {uploadingLogo && (
+                    <span className="text-xs text-primary flex items-center gap-1 font-normal">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Mengunggah...
+                    </span>
+                  )}
+                </Label>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleLogoUpload}
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                  className="hidden"
                 />
+
+                {imagePreview || form.img ? (
+                  <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">
+                    <div className="h-14 w-14 rounded-lg border bg-slate-50 dark:bg-slate-800 p-1.5 flex items-center justify-center shrink-0">
+                      <img
+                        src={imagePreview || getAdminImageSrc(form.img)}
+                        alt="Logo Preview"
+                        className="h-full w-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-mono truncate text-muted-foreground" title={form.img}>
+                        {form.img || "File lokal baru"}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingLogo}
+                        >
+                          <UploadCloud className="h-3.5 w-3.5 mr-1" /> Ganti Logo
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-destructive hover:text-destructive"
+                          onClick={handleRemoveLogo}
+                          disabled={uploadingLogo}
+                        >
+                          <X className="h-3.5 w-3.5 mr-1" /> Hapus
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-5 cursor-pointer hover:border-primary/60 hover:bg-muted/40 transition-colors text-center"
+                  >
+                    <UploadCloud className="h-8 w-8 text-muted-foreground mb-1" />
+                    <span className="text-xs font-medium">Klik untuk upload file logo</span>
+                    <span className="text-[11px] text-muted-foreground mt-0.5">PNG, JPG, SVG, WebP (Maks 5 MB)</span>
+                  </div>
+                )}
+
+                {/* Input manual opsional jika path asset atau external link */}
+                <div className="mt-2">
+                  <Label htmlFor="img" className="text-[11px] text-muted-foreground">
+                    Atau ketik path / URL gambar langsung:
+                  </Label>
+                  <Input
+                    id="img"
+                    className="h-8 text-xs font-mono mt-1"
+                    placeholder="Misal: icons/rup.png atau https://.../logo.png"
+                    value={form.img}
+                    onChange={(e) => {
+                      setForm({ ...form, img: e.target.value })
+                      setImagePreview(e.target.value ? getAdminImageSrc(e.target.value) : "")
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="icon">Material Icon Name (Jika tanpa gambar)</Label>
+                <Label htmlFor="icon">Material Icon Name (Fallback jika tanpa gambar)</Label>
                 <Input
                   id="icon"
                   placeholder="Misal: reviews, description, apps"
@@ -374,7 +565,7 @@ export default function Page() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setModalOpen(false)}>Batal</Button>
-              <Button onClick={handleSave} disabled={saving}>
+              <Button onClick={handleSave} disabled={saving || uploadingLogo}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {saving ? "Menyimpan..." : "Simpan Menu"}
               </Button>
