@@ -405,7 +405,7 @@ export default {
       { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
       { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
       { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
-      { label: 'RUP', img: 'icons/rup.png', route: '/rup' },
+      { label: 'RUP', img: 'icons/Logolpse.png', route: '/rup' },
     ])
 
     const fetchDynamicMenu = async () => {
@@ -414,7 +414,7 @@ export default {
         if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
           menuItems.value = res.data.data.map(item => ({
             label: item.label,
-            img: item.img || '',
+            img: (item.route === '/rup' || item.label?.toLowerCase() === 'rup') ? 'icons/Logolpse.png' : (item.img || ''),
             icon: item.icon || 'apps',
             route: item.route
           }))

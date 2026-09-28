@@ -58,7 +58,7 @@
       <!-- Card 1: Daftar RUP (Light Blue Card) -->
       <div class="menu-card card-rup q-mb-md" @click="goToDaftarRup">
         <div class="card-icon-col">
-          <img src="/img/rup/rup-icon.svg" alt="Daftar RUP" class="service-icon" />
+          <img src="/img/rup/Logorup.png" alt="Daftar RUP" class="service-icon" />
         </div>
         <div class="card-text-col">
           <div class="card-title">Daftar RUP</div>
@@ -74,9 +74,9 @@
       </div>
 
       <!-- Card 2: Konsultasi Masyarakat (Light Green Card) -->
-      <div class="menu-card card-konsultasi" @click="goToKonsultasi">
+      <div class="menu-card card-konsultasi q-mb-md" @click="goToKonsultasi">
         <div class="card-icon-col">
-          <img src="/img/rup/consultation-icon.svg" alt="Konsultasi Masyarakat" class="service-icon" />
+          <img src="/img/rup/Logokonsultasi.png" alt="Konsultasi Masyarakat" class="service-icon" />
         </div>
         <div class="card-text-col">
           <div class="card-title">Konsultasi Masyarakat</div>
@@ -87,6 +87,42 @@
         <div class="card-action-col">
           <div class="action-circle bg-green">
             <q-icon name="arrow_forward" size="18px" color="white" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: SPSE (Light Amber Card) -->
+      <div class="menu-card card-spse q-mb-md" @click="goToSpse">
+        <div class="card-icon-col">
+          <img src="/img/rup/logospse.png" alt="SPSE" class="service-icon" />
+        </div>
+        <div class="card-text-col">
+          <div class="card-title">SPSE</div>
+          <div class="card-desc">
+            Layanan Pengadaan Secara Elektronik Kabupaten Konawe Selatan.
+          </div>
+        </div>
+        <div class="card-action-col">
+          <div class="action-circle bg-amber-custom">
+            <q-icon name="open_in_new" size="18px" color="white" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: E-Katalog (Light Purple Card) -->
+      <div class="menu-card card-ekatalog" @click="goToEkatalog">
+        <div class="card-icon-col">
+          <img src="/img/rup/Logoekatalog.png" alt="E-Katalog" class="service-icon" />
+        </div>
+        <div class="card-text-col">
+          <div class="card-title">E-Katalog</div>
+          <div class="card-desc">
+            Katalog Elektronik Pengadaan Nasional INAPROC LKPP.
+          </div>
+        </div>
+        <div class="card-action-col">
+          <div class="action-circle bg-purple-custom">
+            <q-icon name="open_in_new" size="18px" color="white" />
           </div>
         </div>
       </div>
@@ -136,8 +172,9 @@ export default {
     const currentSlideIndex = ref(0)
 
     const banners = ref([
-      { id: 1, src: '/img/rup/banner-rup-1.jpg?v=4', alt: 'RUP UKPBJ Kabupaten Konawe Selatan' },
-      { id: 2, src: '/img/rup/banner-rup-2.jpg?v=4', alt: 'Konsultasi & Partisipasi Publik Pengadaan' },
+      { id: 1, src: '/img/rup/banner-rup-1.jpg?v=5', alt: 'RUP UKPBJ Kabupaten Konawe Selatan' },
+      { id: 2, src: '/img/rup/banner-rup-2.jpg?v=5', alt: 'Konsultasi & Partisipasi Publik Pengadaan' },
+      { id: 3, src: '/img/rup/banner3.png?v=5', alt: 'Aplikasi mengelola proses pengadaan barang dan jasa pemerintah secara online' },
     ])
 
     const onSwiper = (swiper) => {
@@ -170,6 +207,14 @@ export default {
       router.push('/rup/konsultasi')
     }
 
+    const goToSpse = () => {
+      window.open('https://spse.inaproc.id/konaweselatankab', '_blank')
+    }
+
+    const goToEkatalog = () => {
+      window.open('https://katalog.inaproc.id', '_blank')
+    }
+
     return {
       modules: [Autoplay],
       banners,
@@ -179,7 +224,9 @@ export default {
       goToSlide,
       goBack,
       goToDaftarRup,
-      goToKonsultasi
+      goToKonsultasi,
+      goToSpse,
+      goToEkatalog
     }
   }
 }
@@ -246,7 +293,7 @@ export default {
 .banner-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
 }
 
@@ -310,7 +357,7 @@ export default {
 .menu-card {
   display: flex;
   align-items: center;
-  padding: 16px 18px;
+  padding: 14px 16px;
   border-radius: 20px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -341,14 +388,38 @@ export default {
   }
 }
 
+/* Card 3: Amber Palette */
+.card-spse {
+  background: #fff8eb;
+  border: 1px solid #fed7aa;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.14);
+  }
+}
+
+/* Card 4: Purple Palette */
+.card-ekatalog {
+  background: #fbf5ff;
+  border: 1px solid #e9d5ff;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.14);
+  }
+}
+
 .card-icon-col {
   flex-shrink: 0;
-  width: 58px;
-  height: 58px;
+  width: 82px;
+  height: 56px;
   margin-right: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .service-icon {
@@ -397,6 +468,16 @@ export default {
   &.bg-green {
     background: #00a86b;
     box-shadow: 0 4px 10px rgba(0, 168, 107, 0.35);
+  }
+
+  &.bg-amber-custom {
+    background: #f59e0b;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+  }
+
+  &.bg-purple-custom {
+    background: #9333ea;
+    box-shadow: 0 4px 10px rgba(147, 51, 234, 0.35);
   }
 
   .menu-card:hover & {

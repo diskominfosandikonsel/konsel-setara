@@ -305,7 +305,7 @@
             unelevated
             color="primary"
             icon="open_in_new"
-            label="Buka di SiRUP LKPP"
+            label="Buka di Data RUP INAPROC"
             @click="openSirup(selectedItem.kode_rup)"
           />
         </q-card-actions>
@@ -734,7 +734,7 @@ export default {
     }
 
     const openSirup = (kodeRup) => {
-      const url = `https://sirup.lkpp.go.id/sirup/ro/cari?koderup=${kodeRup}`
+      const url = `https://data.inaproc.id/rup?search_rup=${kodeRup}`
       window.open(url, '_blank')
     }
 
