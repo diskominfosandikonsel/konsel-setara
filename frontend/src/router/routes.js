@@ -635,6 +635,22 @@ const routes = [
         component: () => import('pages/Rup/Konsultasi.vue'),
         meta: { showBottomNav: false }
       },
+      // SLA TICKETING SYSTEM
+      {
+        path: 'tiket',
+        component: () => import('pages/Rup/Konsultasi.vue'),
+        meta: { showBottomNav: true }
+      },
+      {
+        path: 'tiket/buat',
+        component: () => import('pages/Rup/Konsultasi.vue'),
+        meta: { showBottomNav: false }
+      },
+      {
+        path: 'tiket/riwayat',
+        component: () => import('pages/Rup/Konsultasi.vue'),
+        meta: { showBottomNav: false }
+      },
       // ADMIN SECTION
       {
         path: 'admin/slider',

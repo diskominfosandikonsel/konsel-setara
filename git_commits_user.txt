@@ -1,0 +1,70 @@
+c9bc55e517fc21534cb9bbafa33125e1f0323c3d	2026-01-09	Vite + Quasar App
+b0131291b77e51a53303ac77d7f452f3bc78e7fc	2026-01-09	add gitignore
+5a9f7ece8fb61cd8de1fa172553fdcfceca6ecc5	2026-01-09	Add gitignore
+6d02309f08fbdafb94bc08973c3cc9e4120a81a8	2026-01-09	Remove Eslint & Create Layouts With Bottom Navigation
+df2c018ffa9289f96b1654bc55a7aa7f6d15281a	2026-01-10	Bottom Navigation & Routes to Layout
+e2c13ee1c610d4c2ddf604cbc73d982922430b5b	2026-01-11	add smooth transition on bottom navigation
+2ea458de905037b7f4f1eb04c46f0b37253662fc	2026-01-14	Update Readme.md
+47fed54d8bfc388dadbcb18e0d89309012cf5179	2026-01-14	Update Readme.md
+22375b6703bcfcb1d16755744e4180f6882e243c	2026-01-17	Dashboard SapaKonsel
+cb198df59c4f3cc50a4d4a8df120e270a73a93a6	2026-04-04	Riwayat Sapa Konsel
+a3a2896feb1b21245ea64f503561d07fb531b358	2026-04-04	Add Detail SapaKonsel
+1e2a758d786609fab6287bce4424a58bf3496001	2026-04-05	Add Satgas PPPA
+016feab6467672061768bfeb49c1122eab41deec	2026-04-05	SapaKonsel Pages Routing
+0cf35d01e58119b8914dd2e43cd3e7614573d642	2026-04-06	Authentication, API Services and Stores
+fbadb4da646d09b171059e28b15a973016f99ba5	2026-04-07	Add Backend
+0559c5f0f16bd5a6deef61afa6102629dbeceb9e	2026-04-07	Updated README.md
+dd8a4b80fe93669de6a5d3972f90c2a34639a59a	2026-04-07	Add Capacitor For Build On Android
+783a08012836d6588a4857ec23583cf0b4744d88	2026-04-08	Change SapaKonsel Logo on IndexPage
+148de2928699f76340adccda406a4e490561373e	2026-04-08	Delete Temporary Config & Quasar Folder
+e8a5e8bc261ca685e2ba73e76a65bec1cad9d314	2026-04-09	Restructure Architect API
+4929776a4ea7850c12b73d7fe558fee4e81c5979	2026-04-09	Template CRUD with formData
+97ac3d1542913fc138670a94236d42718d90d3d3	2026-04-09	Add Delete Function
+7cb7fbf29104daafe0f870aca2db0742ff881cb3	2026-04-09	Add Registration's Function and Copy User Account
+05ad0dcc2703249bfdc6da7d7e1de7e8b203f694	2026-04-11	Add gitignore on android and readme.md mobile production
+67b951080c4d6a15b39ceca2f8740c1dc8774239	2026-04-11	Add gitignore on android and readme.md mobile production
+a829733c21663929ab4fe359688a659d2ac13d4b	2026-04-11	Fix Logout Issues
+5165b8c2f2ccfac1da1c499b4917d112e096436e	2026-04-11	remove android folder from tracking
+d4139da033947b4ab4eb7c45bd093b6a26482a81	2026-04-11	Back Configuration
+5535d342d386e7ce0bbc6771b40a23376b00521a	2026-04-11	Back Configuration
+0e435f8650f7a94c8d90af58c47ac9c2a223158a	2026-04-13	Fix Merge
+8501679dec13a5d3c485cffc7cb51cf75b29d65c	2026-04-13	Edukasi SapaKonsel
+1b3d666614c66326d70ff658fd07ebd0d29564ce	2026-04-14	SapaKonsel Report Emergency
+1f0704e9380d59ebd3f4611c4b0db54ca3eaac73	2026-04-14	SapaKonsel Emergency
+e3ed3383d985ca64fda5158d64591f5072d2e9f0	2026-04-14	SapaKonsel Emergency & Android Manifest Camera Hardware
+fcdc340124de03ce2a234dfa768cf0a150c81a97	2026-04-14	Add Package npm install @capacitor-community/camera-preview
+dc0cc59edce9d10af65196c62aee4c15b2972834	2026-04-14	Camera UI
+0fb591560f714e246cc96f6133441488ff22e87d	2026-04-14	Emergency Report Image
+6d207fe07716debcf180bcded18b46dffb721217	2026-04-14	Emergency Report Image
+65692f2b76e0c9a6fd3ebbc68fab0c84bff19d41	2026-04-14	Add Riwayat Laporan SapaKonsel
+fc18339b2981062bab1e5e9fc11c05b2f07c1246	2026-04-14	Add Riwayat Laporan SapaKonsel
+ed3dcac3a7fdb1852a5edad89c2936f8e27e5ff7	2026-04-14	Fix Emergency Routing
+ec0c4c578ec8d632e5cbfe78dd55c8b8f055b27b	2026-04-14	Fix Detail Riwayat & Detail Edukasi Route
+68434fab39f808729570a90999152b12d518b97c	2026-04-14	Fix Detail Riwayat & Detail Edukasi Route
+81517d5198997faaf273acb9207f47e29bd3ceb8	2026-04-15	fix merge conflict
+b245e934a4c72fce3061203a5f1cbd0758e600cf	2026-04-15	fix merge conflict
+abeb98958087bf56176d0a20047301e68a4e9a7c	2026-04-15	Fix SapaKonsel Icon
+9f017a8b3ff696a3a385c57b745284f6fd7f35e1	2026-04-16	Add Guide Page Dummy
+30a3230b3052885839f8be31adc2e9e16db696a8	2026-04-16	Guide App Pdf Viewer On Profile Page
+99147ea95649bc1b2874a5cc7308b907403084ae	2026-04-17	Feat: add infografis SapaKonsel
+6486372742190e1ed0238eed1438f1ad64c16738	2026-04-17	fix push conflict
+8507a16493c91241d304158c4b542bd8f111801f	2026-04-18	Feat : Push Notifikasi using firebase
+2e206eb80fcb8a05bffcd74417a84edde148a517	2026-04-18	Android Manifest Post_Notifications
+dcedb013d38cf3e25208de0874d619dabf20ad8c	2026-04-18	Feat: add fcm for notification token
+2f0ae607877da99df87bdd003efc39b5cbd79bc3	2026-04-18	fix : Pernaikan UI SapaKonsel
+a11dad1603ea71bd248b1906958cf7ac36a1a375	2026-04-19	Feat: add package ApexCharts for chart Erida
+a7019f6ebe9551e98a7f665d863697d1e03f70f1	2026-04-20	Feat: add riset page, pdf viewer and chart
+bfe97333dfa1aba8b54b9b5790383f42f23b07d4	2026-04-20	Feat: add aksi, haki, krenova, penelitian dan teknologi
+f2864b7a42c18ba97e3bd2dbe7d7fadead494e17	2026-04-21	Dashboard Erida
+151fcde3f23888e4d94c0616b3fe20566bd865c0	2026-04-24	Feat: Add Izin Penelitian, Tema Penelitian, Dokumen dan Kreatifitas & Inovasi
+1a66994094785b7b6fb6ca539abb2ae450a22700	2026-04-24	Feat: tambah kegiatan dan berita erida
+b2362e96cfaed9da49d5a77d8dcd7def3f137d9f	2026-04-25	Feat : Add erida news, kegiatan, usulan tema penelitian dan dokumen lainnya
+16194555b4bec68a81323b9664caf14882fa00c7	2026-04-26	Erida Fix Krenova
+9af1d40873ea9932640398b1f4356a1d53e5fd4c	2026-04-30	Feat : Add dashboard Bansos
+8984b647f7c59d04424f7845fde6cf7179c6d91a	2026-04-30	Bansos Routing On Dashboard
+78d67a60d1b70d3439bf5ba7bddea49b3bd79789	2026-04-30	Fix: Dashboar Bantuan & Hibah
+dacfab9af821c461f2e58d0934183fa9304bf58d	2026-04-30	Add Modal Cari Data
+06bd66134f87477481d27cb652ba749a3a2972e0	2026-04-30	Feat Add Search Function on Bansos
+4dee2a27601e0085998b8fe284b5789acb7c6952	2026-05-01	Add Izin Penelitian Erida
+281b76f88f042272600cc6b5327fc3900c1c0d03	2026-05-03	Erida Izin Penelitian Survey IKM
+c62abdfccf9537ffe11ab78c77a59a625eda8ba5	2026-05-03	Erida Izin Penelitian Survey IKM
