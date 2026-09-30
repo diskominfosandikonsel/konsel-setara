@@ -4,11 +4,11 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ---
 
-## 🏆 STATUS TERAKHIR (RILIS v1.6.0 / v1.6.1)
+## 🏆 STATUS TERAKHIR (RILIS v1.6.2)
 
 | Komponen                        |        Status        | Catatan Rilis                                                                                                                               |
 | :------------------------------ | :------------------: | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Mobile Android**              | 🚀 **LIVE & UPDATE** | Versi `1.6.1` (kode `10`) live di Play Store. Bundle rilis baru **`1.6.2` (kode `11`)** siap diunggah dengan fitur **Konsultasi LPSE / Tiket SLA Pengadaan**. |
+| **Mobile Android**              | 🚀 **RESMI LIVE**    | Versi **`1.6.2` (kode `11`)** resmi disetujui Google Play Store dan live ke publik dengan fitur **Konsultasi LPSE / Tiket SLA Pengadaan**. |
 | **Konsultasi LPSE (SLA Tiket)** |    ✅ **SELESAI**    | Formulir konsultasi PBJ, lampiran kamera/galeri, tracking status tiket, komentar interaktif, dan offline fallback storage.                  |
 | **Backend Visitor & Menu**      |    ✅ **SELESAI**    | Endpoint `/api/v1/visitors/*` & `/api/v1/menu/upload` aktif melayani aplikasi & admin.                                                      |
 | **Plan 1: Upload Logo Dinamis** |    ✅ **SELESAI**    | Admin web bisa upload logo gambar mandiri, backend melayani static storage & mobile `IndexPage.vue` otomatis render logo remote.            |
@@ -19,9 +19,8 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ```mermaid
 flowchart LR
-    A[v1.6.2 Build AAB Kode 11] --> B[✅ Fitur Konsultasi LPSE & SLA Selesai]
-    B --> C[🎯 FOKUS: PLAN 2 Dashboard Analitik Pengunjung di Admin]
-    C --> D[🛠️ PLAN 3: DEX Obfuscation R8 & Optimasi Android]
+    A[✅ v1.6.2 Resmi Live di Play Store] --> B[🎯 FOKUS SEKARANG: PLAN 2 Dashboard Analitik Pengunjung di Admin]
+    B --> C[🛠️ PLAN 3: DEX Obfuscation R8 & Optimasi Android]
 ```
 
 ---
