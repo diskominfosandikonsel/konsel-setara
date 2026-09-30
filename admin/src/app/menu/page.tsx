@@ -128,9 +128,7 @@ export default function Page() {
       const formData = new FormData()
       formData.append("logo", file)
 
-      const res = await api.post("/api/v1/menu/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      })
+      const res = await api.post("/api/v1/menu/upload", formData)
 
       if (res.data?.success && res.data?.data?.path) {
         const uploadedPath = res.data.data.path
@@ -139,8 +137,12 @@ export default function Page() {
         toast.success("Logo berhasil diunggah!")
       }
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Gagal mengunggah logo"
-      toast.error(msg)
+      if (err.response?.status === 404) {
+        toast.error("Endpoint upload belum aktif di server backend (404). Silakan pull & reload backend di server.")
+      } else {
+        const msg = err.response?.data?.message || err.message || "Gagal mengunggah logo"
+        toast.error(msg)
+      }
     } finally {
       setUploadingLogo(false)
       if (fileInputRef.current) fileInputRef.current.value = ""

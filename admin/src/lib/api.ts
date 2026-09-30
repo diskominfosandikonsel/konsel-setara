@@ -17,6 +17,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.authorization = `kikensbatara ${token}`
     }
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
     return config
   },
   (error) => Promise.reject(error)

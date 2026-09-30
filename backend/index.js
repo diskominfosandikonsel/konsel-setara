@@ -68,7 +68,7 @@ app.get('/openapi.json', (req, res) => {
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
     // latestVersion: '1.4.0',
-    latestVersion: '1.6.0', /// BUKA JIKA SUDAH UP DI PLAYSTORE
+    latestVersion: '1.6.1', /// BUKA JIKA SUDAH UP DI PLAYSTORE
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: true
   });
