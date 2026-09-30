@@ -8,7 +8,8 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 | Komponen                        |        Status        | Catatan Rilis                                                                                                                               |
 | :------------------------------ | :------------------: | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Mobile Android**              | 🚀 **LIVE & UPDATE** | Versi `1.6.0` (kode `9`) live di Play Store. Bundle versi `1.6.1` (kode `10`, dukungan logo dinamis) sudah diunggah ke Google Play Console. |
+| **Mobile Android**              | 🚀 **LIVE & UPDATE** | Versi `1.6.1` (kode `10`) live di Play Store. Bundle rilis baru **`1.6.2` (kode `11`)** siap diunggah dengan fitur **Konsultasi LPSE / Tiket SLA Pengadaan**. |
+| **Konsultasi LPSE (SLA Tiket)** |    ✅ **SELESAI**    | Formulir konsultasi PBJ, lampiran kamera/galeri, tracking status tiket, komentar interaktif, dan offline fallback storage.                  |
 | **Backend Visitor & Menu**      |    ✅ **SELESAI**    | Endpoint `/api/v1/visitors/*` & `/api/v1/menu/upload` aktif melayani aplikasi & admin.                                                      |
 | **Plan 1: Upload Logo Dinamis** |    ✅ **SELESAI**    | Admin web bisa upload logo gambar mandiri, backend melayani static storage & mobile `IndexPage.vue` otomatis render logo remote.            |
 
@@ -18,8 +19,8 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ```mermaid
 flowchart LR
-    A[v1.6.1 Diunggah ke Play Store] --> B[✅ PLAN 1: Upload Logo Dinamis SELESAI]
-    B --> C[🎯 FOKUS SEKARANG: PLAN 2 Dashboard Analitik Pengunjung di Admin]
+    A[v1.6.2 Build AAB Kode 11] --> B[✅ Fitur Konsultasi LPSE & SLA Selesai]
+    B --> C[🎯 FOKUS: PLAN 2 Dashboard Analitik Pengunjung di Admin]
     C --> D[🛠️ PLAN 3: DEX Obfuscation R8 & Optimasi Android]
 ```
 
@@ -72,8 +73,45 @@ flowchart LR
 
 ---
 
+## 📱 STANDAR PROSEDUR RILIS & BUILD PLAY STORE (SOP UPDATE APLIKASI)
+
+Setiap kali pengguna meminta **"update"** atau **"mau upload ke Play Store"**, jalankan alur kerja standar berikut secara otomatis:
+
+### 1. Pengecekan & Kenaikan Versi (Wajib)
+- **`versionCode`**: **WAJIB SELALU NAIK (+1)** dari versi Play Store sebelumnya agar tidak ditolak oleh Google Play Console (*error: version code already used*).
+- **`versionName`**: Naikkan sesuai tipe rilis (`MAJOR.MINOR.PATCH`, misal: `1.6.1` ➔ `1.6.2`).
+
+### 2. Sinkronisasi 5 Titik Versi Wajib
+Pastikan nomor versi tersinkronisasi di kelima file berikut:
+1. `frontend/android/app/build.gradle` (`versionCode` & `versionName`)
+2. `frontend/package.json` (`version`)
+3. `frontend/src/pages/Auth/LoginPage.vue` (`appVersion`)
+4. `frontend/src/pages/ProfilPage.vue` (`appVersion`)
+5. `backend/index.js` (`latestVersion`)
+
+### 3. Eksekusi Kompilasi Build Otomatis
+```bash
+# 1. Kompilasi web assets SPA
+cd frontend && npm run build
+
+# 2. Sinkronkan assets & native plugins ke Capacitor Android
+npx cap sync android
+
+# 3. Kompilasi signed bundle release (.aab) & signed APK (.apk)
+cd android && ./gradlew bundleRelease assembleRelease
+```
+
+### 4. Output & Laporan Akhir
+Selalu sediakan laporan terstruktur mencakup:
+- **Lokasi file `.aab`**: `frontend/android/app/build/outputs/bundle/release/app-release.aab`
+- **Lokasi file `.apk`**: `frontend/android/app/build/outputs/apk/release/app-release.apk`
+- **Konfirmasi Metadata**: `versionCode` dan `versionName` aktif
+- **Draf Catatan Rilis (*Release Notes*)**: Siap copy-paste ke Google Play Console.
+
+---
+
 ## 📌 CARA PENGGUNAAN PLAN INI
 
 Setiap kali membuka sesi proyek berikutnya, Anda cukup mengatakan:  
-👉 **"Lanjutkan Plan 2 (Dashboard Analitik Pengunjung di Admin)"** atau **"Lanjutkan Plan 3 (Optimalisasi DEX R8 Android)"**, dan kita langsung mengeksekusi sesuai prioritas!
+👉 **"Lanjutkan Plan 2 (Dashboard Analitik Pengunjung di Admin)"**, **"Lanjutkan Plan 3 (Optimalisasi DEX R8 Android)"**, atau **"Mau build / upload ke Play Store"**, dan kita langsung mengeksekusi sesuai standar SOP!
 

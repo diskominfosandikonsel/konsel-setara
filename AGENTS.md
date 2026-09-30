@@ -55,3 +55,21 @@ Dokumen ini adalah acuan kerja utama untuk AI Assistant / Agent agar selalu sela
    - Desain: **Minimalis, kompak, dan subtle strip** di bagian bawah [IndexPage.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/pages/IndexPage.vue) (tidak mendominasi halaman, hanya sebagai pelengkap).
 3. **Penyajian Data di Web Admin (`admin/`)**:
    - Dibuatkan halaman/modul tersendiri untuk statistik keseluruhan secara komprehensif (grafik tren harian, bulanan, dan analitik lengkap).
+
+---
+
+## 📱 STANDAR RILIS PLAY STORE (KETIKA USER MEMINTA UPDATE / UPLOAD PLAY STORE)
+
+Setiap kali pengguna meminta **"update"** atau **"mau upload ke Play Store"**, jalankan alur SOP berikut secara otomatis:
+1. **Pengecekan Versi Play Store**: Selalu naikkan `versionCode` (+1) dan `versionName` agar tidak ditolak Play Store.
+2. **Sinkronkan 5 File Versi**:
+   - `frontend/android/app/build.gradle` (`versionCode`, `versionName`)
+   - `frontend/package.json` (`version`)
+   - `frontend/src/pages/Auth/LoginPage.vue` (`appVersion`)
+   - `frontend/src/pages/ProfilPage.vue` (`appVersion`)
+   - `backend/index.js` (`latestVersion`)
+3. **Eksekusi Build Lengkap**:
+   - `npm run build` (frontend)
+   - `npx cap sync android` (sync Capacitor)
+   - `./gradlew bundleRelease assembleRelease` (build `.aab` dan `.apk` ter-signing)
+4. **Sajikan Laporan Lengkap**: Berikan path `.aab` & `.apk`, konfirmasi metadata versi, dan draf catatan rilis (*Release Notes*) yang siap disalin ke Google Play Console.

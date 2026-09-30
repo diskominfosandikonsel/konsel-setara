@@ -176,7 +176,7 @@ export default {
     return {
       showLogoutDialog: false,
       loggingOut: false,
-      appVersion: '1.6.1'
+      appVersion: '1.6.2'
     }
   },
 
