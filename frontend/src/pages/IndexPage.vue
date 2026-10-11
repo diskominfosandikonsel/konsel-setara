@@ -405,6 +405,7 @@ export default {
       { label: 'CSR Setara', img: 'icons/Csr.png', route: '/csr_dashboard' },
       { label: 'BANSOS', img: 'icons/bansos.png', route: '/bansos_dashboard' },
       { label: 'Data', img: 'icons/data.png', route: '/data_dashboard' },
+      { label: 'Koperasi & UMKM', img: 'icons/koperasi.png', route: '/koperasi_dashboard' },
       { label: 'RUP', img: 'icons/Logolpse.png', route: '/rup' },
     ])
 

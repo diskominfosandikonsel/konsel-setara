@@ -635,6 +635,12 @@ const routes = [
         component: () => import('pages/Rup/Konsultasi.vue'),
         meta: { showBottomNav: false }
       },
+      // KOPERASI & UMKM (APLI DAKOP)
+      {
+        path: 'koperasi_dashboard',
+        component: () => import('pages/KoperasiUmkm/Dashboard.vue'),
+        meta: { showBottomNav: true, requiresAuth: false }
+      },
       // SLA TICKETING SYSTEM
       {
         path: 'tiket',

@@ -111,6 +111,9 @@ app.get('/api/v1/app-version', (req, res) => {
 
 | Versi (`versionName`) | Kode (`versionCode`) | Tanggal Rilis | Tipe Update | Keterangan Singkat |
 | :---: | :---: | :---: | :---: | :--- |
-| **`1.5.0`** | **`8`** | 28 Sep 2026 | Minor (Wajib) | Penambahan Fitur Statistik Pengunjung (Realtime Counter) & Menu RUP baru. |
+| **`1.6.3`** | **`12`** | 11 Okt 2026 | Minor (Wajib) | Penambahan Modul Layanan Koperasi & Katalog Pelaku UMKM Daerah (APLI DAKOP) dengan filter kecamatan, desa, sektor usaha, dan NIK. |
+| `1.6.2` | `11` | Okt 2026 | Patch | Pembaruan optimasi visual dashboard dan perbaikan rute. |
+| `1.6.1` | `10` | Okt 2026 | Patch | Optimasi upload logo menu admin & penambahan ikon warga bicara. |
+| `1.5.0` | `8` | 28 Sep 2026 | Minor (Wajib) | Penambahan Fitur Statistik Pengunjung (Realtime Counter) & Menu RUP baru. |
 | `1.4.0` | `7` | 02 Sep 2026 | Minor (Wajib) | Penambahan Modul SKM, Realisasi Permohonan, & Rebranding visual. |
 | `1.3.0` | `6` | Agustus 2026 | Minor (Wajib) | Integrasi Layanan Publik Daerah Terpadu. |
