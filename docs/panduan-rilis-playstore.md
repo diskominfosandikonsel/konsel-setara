@@ -44,6 +44,9 @@ Sebelum melakukan proses build, perbarui nomor versi pada file-file berikut:
    ```json
    "version": "<NOMOR_VERSI_BARU>"
    ```
+5. **[frontend/src/App.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/App.vue)** *(Bagian "What's new" pada Pop-up Update)*:
+   - Pop-up ini akan tampil di smartphone pengguna versi lama jika `latestVersion` di backend lebih tinggi dari versi di HP mereka.
+   - Poin-poin di `<div class="whats-new">` dapat disesuaikan atau dibiarkan teks umum (*Peningkatan performa, Fitur baru, Pembaruan keamanan*) yang selaras dengan Catatan Rilis (*Release Notes*) Google Play Console.
 
 ---
 
@@ -104,6 +107,12 @@ app.get('/api/v1/app-version', (req, res) => {
 > **Aturan Waktu Eksekusi Backend**:  
 > **JANGAN** mengubah nilai `latestVersion` di server produksi saat rilis masih berstatus *"Sedang ditinjau"* di Play Console.  
 > **Ubah HANYA SETELAH** status rilis di Google Play Console telah berubah menjadi **"Tersedia di Google Play" (*Active*)** dan tombol *"Update"* sudah benar-benar terlihat di aplikasi Play Store smartphone.
+
+> [!NOTE]
+> **Hubungan Catatan Rilis Play Console & Pop-up Update In-App**:
+> 1. **Di Play Console**: Catatan Rilis (*Release Notes*) yang ditulis saat membuat rilis adalah teks resmi yang akan dibaca pengguna di aplikasi Google Play Store saat membuka halaman aplikasi.
+> 2. **Di Aplikasi Mobile (`frontend/src/App.vue`)**: Modal pop-up update (`<q-dialog>`) akan muncul di HP pengguna versi lama saat membuka aplikasi. Poin-poin *"What's new"* di modal ini berfungsi sebagai ringkasan pembaruan dan ajakan (*call-to-action*) agar pengguna segera menekan tombol **"Update Sekarang"**.
+> 3. Teks *"What's new"* di [App.vue](file:///Users/simplephi/Documents/riswan/konsel-setara/frontend/src/App.vue) dapat dibiarkan teks universal (*Peningkatan performa, Fitur baru, Pembaruan keamanan*) atau disesuaikan sebelum build bundle rilis baru.
 
 ---
 
