@@ -93,8 +93,11 @@
             <q-badge v-if="selectedJenis !== 'Semua'" color="orange-2" text-color="orange-9" class="text-weight-medium">
               {{ jenisList.find(j => j.kode === selectedJenis)?.nama || selectedJenis }}
             </q-badge>
+            <q-badge v-if="selectedOpdFilter !== 'Semua'" color="teal-2" text-color="teal-9" class="text-weight-medium ellipsis" style="max-width: 150px;">
+              {{ getOpdLabel(selectedOpdFilter) }}
+            </q-badge>
             <q-btn
-              v-if="selectedCara !== 'Semua' || selectedMetode !== 'Semua' || selectedJenis !== 'Semua'"
+              v-if="isFilterActive"
               flat round dense size="xs" icon="close" color="grey-7"
               @click="resetFilter"
             >
@@ -361,15 +364,26 @@
           <q-select
             v-model="tempOpdFilter"
             :options="opdOptions"
-            label="Satuan Kerja / OPD"
+            label="Satuan Kerja / Unit Kerja (OPD)"
             outlined
             dense
             use-input
             fill-input
             hide-selected
             input-debounce="0"
+            emit-value
+            map-options
             @filter="filterOpdOptions"
-          />
+            :loading="isLoadingSatker"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Unit kerja tidak ditemukan
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
         </q-card-section>
 
         <q-card-actions align="between" class="q-pa-md">
@@ -384,7 +398,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
-import { getDaftarRup, getRupSummary } from 'src/api/apiRup'
+import { getDaftarRup, getRupSummary, getSatkerList } from 'src/api/apiRup'
 
 export default {
   name: 'DaftarRupPage',
@@ -413,12 +427,16 @@ export default {
     const tempTahun = ref(currentYear)
     const tempMetode = ref('Semua')
     const tempJenis = ref('Semua')
-    const selectedOpdFilter = ref('Semua OPD')
-    const tempOpdFilter = ref('Semua OPD')
+    const selectedOpdFilter = ref('Semua') // nilai kode satker (misal '5.03.5.04.0.00.01.0000') atau 'Semua'
+    const tempOpdFilter = ref('Semua')
+
+    const opdFullList = ref([{ label: 'Semua Unit Kerja (OPD)', value: 'Semua' }])
+    const opdOptions = ref([{ label: 'Semua Unit Kerja (OPD)', value: 'Semua' }])
+    const isLoadingSatker = ref(false)
 
     const isFilterActive = computed(() => {
       return selectedTahun.value !== currentYear ||
-        selectedOpdFilter.value !== 'Semua OPD' ||
+        selectedOpdFilter.value !== 'Semua' ||
         selectedCara.value !== 'Semua' ||
         selectedMetode.value !== 'Semua' ||
         selectedJenis.value !== 'Semua'
@@ -443,9 +461,6 @@ export default {
       total_rup: 0,
       total_pagu: 0
     })
-
-    const opdList = ref(['Semua OPD'])
-    const opdOptions = ref(['Semua OPD'])
 
     // Cara pengadaan: dua pilihan utama di INAPROC
     const caraPengadaanList = [
@@ -482,7 +497,7 @@ export default {
           metode: selectedMetode.value === 'Semua' ? '' : selectedMetode.value,
           jenis: selectedJenis.value === 'Semua' ? '' : selectedJenis.value,
           search: searchQuery.value || '',
-          satker: selectedOpdFilter.value === 'Semua OPD' ? '' : selectedOpdFilter.value
+          satker: selectedOpdFilter.value === 'Semua' ? '' : selectedOpdFilter.value
         })
 
         if (result.success) {
@@ -492,11 +507,9 @@ export default {
           } else {
             allPaket.value = newData
 
-            // Ekstrak daftar unik Satker jika belum terisi banyak
-            if (opdList.value.length <= 1) {
-              const opds = ['Semua OPD', ...new Set(newData.map(d => d.opd).filter(Boolean))]
-              opdList.value = opds
-              opdOptions.value = [...opds]
+            // Ekstrak fallback Satker jika getSatkerList belum terisi
+            if (opdFullList.value.length <= 1) {
+              extractFallbackSatkers(newData)
             }
           }
 
@@ -635,6 +648,7 @@ export default {
     }
 
     const applyFilterDialog = () => {
+      const yearChanged = selectedTahun.value !== tempTahun.value
       selectedTahun.value = tempTahun.value
       selectedCara.value = tempCara.value
       selectedMetode.value = tempCara.value === 'Swakelola' ? 'Semua' : tempMetode.value
@@ -644,6 +658,9 @@ export default {
       currentPage.value = 1
       fetchData(1, false)
       loadSummary()
+      if (yearChanged) {
+        loadSatker(tempTahun.value)
+      }
     }
 
     const resetFilter = () => {
@@ -655,20 +672,80 @@ export default {
       tempMetode.value = 'Semua'
       selectedJenis.value = 'Semua'
       tempJenis.value = 'Semua'
-      selectedOpdFilter.value = 'Semua OPD'
-      tempOpdFilter.value = 'Semua OPD'
+      selectedOpdFilter.value = 'Semua'
+      tempOpdFilter.value = 'Semua'
       searchQuery.value = ''
       showFilterDialog.value = false
       currentPage.value = 1
       fetchData(1, false)
       loadSummary()
+      loadSatker(currentYear)
+    }
+
+    const loadSatker = async (forceTahun) => {
+      const yr = forceTahun || selectedTahun.value
+      isLoadingSatker.value = true
+      try {
+        const res = await getSatkerList(yr)
+        if (res && res.success && Array.isArray(res.items) && res.items.length > 0) {
+          const list = [
+            { label: 'Semua Unit Kerja (OPD)', value: 'Semua' },
+            ...res.items.map(item => ({
+              label: (item.nama || '').replace(/\s*-\s*[0-9.]+$/, '').trim() || item.nama,
+              fullNama: item.nama || '',
+              value: String(item.kode || item.nama)
+            }))
+          ]
+          opdFullList.value = list
+          opdOptions.value = [...list]
+        }
+      } catch (e) {
+        console.warn('Gagal memuat satker dari INAPROC:', e)
+      } finally {
+        isLoadingSatker.value = false
+      }
+    }
+
+    const extractFallbackSatkers = (packets) => {
+      if (Array.isArray(packets) && packets.length > 0) {
+        const uniqueOpds = [...new Set(packets.map(p => p.opd).filter(Boolean))]
+        uniqueOpds.forEach(opdStr => {
+          const match = opdStr.match(/(.+?)\s*-\s*([0-9.]+)$/)
+          if (match) {
+            const cleanLabel = match[1].trim()
+            const kode = match[2].trim()
+            if (!opdFullList.value.some(o => o.value === kode)) {
+              opdFullList.value.push({
+                label: cleanLabel,
+                fullNama: opdStr,
+                value: kode
+              })
+            }
+          }
+        })
+        opdOptions.value = [...opdFullList.value]
+      }
     }
 
     const filterOpdOptions = (val, update) => {
       update(() => {
-        const needle = (val || '').toLowerCase()
-        opdOptions.value = opdList.value.filter(v => v.toLowerCase().includes(needle))
+        const needle = (val || '').toLowerCase().trim()
+        if (!needle) {
+          opdOptions.value = [...opdFullList.value]
+        } else {
+          opdOptions.value = opdFullList.value.filter(v =>
+            v.label.toLowerCase().includes(needle) ||
+            (v.fullNama && v.fullNama.toLowerCase().includes(needle)) ||
+            (v.value && v.value.toLowerCase().includes(needle))
+          )
+        }
       })
+    }
+
+    const getOpdLabel = (kode) => {
+      if (!kode || kode === 'Semua') return 'Semua OPD'
+      const found = opdFullList.value.find(o => o.value === kode)
+      return found ? found.label : kode
     }
 
     const getMetodeBadgeColor = (metode) => {
@@ -741,9 +818,11 @@ export default {
     onMounted(() => {
       selectedTahun.value = currentYear
       tempTahun.value = currentYear
-      tempOpdFilter.value = selectedOpdFilter.value
+      selectedOpdFilter.value = 'Semua'
+      tempOpdFilter.value = 'Semua'
       fetchData(1, false)
       loadSummary()
+      loadSatker()
     })
 
     return {
@@ -776,6 +855,8 @@ export default {
       dataSource,
       hasMore,
       opdOptions,
+      isLoadingSatker,
+      getOpdLabel,
       getMetodeBadgeColor,
       getJenisBadgeColor,
       formatRupiah,

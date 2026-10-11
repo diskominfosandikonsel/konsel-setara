@@ -15,10 +15,13 @@ function fetchInaprocWeb(endpoint, queryParams) {
     const now = Date.now().toString();
     const secret = Buffer.from(now.split('').reverse().join('')).toString('base64');
     const qs = new URLSearchParams(queryParams).toString();
+    const apiPath = endpoint.startsWith('/')
+      ? `/dashboard-api${endpoint}`
+      : `/dashboard-api/rup/${endpoint}`;
 
     const options = {
       hostname: INAPROC_HOST,
-      path: `/dashboard-api/rup/${endpoint}?${qs}`,
+      path: `${apiPath}?${qs}`,
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
@@ -93,6 +96,7 @@ router.get('/paket-penyedia', async (req, res) => {
     const metode = req.query.metode || '';   // 'Tender' | 'Pengadaan Langsung' | ...
     const jenis = req.query.jenis || '';     // 'Barang' | 'Pekerjaan Konstruksi' | ...
     const search = req.query.search || req.query.q || '';
+    const satker = req.query.satker || '';
 
     const queryParams = {
       tahun,
@@ -115,6 +119,11 @@ router.get('/paket-penyedia', async (req, res) => {
     // filter jenis pengadaan
     if (jenis && jenis !== 'Semua') {
       queryParams.filter_jenis = jenis;
+    }
+
+    // filter satker / unit kerja (kode satker)
+    if (satker && satker !== 'Semua' && satker !== 'Semua OPD') {
+      queryParams.satker = satker;
     }
 
     const querySearch = search ? String(search).trim() : '';
@@ -185,6 +194,38 @@ router.get('/paket-penyedia', async (req, res) => {
       error: err.message,
       message: 'Gagal mengambil data dari web inaproc',
     });
+  }
+});
+
+/**
+ * GET /api/v1/rup/satker
+ * Ambil daftar lengkap unit kerja / Satker resmi Konawe Selatan dari web INAPROC
+ */
+router.get('/satker', async (req, res) => {
+  try {
+    const tahun = req.query.tahun || new Date().getFullYear().toString();
+    const result = await fetchInaprocWeb('/profil-pengadaan/satker', {
+      tahun,
+      jenis: JENIS_KLPD,
+      instansi: INSTANSI_KONSEL,
+    });
+
+    if (result.status === 200 && Array.isArray(result.data?.items)) {
+      return res.json({
+        success: true,
+        source: 'inaproc-live',
+        tahun,
+        items: result.data.items,
+      });
+    }
+
+    return res.status(result.status || 500).json({
+      success: false,
+      error: 'Gagal mengambil data Satker dari INAPROC',
+      items: [],
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message, items: [] });
   }
 });
 

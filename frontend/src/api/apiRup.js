@@ -137,7 +137,7 @@ export async function getDaftarRup({
         queryParams.search_paket = querySearch
       }
     }
-    if (satker && satker !== 'Semua OPD') queryParams.satker = satker
+    if (satker && satker !== 'Semua' && satker !== 'Semua OPD') queryParams.satker = satker
 
     let res = await fetchDirectInaproc('table', queryParams)
 
@@ -192,5 +192,61 @@ export async function getDaftarRup({
     success: false,
     error: 'Tidak dapat terhubung ke data INAPROC. Periksa koneksi internet Anda.'
   }
+}
+
+/**
+ * Ambil daftar lengkap Satker / Unit Kerja resmi Konawe Selatan dari web INAPROC
+ */
+export async function getSatkerList(tahun) {
+  const currentYear = tahun || String(new Date().getFullYear())
+
+  // 1. Coba backend server
+  try {
+    const res = await api.get(`${BACKEND_BASE}/satker`, {
+      params: { tahun: currentYear },
+      timeout: 6000
+    })
+    if (res.data?.success && Array.isArray(res.data.items) && res.data.items.length > 0) {
+      return {
+        success: true,
+        source: 'backend',
+        items: res.data.items
+      }
+    }
+  } catch {
+    // lanjut ke direct web
+  }
+
+  // 2. Coba direct web INAPROC
+  try {
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const isCapacitor = !!window.Capacitor?.isNativePlatform?.()
+    const baseUrl = (isDev && !isCapacitor)
+      ? '/inaproc-proxy/dashboard-api/profil-pengadaan/satker'
+      : 'https://data.inaproc.id/dashboard-api/profil-pengadaan/satker'
+
+    const headers = createInaprocSignature()
+    const res = await axios.get(baseUrl, {
+      params: {
+        tahun: currentYear,
+        jenis: JENIS_KLPD,
+        instansi: INSTANSI_KONSEL
+      },
+      headers,
+      timeout: 10000
+    })
+
+    if (res.data?.items && Array.isArray(res.data.items)) {
+      return {
+        success: true,
+        source: 'inaproc-live',
+        items: res.data.items
+      }
+    }
+  } catch (err) {
+    console.warn('Gagal memuat satker dari INAPROC:', err.message)
+  }
+
+  return { success: false, items: [] }
 }
 
