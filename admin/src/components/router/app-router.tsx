@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { routes, type RouteConfig } from '@/config/routes'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PermissionGuard } from '@/components/permission-guard'
 
 function renderRoutes(routeConfigs: RouteConfig[]) {
   return routeConfigs.map((route, index) => (
@@ -12,7 +13,9 @@ function renderRoutes(routeConfigs: RouteConfig[]) {
       path={route.path}
       element={
         <Suspense fallback={<LoadingSpinner />}>
-          {route.element}
+          {route.permissionKey ? (
+            <PermissionGuard menuKey={route.permissionKey}>{route.element}</PermissionGuard>
+          ) : route.element}
         </Suspense>
       }
     >

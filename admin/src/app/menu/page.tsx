@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api, { UPLOAD_URL } from "@/lib/api"
+import { hasPermission } from "@/lib/permissions"
 
 interface MenuItem {
   id: string
@@ -32,6 +33,9 @@ interface MenuItem {
 }
 
 export default function Page() {
+  const canCreate = hasPermission("menu", "create")
+  const canUpdate = hasPermission("menu", "update")
+  const canDelete = hasPermission("menu", "delete")
   const [menus, setMenus] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -232,9 +236,11 @@ export default function Page() {
                       <CardTitle className="text-lg">Daftar Menu Grid ({menus.length})</CardTitle>
                       <CardDescription>Atur urutan, ikon/logo, dan status aktif menu</CardDescription>
                     </div>
-                    <Button onClick={openAdd}>
-                      <Plus className="h-4 w-4 mr-2" /> Tambah Menu
-                    </Button>
+                    {canCreate && (
+                      <Button onClick={openAdd}>
+                        <Plus className="h-4 w-4 mr-2" /> Tambah Menu
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -270,6 +276,8 @@ export default function Page() {
                             <TableRow key={item.id}>
                               <TableCell>
                                 <div className="flex items-center gap-1">
+                                  {canUpdate && (
+                                    <>
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -288,6 +296,8 @@ export default function Page() {
                                   >
                                     <ArrowDown className="h-3 w-3" />
                                   </Button>
+                                    </>
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell className="font-medium">
@@ -342,12 +352,16 @@ export default function Page() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex justify-end gap-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(item.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  {canUpdate && (
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {canDelete && (
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(item.id)}>
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>

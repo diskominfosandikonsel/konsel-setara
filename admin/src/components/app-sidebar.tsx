@@ -11,6 +11,7 @@ import {
   Award,
   ShieldCheck,
   Video,
+  KeyRound,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Logo } from "@/components/logo"
@@ -27,6 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { getProfile } from "@/lib/auth"
+import { fetchMyAccessGroup, getStoredAccessGroup, hasPermission } from "@/lib/permissions"
 
 const navGroups = [
   {
@@ -36,6 +38,7 @@ const navGroups = [
         title: "Dashboard SKM",
         url: "/dashboard",
         icon: LayoutDashboard,
+        permissionKey: "dashboard",
       },
     ],
   },
@@ -46,6 +49,7 @@ const navGroups = [
         title: "Realisasi Setara",
         url: "/realisasi",
         icon: Award,
+        permissionKey: "realisasi",
       },
     ],
   },
@@ -56,11 +60,13 @@ const navGroups = [
         title: "Ulasan & Komentar",
         url: "/ulasan",
         icon: MessageSquare,
+        permissionKey: "ulasan",
       },
       {
         title: "Aplikasi / Layanan",
         url: "/aplikasi",
         icon: AppWindow,
+        permissionKey: "aplikasi",
       },
     ],
   },
@@ -71,16 +77,19 @@ const navGroups = [
         title: "Slider / Banner",
         url: "/slider",
         icon: Image,
+        permissionKey: "slider",
       },
       {
         title: "Menu Dinamis",
         url: "/menu",
         icon: Menu,
+        permissionKey: "menu",
       },
       {
         title: "Video Konsel",
         url: "/video-konsel",
         icon: Video,
+        permissionKey: "video_konsel",
       },
     ],
   },
@@ -91,11 +100,19 @@ const navGroups = [
         title: "Manajemen User",
         url: "/users",
         icon: Users,
+        permissionKey: "users",
       },
       {
         title: "Hak Akses Pegawai",
         url: "/pegawai",
         icon: ShieldCheck,
+        permissionKey: "pegawai",
+      },
+      {
+        title: "Kelompok & Hak Akses",
+        url: "/access-groups",
+        icon: KeyRound,
+        permissionKey: "access_groups",
       },
     ],
   },
@@ -104,6 +121,14 @@ const navGroups = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const profile = getProfile()
   const role = Number(profile?.menu_klp)
+  const [accessGroup, setAccessGroup] = React.useState(getStoredAccessGroup())
+
+  React.useEffect(() => {
+    const refresh = () => setAccessGroup(getStoredAccessGroup())
+    window.addEventListener('access-permissions-changed', refresh)
+    fetchMyAccessGroup().then(setAccessGroup).catch(() => undefined)
+    return () => window.removeEventListener('access-permissions-changed', refresh)
+  }, [])
 
   const user = {
     name: profile?.nama || "Admin",
@@ -111,14 +136,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     avatar: "",
   }
 
-  // Filter menu based on role:
-  // Role 2 (Pegawai OPD) ONLY sees Dashboard & Realisasi Setara
-  const filteredNavGroups = navGroups.filter((group) => {
-    if (role === 2) {
-      return group.label === "Dashboard" || group.label === "Program Prioritas"
-    }
-    return true
-  })
+  const filteredNavGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => hasPermission(item.permissionKey, 'read', accessGroup)),
+    }))
+    .filter((group) => group.items.length > 0)
 
   return (
     <Sidebar {...props}>
@@ -133,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Konsel Setara</span>
                   <span className="truncate text-xs">
-                    {role === 2 ? "Portal Pegawai OPD" : "Admin Panel"}
+                    {accessGroup?.name || (role === 2 ? "Admin OPD" : "Admin Panel")}
                   </span>
                 </div>
               </Link>

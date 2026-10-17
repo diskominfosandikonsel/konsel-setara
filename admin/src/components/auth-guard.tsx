@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isAuthenticated, getProfile, logout } from '@/lib/auth'
+import { isAuthenticated } from '@/lib/auth'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -15,16 +15,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return
     }
 
-    const profile = getProfile()
-    const role = Number(profile?.menu_klp)
-    if (role !== 1 && role !== 2) {
-      logout()
-    }
   }, [navigate])
 
-  const profile = getProfile()
-  const role = Number(profile?.menu_klp)
-  if (!isAuthenticated() || (role !== 1 && role !== 2)) {
+  if (!isAuthenticated()) {
     return null
   }
 

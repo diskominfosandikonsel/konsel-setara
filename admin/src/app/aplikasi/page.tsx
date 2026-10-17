@@ -19,6 +19,7 @@ import {
 import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { hasPermission } from "@/lib/permissions"
 
 interface Aplikasi {
   id: string
@@ -31,6 +32,9 @@ interface Aplikasi {
 }
 
 export default function Page() {
+  const canCreate = hasPermission("aplikasi", "create")
+  const canUpdate = hasPermission("aplikasi", "update")
+  const canDelete = hasPermission("aplikasi", "delete")
   const [data, setData] = useState<Aplikasi[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -131,9 +135,11 @@ export default function Page() {
                   <Button variant="outline" size="icon" onClick={handleSearch}>
                     <Search className="h-4 w-4" />
                   </Button>
-                  <Button onClick={openAdd}>
-                    <Plus className="h-4 w-4 mr-1" /> Tambah
-                  </Button>
+                  {canCreate && (
+                    <Button onClick={openAdd}>
+                      <Plus className="h-4 w-4 mr-1" /> Tambah
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -179,12 +185,16 @@ export default function Page() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {canUpdate && (
+                                <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {canDelete && (
+                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item.id)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>

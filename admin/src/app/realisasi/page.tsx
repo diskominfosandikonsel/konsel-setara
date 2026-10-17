@@ -53,6 +53,7 @@ import {
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { getProfile } from "@/lib/auth"
+import { hasPermission } from "@/lib/permissions"
 
 export interface RincianItem {
   label: string
@@ -96,6 +97,9 @@ export default function RealisasiPage() {
   const profile = getProfile()
   const userRole = Number(profile?.menu_klp) // 1 = Super Admin, 2 = Admin OPD
   const userOpd = profile?.opd || ""
+  const canCreate = hasPermission("realisasi", "create")
+  const canUpdate = hasPermission("realisasi", "update")
+  const canDelete = hasPermission("realisasi", "delete")
 
   const [selectedYear, setSelectedYear] = useState<string>("all")
   const [search, setSearch] = useState("")
@@ -349,9 +353,11 @@ export default function RealisasiPage() {
               >
                 <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
-              <Button onClick={openAdd} className="h-9 px-3 shrink-0">
-                <Plus className="h-4 w-4 mr-1.5" /> Tambah Program
-              </Button>
+              {canCreate && (
+                <Button onClick={openAdd} className="h-9 px-3 shrink-0">
+                  <Plus className="h-4 w-4 mr-1.5" /> Tambah Program
+                </Button>
+              )}
             </div>
           </div>
 
@@ -510,8 +516,9 @@ export default function RealisasiPage() {
 
                             {/* Aksi (Terkunci jika milik OPD lain) */}
                             <TableCell className="text-right align-top py-3.5">
-                              {isAllowed ? (
+                              {isAllowed && (canUpdate || canDelete) ? (
                                 <div className="flex justify-end gap-1">
+                                  {canUpdate && (
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -521,6 +528,8 @@ export default function RealisasiPage() {
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
                                   </Button>
+                                  )}
+                                  {canDelete && (
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -530,8 +539,9 @@ export default function RealisasiPage() {
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
+                                  )}
                                 </div>
-                              ) : (
+                              ) : !isAllowed ? (
                                 <div
                                   className="flex justify-end items-center"
                                   title={`Program ini diinput oleh ${item.opd || "OPD lain"}`}
@@ -544,7 +554,7 @@ export default function RealisasiPage() {
                                     Terkunci
                                   </Badge>
                                 </div>
-                              )}
+                              ) : null}
                             </TableCell>
                           </TableRow>
                         )

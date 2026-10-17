@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/hooks/use-auth"
 import { Loader2 } from "lucide-react"
+import { getFirstAllowedRoute } from "@/lib/permissions"
 
 export function LoginForm({
   className,
@@ -29,7 +30,7 @@ export function LoginForm({
     e.preventDefault()
     try {
       await login(username, password)
-      navigate("/dashboard", { replace: true })
+      navigate(getFirstAllowedRoute(), { replace: true })
     } catch {
       // Error is handled by useAuth
     }

@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { hasPermission } from "@/lib/permissions"
 
 interface VideoItem {
   id: number
@@ -45,6 +46,9 @@ interface VideoItem {
 }
 
 export default function Page() {
+  const canCreate = hasPermission("video_konsel", "create")
+  const canUpdate = hasPermission("video_konsel", "update")
+  const canDelete = hasPermission("video_konsel", "delete")
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -251,14 +255,16 @@ export default function Page() {
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Segarkan
               </Button>
-              <Button
-                size="sm"
-                onClick={() => setAddModalOpen(true)}
-                className="gap-1.5 bg-primary hover:bg-primary/90 text-white shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Tambah Video Baru
-              </Button>
+              {canCreate && (
+                <Button
+                  size="sm"
+                  onClick={() => setAddModalOpen(true)}
+                  className="gap-1.5 bg-primary hover:bg-primary/90 text-white shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tambah Video Baru
+                </Button>
+              )}
             </div>
           </div>
 
@@ -355,10 +361,12 @@ export default function Page() {
                   <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
                     Belum ada video yang tersimpan untuk filter ini. Silakan tambahkan video baru menggunakan tautan video TikTok.
                   </p>
-                  <Button size="sm" onClick={() => setAddModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-1.5" />
-                    Tambah Video Sekarang
-                  </Button>
+                  {canCreate && (
+                    <Button size="sm" onClick={() => setAddModalOpen(true)}>
+                      <Plus className="w-4 h-4 mr-1.5" />
+                      Tambah Video Sekarang
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -442,6 +450,7 @@ export default function Page() {
                                 checked={vid.is_active === 1}
                                 onCheckedChange={() => handleToggleActive(vid)}
                                 aria-label="Toggle status video"
+                                disabled={!canUpdate}
                               />
                               <span className={`text-xs font-medium ${vid.is_active === 1 ? "text-emerald-600" : "text-slate-400"}`}>
                                 {vid.is_active === 1 ? "Tampil" : "Sembunyi"}
@@ -461,15 +470,17 @@ export default function Page() {
                               >
                                 <Play className="w-4 h-4 fill-current" />
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-600 hover:text-blue-600"
-                                onClick={() => openEdit(vid)}
-                                title="Edit Info"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </Button>
+                              {canUpdate && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-slate-600 hover:text-blue-600"
+                                  onClick={() => openEdit(vid)}
+                                  title="Edit Info"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              )}
                               <a
                                 href={vid.video_url}
                                 target="_blank"
@@ -479,15 +490,17 @@ export default function Page() {
                               >
                                 <ExternalLink className="w-4 h-4" />
                               </a>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                                onClick={() => confirmDelete(vid)}
-                                title="Hapus Video"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              {canDelete && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                  onClick={() => confirmDelete(vid)}
+                                  title="Hapus Video"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>

@@ -16,10 +16,11 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2, ShieldCheck, ShieldAlert, User as UserIcon } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2, ShieldCheck, User as UserIcon } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { getProfile } from "@/lib/auth"
+import { hasPermission } from "@/lib/permissions"
 
 interface UserAccount {
   id: string
@@ -31,9 +32,18 @@ interface UserAccount {
   createdAt: string
 }
 
+interface GroupOption {
+  id: number
+  name: string
+}
+
 export default function Page() {
   const currentProfile = getProfile()
+  const canCreate = hasPermission("users", "create")
+  const canUpdate = hasPermission("users", "update")
+  const canDelete = hasPermission("users", "delete")
   const [users, setUsers] = useState<UserAccount[]>([])
+  const [groupOptions, setGroupOptions] = useState<GroupOption[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -51,7 +61,7 @@ export default function Page() {
     email: "",
     hp: "",
     password: "",
-    menu_klp: 1,
+    menu_klp: 2,
   })
 
   const fetchUsers = async (p: number) => {
@@ -77,6 +87,12 @@ export default function Page() {
     fetchUsers(page)
   }, [page])
 
+  useEffect(() => {
+    api.get("/api/v1/access-groups/options")
+      .then((response) => setGroupOptions(response.data.data || []))
+      .catch(() => toast.error("Gagal memuat pilihan kelompok akses"))
+  }, [])
+
   const handleSearch = () => {
     setPage(1)
     fetchUsers(1)
@@ -90,7 +106,7 @@ export default function Page() {
       email: "",
       hp: "",
       password: "",
-      menu_klp: 1,
+      menu_klp: 2,
     })
     setModalOpen(true)
   }
@@ -155,19 +171,16 @@ export default function Page() {
   }
 
   const getRoleBadge = (menu_klp: number) => {
+    const dynamicGroup = groupOptions.find((group) => group.id === Number(menu_klp))
+    if (dynamicGroup) {
+      return (
+        <Badge className={dynamicGroup.id === 1 ? "bg-red-600 hover:bg-red-700 gap-1" : "bg-blue-600 hover:bg-blue-700 gap-1"}>
+          <ShieldCheck className="h-3 w-3" /> {dynamicGroup.name}
+        </Badge>
+      )
+    }
+
     switch (Number(menu_klp)) {
-      case 1:
-        return (
-          <Badge className="bg-red-600 hover:bg-red-700 gap-1">
-            <ShieldCheck className="h-3 w-3" /> Super Admin
-          </Badge>
-        )
-      case 2:
-        return (
-          <Badge className="bg-blue-600 hover:bg-blue-700 gap-1">
-            <ShieldAlert className="h-3 w-3" /> Admin OPD
-          </Badge>
-        )
       case 4:
         return (
           <Badge className="bg-amber-600 hover:bg-amber-700 gap-1">
@@ -205,9 +218,11 @@ export default function Page() {
                   <Button variant="outline" size="icon" onClick={handleSearch}>
                     <Search className="h-4 w-4" />
                   </Button>
-                  <Button onClick={openAdd}>
-                    <Plus className="h-4 w-4 mr-1" /> Tambah Admin
-                  </Button>
+                  {canCreate && (
+                    <Button onClick={openAdd}>
+                      <Plus className="h-4 w-4 mr-1" /> Tambah Admin
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -255,18 +270,22 @@ export default function Page() {
                           <TableCell>{getRoleBadge(item.menu_klp)}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-destructive"
-                                disabled={item.username === currentProfile?.username}
-                                onClick={() => handleDelete(item.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {canUpdate && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {canDelete && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive"
+                                  disabled={item.username === currentProfile?.username}
+                                  onClick={() => handleDelete(item.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -370,9 +389,11 @@ export default function Page() {
                     <SelectValue placeholder="Pilih Role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Super Administrator (Akses Penuh)</SelectItem>
-                    <SelectItem value="2">Admin OPD / Unit Layanan</SelectItem>
+                    {groupOptions.map((group) => (
+                      <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
+                    ))}
                     <SelectItem value="3">Pengguna Biasa (Mobile App)</SelectItem>
+                    <SelectItem value="4">Admin CSR (Aplikasi CSR)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -12,6 +12,7 @@ import {
 import { Plus, Trash2, Pencil, Image as ImageIcon, ExternalLink, Loader2, ArrowUp, ArrowDown } from "lucide-react"
 import { toast } from "sonner"
 import api, { UPLOAD_URL } from "@/lib/api"
+import { hasPermission } from "@/lib/permissions"
 
 interface SliderItem {
   id: number
@@ -22,6 +23,9 @@ interface SliderItem {
 }
 
 export default function Page() {
+  const canCreate = hasPermission("slider", "create")
+  const canUpdate = hasPermission("slider", "update")
+  const canDelete = hasPermission("slider", "delete")
   const [sliders, setSliders] = useState<SliderItem[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -158,9 +162,11 @@ export default function Page() {
               <h2 className="text-lg font-semibold">Daftar Banner Aktif ({sliders.length})</h2>
               <p className="text-sm text-muted-foreground">Urutan di bawah ini menentukan urutan tayang pada aplikasi mobile</p>
             </div>
-            <Button onClick={openAdd}>
-              <Plus className="h-4 w-4 mr-2" /> Tambah Banner
-            </Button>
+            {canCreate && (
+              <Button onClick={openAdd}>
+                <Plus className="h-4 w-4 mr-2" /> Tambah Banner
+              </Button>
+            )}
           </div>
 
           {loading ? (
@@ -183,9 +189,11 @@ export default function Page() {
                 <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-4">
                   Tambahkan gambar banner untuk mempercantik dan menampilkan pengumuman di aplikasi mobile.
                 </p>
-                <Button onClick={openAdd}>
-                  <Plus className="h-4 w-4 mr-2" /> Upload Banner Baru
-                </Button>
+                {canCreate && (
+                  <Button onClick={openAdd}>
+                    <Plus className="h-4 w-4 mr-2" /> Upload Banner Baru
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -231,6 +239,8 @@ export default function Page() {
                   </div>
                   <div className="p-4 pt-0 border-t flex items-center justify-between bg-muted/20">
                     <div className="flex items-center gap-1">
+                      {canUpdate && (
+                        <>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -251,14 +261,20 @@ export default function Page() {
                       >
                         <ArrowDown className="h-4 w-4" />
                       </Button>
+                        </>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canUpdate && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>

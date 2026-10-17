@@ -66,6 +66,7 @@ import {
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { hasPermission } from "@/lib/permissions"
 
 interface InstansiItem {
   id: string
@@ -89,9 +90,14 @@ interface PegawaiDirectoryItem {
   instansi_id: string
   unit_kerja_id: string
   akses_id: string | null
-  role_akses: number // 0 = None, 1 = Administrator, 2 = Admin OPD
+  role_akses: number // 0 = belum diberi akses; lainnya = ID kelompok akses
   is_active: boolean
   granted_at: string | null
+}
+
+interface GroupOption {
+  id: number
+  name: string
 }
 
 // Reusable Searchable Combobox Component
@@ -186,6 +192,7 @@ function SearchableSelect({
 
 export default function PegawaiDirectoryPage() {
   const queryClient = useQueryClient()
+  const canUpdate = hasPermission("pegawai", "update")
 
   // Filter States
   const [selectedInstansi, setSelectedInstansi] = useState("all")
@@ -200,6 +207,15 @@ export default function PegawaiDirectoryPage() {
   const [targetPegawai, setTargetPegawai] = useState<PegawaiDirectoryItem | null>(null)
   const [selectedRole, setSelectedRole] = useState<string>("2") // '1', '2', '0'
   const [savingRole, setSavingRole] = useState(false)
+
+  const { data: groupOptions = [] } = useQuery({
+    queryKey: ["access-group-options"],
+    queryFn: async () => {
+      const res = await api.get("/api/v1/access-groups/options")
+      return (res.data?.data || []) as GroupOption[]
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
   // Fetch List Instansi
   const { data: instansiList } = useQuery({
@@ -254,7 +270,7 @@ export default function PegawaiDirectoryPage() {
 
   const openEditModal = (item: PegawaiDirectoryItem) => {
     setTargetPegawai(item)
-    setSelectedRole(item.role_akses ? item.role_akses.toString() : "2")
+    setSelectedRole(item.role_akses ? item.role_akses.toString() : String(groupOptions.find((group) => group.id === 2)?.id || groupOptions[0]?.id || 2))
     setEditModalOpen(true)
   }
 
@@ -271,9 +287,7 @@ export default function PegawaiDirectoryPage() {
       toast.success(
         selectedRole === "0"
           ? `Hak akses untuk ${targetPegawai.nama} berhasil dicabut`
-          : `Hak akses ${targetPegawai.nama} berhasil diatur ke ${
-              selectedRole === "1" ? "Administrator" : "Admin OPD"
-            }`
+          : `Hak akses ${targetPegawai.nama} berhasil diatur ke ${groupOptions.find((group) => String(group.id) === selectedRole)?.name || "kelompok terpilih"}`
       )
       queryClient.invalidateQueries({ queryKey: ["pegawai-directory"] })
       setEditModalOpen(false)
@@ -479,15 +493,10 @@ export default function PegawaiDirectoryPage() {
 
                             {/* Status Hak Akses */}
                             <TableCell className="text-center py-3">
-                              {item.role_akses === 1 ? (
-                                <Badge className="bg-amber-600 hover:bg-amber-700 text-white gap-1 text-[11px]">
-                                  <Shield className="h-3 w-3" />
-                                  Administrator
-                                </Badge>
-                              ) : item.role_akses === 2 ? (
-                                <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1 text-[11px]">
-                                  <ShieldCheck className="h-3 w-3" />
-                                  Admin OPD
+                              {item.role_akses > 0 ? (
+                                <Badge className={`${item.role_akses === 1 ? "bg-amber-600 hover:bg-amber-700" : "bg-emerald-600 hover:bg-emerald-700"} text-white gap-1 text-[11px]`}>
+                                  {item.role_akses === 1 ? <Shield className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+                                  {groupOptions.find((group) => group.id === item.role_akses)?.name || `Kelompok ${item.role_akses}`}
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground text-[11px]">
@@ -498,15 +507,17 @@ export default function PegawaiDirectoryPage() {
 
                             {/* Aksi Button */}
                             <TableCell className="text-right py-3">
-                              <Button
-                                size="sm"
-                                variant={item.role_akses > 0 ? "outline" : "default"}
-                                className="h-8 text-xs gap-1.5"
-                                onClick={() => openEditModal(item)}
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                                {item.role_akses > 0 ? "Ubah" : "Beri Akses"}
-                              </Button>
+                              {canUpdate && (
+                                <Button
+                                  size="sm"
+                                  variant={item.role_akses > 0 ? "outline" : "default"}
+                                  className="h-8 text-xs gap-1.5"
+                                  onClick={() => openEditModal(item)}
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                  {item.role_akses > 0 ? "Ubah" : "Beri Akses"}
+                                </Button>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))
@@ -574,43 +585,26 @@ export default function PegawaiDirectoryPage() {
                 <div className="space-y-3">
                   <Label className="text-xs font-semibold">Pilih Hak Akses:</Label>
                   <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="space-y-2">
-                    {/* Option 1: Admin OPD */}
-                    <div
-                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedRole === "2" ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20" : "hover:bg-muted/40"
-                      }`}
-                      onClick={() => setSelectedRole("2")}
-                    >
-                      <RadioGroupItem value="2" id="role-2" className="mt-0.5" />
-                      <div className="space-y-0.5">
-                        <Label htmlFor="role-2" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5">
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                          Admin OPD (Rekomendasi)
-                        </Label>
-                        <p className="text-[11px] text-muted-foreground">
-                          Dapat mengelola data program realisasi khusus untuk instansi {targetPegawai.opd || "terkait"}.
-                        </p>
+                    {groupOptions.map((group) => (
+                      <div
+                        key={group.id}
+                        className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedRole === String(group.id) ? "border-primary bg-primary/5" : "hover:bg-muted/40"
+                        }`}
+                        onClick={() => setSelectedRole(String(group.id))}
+                      >
+                        <RadioGroupItem value={String(group.id)} id={`role-${group.id}`} className="mt-0.5" />
+                        <div className="space-y-0.5">
+                          <Label htmlFor={`role-${group.id}`} className="font-semibold text-xs cursor-pointer flex items-center gap-1.5">
+                            {group.id === 1 ? <Shield className="h-3.5 w-3.5 text-amber-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-primary" />}
+                            {group.name}{group.id === 2 ? " (Rekomendasi)" : ""}
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            Mengikuti izin menu dan tindakan yang diatur pada halaman Kelompok & Hak Akses.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Option 2: Super Admin */}
-                    <div
-                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedRole === "1" ? "border-amber-600 bg-amber-50/50 dark:bg-amber-950/20" : "hover:bg-muted/40"
-                      }`}
-                      onClick={() => setSelectedRole("1")}
-                    >
-                      <RadioGroupItem value="1" id="role-1" className="mt-0.5" />
-                      <div className="space-y-0.5">
-                        <Label htmlFor="role-1" className="font-semibold text-xs cursor-pointer flex items-center gap-1.5">
-                          <Shield className="h-3.5 w-3.5 text-amber-600" />
-                          Administrator (Super Admin)
-                        </Label>
-                        <p className="text-[11px] text-muted-foreground">
-                          Akses penuh mengelola seluruh data OPD, manajemen menu, banner, dan hak akses user.
-                        </p>
-                      </div>
-                    </div>
+                    ))}
 
                     {/* Option 3: Cabut Hak Akses */}
                     <div
