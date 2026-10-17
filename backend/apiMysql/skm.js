@@ -382,10 +382,14 @@ router.get('/listAplikasi', (req, res) => {
 });
 
 const { MongoClient } = require('mongodb');
-const uriMongoWB = "mongodb://diskominfosandi:Kominfo2018@121.52.72.101:27017/warga_bicara?authSource=admin";
+const uriMongoWB = process.env.MONGO_URI_WARGA_BICARA || "";
 
 // Fungsi sinkronisasi realtime dari MongoDB Warga Bicara ke MySQL konsel_setara
 async function syncWargaBicaraRatings() {
+    if (!uriMongoWB) {
+        console.warn("Sync Warga Bicara MongoDB notice: MONGO_URI_WARGA_BICARA tidak dikonfigurasi di .env");
+        return;
+    }
     try {
         const client = new MongoClient(uriMongoWB, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
