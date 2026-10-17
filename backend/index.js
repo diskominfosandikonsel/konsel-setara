@@ -67,10 +67,15 @@ app.get('/openapi.json', (req, res) => {
 // Pengecekan Versi Aplikasi Mobile
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
-    // latestVersion: '1.6.2',
-    latestVersion: '1.6.3', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
+    // latestVersion: '1.6.3',
+    latestVersion: '1.6.4', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
-    forceUpdate: false
+    forceUpdate: false,
+    whatsNew: [
+      'Pembaruan filter & data paket pengadaan RUP',
+      'Integrasi Layanan Koperasi & UMKM Konsel (APLI DAKOP)',
+      'Peningkatan performa, keamanan & stabilitas sistem'
+    ]
   });
 });
 
@@ -102,6 +107,10 @@ app.use('/api/v1/rup', rup);
 const visitors = require('./apiMysql/visitors');
 app.use('/api/v1/visitors', visitors);
 
+// Modul Feed Video TikTok Otomatis (Resmi & Daily)
+const tiktok = require('./apiMysql/tiktok');
+app.use('/api/v1/tiktok', tiktok);
+
 // Error Handling Middleware
 function notFound(req, res, next) {
   res.status(404);
@@ -124,6 +133,14 @@ app.use(errorHandler);
 const port = process.env.PORT || 5025;
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
+  
+  // Inisialisasi Penjadwal Sinkronisasi Video TikTok
+  try {
+    const { initTikTokSyncJob } = require('./jobs/tiktokSyncJob');
+    initTikTokSyncJob();
+  } catch (jobErr) {
+    console.error('Gagal memulai TikTok sync job:', jobErr.message);
+  }
 });
 
 server.on('error', (err) => {
