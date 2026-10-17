@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/components/theme-provider'
 import { SidebarConfigProvider } from '@/contexts/sidebar-context'
 import { AppRouter } from '@/components/router/app-router'
+import { Toaster } from '@/components/ui/sonner'
 import { useEffect } from 'react'
 import { initGTM } from '@/utils/analytics'
 
@@ -34,6 +35,7 @@ function App() {
           <SidebarConfigProvider>
             <Router basename={basename}>
               <AppRouter />
+              <Toaster richColors position="top-right" />
             </Router>
           </SidebarConfigProvider>
         </ThemeProvider>
