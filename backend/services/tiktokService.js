@@ -378,6 +378,66 @@ class TikTokService {
       });
     });
   }
+
+  /**
+   * Mengambil video berdasarkan ID
+   */
+  async getVideoById(id) {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM tiktok_videos WHERE id = ? LIMIT 1';
+      db.query(sql, [id], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows && rows.length > 0 ? rows[0] : null);
+      });
+    });
+  }
+
+  /**
+   * Mendapatkan direct play_url yang valid dan aktif.
+   * Jika play_url lama kadaluarsa (HTTP 403) atau kosong,
+   * secara otomatis merefresh link stream baru via TikWM dan menyimpannya ke database.
+   */
+  async getFreshPlayUrl(videoId) {
+    const video = await this.getVideoById(videoId);
+    if (!video) throw new Error('Video tidak ditemukan');
+
+    // Cek apakah play_url saat ini masih aktif
+    if (video.play_url) {
+      try {
+        const check = await axios.head(video.play_url, {
+          timeout: 3500,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+          }
+        });
+        if (check.status === 200) {
+          return video.play_url;
+        }
+      } catch (e) {
+        console.warn(`[TikTokService] play_url video #${video.id} kadaluarsa (${e.message}), merefresh stream baru...`);
+      }
+    }
+
+    // Ambil metadata & play_url baru via TikWM
+    if (video.video_url) {
+      try {
+        const meta = await this.fetchVideoMetadata(video.video_url);
+        if (meta && meta.play_url) {
+          // Update play_url baru ke database agar request berikutnya cepat
+          db.query(
+            'UPDATE tiktok_videos SET play_url = ?, cover_url = COALESCE(?, cover_url), updated_at = NOW() WHERE id = ?',
+            [meta.play_url, meta.thumbnail_url, video.id]
+          );
+          console.log(`[TikTokService] Berhasil merefresh stream aktif untuk video #${video.id}`);
+          return meta.play_url;
+        }
+      } catch (refreshErr) {
+        console.warn(`[TikTokService] Gagal merefresh play_url video #${video.id}:`, refreshErr.message);
+      }
+    }
+
+    return video.play_url;
+  }
 }
 
 module.exports = new TikTokService();

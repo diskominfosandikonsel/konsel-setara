@@ -34,6 +34,52 @@ router.get('/feed', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// GET /api/v1/tiktok/play/:id — Redirect Langsung ke Stream MP4 Aktif
+// Jika token play_url lama kadaluarsa (403), otomatis direfresh ke link aktif
+// ═══════════════════════════════════════════════════════════════
+router.get('/play/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const playUrl = await tiktokService.getFreshPlayUrl(id);
+    if (!playUrl) {
+      return res.status(404).json({
+        success: false,
+        message: 'Link streaming video tidak tersedia'
+      });
+    }
+    // Redirect 302 langsung ke URL CDN MP4 yang segar dan aktif
+    return res.redirect(302, playUrl);
+  } catch (err) {
+    console.error(`[API TIKTOK] Error resolving play URL untuk #${req.params.id}:`, err.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal memutar video',
+      error: err.message
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// GET /api/v1/tiktok/stream-info/:id — Dapatkan JSON Stream URL Aktif
+// ═══════════════════════════════════════════════════════════════
+router.get('/stream-info/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const playUrl = await tiktokService.getFreshPlayUrl(id);
+    return res.json({
+      success: true,
+      play_url: playUrl
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal mendapatkan info streaming video',
+      error: err.message
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // GET /api/v1/tiktok/accounts — Daftar Akun TikTok Aktif
 // ═══════════════════════════════════════════════════════════════
 router.get('/accounts', async (req, res) => {

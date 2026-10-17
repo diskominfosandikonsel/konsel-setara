@@ -209,6 +209,7 @@
               loop
               class="fit rounded-borders"
               style="object-fit: contain; max-height: 75vh;"
+              @error="handleVideoError"
             ></video>
 
             <!-- Video Embed Player (jika tidak ada direct MP4) -->
@@ -463,9 +464,36 @@ export default {
       fetchTiktokFeed()
     }
 
-    const openVideoPlayer = (vid) => {
-      currentPlayingVideo.value = vid
+    const openVideoPlayer = async (vid) => {
+      currentPlayingVideo.value = { ...vid }
       showVideoPlayer.value = true
+
+      // Validasi dan refresh play_url di background jika token CDN sudah expired
+      if (vid?.id) {
+        try {
+          const res = await apiTiktok.getStreamInfo(vid.id)
+          if (res.data?.success && res.data?.play_url) {
+            if (currentPlayingVideo.value && currentPlayingVideo.value.id === vid.id) {
+              currentPlayingVideo.value.play_url = res.data.play_url
+            }
+          }
+        } catch (err) {
+          console.warn('Refresh stream video notice:', err.message)
+        }
+      }
+    }
+
+    const handleVideoError = async () => {
+      if (currentPlayingVideo.value?.id) {
+        try {
+          const res = await apiTiktok.getStreamInfo(currentPlayingVideo.value.id)
+          if (res.data?.success && res.data?.play_url) {
+            currentPlayingVideo.value.play_url = res.data.play_url
+          }
+        } catch (err) {
+          console.warn('Gagal memuat ulang stream video:', err.message)
+        }
+      }
     }
 
     const videoBerita = ref([])
@@ -741,7 +769,8 @@ export default {
       displayedVideos,
       fetchTiktokFeed,
       setTiktokCategory,
-      openVideoPlayer
+      openVideoPlayer,
+      handleVideoError
     }
   }
 }
