@@ -145,6 +145,14 @@ const server = app.listen(port, '0.0.0.0', () => {
   } catch (jobErr) {
     console.error('Gagal memulai TikTok sync job:', jobErr.message);
   }
+
+  // Inisialisasi Penjadwal Otomatis Sinkronisasi RUP
+  try {
+    const rupSyncService = require('./services/rupSyncService');
+    rupSyncService.initScheduler();
+  } catch (err) {
+    console.error('Gagal menginisialisasi RUP Scheduler:', err.message);
+  }
 });
 
 server.on('error', (err) => {

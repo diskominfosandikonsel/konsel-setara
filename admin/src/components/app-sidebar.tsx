@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Video,
   KeyRound,
+  Database,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Logo } from "@/components/logo"
@@ -90,6 +91,17 @@ const navGroups = [
         url: "/video-konsel",
         icon: Video,
         permissionKey: "video_konsel",
+      },
+    ],
+  },
+  {
+    label: "Integrasi Data",
+    items: [
+      {
+        title: "Sinkronisasi RUP",
+        url: "/rup",
+        icon: Database,
+        permissionKey: "rup",
       },
     ],
   },

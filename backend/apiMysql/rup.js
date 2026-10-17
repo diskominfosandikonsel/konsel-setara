@@ -1,56 +1,113 @@
 const express = require('express');
 const router = express.Router();
-const https = require('https');
+const db = require('../db/MySql/utama');
+const rupSyncService = require('../services/rupSyncService');
 
 const INAPROC_HOST = 'data.inaproc.id';
-const INSTANSI_KONSEL = process.env.INAPROC_INSTANSI || 'D438';
-const JENIS_KLPD = process.env.INAPROC_JENIS_KLPD || '4'; // Kabupaten
+const INSTANSI_KONSEL = 'D438';
+const JENIS_KLPD = '4'; // Kabupaten
+
+// ═════════════════════════════════════════════════════════════════
+// ENDPOINT ADMIN / SINKRONISASI & CRONJOB
+// ═════════════════════════════════════════════════════════════════
 
 /**
- * Fetch data langsung dari web data.inaproc.id (Dashboard API internal Next.js)
- * Tanpa memerlukan API Gateway Key atau akun terdaftar.
+ * GET /api/v1/rup/sync/config
+ * Mengambil konfigurasi cronjob & status sinkronisasi saat ini
  */
-function fetchInaprocWeb(endpoint, queryParams) {
-  return new Promise((resolve, reject) => {
-    const now = Date.now().toString();
-    const secret = Buffer.from(now.split('').reverse().join('')).toString('base64');
-    const qs = new URLSearchParams(queryParams).toString();
-    const apiPath = endpoint.startsWith('/')
-      ? `/dashboard-api${endpoint}`
-      : `/dashboard-api/rup/${endpoint}`;
-
-    const options = {
-      hostname: INAPROC_HOST,
-      path: `${apiPath}?${qs}`,
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-        'x-request-time': now,
-        'x-secret': secret,
-        'Accept': 'application/json, text/plain, */*',
-        'Referer': 'https://data.inaproc.id/rup',
-      },
-      timeout: 15000,
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve({ status: res.statusCode, data: parsed });
-        } catch (err) {
-          resolve({ status: res.statusCode, error: err.message, raw: data.substring(0, 200) });
-        }
-      });
+router.get('/sync/config', async (req, res) => {
+  try {
+    const config = await rupSyncService.getConfig();
+    return res.json({
+      success: true,
+      data: config,
     });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
-    req.on('error', (err) => reject(err));
-    req.on('timeout', () => { req.destroy(); reject(new Error('Request timeout ke data.inaproc.id')); });
-    req.end();
-  });
-}
+/**
+ * POST /api/v1/rup/sync/config
+ * Mengubah status on/off cronjob dan waktu sinkronisasi manual/cron expression
+ * Body: { is_active: boolean, schedule_time: '02:00', cron_expression?: string, sync_year?: string }
+ */
+router.post('/sync/config', async (req, res) => {
+  try {
+    const { is_active, schedule_time, cron_expression, sync_year, frequency_type, frequency_value } = req.body;
+    const updated = await rupSyncService.updateConfig({
+      is_active,
+      schedule_time,
+      cron_expression,
+      sync_year,
+      frequency_type,
+      frequency_value,
+    });
+    return res.json({
+      success: true,
+      message: 'Konfigurasi penjadwalan sinkronisasi RUP berhasil disimpan.',
+      data: updated,
+    });
+  } catch (err) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/v1/rup/sync/trigger
+ * Memicu sinkronisasi data RUP dari web INAPROC ke database secara manual
+ * Body: { tahun?: string }
+ */
+router.post('/sync/trigger', async (req, res) => {
+  try {
+    if (rupSyncService.isCurrentlySyncing()) {
+      return res.status(409).json({
+        success: false,
+        message: 'Proses sinkronisasi sedang berlangsung. Harap tunggu proses selesai.',
+      });
+    }
+
+    const tahun = req.body?.tahun || new Date().getFullYear().toString();
+
+    // Jalankan secara asynchronous di background
+    rupSyncService.runSync({ tahun, triggeredBy: 'manual_admin' })
+      .then((result) => {
+        console.log('[RUP MANUAL SYNC SUCCESS]', result.message);
+      })
+      .catch((err) => {
+        console.error('[RUP MANUAL SYNC ERROR]', err.message);
+      });
+
+    return res.json({
+      success: true,
+      message: `Proses sinkronisasi RUP untuk tahun anggaran ${tahun} telah dimulai di background.`,
+      status: 'running',
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/v1/rup/sync/logs
+ * Mengambil riwayat log sinkronisasi
+ */
+router.get('/sync/logs', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const logs = await rupSyncService.getLogs(limit);
+    return res.json({
+      success: true,
+      data: logs,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════
+// ENDPOINT PUBLIK / DATA RUP (MEMBACA DARI DATABASE DENGAN FALLBACK)
+// ═════════════════════════════════════════════════════════════════
 
 /**
  * GET /api/v1/rup/summary
@@ -59,7 +116,30 @@ function fetchInaprocWeb(endpoint, queryParams) {
 router.get('/summary', async (req, res) => {
   try {
     const tahun = req.query.tahun || new Date().getFullYear().toString();
-    const result = await fetchInaprocWeb('summary', {
+
+    // Cek apakah ada data di database lokal
+    const [dbRows] = await db.promise().query(`
+      SELECT 
+        COUNT(*) as jumlah_rup,
+        COALESCE(SUM(pagu), 0) as total_pagu
+      FROM rup_paket 
+      WHERE tahun = ?
+    `, [tahun]);
+
+    if (dbRows.length > 0 && dbRows[0].jumlah_rup > 0) {
+      return res.json({
+        success: true,
+        source: 'database-local',
+        tahun,
+        summary: {
+          jumlah_rup: parseInt(dbRows[0].jumlah_rup, 10),
+          total_pagu: parseFloat(dbRows[0].total_pagu),
+        },
+      });
+    }
+
+    // Fallback: Jika data belum ada di database, ambil live dari INAPROC
+    const result = await rupSyncService.fetchInaprocWeb('summary', {
       tahun,
       jenis_klpd: JENIS_KLPD,
       instansi: INSTANSI_KONSEL,
@@ -76,7 +156,7 @@ router.get('/summary', async (req, res) => {
 
     return res.status(result.status || 500).json({
       success: false,
-      error: 'Gagal mengambil ringkasan RUP dari web INAPROC',
+      error: 'Gagal mengambil ringkasan RUP',
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -85,19 +165,117 @@ router.get('/summary', async (req, res) => {
 
 /**
  * GET /api/v1/rup/paket-penyedia
- * Daftar paket RUP Konawe Selatan diambil langsung dari web data.inaproc.id
+ * Daftar paket RUP Konawe Selatan
  */
 router.get('/paket-penyedia', async (req, res) => {
   try {
     const tahun = req.query.tahun || new Date().getFullYear().toString();
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const offset = (page - 1) * limit;
+
     const cara = req.query.cara || '';       // 'Penyedia' | 'Swakelola' | ''
     const metode = req.query.metode || '';   // 'Tender' | 'Pengadaan Langsung' | ...
     const jenis = req.query.jenis || '';     // 'Barang' | 'Pekerjaan Konstruksi' | ...
     const search = req.query.search || req.query.q || '';
     const satker = req.query.satker || '';
 
+    // Cek apakah ada data di database untuk tahun ini
+    const [countCheck] = await db.promise().query(
+      'SELECT COUNT(*) as cnt FROM rup_paket WHERE tahun = ?',
+      [tahun]
+    );
+
+    if (countCheck[0].cnt > 0) {
+      // Query dari Database Lokal dengan Relasi rup_satker
+      let whereClauses = ['p.tahun = ?'];
+      let params = [tahun];
+
+      if (cara && cara !== 'Semua') {
+        whereClauses.push('p.cara_pengadaan = ?');
+        params.push(cara);
+      }
+
+      if (metode && metode !== 'Semua' && cara !== 'Swakelola') {
+        whereClauses.push('p.metode = ?');
+        params.push(metode);
+      }
+
+      if (jenis && jenis !== 'Semua') {
+        whereClauses.push('p.jenis = ?');
+        params.push(jenis);
+      }
+
+      if (satker && satker !== 'Semua' && satker !== 'Semua OPD') {
+        // Filter via kode_satker atau pencarian nama OPD
+        whereClauses.push('(p.kode_satker = ? OR s.nama LIKE ?)');
+        params.push(satker, `%${satker}%`);
+      }
+
+      if (search) {
+        whereClauses.push('(p.kode_rup LIKE ? OR p.nama_paket LIKE ? OR s.nama LIKE ?)');
+        const searchPattern = `%${search}%`;
+        params.push(searchPattern, searchPattern, searchPattern);
+      }
+
+      const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+      // Hitung total matching
+      const [totalCountRows] = await db.promise().query(
+        `SELECT COUNT(*) as total 
+         FROM rup_paket p
+         LEFT JOIN rup_satker s ON p.kode_satker = s.kode
+         ${whereSql}`,
+        params
+      );
+      const total = totalCountRows[0].total;
+
+      // Ambil data halaman ini beserta nama OPD dari relasi rup_satker
+      const [rows] = await db.promise().query(
+        `SELECT 
+           p.*, 
+           COALESCE(s.nama, '') as nama_satker, 
+           COALESCE(s.nama, '') as opd
+         FROM rup_paket p
+         LEFT JOIN rup_satker s ON p.kode_satker = s.kode
+         ${whereSql}
+         ORDER BY p.pagu DESC 
+         LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
+      );
+
+      return res.json({
+        success: true,
+        source: 'database-local',
+        tahun,
+        total,
+        page,
+        limit,
+        pagination: {
+          current_page: page,
+          total_page: Math.ceil(total / limit) || 1,
+          limit,
+          total,
+        },
+        data: rows.map((item, idx) => ({
+          id: item.kode_rup || `${page}-${idx + 1}`,
+          kode_rup: item.kode_rup || '',
+          nama_paket: item.nama_paket || '',
+          kode_satker: item.kode_satker || '',
+          opd: item.opd || item.nama_satker || '',
+          metode: item.metode || item.cara_pengadaan || '',
+          pagu: parseFloat(item.pagu || 0),
+          sumber_dana: item.sumber_dana || 'APBD',
+          tahun: String(item.tahun || tahun),
+          jenis: item.jenis || '',
+          cara_pengadaan: item.cara_pengadaan || '',
+          pdn: item.pdn || 'Ya',
+          status: item.status || 'Aktif',
+        })),
+      });
+    }
+
+    // Fallback ke INAPROC live jika database lokal belum memiliki data
     const queryParams = {
       tahun,
       jenis_klpd: JENIS_KLPD,
@@ -106,53 +284,18 @@ router.get('/paket-penyedia', async (req, res) => {
       limit: String(limit),
     };
 
-    // sumber = cara pengadaan (Penyedia / Swakelola)
-    if (cara && cara !== 'Semua') {
-      queryParams.sumber = cara;
-    }
-
-    // filter_metode hanya berlaku untuk Penyedia
-    if (metode && metode !== 'Semua' && cara !== 'Swakelola') {
-      queryParams.filter_metode = metode;
-    }
-
-    // filter jenis pengadaan
-    if (jenis && jenis !== 'Semua') {
-      queryParams.filter_jenis = jenis;
-    }
-
-    // filter satker / unit kerja (kode satker)
-    if (satker && satker !== 'Semua' && satker !== 'Semua OPD') {
-      queryParams.satker = satker;
-    }
+    if (cara && cara !== 'Semua') queryParams.sumber = cara;
+    if (metode && metode !== 'Semua' && cara !== 'Swakelola') queryParams.filter_metode = metode;
+    if (jenis && jenis !== 'Semua') queryParams.filter_jenis = jenis;
+    if (satker && satker !== 'Semua' && satker !== 'Semua OPD') queryParams.satker = satker;
 
     const querySearch = search ? String(search).trim() : '';
-    const isNumericSearch = /^\d+$/.test(querySearch);
-
     if (querySearch) {
-      if (isNumericSearch) {
-        queryParams.search_rup = querySearch;
-      } else {
-        queryParams.search_paket = querySearch;
-      }
+      if (/^\d+$/.test(querySearch)) queryParams.search_rup = querySearch;
+      else queryParams.search_paket = querySearch;
     }
 
-    let result = await fetchInaprocWeb('table', queryParams);
-
-    // Jika pencarian angka dengan search_rup tidak menemukan hasil, coba fallback search_paket
-    if (isNumericSearch && querySearch && (!result.data?.tableRows || result.data.tableRows.length === 0)) {
-      const fallbackParams = { ...queryParams };
-      delete fallbackParams.search_rup;
-      fallbackParams.search_paket = querySearch;
-      try {
-        const fallbackResult = await fetchInaprocWeb('table', fallbackParams);
-        if (fallbackResult.status === 200 && fallbackResult.data?.tableRows?.length > 0) {
-          result = fallbackResult;
-        }
-      } catch {
-        // Abaikan dan gunakan result awal
-      }
-    }
+    const result = await rupSyncService.fetchInaprocWeb('table', queryParams);
 
     if (result.status === 200 && result.data && Array.isArray(result.data.tableRows)) {
       const rows = result.data.tableRows;
@@ -192,19 +335,35 @@ router.get('/paket-penyedia', async (req, res) => {
     return res.status(503).json({
       success: false,
       error: err.message,
-      message: 'Gagal mengambil data dari web inaproc',
+      message: 'Gagal mengambil data RUP',
     });
   }
 });
 
 /**
  * GET /api/v1/rup/satker
- * Ambil daftar lengkap unit kerja / Satker resmi Konawe Selatan dari web INAPROC
+ * Ambil daftar lengkap unit kerja / Satker resmi Konawe Selatan
  */
 router.get('/satker', async (req, res) => {
   try {
     const tahun = req.query.tahun || new Date().getFullYear().toString();
-    const result = await fetchInaprocWeb('/profil-pengadaan/satker', {
+
+    // Cek di database lokal dulu (Master Satker independen)
+    const [dbSatkers] = await db.promise().query(
+      'SELECT kode, nama, kode as kd_satker, nama as nama_satker FROM rup_satker ORDER BY nama ASC'
+    );
+
+    if (dbSatkers.length > 0) {
+      return res.json({
+        success: true,
+        source: 'database-local',
+        tahun,
+        items: dbSatkers,
+      });
+    }
+
+    // Fallback ke web INAPROC
+    const result = await rupSyncService.fetchInaprocWeb('/profil-pengadaan/satker', {
       tahun,
       jenis: JENIS_KLPD,
       instansi: INSTANSI_KONSEL,
@@ -221,7 +380,7 @@ router.get('/satker', async (req, res) => {
 
     return res.status(result.status || 500).json({
       success: false,
-      error: 'Gagal mengambil data Satker dari INAPROC',
+      error: 'Gagal mengambil data Satker',
       items: [],
     });
   } catch (err) {
@@ -236,7 +395,7 @@ router.get('/satker', async (req, res) => {
 router.get('/ping', async (req, res) => {
   try {
     const tahun = new Date().getFullYear().toString();
-    const result = await fetchInaprocWeb('summary', {
+    const result = await rupSyncService.fetchInaprocWeb('summary', {
       tahun,
       jenis_klpd: JENIS_KLPD,
       instansi: INSTANSI_KONSEL,

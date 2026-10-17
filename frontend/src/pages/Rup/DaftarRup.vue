@@ -690,11 +690,16 @@ export default {
         if (res && res.success && Array.isArray(res.items) && res.items.length > 0) {
           const list = [
             { label: 'Semua Unit Kerja (OPD)', value: 'Semua' },
-            ...res.items.map(item => ({
-              label: (item.nama || '').replace(/\s*-\s*[0-9.]+$/, '').trim() || item.nama,
-              fullNama: item.nama || '',
-              value: String(item.kode || item.nama)
-            }))
+            ...res.items.map(item => {
+              const rawName = item.nama || item.nama_satker || ''
+              const kode = String(item.kode || item.kd_satker || rawName)
+              const cleanLabel = rawName.replace(/\s*-\s*[0-9.]+$/, '').trim() || rawName
+              return {
+                label: cleanLabel,
+                fullNama: rawName,
+                value: kode
+              }
+            })
           ]
           opdFullList.value = list
           opdOptions.value = [...list]

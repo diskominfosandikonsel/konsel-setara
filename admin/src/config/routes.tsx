@@ -25,6 +25,7 @@ const VideoKonsel = lazy(() => import('@/app/video-konsel/page'))
 const Users = lazy(() => import('@/app/users/page'))
 const Pegawai = lazy(() => import('@/app/pegawai/page'))
 const AccessGroups = lazy(() => import('@/app/access-groups/page'))
+const RupSync = lazy(() => import('@/app/rup/page'))
 
 // Settings
 const UserSettings = lazy(() => import('@/app/settings/user/page'))
@@ -123,6 +124,10 @@ export const routes: RouteConfig[] = [
     path: "/access-groups",
     element: <AccessGroups />,
     permissionKey: "access_groups"
+  },
+  {
+    path: "/rup",
+    element: <RupSync />
   },
 
   // Settings

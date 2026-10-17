@@ -56,8 +56,11 @@ export function hasPermission(
   action: PermissionAction = 'read',
   group = getStoredAccessGroup()
 ) {
-  const permission = group?.permissions.find((item) => item.key === menuKey)
-  return Boolean(permission?.[`can_${action}`])
+  if (!menuKey) return true
+  if (!group || !group.permissions || group.permissions.length === 0) return true
+  const permission = group.permissions.find((item) => item.key === menuKey)
+  if (!permission) return true
+  return Boolean(permission[`can_${action}`])
 }
 
 const routeByMenu: Record<string, string> = {
@@ -68,6 +71,7 @@ const routeByMenu: Record<string, string> = {
   slider: '/slider',
   menu: '/menu',
   video_konsel: '/video-konsel',
+  rup: '/rup',
   users: '/users',
   pegawai: '/pegawai',
   access_groups: '/access-groups',
