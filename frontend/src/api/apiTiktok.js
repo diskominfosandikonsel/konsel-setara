@@ -13,11 +13,6 @@ export const apiTiktok = {
   getAccounts: () => api.get('/api/v1/tiktok/accounts'),
 
   /**
-   * Trigger sinkronisasi manual ke backend
-   */
-  sync: () => api.post('/api/v1/tiktok/sync'),
-
-  /**
    * Menambahkan video manual dari URL TikTok
    * @param {Object} data - { videoUrl: string, category: 'official'|'daily' }
    */

@@ -254,42 +254,6 @@ class TikTokService {
   }
 
   /**
-   * Sinkronisasi akun TikTok yang terdaftar
-   */
-  async syncAllAccounts() {
-    try {
-      console.log('🔄 [TikTokService] Memulai proses sinkronisasi akun TikTok...');
-      const accounts = await this.getAccounts();
-      const results = [];
-
-      for (const acc of accounts) {
-        try {
-          console.log(`📡 [TikTokService] Memeriksa akun: @${acc.username} (${acc.display_name})...`);
-
-          // Catat waktu sinkronisasi
-          await new Promise((resolve) => {
-            db.query(
-              'UPDATE tiktok_accounts SET last_sync_at = NOW() WHERE id = ?',
-              [acc.id],
-              resolve
-            );
-          });
-
-          results.push({ account: acc.username, status: 'synced' });
-        } catch (accountErr) {
-          console.error(`❌ [TikTokService] Error sinkronisasi @${acc.username}:`, accountErr.message);
-          results.push({ account: acc.username, status: 'error', message: accountErr.message });
-        }
-      }
-
-      return results;
-    } catch (err) {
-      console.error('❌ [TikTokService] Global sync error:', err.message);
-      throw err;
-    }
-  }
-
-  /**
    * Toggle status aktif video (Sembunyikan / Tampilkan)
    */
   async toggleActive(id, isActive) {

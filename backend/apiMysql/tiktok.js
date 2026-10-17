@@ -54,27 +54,6 @@ router.get('/accounts', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// POST /api/v1/tiktok/sync — Trigger Sinkronisasi Manual
-// ═══════════════════════════════════════════════════════════════
-router.post('/sync', middleware.isLoggedIn, requirePermission('video_konsel', 'update'), async (req, res) => {
-  try {
-    const results = await tiktokService.syncAllAccounts();
-    return res.json({
-      success: true,
-      message: 'Proses sinkronisasi video TikTok berhasil dijalankan',
-      results
-    });
-  } catch (err) {
-    console.error('[API TIKTOK] Error running sync:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Gagal menjalankan sinkronisasi TikTok',
-      error: err.message
-    });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════
 // POST /api/v1/tiktok/add — Tambah Video Manual via URL TikTok
 // Body: { videoUrl: string, category: 'official' | 'daily' }
 // ═══════════════════════════════════════════════════════════════

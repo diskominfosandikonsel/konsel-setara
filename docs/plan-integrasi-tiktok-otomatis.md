@@ -1,6 +1,8 @@
 # 📱 Rencana Implementasi: Integrasi Feed Video TikTok Otomatis (Skenario B)
 **Proyek: Konsel Setara (Pemerintah Kabupaten Konawe Selatan)**
 
+> **Status: dibatalkan / tidak digunakan.** Pada 17 Oktober 2026 diputuskan bahwa pengisian video TikTok tetap dilakukan manual melalui panel admin. Scheduler, fungsi sinkronisasi semu, dan endpoint `/api/v1/tiktok/sync` telah dihapus. Dokumen ini dipertahankan hanya sebagai arsip rencana lama dan bukan gambaran sistem yang aktif.
+
 Dokumen ini adalah rencana kerja komprehensif (*implementation plan*) untuk mengintegrasikan feed video dari akun TikTok resmi Pemerintah Daerah (misal: Diskominfo / Pemkab Konawe Selatan) ke dalam aplikasi mobile **Konsel Setara** secara otomatis dan berkala tanpa campur tangan manual operator.
 
 ---

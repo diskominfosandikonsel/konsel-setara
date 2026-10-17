@@ -111,7 +111,7 @@ app.use('/api/v1/rup', rup);
 const visitors = require('./apiMysql/visitors');
 app.use('/api/v1/visitors', visitors);
 
-// Modul Feed Video TikTok Otomatis (Resmi & Daily)
+// Modul Feed Video TikTok Manual (Resmi & Daily)
 const tiktok = require('./apiMysql/tiktok');
 app.use('/api/v1/tiktok', tiktok);
 
@@ -137,14 +137,6 @@ app.use(errorHandler);
 const port = process.env.PORT || 5025;
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
-
-  // Inisialisasi Penjadwal Sinkronisasi Video TikTok
-  try {
-    const { initTikTokSyncJob } = require('./jobs/tiktokSyncJob');
-    initTikTokSyncJob();
-  } catch (jobErr) {
-    console.error('Gagal memulai TikTok sync job:', jobErr.message);
-  }
 
   // Inisialisasi Penjadwal Otomatis Sinkronisasi RUP
   try {
