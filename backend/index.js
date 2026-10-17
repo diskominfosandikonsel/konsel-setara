@@ -72,7 +72,7 @@ app.get('/api/v1/app-version', (req, res) => {
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: false,
     whatsNew: [
-      'Fitur baru Video Konsel (Official & Daily) pemutaran langsung di aplikasi',
+      'Fitur baru Video Konsel (Official & Daily)',
       'Pembaruan filter & data paket pengadaan RUP',
       'Peningkatan performa, keamanan & stabilitas sistem'
     ]
@@ -133,7 +133,7 @@ app.use(errorHandler);
 const port = process.env.PORT || 5025;
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
-  
+
   // Inisialisasi Penjadwal Sinkronisasi Video TikTok
   try {
     const { initTikTokSyncJob } = require('./jobs/tiktokSyncJob');
