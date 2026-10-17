@@ -52,7 +52,12 @@ class TikTokService {
 
       db.query(query, params, (err, rows) => {
         if (err) return reject(err);
-        resolve(rows || []);
+        const baseUrl = process.env.BASE_API_URL || 'https://konsel-setara.konaweselatankab.go.id';
+        const mapped = (rows || []).map((r) => ({
+          ...r,
+          play_url: `${baseUrl}/api/v1/tiktok/play/${r.id}`,
+        }));
+        resolve(mapped);
       });
     });
   }
