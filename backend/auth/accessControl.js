@@ -8,6 +8,7 @@ const MENU_DEFINITIONS = [
   { key: 'slider', label: 'Slider / Banner', section: 'Kelola Konten' },
   { key: 'menu', label: 'Menu Dinamis', section: 'Kelola Konten' },
   { key: 'video_konsel', label: 'Video Konsel', section: 'Kelola Konten' },
+  { key: 'rup', label: 'Sinkronisasi RUP', section: 'Integrasi Data' },
   { key: 'users', label: 'Manajemen User', section: 'Administrasi' },
   { key: 'pegawai', label: 'Hak Akses Pegawai', section: 'Administrasi' },
   { key: 'access_groups', label: 'Kelompok & Hak Akses', section: 'Administrasi' },
@@ -120,15 +121,16 @@ async function getGroupWithPermissions(groupId) {
     WHERE group_id = ?
   `, [groupId]);
 
+  const isSuperAdmin = Number(groupId) === 1;
   const byMenu = new Map(rows.map((row) => [row.menu_key, row]));
   const permissions = MENU_DEFINITIONS.map((menu) => {
     const row = byMenu.get(menu.key) || {};
     return {
       ...menu,
-      can_read: Boolean(row.can_read),
-      can_create: Boolean(row.can_create),
-      can_update: Boolean(row.can_update),
-      can_delete: Boolean(row.can_delete),
+      can_read: isSuperAdmin ? true : Boolean(row.can_read),
+      can_create: isSuperAdmin ? true : Boolean(row.can_create),
+      can_update: isSuperAdmin ? true : Boolean(row.can_update),
+      can_delete: isSuperAdmin ? true : Boolean(row.can_delete),
     };
   });
 

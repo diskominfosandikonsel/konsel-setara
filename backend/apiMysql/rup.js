@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/MySql/utama');
 const rupSyncService = require('../services/rupSyncService');
+const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 const INAPROC_HOST = 'data.inaproc.id';
 const INSTANSI_KONSEL = 'D438';
@@ -15,7 +17,7 @@ const JENIS_KLPD = '4'; // Kabupaten
  * GET /api/v1/rup/sync/config
  * Mengambil konfigurasi cronjob & status sinkronisasi saat ini
  */
-router.get('/sync/config', async (req, res) => {
+router.get('/sync/config', middleware.isLoggedIn, requirePermission('rup', 'read'), async (req, res) => {
   try {
     const config = await rupSyncService.getConfig();
     return res.json({
@@ -32,7 +34,7 @@ router.get('/sync/config', async (req, res) => {
  * Mengubah status on/off cronjob dan waktu sinkronisasi manual/cron expression
  * Body: { is_active: boolean, schedule_time: '02:00', cron_expression?: string, sync_year?: string }
  */
-router.post('/sync/config', async (req, res) => {
+router.post('/sync/config', middleware.isLoggedIn, requirePermission('rup', 'update'), async (req, res) => {
   try {
     const { is_active, schedule_time, cron_expression, sync_year, frequency_type, frequency_value } = req.body;
     const updated = await rupSyncService.updateConfig({
@@ -58,7 +60,7 @@ router.post('/sync/config', async (req, res) => {
  * Memicu sinkronisasi data RUP dari web INAPROC ke database secara manual
  * Body: { tahun?: string }
  */
-router.post('/sync/trigger', async (req, res) => {
+router.post('/sync/trigger', middleware.isLoggedIn, requirePermission('rup', 'update'), async (req, res) => {
   try {
     if (rupSyncService.isCurrentlySyncing()) {
       return res.status(409).json({
@@ -92,7 +94,7 @@ router.post('/sync/trigger', async (req, res) => {
  * GET /api/v1/rup/sync/logs
  * Mengambil riwayat log sinkronisasi
  */
-router.get('/sync/logs', async (req, res) => {
+router.get('/sync/logs', middleware.isLoggedIn, requirePermission('rup', 'read'), async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 20;
     const logs = await rupSyncService.getLogs(limit);
