@@ -4,6 +4,8 @@ const router = express.Router();
 var db = require('../db/MySql/utama');
 var upload = require('../db/multer/pdf');
 var uniqid = require('uniqid');
+const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 // DASBOARD
 router.get('/getDashboard', async (req, res) => {
@@ -105,7 +107,7 @@ router.get('/getDashboard', async (req, res) => {
 
 
 // APLIKASI
-router.post('/viewAplikasi', (req, res) => {
+router.post('/viewAplikasi', middleware.isLoggedIn, requirePermission('aplikasi', 'read'), (req, res) => {
     const data_batas = Number(req.body.page_limit) || 10;
     const page_first = Number(req.body.data_ke) || 1;
     const data_star = (page_first - 1) * data_batas;
@@ -162,7 +164,7 @@ router.post('/viewAplikasi', (req, res) => {
     });
 });
 
-router.post('/addAplikasi', (req, res) => {
+router.post('/addAplikasi', middleware.isLoggedIn, requirePermission('aplikasi', 'create'), (req, res) => {
     console.log(req.body);
     let query = `INSERT INTO aplikasi (id, nama, keterangan, kategori, skor, responden, createdAt)
     VALUES(
@@ -189,7 +191,7 @@ router.post('/addAplikasi', (req, res) => {
     console.log(req.body);
 });
 
-router.post('/editAplikasi', (req, res) => {
+router.post('/editAplikasi', middleware.isLoggedIn, requirePermission('aplikasi', 'update'), (req, res) => {
     console.log(req.body);
     var query = `
         UPDATE aplikasi SET
@@ -211,7 +213,7 @@ router.post('/editAplikasi', (req, res) => {
     })
 });
 
-router.post('/removeAplikasi', (req, res) => {
+router.post('/removeAplikasi', middleware.isLoggedIn, requirePermission('aplikasi', 'delete'), (req, res) => {
     var query = `
         DELETE FROM aplikasi WHERE id = '`+ req.body.id + `';
     `;
@@ -240,7 +242,7 @@ router.post('/listAplikasi', (req, res) => {
 // APLIKASI
 
 // ULASAN
-router.post('/viewUlasan', (req, res) => {
+router.post('/viewUlasan', middleware.isLoggedIn, requirePermission('ulasan', 'read'), (req, res) => {
     console.log(req.body)
     var data_batas = 10;
     var data_star = (req.body.data_ke - 1) * data_batas;
@@ -454,7 +456,7 @@ async function syncWargaBicaraRatings() {
 }
 
 // Endpoint manual sync jika dibutuhkan
-router.get('/syncWargaBicara', async (req, res) => {
+router.get('/syncWargaBicara', middleware.isLoggedIn, requirePermission('ulasan', 'update'), async (req, res) => {
     await syncWargaBicaraRatings();
     res.json({ success: true, message: "Sinkronisasi Warga Bicara berhasil" });
 });
@@ -463,7 +465,7 @@ router.get('/syncWargaBicara', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // ENDPOINT BARU KHUSUS ADMIN (CEPAT & TERINDEX)
 // ═══════════════════════════════════════════════════════════════
-router.post('/viewUlasanFast', (req, res) => {
+router.post('/viewUlasanFast', middleware.isLoggedIn, requirePermission('ulasan', 'read'), (req, res) => {
     const data_batas = Number(req.body.page_limit) || 10;
     const page_first = Number(req.body.data_ke) || 1;
     const data_star = (page_first - 1) * data_batas;

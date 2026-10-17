@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db/MySql/utama');
 const uniqid = require('uniqid');
 const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 // Auto-migration: ensure column `rincian` exists in `realisasi_setara`
 db.query("SHOW COLUMNS FROM realisasi_setara LIKE 'rincian'", (err, rows) => {
@@ -165,7 +166,7 @@ router.get('/years', (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/realisasi/add — Tambah Program Realisasi (Auto Assign OPD)
 // ═══════════════════════════════════════════════════════════════
-router.post('/add', middleware.isLoggedIn, (req, res) => {
+router.post('/add', middleware.isLoggedIn, requirePermission('realisasi', 'create'), (req, res) => {
   const { tahun, nama_program, realisasi_anggaran, volume, satuan, opd, rincian } = req.body;
 
   if (!nama_program || !tahun) {
@@ -214,7 +215,7 @@ router.post('/add', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/realisasi/edit — Edit Program Realisasi (OPD Protection)
 // ═══════════════════════════════════════════════════════════════
-router.post('/edit', middleware.isLoggedIn, (req, res) => {
+router.post('/edit', middleware.isLoggedIn, requirePermission('realisasi', 'update'), (req, res) => {
   const { id, tahun, nama_program, realisasi_anggaran, volume, satuan, opd, rincian } = req.body;
 
   if (!id) {
@@ -287,7 +288,7 @@ router.post('/edit', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/realisasi/remove — Hapus Program Realisasi (OPD Protection)
 // ═══════════════════════════════════════════════════════════════
-router.post('/remove', middleware.isLoggedIn, (req, res) => {
+router.post('/remove', middleware.isLoggedIn, requirePermission('realisasi', 'delete'), (req, res) => {
   const { id } = req.body;
   if (!id) return res.status(400).json({ success: false, message: 'ID data wajib disertakan' });
 

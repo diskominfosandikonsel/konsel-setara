@@ -5,6 +5,7 @@ const path = require('path');
 const db = require('../db/MySql/utama');
 const upload = require('../db/multer/image');
 const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 // ═══════════════════════════════════════════════
 // GET /api/v1/slider — Ambil semua data slider
@@ -22,6 +23,7 @@ router.get('/', (req, res) => {
 // ═══════════════════════════════════════════════
 router.post('/',
   middleware.isLoggedIn,
+  requirePermission('slider', 'create'),
   (req, res, next) => {
     upload.single('image')(req, res, (err) => {
       if (err) return res.status(422).json({ success: false, message: 'Gagal upload: ' + err.message });
@@ -29,8 +31,6 @@ router.post('/',
     });
   },
   (req, res) => {
-    if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
     const { link } = req.body;
     const file = req.file;
     if (!file) return res.status(422).json({ success: false, message: 'File gambar wajib diunggah' });
@@ -59,9 +59,7 @@ router.post('/',
 // ═══════════════════════════════════════════════
 // POST /api/v1/slider/reorder — Simpan urutan baru
 // ═══════════════════════════════════════════════
-router.post('/reorder', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
+router.post('/reorder', middleware.isLoggedIn, requirePermission('slider', 'update'), (req, res) => {
   const { orders } = req.body; // Array of {id, urutan}
   if (!Array.isArray(orders)) return res.status(422).json({ success: false, message: 'Invalid data' });
 
@@ -87,11 +85,7 @@ router.post('/reorder', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════
 // DELETE /api/v1/slider/:id — Hapus slider (Admin Only)
 // ═══════════════════════════════════════════════
-router.delete('/:id', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) {
-    return res.status(403).json({ success: false, message: 'Akses ditolak. Hanya admin yang boleh menghapus slider.' })
-  }
-
+router.delete('/:id', middleware.isLoggedIn, requirePermission('slider', 'delete'), (req, res) => {
   const { id } = req.params
 
   // 1. Cari data slider dulu untuk mendapatkan nama file gambarnya
@@ -121,7 +115,7 @@ router.delete('/:id', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════
 // PUT /api/v1/slider/:id — Update data slider (Admin Only)
 // ═══════════════════════════════════════════════
-router.put('/:id', middleware.isLoggedIn,
+router.put('/:id', middleware.isLoggedIn, requirePermission('slider', 'update'),
   (req, res, next) => {
     upload.single('image')(req, res, (err) => {
       if (err) {
@@ -132,10 +126,6 @@ router.put('/:id', middleware.isLoggedIn,
     })
   },
   (req, res) => {
-    if (req.user.menu_klp != 1) {
-      return res.status(403).json({ success: false, message: 'Akses ditolak.' })
-    }
-
     const { id } = req.params
     const { link } = req.body
     const file = req.file

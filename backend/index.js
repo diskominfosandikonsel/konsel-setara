@@ -99,6 +99,10 @@ app.use('/api/v1/realisasi', realisasi);
 const pegawai = require('./apiMysql/pegawai');
 app.use('/api/v1/pegawai', pegawai);
 
+// Modul Kelompok Menu & Hak Akses Admin
+const accessGroups = require('./apiMysql/accessGroups');
+app.use('/api/v1/access-groups', accessGroups);
+
 // Modul RUP (Rencana Umum Pengadaan) - Proxy ke inaproc API
 const rup = require('./apiMysql/rup');
 app.use('/api/v1/rup', rup);
@@ -146,4 +150,3 @@ const server = app.listen(port, '0.0.0.0', () => {
 server.on('error', (err) => {
   console.error('Server failed:', err);
 });
-

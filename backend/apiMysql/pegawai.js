@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db/MySql/utama');
 const uniqid = require('uniqid');
 const middleware = require('../auth/middlewares');
+const { ensureAccessControlTables, queryAsync, requirePermission } = require('../auth/accessControl');
 
 // Helper to format full name cleanly without stray dashes
 function formatNamaLengkap(row) {
@@ -50,11 +51,7 @@ router.get('/unit_kerja', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/pegawai/directory — Direktori Pegawai Lengkap dengan Status Hak Akses & Nama Jabatan
 // ═══════════════════════════════════════════════════════════════
-router.post('/directory', middleware.isLoggedIn, (req, res) => {
-  if (Number(req.user?.menu_klp) !== 1) {
-    return res.status(403).json({ success: false, message: 'Akses ditolak' });
-  }
-
+router.post('/directory', middleware.isLoggedIn, requirePermission('pegawai', 'read'), (req, res) => {
   const page = Number(req.body.page) || 1;
   const limit = Number(req.body.limit) || 15;
   const offset = (page - 1) * limit;
@@ -175,11 +172,7 @@ router.post('/directory', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/pegawai/lookup — Cari Pegawai di E-Gov / Simpeg (READ-ONLY)
 // ═══════════════════════════════════════════════════════════════
-router.post('/lookup', middleware.isLoggedIn, (req, res) => {
-  if (Number(req.user?.menu_klp) !== 1) {
-    return res.status(403).json({ success: false, message: 'Hanya Super Admin yang dapat mencari data pegawai' });
-  }
-
+router.post('/lookup', middleware.isLoggedIn, requirePermission('pegawai', 'read'), (req, res) => {
   const cari = req.body.cari_value ? req.body.cari_value.trim() : '';
   if (!cari || cari.length < 3) {
     return res.json({ data: [] });
@@ -237,16 +230,16 @@ router.post('/lookup', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/pegawai/set_role — Edit / Beri Hak Akses Pegawai
 // ═══════════════════════════════════════════════════════════════
-router.post('/set_role', middleware.isLoggedIn, (req, res) => {
-  if (Number(req.user?.menu_klp) !== 1) {
-    return res.status(403).json({ success: false, message: 'Akses ditolak' });
-  }
-
+router.post('/set_role', middleware.isLoggedIn, requirePermission('pegawai', 'update'), async (req, res) => {
   const { nip, nama, opd, role } = req.body;
-  const targetRole = Number(role); // 1 = Super Administrator, 2 = Admin OPD, 0 = Cabut Akses
+  const targetRole = Number(role); // 0 = cabut akses; lainnya = ID kelompok akses aktif
 
   if (!nip) {
     return res.status(400).json({ success: false, message: 'NIP pegawai wajib diisi' });
+  }
+
+  if (!Number.isInteger(targetRole) || targetRole < 0) {
+    return res.status(422).json({ success: false, message: 'Kelompok akses tidak valid' });
   }
 
   if (targetRole === 0) {
@@ -257,12 +250,25 @@ router.post('/set_role', middleware.isLoggedIn, (req, res) => {
       return res.json({ success: true, message: `Hak akses untuk ${nama || nip} berhasil dicabut` });
     });
   } else {
-    // Beri atau Ubah Hak Akses (Role 1 atau 2)
+    let roleName;
+    try {
+      await ensureAccessControlTables();
+      const groups = await queryAsync(
+        'SELECT name FROM access_groups WHERE id = ? AND is_active = 1 LIMIT 1',
+        [targetRole]
+      );
+      if (!groups.length) {
+        return res.status(422).json({ success: false, message: 'Kelompok akses tidak aktif atau tidak ditemukan' });
+      }
+      roleName = groups[0].name;
+    } catch (error) {
+      return res.status(500).json({ success: false, message: 'Gagal memvalidasi kelompok akses' });
+    }
+
+    // Beri atau ubah hak akses menggunakan kelompok yang terdaftar.
     const checkSql = `SELECT id FROM pegawai_akses WHERE nip = ?`;
     db.query(checkSql, [nip], (errCheck, rowsCheck) => {
       if (errCheck) return res.status(500).json({ success: false, message: errCheck.message });
-
-      const roleName = targetRole === 1 ? 'Super Administrator' : 'Admin OPD';
 
       if (rowsCheck && rowsCheck.length > 0) {
         const updateSql = `

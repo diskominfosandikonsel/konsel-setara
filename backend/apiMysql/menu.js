@@ -6,6 +6,7 @@ const multer = require('multer');
 const db = require('../db/MySql/utama');
 const uniqid = require('uniqid');
 const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 // Konfigurasi penyimpanan upload logo menu
 const menuUploadDir = path.join(__dirname, '../uploads/menu');
@@ -97,7 +98,7 @@ router.get('/list', (req, res) => {
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/view — List semua menu untuk Admin
 // ═══════════════════════════════════════════════
-router.post('/view', (req, res) => {
+router.post('/view', middleware.isLoggedIn, requirePermission('menu', 'read'), (req, res) => {
   const data_batas = Number(req.body.page_limit) || 20;
   const page_first = Number(req.body.data_ke) || 1;
   const data_star = (page_first - 1) * data_batas;
@@ -136,6 +137,7 @@ router.post('/view', (req, res) => {
 // ═══════════════════════════════════════════════
 router.post('/upload',
   middleware.isLoggedIn,
+  requirePermission('menu', 'create'),
   (req, res, next) => {
     upload.single('logo')(req, res, (err) => {
       if (err) return res.status(422).json({ success: false, message: 'Gagal upload logo: ' + err.message });
@@ -143,7 +145,6 @@ router.post('/upload',
     });
   },
   (req, res) => {
-    if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
     if (!req.file) return res.status(422).json({ success: false, message: 'File gambar logo wajib disertakan' });
 
     const relativePath = `uploads/menu/${req.file.filename}`;
@@ -162,9 +163,7 @@ router.post('/upload',
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/add — Tambah Menu Baru
 // ═══════════════════════════════════════════════
-router.post('/add', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
+router.post('/add', middleware.isLoggedIn, requirePermission('menu', 'create'), (req, res) => {
   const { label, icon, img, route, urutan, is_active } = req.body;
   const id = uniqid();
 
@@ -178,9 +177,7 @@ router.post('/add', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/edit — Update Menu
 // ═══════════════════════════════════════════════
-router.post('/edit', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
+router.post('/edit', middleware.isLoggedIn, requirePermission('menu', 'update'), (req, res) => {
   const { id, label, icon, img, route, urutan, is_active } = req.body;
   if (!id) return res.status(422).json({ success: false, message: 'ID menu wajib disertakan' });
 
@@ -194,9 +191,7 @@ router.post('/edit', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/remove — Hapus Menu
 // ═══════════════════════════════════════════════
-router.post('/remove', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
+router.post('/remove', middleware.isLoggedIn, requirePermission('menu', 'delete'), (req, res) => {
   const { id } = req.body;
   if (!id) return res.status(422).json({ success: false, message: 'ID menu wajib disertakan' });
 
@@ -210,9 +205,7 @@ router.post('/remove', middleware.isLoggedIn, (req, res) => {
 // ═══════════════════════════════════════════════
 // POST /api/v1/menu/reorder — Reorder Urutan Menu
 // ═══════════════════════════════════════════════
-router.post('/reorder', middleware.isLoggedIn, (req, res) => {
-  if (req.user.menu_klp != 1) return res.status(403).json({ success: false, message: 'Akses ditolak.' });
-
+router.post('/reorder', middleware.isLoggedIn, requirePermission('menu', 'update'), (req, res) => {
   const { orders } = req.body;
   if (!Array.isArray(orders)) return res.status(422).json({ success: false, message: 'Invalid data' });
 

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const tiktokService = require('../services/tiktokService');
+const middleware = require('../auth/middlewares');
+const { requirePermission } = require('../auth/accessControl');
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/v1/tiktok/feed — Daftar Video TikTok untuk Mobile App
@@ -54,7 +56,7 @@ router.get('/accounts', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // POST /api/v1/tiktok/sync — Trigger Sinkronisasi Manual
 // ═══════════════════════════════════════════════════════════════
-router.post('/sync', async (req, res) => {
+router.post('/sync', middleware.isLoggedIn, requirePermission('video_konsel', 'update'), async (req, res) => {
   try {
     const results = await tiktokService.syncAllAccounts();
     return res.json({
@@ -76,7 +78,7 @@ router.post('/sync', async (req, res) => {
 // POST /api/v1/tiktok/add — Tambah Video Manual via URL TikTok
 // Body: { videoUrl: string, category: 'official' | 'daily' }
 // ═══════════════════════════════════════════════════════════════
-router.post('/add', async (req, res) => {
+router.post('/add', middleware.isLoggedIn, requirePermission('video_konsel', 'create'), async (req, res) => {
   try {
     const { videoUrl, category = 'official' } = req.body;
     if (!videoUrl) {
@@ -106,7 +108,7 @@ router.post('/add', async (req, res) => {
 // GET /api/v1/tiktok/list — Daftar Lengkap Video untuk Web Admin
 // Query: ?category=all|official|daily & search=... & limit=10 & page=1
 // ═══════════════════════════════════════════════════════════════
-router.get('/list', async (req, res) => {
+router.get('/list', middleware.isLoggedIn, requirePermission('video_konsel', 'read'), async (req, res) => {
   try {
     const { category = 'all', search = '', limit = 10, page = 1 } = req.query;
     const result = await tiktokService.getAllVideosAdmin({ category, search, limit, page });
@@ -129,7 +131,7 @@ router.get('/list', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // DELETE /api/v1/tiktok/:id — Hapus Video Permanen
 // ═══════════════════════════════════════════════════════════════
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', middleware.isLoggedIn, requirePermission('video_konsel', 'delete'), async (req, res) => {
   try {
     const { id } = req.params;
     await tiktokService.deleteVideo(id);
@@ -150,7 +152,7 @@ router.delete('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 // PUT /api/v1/tiktok/:id — Edit Informasi Video (Kategori / Judul)
 // ═══════════════════════════════════════════════════════════════
-router.put('/:id', async (req, res) => {
+router.put('/:id', middleware.isLoggedIn, requirePermission('video_konsel', 'update'), async (req, res) => {
   try {
     const { id } = req.params;
     const { category, title } = req.body;
@@ -173,7 +175,7 @@ router.put('/:id', async (req, res) => {
 // PATCH /api/v1/tiktok/toggle/:id — Aktifkan / Sembunyikan Video
 // Body: { is_active: boolean }
 // ═══════════════════════════════════════════════════════════════
-router.patch('/toggle/:id', async (req, res) => {
+router.patch('/toggle/:id', middleware.isLoggedIn, requirePermission('video_konsel', 'update'), async (req, res) => {
   try {
     const { id } = req.params;
     const { is_active } = req.body;
