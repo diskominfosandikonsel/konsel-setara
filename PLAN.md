@@ -4,14 +4,14 @@ Dokumen ini adalah **panduan acuan rencana kerja terpusat**. Kapan pun Anda memu
 
 ---
 
-## 🏆 STATUS TERAKHIR (RILIS v1.6.2)
+## 🏆 STATUS TERAKHIR (RILIS v1.6.5)
 
-| Komponen                        |        Status        | Catatan Rilis                                                                                                                               |
-| :------------------------------ | :------------------: | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Mobile Android**              | 🚀 **RESMI LIVE**    | Versi **`1.6.2` (kode `11`)** resmi disetujui Google Play Store dan live ke publik dengan fitur **Konsultasi LPSE / Tiket SLA Pengadaan**. |
-| **Konsultasi LPSE (SLA Tiket)** |    ✅ **SELESAI**    | Formulir konsultasi PBJ, lampiran kamera/galeri, tracking status tiket, komentar interaktif, dan offline fallback storage.                  |
-| **Backend Visitor & Menu**      |    ✅ **SELESAI**    | Endpoint `/api/v1/visitors/*` & `/api/v1/menu/upload` aktif melayani aplikasi & admin.                                                      |
-| **Plan 1: Upload Logo Dinamis** |    ✅ **SELESAI**    | Admin web bisa upload logo gambar mandiri, backend melayani static storage & mobile `IndexPage.vue` otomatis render logo remote.            |
+| Komponen | Status | Catatan Rilis |
+| :--- | :---: | :--- |
+| **Mobile Android** | 🚀 **SIAP PUBLISH** | Versi **`1.6.5` (kode `14`)** mengintegrasikan fitur **Video Konsel (Official & Daily)** dengan pemutaran langsung in-app. |
+| **Modul Video Konsel (Mobile)** | ✅ **SELESAI** | Strip video vertikal 9:16, tab filter Semua/Official/Daily, stream direct MP4 resolusi tinggi tanpa membuka TikTok. |
+| **Modul Video Konsel (Admin)** | ✅ **SELESAI** | Modul kelola video di Web Admin (`/video-konsel`): tambah via URL, filter, switch tayang mobile, in-app preview, edit & hapus. |
+| **RUP Paket Pengadaan (v1.6.4)** | ✅ **PRODUKSI** | Versi **`1.6.4` (kode `13`)** telah live di Play Store dengan pembaruan filter & data paket pengadaan RUP. |
 
 ---
 

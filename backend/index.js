@@ -67,8 +67,8 @@ app.get('/openapi.json', (req, res) => {
 // Pengecekan Versi Aplikasi Mobile
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
-    // latestVersion: '1.6.3',
-    latestVersion: '1.6.4', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
+    // latestVersion: '1.6.4',
+    latestVersion: '1.6.5', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: false,
     whatsNew: [
