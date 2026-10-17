@@ -167,6 +167,58 @@ class TikTokService {
   /**
    * Menambahkan video manual dari URL postingan TikTok
    */
+  /**
+   * Ekstraksi metadata lengkap video (mencoba direct stream TikWM dahulu, fallback ke oEmbed)
+   */
+  async fetchVideoMetadata(videoUrl) {
+    const cleanUrl = videoUrl.trim();
+
+    // 1. Coba ambil direct stream MP4 tanpa watermark via TikWM
+    try {
+      const tikwmApi = `https://tikwm.com/api/?url=${encodeURIComponent(cleanUrl)}`;
+      const res = await axios.get(tikwmApi, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        },
+        timeout: 10000
+      });
+
+      if (res.data && res.data.code === 0 && res.data.data) {
+        const d = res.data.data;
+        return {
+          title: d.title || '',
+          author_unique_id: d.author?.unique_id || '',
+          thumbnail_url: d.cover || '',
+          play_url: d.play || d.wmplay || null,
+          play_count: d.play_count || 0,
+          digg_count: d.digg_count || 0,
+          comment_count: d.comment_count || 0
+        };
+      }
+    } catch (err) {
+      console.warn(`[TikTokService] TikWM direct stream tidak tersedia, mencoba oEmbed... (${err.message})`);
+    }
+
+    // 2. Fallback ke official oEmbed
+    const oembedMeta = await this.fetchOembedMetadata(cleanUrl);
+    if (oembedMeta) {
+      return {
+        title: oembedMeta.title || '',
+        author_unique_id: oembedMeta.author_unique_id || '',
+        thumbnail_url: oembedMeta.thumbnail_url || '',
+        play_url: null,
+        play_count: 0,
+        digg_count: 0,
+        comment_count: 0
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Menambahkan video manual dari URL postingan TikTok
+   */
   async addVideoByUrl(videoUrl, category = 'official') {
     const cleanUrl = videoUrl.trim();
     const tiktokId = this.extractTikTokId(cleanUrl);
@@ -179,8 +231,8 @@ class TikTokService {
     const accountId = matchedAccount ? matchedAccount.id : 1;
     const authorUsername = matchedAccount ? matchedAccount.username : 'diskominfo.konsel';
 
-    // Ambil metadata dari oEmbed
-    const meta = await this.fetchOembedMetadata(cleanUrl);
+    // Ambil metadata dari TikWM / oEmbed
+    const meta = await this.fetchVideoMetadata(cleanUrl);
 
     const videoData = {
       tiktok_id: tiktokId,
@@ -189,8 +241,11 @@ class TikTokService {
       category: category,
       title: meta?.title || 'Video Pemkab Konawe Selatan',
       video_url: cleanUrl,
-      play_url: null, // Siap untuk in-app embed / stream
+      play_url: meta?.play_url || null, // Direct MP4 stream tanpa keluar aplikasi
       cover_url: meta?.thumbnail_url || null,
+      play_count: meta?.play_count || 0,
+      digg_count: meta?.digg_count || 0,
+      comment_count: meta?.comment_count || 0,
       posted_at: new Date()
     };
 
@@ -241,6 +296,119 @@ class TikTokService {
     return new Promise((resolve, reject) => {
       const sql = 'UPDATE tiktok_videos SET is_active = ? WHERE id = ?';
       db.query(sql, [isActive ? 1 : 0, id], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  }
+
+  /**
+   * Ambil semua video untuk Web Admin (termasuk yang tidak aktif)
+   */
+  async getAllVideosAdmin({ category = 'all', search = '', limit = 10, page = 1 } = {}) {
+    return new Promise((resolve, reject) => {
+      const parsedLimit = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+      const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+      const offset = (parsedPage - 1) * parsedLimit;
+
+      let whereConditions = [];
+      const params = [];
+
+      if (category && category !== 'all') {
+        whereConditions.push('v.category = ?');
+        params.push(category);
+      }
+
+      if (search && search.trim() !== '') {
+        whereConditions.push('(v.title LIKE ? OR v.author_username LIKE ?)');
+        const searchPattern = `%${search.trim()}%`;
+        params.push(searchPattern, searchPattern);
+      }
+
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      const countSql = `SELECT COUNT(*) AS total FROM tiktok_videos v ${whereClause}`;
+      db.query(countSql, params, (countErr, countRows) => {
+        if (countErr) return reject(countErr);
+        const total = countRows[0]?.total || 0;
+
+        const dataSql = `
+          SELECT 
+            v.id,
+            v.tiktok_id,
+            v.account_id,
+            v.author_username,
+            v.category,
+            v.title,
+            v.video_url,
+            v.play_url,
+            v.cover_url,
+            v.play_count,
+            v.digg_count,
+            v.comment_count,
+            v.is_active,
+            v.posted_at,
+            v.created_at,
+            a.display_name AS account_name,
+            a.badge_color
+          FROM tiktok_videos v
+          LEFT JOIN tiktok_accounts a ON v.account_id = a.id
+          ${whereClause}
+          ORDER BY v.id DESC
+          LIMIT ? OFFSET ?
+        `;
+
+        db.query(dataSql, [...params, parsedLimit, offset], (dataErr, rows) => {
+          if (dataErr) return reject(dataErr);
+          resolve({
+            data: rows || [],
+            pagination: {
+              total,
+              page: parsedPage,
+              limit: parsedLimit,
+              totalPages: Math.ceil(total / parsedLimit)
+            }
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Hapus video TikTok dari database
+   */
+  async deleteVideo(id) {
+    return new Promise((resolve, reject) => {
+      const sql = 'DELETE FROM tiktok_videos WHERE id = ?';
+      db.query(sql, [id], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  }
+
+  /**
+   * Perbarui informasi video TikTok
+   */
+  async updateVideo(id, { category, title }) {
+    return new Promise((resolve, reject) => {
+      const fields = [];
+      const values = [];
+
+      if (category) {
+        fields.push('category = ?');
+        values.push(category);
+      }
+      if (typeof title === 'string') {
+        fields.push('title = ?');
+        values.push(title);
+      }
+
+      if (fields.length === 0) return resolve(null);
+
+      values.push(id);
+      const sql = `UPDATE tiktok_videos SET ${fields.join(', ')} WHERE id = ?`;
+      db.query(sql, values, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });

@@ -103,6 +103,73 @@ router.post('/add', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// GET /api/v1/tiktok/list — Daftar Lengkap Video untuk Web Admin
+// Query: ?category=all|official|daily & search=... & limit=10 & page=1
+// ═══════════════════════════════════════════════════════════════
+router.get('/list', async (req, res) => {
+  try {
+    const { category = 'all', search = '', limit = 10, page = 1 } = req.query;
+    const result = await tiktokService.getAllVideosAdmin({ category, search, limit, page });
+
+    return res.json({
+      success: true,
+      data: result.data,
+      pagination: result.pagination
+    });
+  } catch (err) {
+    console.error('[API TIKTOK] Error fetching admin list:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil daftar video admin',
+      error: err.message
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE /api/v1/tiktok/:id — Hapus Video Permanen
+// ═══════════════════════════════════════════════════════════════
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await tiktokService.deleteVideo(id);
+    return res.json({
+      success: true,
+      message: `Video #${id} berhasil dihapus`
+    });
+  } catch (err) {
+    console.error('[API TIKTOK] Error deleting video:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal menghapus video',
+      error: err.message
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// PUT /api/v1/tiktok/:id — Edit Informasi Video (Kategori / Judul)
+// ═══════════════════════════════════════════════════════════════
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, title } = req.body;
+    await tiktokService.updateVideo(id, { category, title });
+    return res.json({
+      success: true,
+      message: `Video #${id} berhasil diperbarui`
+    });
+  } catch (err) {
+    console.error('[API TIKTOK] Error updating video:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal memperbarui video',
+      error: err.message
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // PATCH /api/v1/tiktok/toggle/:id — Aktifkan / Sembunyikan Video
 // Body: { is_active: boolean }
 // ═══════════════════════════════════════════════════════════════
