@@ -329,8 +329,13 @@ class TikTokService {
 
         db.query(dataSql, [...params, parsedLimit, offset], (dataErr, rows) => {
           if (dataErr) return reject(dataErr);
+          const baseUrl = process.env.BASE_API_URL || 'https://konsel-setara.konaweselatankab.go.id';
+          const mapped = (rows || []).map((r) => ({
+            ...r,
+            play_url: `${baseUrl}/api/v1/tiktok/stream/${r.id}`,
+          }));
           resolve({
-            data: rows || [],
+            data: mapped,
             pagination: {
               total,
               page: parsedPage,

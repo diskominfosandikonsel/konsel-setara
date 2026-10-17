@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const tiktokService = require('../services/tiktokService');
 const middleware = require('../auth/middlewares');
 const { requirePermission } = require('../auth/accessControl');
@@ -30,6 +31,56 @@ router.get('/feed', async (req, res) => {
       message: 'Gagal mengambil feed video TikTok',
       error: err.message
     });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// GET /api/v1/tiktok/stream/:id — Streaming Proxy Video MP4
+// Mengalirkan video langsung dari server backend Konsel Setara
+// 100% Bebas dari kendala CORS, Referer Blocking, dan 403 Forbidden TikTok CDN
+// ═══════════════════════════════════════════════════════════════
+router.get('/stream/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const playUrl = await tiktokService.getFreshPlayUrl(id);
+    if (!playUrl) {
+      return res.status(404).send('Video stream tidak ditemukan');
+    }
+
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+    };
+
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
+    }
+
+    const streamResponse = await axios({
+      method: 'get',
+      url: playUrl,
+      responseType: 'stream',
+      headers,
+      timeout: 15000
+    });
+
+    res.status(streamResponse.status);
+    ['content-type', 'content-range', 'content-length', 'accept-ranges'].forEach((h) => {
+      if (streamResponse.headers[h]) {
+        res.setHeader(h, streamResponse.headers[h]);
+      }
+    });
+
+    streamResponse.data.pipe(res);
+
+    streamResponse.data.on('error', (err) => {
+      console.warn(`[API TIKTOK] Stream pipe error #${id}:`, err.message);
+      if (!res.headersSent) res.status(500).send('Streaming error');
+    });
+  } catch (err) {
+    console.error(`[API TIKTOK] Stream proxy error #${req.params.id}:`, err.message);
+    if (!res.headersSent) {
+      return res.status(500).send('Gagal mengalirkan video');
+    }
   }
 });
 
