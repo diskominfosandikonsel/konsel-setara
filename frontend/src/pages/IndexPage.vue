@@ -58,34 +58,90 @@
         </div>
       </div>
 
-      <!-- Video Berita -->
+      <!-- Video Konsel & Berita Daerah (Official & Daily) -->
       <div class="q-mb-lg">
-        <div class="row items-center justify-between q-mb-sm">
-          <div class="text-subtitle1 text-weight-bold text-grey-9">Video Berita</div>
+        <div class="row items-center justify-between q-mb-xs">
+          <div class="row items-center q-gutter-x-xs">
+            <div class="text-subtitle1 text-weight-bold text-grey-9">Video Konsel</div>
+          </div>
           <div class="text-caption text-primary cursor-pointer text-weight-bold" @click="showVideoSocials = true">
-            Video lainnya <q-icon name="chevron_right" />
+            Kanal Kami <q-icon name="chevron_right" />
           </div>
         </div>
+
+        <!-- Filter Tab Pills: Semua | Official | Daily -->
+        <div class="row items-center q-gutter-x-xs q-mb-sm">
+          <q-btn
+            dense
+            rounded
+            unelevated
+            no-caps
+            size="xs"
+            :color="selectedTiktokCategory === 'all' ? 'primary' : 'grey-3'"
+            :text-color="selectedTiktokCategory === 'all' ? 'white' : 'grey-8'"
+            class="q-px-sm text-weight-bold"
+            label="Semua"
+            @click="setTiktokCategory('all')"
+          />
+          <q-btn
+            dense
+            rounded
+            unelevated
+            no-caps
+            size="xs"
+            :color="selectedTiktokCategory === 'official' ? 'blue-8' : 'grey-3'"
+            :text-color="selectedTiktokCategory === 'official' ? 'white' : 'grey-8'"
+            class="q-px-sm text-weight-bold"
+            label="Official"
+            @click="setTiktokCategory('official')"
+          />
+          <q-btn
+            dense
+            rounded
+            unelevated
+            no-caps
+            size="xs"
+            :color="selectedTiktokCategory === 'daily' ? 'amber-9' : 'grey-3'"
+            :text-color="selectedTiktokCategory === 'daily' ? 'white' : 'grey-8'"
+            class="q-px-sm text-weight-bold"
+            label="Daily"
+            @click="setTiktokCategory('daily')"
+          />
+        </div>
+
         <div class="video-scroll-container">
-          <!-- Render videos dynamically or show skeleton/dummy -->
-          <template v-if="videoBerita.length > 0">
-            <q-card v-for="(vid, idx) in videoBerita" :key="'vid' + idx"
-              class="video-card q-mr-sm no-shadow bordered-card cursor-pointer" @click="openVideoLink(vid.link)">
-              <q-img :src="vid.img || getThumbnail(vid.link)" height="140px" class="bg-dark rounded-borders">
+          <!-- Render videos dynamically -->
+          <template v-if="displayedVideos.length > 0">
+            <q-card v-for="(vid, idx) in displayedVideos" :key="'vid' + idx"
+              class="video-card q-mr-sm no-shadow bordered-card cursor-pointer" @click="openVideoPlayer(vid)">
+              <q-img :src="vid.cover_url || vid.img || getThumbnail(vid.video_url || vid.link)" height="190px" class="bg-dark rounded-borders">
+                <!-- Play Icon Center -->
                 <div class="absolute-center bg-transparent">
-                  <q-icon name="play_circle_outline" color="white" size="40px" />
+                  <div class="play-btn-circle">
+                    <q-icon name="play_arrow" color="white" size="24px" />
+                  </div>
                 </div>
+
+                <!-- Bottom Title Overlay -->
                 <div class="absolute-bottom text-caption text-left text-white video-overlay">
-                  <div class="line-clamp-2">{{ vid.title }}</div>
+                  <div class="line-clamp-2 text-weight-medium text-xxs">{{ vid.title }}</div>
                 </div>
               </q-img>
             </q-card>
           </template>
+
           <!-- Shimmer loading state -->
-          <template v-else>
+          <template v-else-if="tiktokLoading">
             <q-card v-for="n in 3" :key="'skel-vid' + n" class="video-card q-mr-sm no-shadow bordered-card">
-              <q-skeleton height="140px" square class="rounded-borders" />
+              <q-skeleton height="190px" square class="rounded-borders" />
             </q-card>
+          </template>
+
+          <!-- Fallback jika belum ada video di kategori tersebut -->
+          <template v-else>
+            <div class="q-pa-md text-caption text-grey-6 text-center full-width bg-grey-1 rounded-borders">
+              Belum ada video di kategori ini
+            </div>
           </template>
         </div>
       </div>
@@ -93,21 +149,97 @@
       <!-- Modal Pilihan Sosial Media Video -->
       <q-dialog v-model="showVideoSocials" position="bottom">
         <q-card class="q-pa-md q-pb-xl rounded-borders-top" style="width: 100%; border-radius: 24px 24px 0 0;">
-          <div class="text-h6 text-center text-weight-bold q-mb-md text-grey-9">Kunjungi Channel Kami</div>
-          <div class="row justify-center q-gutter-x-xl q-mt-md">
+          <div class="text-h6 text-center text-weight-bold q-mb-md text-grey-9">Kunjungi Media Resmi Kami</div>
+          <div class="row justify-center q-gutter-x-lg q-mt-md">
             <!-- Pilihan YouTube -->
             <div class="column items-center cursor-pointer" @click="openSocialLink('youtube')">
-              <q-avatar size="64px" class="bg-red-1 q-mb-sm shadow-2">
-                <q-icon name="fab fa-youtube" color="red" size="32px" />
+              <q-avatar size="56px" class="bg-red-1 q-mb-xs shadow-2">
+                <q-icon name="fab fa-youtube" color="red" size="28px" />
               </q-avatar>
               <div class="text-caption text-weight-bold text-grey-8">YouTube</div>
             </div>
-            <!-- Pilihan TikTok -->
+            <!-- Pilihan TikTok Official -->
             <div class="column items-center cursor-pointer" @click="openSocialLink('tiktok')">
-              <q-avatar size="64px" class="bg-grey-2 q-mb-sm shadow-2">
-                <q-icon name="fab fa-tiktok" color="dark" size="32px" />
+              <q-avatar size="56px" class="bg-blue-1 q-mb-xs shadow-2">
+                <q-icon name="fab fa-tiktok" color="blue-9" size="28px" />
               </q-avatar>
-              <div class="text-caption text-weight-bold text-grey-8">TikTok</div>
+              <div class="text-caption text-weight-bold text-grey-8">TikTok Official</div>
+            </div>
+            <!-- Pilihan TikTok Daily -->
+            <div class="column items-center cursor-pointer" @click="openSocialLink('tiktok-daily')">
+              <q-avatar size="56px" class="bg-amber-1 q-mb-xs shadow-2">
+                <q-icon name="fab fa-tiktok" color="amber-9" size="28px" />
+              </q-avatar>
+              <div class="text-caption text-weight-bold text-grey-8">TikTok Daily</div>
+            </div>
+          </div>
+        </q-card>
+      </q-dialog>
+
+      <!-- In-App Video Player Modal (Putar Langsung di Konsel Setara) -->
+      <q-dialog v-model="showVideoPlayer" maximized transition-show="slide-up" transition-hide="slide-down">
+        <q-card class="bg-black text-white column no-wrap" style="height: 100vh; width: 100vw;">
+          <!-- Top Bar: Header info & Close Button -->
+          <div class="row items-center justify-between q-pa-md" style="z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);">
+            <div class="row items-center q-gutter-x-sm">
+              <q-avatar size="34px" class="bg-blue-grey-9 text-white">
+                <q-icon name="smart_display" size="18px" />
+              </q-avatar>
+              <div>
+                <div class="text-weight-bold text-subtitle2" style="line-height: 1.2;">
+                  {{ currentPlayingVideo?.category === 'daily' ? 'Daily Diskominfo' : 'Official Diskominfo' }}
+                </div>
+                <div class="text-caption text-grey-4">
+                  {{ currentPlayingVideo?.category === 'daily' ? 'Daily' : 'Official' }}
+                </div>
+              </div>
+            </div>
+            <q-btn flat round dense icon="close" color="white" @click="showVideoPlayer = false" class="bg-grey-9 text-white" />
+          </div>
+
+          <!-- Video Body Player -->
+          <div class="col column justify-center items-center relative-position overflow-hidden q-px-sm">
+            <!-- Direct MP4 Player -->
+            <video
+              v-if="currentPlayingVideo?.play_url"
+              :src="currentPlayingVideo.play_url"
+              controls
+              autoplay
+              playsinline
+              loop
+              class="fit rounded-borders"
+              style="object-fit: contain; max-height: 75vh;"
+            ></video>
+
+            <!-- Video Embed Player (jika tidak ada direct MP4) -->
+            <iframe
+              v-else-if="currentPlayingVideo?.tiktok_id"
+              :src="'https://www.tiktok.com/embed/v2/' + currentPlayingVideo.tiktok_id"
+              class="fit rounded-borders"
+              style="border: none; max-width: 500px; height: 75vh; background: #000;"
+              allow="fullscreen"
+              allowfullscreen
+            ></iframe>
+
+            <!-- Fallback Thumbnail with Open External -->
+            <div v-else class="column items-center justify-center q-pa-lg text-center">
+              <q-img :src="currentPlayingVideo?.cover_url || currentPlayingVideo?.img" style="width: 220px; border-radius: 16px;" class="q-mb-md" />
+              <div class="text-body2 q-mb-md">{{ currentPlayingVideo?.title }}</div>
+              <q-btn unelevated rounded color="primary" icon="launch" label="Buka Video" @click="openVideoLink(currentPlayingVideo?.video_url || currentPlayingVideo?.link)" />
+            </div>
+          </div>
+
+          <!-- Bottom Caption & Actions -->
+          <div class="q-pa-md" style="z-index: 10; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 100%);">
+            <div class="text-caption text-weight-medium line-clamp-2 q-mb-sm text-white">
+              {{ currentPlayingVideo?.title || 'Video Liputan Diskominfo Konawe Selatan' }}
+            </div>
+            <div class="row items-center justify-between">
+              <div class="row items-center q-gutter-x-sm text-caption text-grey-4">
+                <span v-if="currentPlayingVideo?.play_count"><q-icon name="visibility" size="14px" /> {{ formatNumber(currentPlayingVideo.play_count) }}</span>
+                <span v-if="currentPlayingVideo?.digg_count"><q-icon name="favorite" size="14px" color="red-4" /> {{ formatNumber(currentPlayingVideo.digg_count) }}</span>
+              </div>
+              <q-btn flat dense no-caps color="cyan-3" icon-right="open_in_new" label="Buka Video" size="sm" @click="openVideoLink(currentPlayingVideo?.video_url || currentPlayingVideo?.link)" />
             </div>
           </div>
         </q-card>
@@ -229,6 +361,7 @@ import { useSliderStore } from 'src/stores/slider'
 import { getImageBerita, formatDate } from 'src/utils/helper'
 import { api } from 'src/api/api'
 import { apiVisitors } from 'src/api/apiVisitors'
+import { apiTiktok } from 'src/api/apiTiktok'
 
 export default {
   name: 'IndexPage',
@@ -289,6 +422,50 @@ export default {
       } catch (error) {
         console.error('Gagal mengambil gambar slider:', error)
       }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Integrasi TikTok Multi-Akun (Resmi & Daily)
+    // ═══════════════════════════════════════════════════════════════
+    const tiktokVideos = ref([])
+    const selectedTiktokCategory = ref('all')
+    const tiktokLoading = ref(false)
+    const tiktokLoaded = ref(false)
+    const showVideoPlayer = ref(false)
+    const currentPlayingVideo = ref(null)
+
+    const displayedVideos = computed(() => {
+      if (tiktokLoaded.value) {
+        return tiktokVideos.value
+      }
+      return videoBerita.value
+    })
+
+    const fetchTiktokFeed = async () => {
+      try {
+        tiktokLoading.value = true
+        const res = await apiTiktok.getFeed({
+          category: selectedTiktokCategory.value,
+          limit: 10
+        })
+        const data = res?.data?.data || []
+        tiktokVideos.value = data
+        tiktokLoaded.value = true
+      } catch (err) {
+        console.warn('Gagal memuat feed TikTok:', err)
+      } finally {
+        tiktokLoading.value = false
+      }
+    }
+
+    const setTiktokCategory = (cat) => {
+      selectedTiktokCategory.value = cat
+      fetchTiktokFeed()
+    }
+
+    const openVideoPlayer = (vid) => {
+      currentPlayingVideo.value = vid
+      showVideoPlayer.value = true
     }
 
     const videoBerita = ref([])
@@ -451,6 +628,7 @@ export default {
 
     onMounted(() => {
       fetchCarousel()
+      fetchTiktokFeed()
       fetchVideoBerita()
       fetchBeritaTerbaru()
       fetchDynamicMenu()
@@ -478,6 +656,8 @@ export default {
         window.open('https://www.youtube.com/@diskominfokonsel', '_blank')
       } else if (platform === 'tiktok') {
         window.open('https://www.tiktok.com/@diskominfo.konsel', '_blank')
+      } else if (platform === 'tiktok-daily') {
+        window.open('https://www.tiktok.com/@dailydiskominfo.konsel', '_blank')
       }
       showVideoSocials.value = false
     }
@@ -552,7 +732,16 @@ export default {
       onSelectMenuItem,
       visitorStats,
       formatNumber,
-      getMenuIconSrc
+      getMenuIconSrc,
+      tiktokVideos,
+      selectedTiktokCategory,
+      tiktokLoading,
+      showVideoPlayer,
+      currentPlayingVideo,
+      displayedVideos,
+      fetchTiktokFeed,
+      setTiktokCategory,
+      openVideoPlayer
     }
   }
 }
@@ -680,15 +869,39 @@ export default {
 }
 
 .video-card {
-  min-width: 140px;
-  max-width: 140px;
-  border-radius: 12px;
+  min-width: 135px;
+  max-width: 135px;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-card:active {
+  transform: scale(0.97);
+}
+
+.play-btn-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.text-xxs {
+  font-size: 0.65rem;
+  line-height: 1.25;
 }
 
 .video-overlay {
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
   font-size: 10px;
-  padding: 8px;
+  padding: 10px 8px;
 }
 
 .bordered-card {

@@ -17,6 +17,7 @@ const Realisasi = lazy(() => import('@/app/realisasi/page'))
 // Content Management
 const Slider = lazy(() => import('@/app/slider/page'))
 const MenuDinamis = lazy(() => import('@/app/menu/page'))
+const VideoKonsel = lazy(() => import('@/app/video-konsel/page'))
 
 // Admin
 const Users = lazy(() => import('@/app/users/page'))
@@ -85,6 +86,10 @@ export const routes: RouteConfig[] = [
   {
     path: "/menu",
     element: <MenuDinamis />
+  },
+  {
+    path: "/video-konsel",
+    element: <VideoKonsel />
   },
 
   // Admin

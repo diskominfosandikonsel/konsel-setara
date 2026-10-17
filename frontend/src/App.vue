@@ -25,22 +25,18 @@
         <div class="update-modal-body">
           <h3 class="update-title">Update Tersedia! 🎉</h3>
           <p class="update-subtitle">
-            Versi terbaru aplikasi sudah siap untuk Anda
+            Konsel Setara v{{ latestAppVersion }} siap digunakan
           </p>
 
           <!-- What's new section -->
           <div class="whats-new">
-            <div class="whats-new-item">
-              <q-icon name="auto_fix_high" size="18px" color="amber" />
-              <span>Peningkatan performa & stabilitas</span>
-            </div>
-            <div class="whats-new-item">
-              <q-icon name="new_releases" size="18px" color="green" />
-              <span>Fitur baru & perbaikan bug</span>
-            </div>
-            <div class="whats-new-item">
-              <q-icon name="security" size="18px" color="blue" />
-              <span>Pembaruan keamanan penting</span>
+            <div
+              v-for="(item, idx) in updateWhatsNew"
+              :key="idx"
+              class="whats-new-item"
+            >
+              <q-icon :name="item.icon" size="18px" :color="item.color" />
+              <span>{{ item.text }}</span>
             </div>
           </div>
         </div>
@@ -88,6 +84,23 @@ export default {
       latestAppVersion: "1.0.0",
       isForceUpdate: false,
       updateStoreUrl: "",
+      updateWhatsNew: [
+        {
+          icon: "smart_display",
+          color: "primary",
+          text: "Fitur baru Video Konsel (Official & Daily) pemutaran langsung di aplikasi",
+        },
+        {
+          icon: "filter_alt",
+          color: "green-7",
+          text: "Pembaruan filter & data paket pengadaan RUP",
+        },
+        {
+          icon: "security",
+          color: "blue-7",
+          text: "Peningkatan performa, keamanan & stabilitas sistem",
+        },
+      ],
     };
   },
 
@@ -133,6 +146,20 @@ export default {
           this.latestAppVersion = latestVersion;
           this.isForceUpdate = !!data.forceUpdate;
           this.updateStoreUrl = data.storeUrl;
+          if (Array.isArray(data.whatsNew) && data.whatsNew.length > 0) {
+            const defaultIcons = ["filter_alt", "storefront", "auto_fix_high", "verified"];
+            const defaultColors = ["primary", "green-7", "amber-8", "blue-7"];
+            this.updateWhatsNew = data.whatsNew.map((item, i) => {
+              if (typeof item === "string") {
+                return {
+                  icon: defaultIcons[i % defaultIcons.length],
+                  color: defaultColors[i % defaultColors.length],
+                  text: item,
+                };
+              }
+              return item;
+            });
+          }
           this.showUpdateDialog = true;
         }
       } catch (err) {
@@ -673,11 +700,17 @@ export default {
 
 .whats-new-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   font-size: 13px;
+  line-height: 1.4;
   color: #4b5563;
   text-align: left;
+}
+
+.whats-new-item .q-icon {
+  margin-top: 1px;
+  flex-shrink: 0;
 }
 
 /* ---- Actions ---- */

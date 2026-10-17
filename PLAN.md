@@ -72,6 +72,15 @@ flowchart LR
 
 ---
 
+### ✅ PLAN 4: Integrasi Video Konsel Multi-Akun & Modul Web Admin — [SELESAI]
+> **Status**: **100% Selesai**. 
+> - **Backend**: Service `TikTokService` dengan resolver otomatis TikWM/oEmbed, rute admin (`/api/v1/tiktok/list`, `/add`, `/toggle/:id`, `/:id`).
+> - **Web Admin**: Modul menu **Video Konsel** di sidebar kategori **Kelola Konten** (`/video-konsel`) dengan fitur tambah via URL, filter Official/Daily, toggle switch tayang mobile, in-app video preview, edit info, dan hapus permanen.
+> - **Mobile Android**: Strip kartu vertikal rasio 9:16 di beranda `IndexPage.vue` dengan tab filter *Semua*, *Official*, *Daily*, serta in-app modal video player MP4 resolusi tinggi tanpa keluar aplikasi.
+> - **Dokumen Rencana**: [docs/plan-integrasi-tiktok-otomatis.md](file:///Users/simplephi/Documents/riswan/konsel-setara/docs/plan-integrasi-tiktok-otomatis.md)
+
+---
+
 ## 📱 STANDAR PROSEDUR RILIS & BUILD PLAY STORE (SOP UPDATE APLIKASI)
 
 Setiap kali pengguna meminta **"update"** atau **"mau upload ke Play Store"**, jalankan alur kerja standar berikut secara otomatis:

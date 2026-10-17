@@ -72,8 +72,8 @@ app.get('/api/v1/app-version', (req, res) => {
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: false,
     whatsNew: [
+      'Fitur baru Video Konsel (Official & Daily) pemutaran langsung di aplikasi',
       'Pembaruan filter & data paket pengadaan RUP',
-      'Integrasi Layanan Koperasi & UMKM Konsel (APLI DAKOP)',
       'Peningkatan performa, keamanan & stabilitas sistem'
     ]
   });

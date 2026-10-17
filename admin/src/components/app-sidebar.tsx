@@ -10,6 +10,7 @@ import {
   Users,
   Award,
   ShieldCheck,
+  Video,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Logo } from "@/components/logo"
@@ -75,6 +76,11 @@ const navGroups = [
         title: "Menu Dinamis",
         url: "/menu",
         icon: Menu,
+      },
+      {
+        title: "Video Konsel",
+        url: "/video-konsel",
+        icon: Video,
       },
     ],
   },
