@@ -1,7 +1,6 @@
 import axios from 'axios'
 
-// const API_URL = 'http://localhost:5025'
-const API_URL = 'https://konsel-setara.konaweselatankab.go.id'
+const API_URL = import.meta.env.VITE_API_URL || 'https://konsel-setara.konaweselatankab.go.id'
 export const UPLOAD_URL = `${API_URL}/uploads`
 
 const api = axios.create({
