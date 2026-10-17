@@ -48,7 +48,9 @@ router.get('/stream/:id', async (req, res) => {
     }
 
     const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      'Accept': 'video/mp4,video/*;q=0.9,*/*;q=0.8',
+      'Referer': 'https://www.tiktok.com/'
     };
 
     if (req.headers.range) {

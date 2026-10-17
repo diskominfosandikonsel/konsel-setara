@@ -55,7 +55,9 @@ class TikTokService {
         const baseUrl = process.env.BASE_API_URL || 'https://konsel-setara.konaweselatankab.go.id';
         const mapped = (rows || []).map((r) => ({
           ...r,
-          play_url: `${baseUrl}/api/v1/tiktok/play/${r.id}`,
+          // Video selalu diputar melalui backend. URL CDN TikTok/TikWM bersifat
+          // sementara dan tidak boleh diberikan langsung ke admin/mobile.
+          play_url: `${baseUrl}/api/v1/tiktok/stream/${r.id}`,
         }));
         resolve(mapped);
       });
