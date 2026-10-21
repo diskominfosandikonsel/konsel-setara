@@ -8,11 +8,13 @@ export interface UserProfile {
   hp?: string
   email?: string
   opd?: string
+  opd_id?: string | null
   nip?: string
   menu_klp: number
   profile?: {
     menu_klp: number
     opd?: string
+    opd_id?: string | null
     nama?: string
   }
 }

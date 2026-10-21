@@ -132,12 +132,14 @@ router.post('/login', async (req, res) => {
           nip: nipPegawai,
           nama: namaLengkap,
           opd: opdName,
+          opd_id: aksesData?.opd_id || null,
           menu_klp: userRole,
           role: userRole === 1 ? 'superadmin' : 'pegawai_opd',
           profile: {
             nama: namaLengkap,
             menu_klp: userRole,
             opd: opdName,
+            opd_id: aksesData?.opd_id || null,
           }
         };
 

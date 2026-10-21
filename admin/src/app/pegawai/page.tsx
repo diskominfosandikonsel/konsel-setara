@@ -282,6 +282,7 @@ export default function PegawaiDirectoryPage() {
         nip: targetPegawai.nip,
         nama: targetPegawai.nama,
         opd: targetPegawai.opd,
+        opd_id: targetPegawai.instansi_id,
         role: Number(selectedRole),
       })
       toast.success(
@@ -313,7 +314,7 @@ export default function PegawaiDirectoryPage() {
     <AuthGuard>
       <BaseLayout
         title="Manajemen Hak Akses Pegawai"
-        description="Filter berdasarkan Instansi / Unit Kerja dan atur hak akses pegawai (Admin OPD atau Administrator)"
+        description="Filter berdasarkan Instansi / Unit Kerja dan atur kelompok hak akses setiap pegawai"
       >
         <div className="px-4 lg:px-6 space-y-6">
           {/* Filter Bar */}
@@ -423,7 +424,7 @@ export default function PegawaiDirectoryPage() {
                     Daftar Pegawai & Hak Akses
                   </CardTitle>
                   <CardDescription>
-                    Pilih pegawai lalu tentukan peran aksesnya (Admin OPD atau Administrator)
+                    Pilih pegawai lalu tentukan perannya, termasuk Admin Resepsionis atau Admin Arsiparis
                   </CardDescription>
                 </div>
               </div>
@@ -558,8 +559,8 @@ export default function PegawaiDirectoryPage() {
 
         {/* Modal Atur / Ubah Hak Akses */}
         <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
+          <DialogContent className="flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-md flex-col gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:w-full">
+            <DialogHeader className="shrink-0 border-b px-4 py-4 pr-12 sm:px-6 sm:py-5 sm:pr-12">
               <DialogTitle className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 Atur Hak Akses Pegawai
@@ -569,12 +570,13 @@ export default function PegawaiDirectoryPage() {
               </DialogDescription>
             </DialogHeader>
 
-            {targetPegawai && (
-              <div className="space-y-4 py-2">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
+              {targetPegawai && (
+                <div className="space-y-4">
                 {/* Profile Card Summary */}
                 <div className="p-3 bg-muted/50 rounded-lg border space-y-1">
                   <div className="font-semibold text-sm text-foreground">{targetPegawai.nama}</div>
-                  <div className="text-xs text-muted-foreground font-mono">
+                  <div className="break-all text-xs text-muted-foreground font-mono">
                     {targetPegawai.nip !== targetPegawai.username ? `NIP: ${targetPegawai.nip}` : `Username: ${targetPegawai.username}`}
                   </div>
                   <div className="text-xs text-primary font-medium">{targetPegawai.opd}</div>
@@ -626,13 +628,14 @@ export default function PegawaiDirectoryPage() {
                   </RadioGroup>
                 </div>
               </div>
-            )}
+              )}
+            </div>
 
-            <DialogFooter className="pt-2">
-              <Button variant="outline" onClick={() => setEditModalOpen(false)} disabled={savingRole}>
+            <DialogFooter className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
+              <Button className="w-full sm:w-auto" variant="outline" onClick={() => setEditModalOpen(false)} disabled={savingRole}>
                 Batal
               </Button>
-              <Button onClick={handleSaveRole} disabled={savingRole}>
+              <Button className="w-full sm:w-auto" onClick={handleSaveRole} disabled={savingRole}>
                 {savingRole && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Simpan Perubahan
               </Button>

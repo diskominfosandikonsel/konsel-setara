@@ -231,7 +231,7 @@ router.post('/lookup', middleware.isLoggedIn, requirePermission('pegawai', 'read
 // POST /api/v1/pegawai/set_role — Edit / Beri Hak Akses Pegawai
 // ═══════════════════════════════════════════════════════════════
 router.post('/set_role', middleware.isLoggedIn, requirePermission('pegawai', 'update'), async (req, res) => {
-  const { nip, nama, opd, role } = req.body;
+  const { nip, nama, opd, opd_id, role } = req.body;
   const targetRole = Number(role); // 0 = cabut akses; lainnya = ID kelompok akses aktif
 
   if (!nip) {
@@ -273,10 +273,10 @@ router.post('/set_role', middleware.isLoggedIn, requirePermission('pegawai', 'up
       if (rowsCheck && rowsCheck.length > 0) {
         const updateSql = `
           UPDATE pegawai_akses 
-          SET menu_klp = ?, is_active = 1, nama = ?, opd = ? 
+          SET menu_klp = ?, is_active = 1, nama = ?, opd = ?, opd_id = ?
           WHERE nip = ?
         `;
-        db.query(updateSql, [targetRole, nama || 'Pegawai', opd || 'OPD Konawe Selatan', nip], (errUp) => {
+        db.query(updateSql, [targetRole, nama || 'Pegawai', opd || 'OPD Konawe Selatan', opd_id || null, nip], (errUp) => {
           if (errUp) return res.status(500).json({ success: false, message: errUp.message });
           res.json({ success: true, message: `Hak akses berhasil diubah menjadi ${roleName}` });
         });
@@ -284,10 +284,10 @@ router.post('/set_role', middleware.isLoggedIn, requirePermission('pegawai', 'up
         const id = uniqid();
         const createdBy = req.user?.nama || 'Super Admin';
         const insertSql = `
-          INSERT INTO pegawai_akses (id, nip, nama, opd, menu_klp, is_active, createdBy)
-          VALUES (?, ?, ?, ?, ?, 1, ?)
+          INSERT INTO pegawai_akses (id, nip, nama, opd, opd_id, menu_klp, is_active, createdBy)
+          VALUES (?, ?, ?, ?, ?, ?, 1, ?)
         `;
-        db.query(insertSql, [id, nip, nama || 'Pegawai', opd || 'OPD Konawe Selatan', targetRole, createdBy], (errIns) => {
+        db.query(insertSql, [id, nip, nama || 'Pegawai', opd || 'OPD Konawe Selatan', opd_id || null, targetRole, createdBy], (errIns) => {
           if (errIns) return res.status(500).json({ success: false, message: errIns.message });
           res.json({ success: true, message: `Hak akses berhasil diberikan sebagai ${roleName}` });
         });

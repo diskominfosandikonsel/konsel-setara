@@ -9,6 +9,9 @@ const MENU_DEFINITIONS = [
   { key: 'menu', label: 'Menu Dinamis', section: 'Kelola Konten' },
   { key: 'video_konsel', label: 'Video Konsel', section: 'Kelola Konten' },
   { key: 'rup', label: 'Sinkronisasi RUP', section: 'Integrasi Data' },
+  { key: 'guestbook_dashboard', label: 'Rekap / Dashboard', section: 'Buku Tamu' },
+  { key: 'guestbook_monitoring', label: 'Monitoring Tamu', section: 'Buku Tamu' },
+  { key: 'guestbook_qr', label: 'Generate QR', section: 'Buku Tamu' },
   { key: 'users', label: 'Manajemen User', section: 'Administrasi' },
   { key: 'pegawai', label: 'Hak Akses Pegawai', section: 'Administrasi' },
   { key: 'access_groups', label: 'Kelompok & Hak Akses', section: 'Administrasi' },
@@ -57,11 +60,22 @@ function ensureAccessControlTables() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
 
+    const opdIdColumns = await queryAsync(`
+      SELECT COUNT(*) AS total
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pegawai_akses' AND COLUMN_NAME = 'opd_id'
+    `);
+    if (Number(opdIdColumns[0]?.total || 0) === 0) {
+      await queryAsync('ALTER TABLE pegawai_akses ADD COLUMN opd_id VARCHAR(64) DEFAULT NULL AFTER opd');
+    }
+
     await queryAsync(`
       INSERT INTO access_groups (id, name, description, is_system, is_active)
       VALUES
         (1, 'Administrator', 'Akses penuh ke seluruh modul administrasi.', 1, 1),
-        (2, 'Admin OPD', 'Mengelola dashboard dan realisasi milik OPD.', 1, 1)
+        (2, 'Admin OPD', 'Mengelola dashboard dan realisasi milik OPD.', 1, 1),
+        (5, 'Admin Resepsionis', 'Mengelola penerimaan dan monitoring tamu pada OPD yang ditugaskan.', 1, 1),
+        (6, 'Admin Arsiparis', 'Mengelola rekap dan arsip Buku Tamu pada OPD yang ditugaskan.', 1, 1)
       ON DUPLICATE KEY UPDATE
         is_system = VALUES(is_system),
         is_active = VALUES(is_active)
@@ -80,6 +94,23 @@ function ensureAccessControlTables() {
           can_update = 1,
           can_delete = 1
       `, [menu.key]);
+    }
+
+    const guestbookRoleDefaults = {
+      guestbook_dashboard: [1, 0, 0, 0],
+      guestbook_monitoring: [1, 0, 1, 0],
+      guestbook_qr: [1, 1, 1, 0],
+    };
+
+    for (const roleId of [5, 6]) {
+      for (const menu of MENU_DEFINITIONS) {
+        const values = guestbookRoleDefaults[menu.key] || [0, 0, 0, 0];
+        await queryAsync(`
+          INSERT IGNORE INTO access_group_permissions
+            (group_id, menu_key, can_read, can_create, can_update, can_delete)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [roleId, menu.key, ...values]);
+      }
     }
 
     const opdDefaults = {

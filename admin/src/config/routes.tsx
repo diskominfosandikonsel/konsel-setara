@@ -27,6 +27,12 @@ const Pegawai = lazy(() => import('@/app/pegawai/page'))
 const AccessGroups = lazy(() => import('@/app/access-groups/page'))
 const RupSync = lazy(() => import('@/app/rup/page'))
 
+// Buku Tamu
+const GuestbookDashboard = lazy(() => import('@/app/buku-tamu/page'))
+const GuestbookMonitoring = lazy(() => import('@/app/buku-tamu/monitoring/page'))
+const GuestbookQr = lazy(() => import('@/app/buku-tamu/qr/page'))
+const GuestbookPublicForm = lazy(() => import('@/app/buku-tamu/public/page'))
+
 // Settings
 const UserSettings = lazy(() => import('@/app/settings/user/page'))
 
@@ -128,6 +134,27 @@ export const routes: RouteConfig[] = [
   {
     path: "/rup",
     element: <RupSync />
+  },
+
+  // Buku Tamu
+  {
+    path: "/buku-tamu",
+    element: <GuestbookDashboard />,
+    permissionKey: "guestbook_dashboard"
+  },
+  {
+    path: "/buku-tamu/monitoring",
+    element: <GuestbookMonitoring />,
+    permissionKey: "guestbook_monitoring"
+  },
+  {
+    path: "/buku-tamu/qr",
+    element: <GuestbookQr />,
+    permissionKey: "guestbook_qr"
+  },
+  {
+    path: "/buku-tamu/form/:token",
+    element: <GuestbookPublicForm />
   },
 
   // Settings

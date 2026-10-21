@@ -103,6 +103,10 @@ app.use('/api/v1/pegawai', pegawai);
 const accessGroups = require('./apiMysql/accessGroups');
 app.use('/api/v1/access-groups', accessGroups);
 
+// Modul Buku Tamu Digital (QR, formulir publik, rekap, dan monitoring OPD)
+const guestbook = require('./apiMysql/guestbook');
+app.use('/api/v1/guestbook', guestbook);
+
 // Modul RUP (Rencana Umum Pengadaan) - Proxy ke inaproc API
 const rup = require('./apiMysql/rup');
 app.use('/api/v1/rup', rup);

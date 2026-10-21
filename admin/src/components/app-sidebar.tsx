@@ -13,6 +13,9 @@ import {
   Video,
   KeyRound,
   Database,
+  BookOpenCheck,
+  ScanLine,
+  ClipboardList,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Logo } from "@/components/logo"
@@ -29,7 +32,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { getProfile } from "@/lib/auth"
-import { fetchMyAccessGroup, getStoredAccessGroup, hasPermission } from "@/lib/permissions"
+import { fetchMyAccessGroup, getFirstAllowedRoute, getStoredAccessGroup, hasPermission } from "@/lib/permissions"
 
 const navGroups = [
   {
@@ -106,6 +109,29 @@ const navGroups = [
     ],
   },
   {
+    label: "Buku Tamu",
+    items: [
+      {
+        title: "Rekap / Dashboard",
+        url: "/buku-tamu",
+        icon: BookOpenCheck,
+        permissionKey: "guestbook_dashboard",
+      },
+      {
+        title: "Monitoring Tamu",
+        url: "/buku-tamu/monitoring",
+        icon: ClipboardList,
+        permissionKey: "guestbook_monitoring",
+      },
+      {
+        title: "Generate QR",
+        url: "/buku-tamu/qr",
+        icon: ScanLine,
+        permissionKey: "guestbook_qr",
+      },
+    ],
+  },
+  {
     label: "Administrasi",
     items: [
       {
@@ -161,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link to="/dashboard">
+              <Link to={accessGroup ? getFirstAllowedRoute(accessGroup) : "/dashboard"}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Logo size={28} />
                 </div>
