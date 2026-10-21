@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { AuthGuard } from "@/components/auth-guard"
 import { BaseLayout } from "@/components/layouts/base-layout"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -12,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProfile } from "@/lib/auth"
 import api from "@/lib/api"
-import { Building2, CalendarDays, Clock3, ContactRound, FileText, Loader2, Printer, UsersRound } from "lucide-react"
+import { Building2, CalendarDays, ContactRound, FileText, Loader2, Printer, UserRound, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { OpdScopeSelect } from "./components/opd-scope-select"
 import { SearchableSelect } from "./components/searchable-select"
@@ -35,7 +34,6 @@ interface SummaryData {
     this_month: number
     internal_total: number
     external_total: number
-    active_total: number
   }
   trend: { date: string; total: number }[]
   recent: GuestbookVisit[]
@@ -137,12 +135,12 @@ export default function GuestbookDashboardPage() {
     }
   }
 
-  const totals = data?.totals || { total: 0, today: 0, this_month: 0, internal_total: 0, external_total: 0, active_total: 0 }
+  const totals = data?.totals || { total: 0, today: 0, this_month: 0, internal_total: 0, external_total: 0 }
   const cards = [
     { label: "Tamu Hari Ini", value: totals.today, icon: CalendarDays, color: "text-emerald-600", bg: "bg-emerald-500/10" },
     { label: "Bulan Ini", value: totals.this_month, icon: UsersRound, color: "text-blue-600", bg: "bg-blue-500/10" },
     { label: "Total Kunjungan", value: totals.total, icon: ContactRound, color: "text-violet-600", bg: "bg-violet-500/10" },
-    { label: "Sedang Berkunjung", value: totals.active_total, icon: Clock3, color: "text-amber-600", bg: "bg-amber-500/10" },
+    { label: "ASN Konsel", value: totals.internal_total, icon: UserRound, color: "text-amber-600", bg: "bg-amber-500/10" },
   ]
 
   return (
@@ -237,7 +235,7 @@ export default function GuestbookDashboardPage() {
                 {data?.recent.map((visit) => (
                   <div key={visit.id} className="flex min-w-0 items-start justify-between gap-3 border-b pb-3 last:border-0 last:pb-0">
                     <div className="min-w-0"><p className="truncate text-sm font-semibold">{visit.visitor_name}</p><p className="truncate text-xs text-muted-foreground">{visit.origin_institution || visitorTypeLabel[visit.visitor_type]}</p><p className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(visit.checked_in_at)}</p></div>
-                    <Badge className="shrink-0" variant={visit.status === "completed" ? "secondary" : "default"}>{visit.status === "completed" ? "Selesai" : "Aktif"}</Badge>
+                    <span className="shrink-0 rounded-full border px-2 py-1 text-[10px] font-medium text-muted-foreground">{visitorTypeLabel[visit.visitor_type]}</span>
                   </div>
                 ))}
               </CardContent>

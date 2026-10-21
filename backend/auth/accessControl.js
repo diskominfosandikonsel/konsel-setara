@@ -98,7 +98,7 @@ function ensureAccessControlTables() {
 
     const guestbookRoleDefaults = {
       guestbook_dashboard: [1, 0, 0, 0],
-      guestbook_monitoring: [1, 0, 1, 0],
+      guestbook_monitoring: [1, 0, 1, 1],
       guestbook_qr: [1, 1, 1, 0],
     };
 
@@ -112,6 +112,12 @@ function ensureAccessControlTables() {
         `, [roleId, menu.key, ...values]);
       }
     }
+
+    await queryAsync(`
+      UPDATE access_group_permissions
+      SET can_delete = 1
+      WHERE group_id IN (5, 6) AND menu_key = 'guestbook_monitoring'
+    `);
 
     const opdDefaults = {
       dashboard: [1, 0, 0, 0],

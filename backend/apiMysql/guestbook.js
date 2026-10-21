@@ -7,7 +7,6 @@ const { queryAsync, requirePermission } = require('../auth/accessControl');
 const router = express.Router();
 
 const VISITOR_TYPES = new Set(['internal', 'external_employee', 'external_general']);
-const VISIT_STATUSES = new Set(['checked_in', 'completed']);
 const publicSubmissions = new Map();
 let initializationPromise;
 
@@ -117,15 +116,12 @@ function ensureGuestbookTables() {
         office_name VARCHAR(255) DEFAULT NULL,
         phone VARCHAR(30) DEFAULT NULL,
         purpose TEXT NOT NULL,
-        status ENUM('checked_in', 'completed') NOT NULL DEFAULT 'checked_in',
         checked_in_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        completed_at DATETIME DEFAULT NULL,
         source_ip VARCHAR(64) DEFAULT NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY idx_guestbook_visit_opd_date (opd_id, checked_in_at),
-        KEY idx_guestbook_visit_status (opd_id, status),
         KEY idx_guestbook_visit_location (location_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
@@ -391,8 +387,7 @@ router.get('/summary', requirePermission('guestbook_dashboard', 'read'), async (
         SUM(DATE(checked_in_at) = CURDATE()) AS today,
         SUM(YEAR(checked_in_at) = YEAR(CURDATE()) AND MONTH(checked_in_at) = MONTH(CURDATE())) AS this_month,
         SUM(visitor_type = 'internal') AS internal_total,
-        SUM(visitor_type != 'internal') AS external_total,
-        SUM(status = 'checked_in') AS active_total
+        SUM(visitor_type != 'internal') AS external_total
       FROM guestbook_visits ${where}
     `, params);
 
@@ -409,7 +404,7 @@ router.get('/summary', requirePermission('guestbook_dashboard', 'read'), async (
       ? 'WHERE opd_id = ? AND DATE(checked_in_at) = CURDATE()'
       : 'WHERE DATE(checked_in_at) = CURDATE()';
     const recent = await queryAsync(`
-      SELECT id, visitor_name, visitor_type, origin_institution, purpose, status, opd_name, checked_in_at
+      SELECT id, visitor_name, visitor_type, origin_institution, purpose, opd_name, checked_in_at
       FROM guestbook_visits ${recentWhere}
       ORDER BY checked_in_at DESC LIMIT 8
     `, params);
@@ -423,7 +418,6 @@ router.get('/summary', requirePermission('guestbook_dashboard', 'read'), async (
           this_month: Number(totals[0]?.this_month || 0),
           internal_total: Number(totals[0]?.internal_total || 0),
           external_total: Number(totals[0]?.external_total || 0),
-          active_total: Number(totals[0]?.active_total || 0),
         },
         trend: trend.map((item) => ({ date: item.visit_date, total: Number(item.total) })),
         recent,
@@ -490,7 +484,7 @@ router.get('/report', requirePermission('guestbook_dashboard', 'read'), async (r
             LIMIT 1
           ) ELSE NULL END
         ) AS phone,
-        purpose, status, checked_in_at, completed_at
+        purpose, checked_in_at
       FROM guestbook_visits
       WHERE ${conditions.join(' AND ')}
       ORDER BY checked_in_at ASC, id ASC
@@ -518,7 +512,6 @@ router.get('/visits', requirePermission('guestbook_monitoring', 'read'), async (
     const offset = (page - 1) * limit;
     const search = cleanText(req.query.search, 100);
     const visitorType = cleanText(req.query.visitor_type, 30);
-    const status = cleanText(req.query.status, 30);
     const dateFrom = cleanText(req.query.date_from, 10);
     const dateTo = cleanText(req.query.date_to, 10);
     const conditions = [];
@@ -530,7 +523,6 @@ router.get('/visits', requirePermission('guestbook_monitoring', 'read'), async (
       params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
     if (VISITOR_TYPES.has(visitorType)) { conditions.push('visitor_type = ?'); params.push(visitorType); }
-    if (VISIT_STATUSES.has(status)) { conditions.push('status = ?'); params.push(status); }
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateFrom)) { conditions.push('DATE(checked_in_at) >= ?'); params.push(dateFrom); }
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateTo)) { conditions.push('DATE(checked_in_at) <= ?'); params.push(dateTo); }
 
@@ -562,8 +554,7 @@ router.get('/visits', requirePermission('guestbook_monitoring', 'read'), async (
             LIMIT 1
           ) ELSE NULL END
         ) AS phone,
-        purpose,
-        status, checked_in_at, completed_at
+        purpose, checked_in_at
       FROM guestbook_visits ${where}
       ORDER BY checked_in_at DESC
       LIMIT ${offset}, ${limit}
@@ -577,29 +568,75 @@ router.get('/visits', requirePermission('guestbook_monitoring', 'read'), async (
   }
 });
 
-router.put('/visits/:id/status', requirePermission('guestbook_monitoring', 'update'), async (req, res) => {
+router.put('/visits/:id', requirePermission('guestbook_monitoring', 'update'), async (req, res) => {
   try {
     await ensureGuestbookTables();
     const scope = await resolveScope(req);
     const id = Number(req.params.id);
-    const status = cleanText(req.body.status, 30);
-    if (!Number.isInteger(id) || id < 1 || !VISIT_STATUSES.has(status)) {
-      return res.status(422).json({ success: false, message: 'Data kunjungan atau status tidak valid.' });
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(422).json({ success: false, message: 'Data kunjungan tidak valid.' });
     }
 
     const conditions = ['id = ?'];
     const params = [id];
     if (scope) { conditions.push('opd_id = ?'); params.push(scope.id); }
-    const result = await queryAsync(`
-      UPDATE guestbook_visits
-      SET status = ?, completed_at = ${status === 'completed' ? 'NOW()' : 'NULL'}
+
+    const visits = await queryAsync(`
+      SELECT id, visitor_type
+      FROM guestbook_visits
       WHERE ${conditions.join(' AND ')}
-    `, [status, ...params]);
-    if (!result.affectedRows) return res.status(404).json({ success: false, message: 'Kunjungan tidak ditemukan pada OPD Anda.' });
-    return res.json({ success: true, message: status === 'completed' ? 'Kunjungan ditandai selesai.' : 'Status kunjungan diaktifkan kembali.' });
+      LIMIT 1
+    `, params);
+    if (!visits.length) return res.status(404).json({ success: false, message: 'Kunjungan tidak ditemukan pada OPD Anda.' });
+
+    const visitorType = visits[0].visitor_type;
+    const visitorName = cleanText(req.body.visitor_name, 200);
+    const purpose = cleanText(req.body.purpose, 1000);
+    const gender = normalizeGender(req.body.gender);
+    const nip = visitorType === 'internal' ? (cleanText(req.body.nip, 40) || null) : null;
+    const institution = cleanText(req.body.institution, 255);
+    const position = cleanText(req.body.position, 180);
+    const phone = cleanText(req.body.phone, 30);
+
+    if (visitorName.length < 3 || purpose.length < 3) {
+      return res.status(422).json({ success: false, message: 'Nama dan urusan wajib diisi dengan benar.' });
+    }
+    if (visitorType !== 'internal' && (!gender || institution.length < 2 || position.length < 2 || !/^[0-9+()\-\s]{8,30}$/.test(phone))) {
+      return res.status(422).json({ success: false, message: 'Lengkapi jenis kelamin, instansi atau asal, jabatan, dan nomor HP yang valid.' });
+    }
+
+    await queryAsync(`
+      UPDATE guestbook_visits
+      SET visitor_name = ?, gender = ?, nip = ?, origin_institution = ?,
+          position_name = ?, office_name = ?, phone = ?, purpose = ?
+      WHERE ${conditions.join(' AND ')}
+    `, [visitorName, gender, nip, institution || null, position || null, institution || null, phone || null, purpose, ...params]);
+
+    return res.json({ success: true, message: 'Data kunjungan berhasil diperbarui.' });
   } catch (error) {
-    console.error('[GUESTBOOK] update status:', error.message);
-    return res.status(error.status || 500).json({ success: false, message: error.message || 'Gagal memperbarui status kunjungan.' });
+    console.error('[GUESTBOOK] update visit:', error.message);
+    return res.status(error.status || 500).json({ success: false, message: error.message || 'Gagal memperbarui data kunjungan.' });
+  }
+});
+
+router.delete('/visits/:id', requirePermission('guestbook_monitoring', 'delete'), async (req, res) => {
+  try {
+    await ensureGuestbookTables();
+    const scope = await resolveScope(req);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(422).json({ success: false, message: 'Data kunjungan tidak valid.' });
+    }
+
+    const conditions = ['id = ?'];
+    const params = [id];
+    if (scope) { conditions.push('opd_id = ?'); params.push(scope.id); }
+    const result = await queryAsync(`DELETE FROM guestbook_visits WHERE ${conditions.join(' AND ')}`, params);
+    if (!result.affectedRows) return res.status(404).json({ success: false, message: 'Kunjungan tidak ditemukan pada OPD Anda.' });
+    return res.json({ success: true, message: 'Data kunjungan berhasil dihapus.' });
+  } catch (error) {
+    console.error('[GUESTBOOK] delete visit:', error.message);
+    return res.status(error.status || 500).json({ success: false, message: error.message || 'Gagal menghapus data kunjungan.' });
   }
 });
 

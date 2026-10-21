@@ -1,7 +1,6 @@
 import { isAxiosError } from "axios"
 
 export type VisitorType = "internal" | "external_employee" | "external_general"
-export type VisitStatus = "checked_in" | "completed"
 
 export interface OpdOption {
   id: string
@@ -34,9 +33,7 @@ export interface GuestbookVisit {
   office_name?: string | null
   phone?: string | null
   purpose: string
-  status: VisitStatus
   checked_in_at: string
-  completed_at?: string | null
 }
 
 export const visitorTypeLabel: Record<VisitorType, string> = {

@@ -112,7 +112,6 @@ export function buildGuestbookReportHtml({
   const internalTotal = records.filter((item) => item.visitor_type === "internal").length
   const externalAsnTotal = records.filter((item) => item.visitor_type === "external_employee").length
   const generalTotal = records.filter((item) => item.visitor_type === "external_general").length
-  const activeTotal = records.filter((item) => item.status === "checked_in").length
 
   const rows = records.map((visit, index) => {
     const origins = [visit.origin_institution, visit.office_name]
@@ -129,7 +128,6 @@ export function buildGuestbookReportHtml({
         <td>${escapeHtml(visit.position_name || "-")}</td>
         <td>${escapeHtml(visit.phone || "-")}</td>
         <td>${escapeHtml(visit.purpose)}</td>
-        <td class="center">${visit.status === "completed" ? "Selesai" : "Berkunjung"}</td>
       </tr>`
   }).join("")
 
@@ -154,7 +152,7 @@ export function buildGuestbookReportHtml({
         .report-title { padding-top: 8px; text-align: center; }
         .report-title h3 { margin: 0; font-size: 12pt; text-decoration: underline; text-underline-offset: 3px; }
         .report-title p { margin: 4px 0 0; color: #334155; font-size: 8pt; }
-        .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0; }
+        .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; }
         .summary div { border: 1px solid #dbe5df; border-radius: 6px; background: #f0fdf4; padding: 6px 8px; }
         .summary span { display: block; color: #64748b; font-size: 7pt; }
         .summary b { display: block; margin-top: 2px; color: #065f46; font-size: 12pt; }
@@ -189,12 +187,11 @@ export function buildGuestbookReportHtml({
         <div><span>ASN Konsel</span><b>${internalTotal}</b></div>
         <div><span>ASN</span><b>${externalAsnTotal}</b></div>
         <div><span>Non ASN / Umum</span><b>${generalTotal}</b></div>
-        <div><span>Sedang Berkunjung</span><b>${activeTotal}</b></div>
       </section>
       <table>
-        <colgroup><col style="width:3%"><col style="width:9%"><col style="width:18%"><col style="width:17%"><col style="width:13%"><col style="width:10%"><col style="width:22%"><col style="width:8%"></colgroup>
-        <thead><tr><th>No.</th><th>Waktu Datang</th><th>Identitas Tamu</th><th>Instansi / Kantor</th><th>Jabatan</th><th>Nomor HP</th><th>Urusan / Keperluan</th><th>Status</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" class="empty">Tidak ada kunjungan pada periode ini.</td></tr>'}</tbody>
+        <colgroup><col style="width:4%"><col style="width:11%"><col style="width:20%"><col style="width:18%"><col style="width:14%"><col style="width:11%"><col style="width:22%"></colgroup>
+        <thead><tr><th>No.</th><th>Waktu Datang</th><th>Identitas Tamu</th><th>Instansi / Kantor</th><th>Jabatan</th><th>Nomor HP</th><th>Urusan / Keperluan</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7" class="empty">Tidak ada kunjungan pada periode ini.</td></tr>'}</tbody>
       </table>
       <p class="footer-note">Dicetak oleh ${escapeHtml(generatedBy)} pada ${escapeHtml(formatDateTime(generatedAt))} WITA · Konsel Setara</p>
       <script>window.addEventListener('load', function () { setTimeout(function () { window.focus(); window.print(); }, 350); });<\/script>
