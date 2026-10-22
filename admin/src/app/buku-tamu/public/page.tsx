@@ -153,6 +153,24 @@ export default function GuestbookPublicFormPage() {
       </header>
 
       <main className="relative mx-auto -mt-6 max-w-2xl px-2 pb-8 sm:-mt-9 sm:px-4 sm:pb-10">
+        {/* Banner Iklan Konsel Setara (Diatas Form) */}
+        <section aria-label="Iklan Konsel Setara" className="mb-3.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md transition-all hover:shadow-lg sm:mb-5 sm:rounded-3xl">
+          <a
+            href="https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block overflow-hidden"
+            title="Download Aplikasi Konsel Setara di Play Store"
+          >
+            <img
+              src="/banners/banner-konsel-setara.png"
+              alt="Banner Konsel Setara"
+              className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+              loading="lazy"
+            />
+          </a>
+        </section>
+
         <form onSubmit={submit} className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-emerald-950/10 sm:rounded-3xl">
           <div className="grid grid-cols-2 divide-x border-b bg-slate-50 text-[11px] sm:text-sm"><div className="flex min-w-0 items-start gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-4 sm:py-3"><CalendarDays className="mt-0.5 size-3.5 shrink-0 text-emerald-600 sm:size-4" /><span className="min-w-0 leading-snug"><span className="block text-[9px] uppercase text-slate-400 sm:text-[10px]">Tanggal</span>{dateLabel}</span></div><div className="flex min-w-0 items-start gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-4 sm:py-3"><Clock3 className="mt-0.5 size-3.5 shrink-0 text-emerald-600 sm:size-4" /><span className="min-w-0 leading-snug"><span className="block text-[9px] uppercase text-slate-400 sm:text-[10px]">Jam</span>{timeLabel} WITA</span></div></div>
 
@@ -171,7 +189,7 @@ export default function GuestbookPublicFormPage() {
                 </div>
               </section>
             )}
-            <section><div className="grid grid-cols-3 gap-1.5 sm:gap-2"><TypeButton active={visitorType === "internal"} icon={UserRound} label="ASN Konsel" onClick={() => chooseType("internal")} /><TypeButton active={visitorType === "external_employee"} icon={Building2} label="ASN" onClick={() => chooseType("external_employee")} /><TypeButton active={visitorType === "external_general"} icon={UsersRound} label="Non ASN / Tamu Umum" onClick={() => chooseType("external_general")} /></div></section>
+            <section><div className="grid grid-cols-3 gap-1.5 sm:gap-2"><TypeButton active={visitorType === "internal"} icon={UserRound} label="ASN Konsel" onClick={() => chooseType("internal")} /><TypeButton active={visitorType === "external_employee"} icon={Building2} label="ASN Eksternal" onClick={() => chooseType("external_employee")} /><TypeButton active={visitorType === "external_general"} icon={UsersRound} label="Non ASN / Tamu Umum" onClick={() => chooseType("external_general")} /></div></section>
 
             {visitorType === "internal" ? (
               <section className="space-y-3">
@@ -237,6 +255,24 @@ export default function GuestbookPublicFormPage() {
             <p className="hidden items-center justify-center gap-1.5 text-center text-[11px] leading-relaxed text-slate-400 sm:flex"><ShieldCheck className="size-3.5" /> Data digunakan untuk administrasi kunjungan dan peningkatan pelayanan.</p>
           </div>
         </form>
+
+        {/* Banner Iklan Warga Bicara (Dibawah Form) */}
+        <section aria-label="Iklan Warga Bicara" className="mt-3.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md transition-all hover:shadow-lg sm:mt-5 sm:rounded-3xl">
+          <a
+            href="https://play.google.com/store/apps/details?id=com.warga_bicara_mobile&pcampaignid=web_share"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block overflow-hidden"
+            title="Download Aplikasi Warga Bicara di Play Store"
+          >
+            <img
+              src="/banners/banner-warga-bicara.png"
+              alt="Banner Warga Bicara"
+              className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+              loading="lazy"
+            />
+          </a>
+        </section>
       </main>
     </PublicShell>
   )

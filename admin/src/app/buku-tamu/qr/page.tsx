@@ -27,6 +27,23 @@ const posterPresets = {
 
 type PosterPreset = keyof typeof posterPresets | "custom"
 
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, r)
+  } else {
+    ctx.moveTo(x + r, y)
+    ctx.lineTo(x + w - r, y)
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+    ctx.lineTo(x + w, y + h - r)
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+    ctx.lineTo(x + r, y + h)
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+    ctx.lineTo(x, y + r)
+    ctx.quadraticCurveTo(x, y, x + r, y)
+    ctx.closePath()
+  }
+}
+
 export default function GuestbookQrPage() {
   const profile = getProfile()
   const isSuperAdmin = Number(profile?.menu_klp) === 1
@@ -73,12 +90,78 @@ export default function GuestbookQrPage() {
 
   const qrImageQuery = useQuery({
     queryKey: ["guestbook-qr-image", publicUrl],
-    queryFn: () => QRCode.toDataURL(publicUrl, {
-      width: 960,
-      margin: 2,
-      errorCorrectionLevel: "H",
-      color: { dark: "#064e3b", light: "#ffffff" },
-    }),
+    queryFn: async () => {
+      if (!publicUrl) return ""
+      const canvas = document.createElement("canvas")
+      await QRCode.toCanvas(canvas, publicUrl, {
+        width: 960,
+        margin: 2,
+        errorCorrectionLevel: "H",
+        color: { dark: "#064e3b", light: "#ffffff" },
+      })
+
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return canvas.toDataURL("image/png")
+
+      const logo = new Image()
+      logo.src = "/logo_konsel.png"
+      await new Promise<void>((resolve) => {
+        if (logo.complete && logo.naturalWidth > 0) {
+          resolve()
+        } else {
+          logo.onload = () => resolve()
+          logo.onerror = () => resolve()
+        }
+      })
+
+      if (logo.complete && logo.naturalWidth > 0) {
+        const size = canvas.width
+        const badgeSize = Math.round(size * 0.22)
+        const x = (size - badgeSize) / 2
+        const y = (size - badgeSize) / 2
+        const radius = Math.round(badgeSize * 0.22)
+
+        // Draw shadow & white background badge
+        ctx.save()
+        ctx.shadowColor = "rgba(0, 0, 0, 0.16)"
+        ctx.shadowBlur = 10
+        ctx.shadowOffsetX = 0
+        ctx.shadowOffsetY = 3
+
+        ctx.fillStyle = "#ffffff"
+        ctx.beginPath()
+        drawRoundedRect(ctx, x, y, badgeSize, badgeSize, radius)
+        ctx.fill()
+        ctx.restore()
+
+        // Draw subtle border
+        ctx.save()
+        ctx.strokeStyle = "#e2e8f0"
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        drawRoundedRect(ctx, x, y, badgeSize, badgeSize, radius)
+        ctx.stroke()
+        ctx.restore()
+
+        // Draw Logo Konsel centered
+        const padding = Math.round(badgeSize * 0.12)
+        const maxLogoW = badgeSize - padding * 2
+        const maxLogoH = badgeSize - padding * 2
+        const aspect = logo.naturalWidth / logo.naturalHeight
+        let drawW = maxLogoW
+        let drawH = maxLogoW / aspect
+        if (drawH > maxLogoH) {
+          drawH = maxLogoH
+          drawW = maxLogoH * aspect
+        }
+        const drawX = x + (badgeSize - drawW) / 2
+        const drawY = y + (badgeSize - drawH) / 2
+
+        ctx.drawImage(logo, drawX, drawY, drawW, drawH)
+      }
+
+      return canvas.toDataURL("image/png")
+    },
     enabled: Boolean(publicUrl),
     staleTime: Infinity,
   })

@@ -164,17 +164,17 @@ export default function GuestbookMonitoringPage() {
   }
 
   const actionButtons = (visit: GuestbookVisit, mobile = false) => (
-    <div className={mobile ? "flex flex-wrap gap-2 border-t pt-3" : "flex justify-end gap-1"}>
-      <Button className={mobile ? "min-w-24 flex-1" : ""} size={mobile ? "sm" : "icon"} variant="outline" title="Lihat detail" onClick={() => setSelected(visit)}>
+    <div className={mobile ? "flex flex-wrap gap-2 border-t pt-3" : "flex items-center justify-end gap-1.5"}>
+      <Button className={mobile ? "min-w-24 flex-1" : "size-8"} size={mobile ? "sm" : "icon"} variant="outline" title="Lihat detail" onClick={() => setSelected(visit)}>
         <Eye className={mobile ? "mr-2 size-4" : "size-4"} />{mobile && "Detail"}
       </Button>
       {canUpdate && (
-        <Button className={mobile ? "min-w-24 flex-1" : ""} size={mobile ? "sm" : "icon"} variant="outline" title="Edit kunjungan" onClick={() => openEdit(visit)}>
+        <Button className={mobile ? "min-w-24 flex-1" : "size-8"} size={mobile ? "sm" : "icon"} variant="outline" title="Edit kunjungan" onClick={() => openEdit(visit)}>
           <Pencil className={mobile ? "mr-2 size-4" : "size-4"} />{mobile && "Edit"}
         </Button>
       )}
       {canDelete && (
-        <Button className={mobile ? "min-w-24 flex-1" : "text-destructive hover:text-destructive"} size={mobile ? "sm" : "icon"} variant="outline" title="Hapus kunjungan" onClick={() => setDeleteTarget(visit)}>
+        <Button className={mobile ? "min-w-24 flex-1 text-destructive hover:text-destructive" : "size-8 text-destructive hover:text-destructive"} size={mobile ? "sm" : "icon"} variant="outline" title="Hapus kunjungan" onClick={() => setDeleteTarget(visit)}>
           <Trash2 className={mobile ? "mr-2 size-4" : "size-4"} />{mobile && "Hapus"}
         </Button>
       )}
@@ -228,19 +228,26 @@ export default function GuestbookMonitoringPage() {
               </div>
 
               <div className="hidden overflow-x-auto rounded-lg border md:block">
-                <Table className="min-w-[820px]">
-                  <TableHeader><TableRow><TableHead>Waktu</TableHead><TableHead>Tamu</TableHead><TableHead>Asal / Instansi</TableHead><TableHead>Urusan</TableHead>{isSuperAdmin && <TableHead>OPD Tujuan</TableHead>}<TableHead className="text-right">Aksi</TableHead></TableRow></TableHeader>
+                <Table className="min-w-[840px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[140px] whitespace-nowrap">Waktu</TableHead>
+                      <TableHead className="min-w-[170px]">Tamu</TableHead>
+                      <TableHead className="min-w-[180px]">Asal / Instansi</TableHead>
+                      <TableHead className="min-w-[200px]">Urusan</TableHead>
+                      <TableHead className="w-[130px] whitespace-nowrap text-right pr-4">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
-                    {visitsQuery.isLoading && Array.from({ length: 6 }).map((_, index) => <TableRow key={index}><TableCell colSpan={isSuperAdmin ? 6 : 5}><Skeleton className="h-10 w-full" /></TableCell></TableRow>)}
-                    {!visitsQuery.isLoading && !visitsQuery.data?.data.length && <TableRow><TableCell colSpan={isSuperAdmin ? 6 : 5} className="h-32 text-center text-muted-foreground">Belum ada tamu pada filter ini.</TableCell></TableRow>}
+                    {visitsQuery.isLoading && Array.from({ length: 6 }).map((_, index) => <TableRow key={index}><TableCell colSpan={5}><Skeleton className="h-10 w-full" /></TableCell></TableRow>)}
+                    {!visitsQuery.isLoading && !visitsQuery.data?.data.length && <TableRow><TableCell colSpan={5} className="h-32 text-center text-muted-foreground">Belum ada tamu pada filter ini.</TableCell></TableRow>}
                     {visitsQuery.data?.data.map((visit) => (
                       <TableRow key={visit.id}>
-                        <TableCell className="whitespace-nowrap text-xs">{formatDateTime(visit.checked_in_at)}</TableCell>
-                        <TableCell><p className="font-medium">{visit.visitor_name}</p><p className="text-xs text-muted-foreground">{visitorTypeLabel[visit.visitor_type as VisitorType]}{visit.nip ? ` · ${visit.nip}` : ""}</p></TableCell>
-                        <TableCell className="max-w-52"><p className="truncate text-sm">{visit.origin_institution || visit.office_name || "-"}</p><p className="truncate text-xs text-muted-foreground">{visit.position_name || "-"}</p></TableCell>
-                        <TableCell className="max-w-64"><p className="line-clamp-2 text-sm">{visit.purpose}</p></TableCell>
-                        {isSuperAdmin && <TableCell className="max-w-52 text-xs">{visit.opd_name}</TableCell>}
-                        <TableCell>{actionButtons(visit)}</TableCell>
+                        <TableCell className="w-[140px] whitespace-nowrap text-xs text-muted-foreground">{formatDateTime(visit.checked_in_at)}</TableCell>
+                        <TableCell className="min-w-[170px]"><p className="font-medium">{visit.visitor_name}</p><p className="text-xs text-muted-foreground">{visitorTypeLabel[visit.visitor_type as VisitorType]}{visit.nip ? ` · ${visit.nip}` : ""}</p></TableCell>
+                        <TableCell className="min-w-[180px] max-w-64"><p className="truncate text-sm font-medium" title={visit.origin_institution || visit.office_name || "-"}>{visit.origin_institution || visit.office_name || "-"}</p><p className="truncate text-xs text-muted-foreground" title={visit.position_name || "-"}>{visit.position_name || "-"}</p></TableCell>
+                        <TableCell className="min-w-[200px]"><p className="line-clamp-2 text-sm leading-relaxed" title={visit.purpose}>{visit.purpose}</p></TableCell>
+                        <TableCell className="w-[130px] whitespace-nowrap text-right pr-4">{actionButtons(visit)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
