@@ -126,7 +126,27 @@ export default function GuestbookPublicFormPage() {
 
   if (locationQuery.isLoading) return <PublicShell><div className="flex min-h-[420px] flex-col items-center justify-center"><Loader2 className="size-10 animate-spin text-emerald-600" /><p className="mt-4 text-sm text-slate-500">Membuka Buku Tamu...</p></div></PublicShell>
 
-  if (locationQuery.isError || !locationQuery.data) return <PublicShell><div className="flex min-h-[420px] flex-col items-center justify-center px-6 text-center"><div className="rounded-full bg-red-50 p-5"><QrCodeError /></div><h1 className="mt-5 text-xl font-bold text-slate-900">QR tidak dapat digunakan</h1><p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">QR Buku Tamu tidak ditemukan, sudah diganti, atau telah dinonaktifkan. Silakan hubungi petugas resepsionis.</p></div></PublicShell>
+  if (locationQuery.isError || !locationQuery.data) {
+    const isNotFound = (locationQuery.error as { response?: { status?: number } })?.response?.status === 404
+    return (
+      <PublicShell>
+        <div className="flex min-h-[420px] flex-col items-center justify-center px-6 text-center">
+          <div className="rounded-full bg-red-50 p-5"><QrCodeError /></div>
+          <h1 className="mt-5 text-xl font-bold text-slate-900">
+            {isNotFound ? "QR tidak dapat digunakan" : "Gagal Membuka Formulir"}
+          </h1>
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+            {isNotFound
+              ? "QR Buku Tamu tidak ditemukan, sudah diganti, atau telah dinonaktifkan. Silakan hubungi petugas resepsionis."
+              : "Terjadi kesalahan saat menghubungi server. Silakan periksa koneksi internet atau muat ulang halaman."}
+          </p>
+          <Button variant="outline" className="mt-4" onClick={() => locationQuery.refetch()}>
+            Muat Ulang Halaman
+          </Button>
+        </div>
+      </PublicShell>
+    )
+  }
 
   if (success) return (
     <PublicShell>
@@ -163,7 +183,7 @@ export default function GuestbookPublicFormPage() {
             title="Download Aplikasi Konsel Setara di Play Store"
           >
             <img
-              src="/banners/banner-konsel-setara.png"
+              src="/banners/banner-konsel-setara.webp"
               alt="Banner Konsel Setara"
               className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
               loading="lazy"
@@ -266,7 +286,7 @@ export default function GuestbookPublicFormPage() {
             title="Download Aplikasi Warga Bicara di Play Store"
           >
             <img
-              src="/banners/banner-warga-bicara.png"
+              src="/banners/banner-warga-bicara.webp"
               alt="Banner Warga Bicara"
               className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
               loading="lazy"

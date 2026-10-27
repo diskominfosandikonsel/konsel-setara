@@ -79,7 +79,10 @@ export default function GuestbookQrPage() {
   })
 
   const location = qrQuery.data
-  const publicUrl = useMemo(() => location ? `${window.location.origin}/buku-tamu/form/${location.token}` : "", [location])
+  const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  const defaultPublicOrigin = "https://admin-konsel-setara.konaweselatankab.go.id"
+  const publicOrigin = import.meta.env.VITE_PUBLIC_URL || (!isLocalhost && typeof window !== "undefined" ? window.location.origin : defaultPublicOrigin)
+  const publicUrl = useMemo(() => location ? `${publicOrigin.replace(/\/$/, "")}/buku-tamu/form/${location.token}` : "", [location, publicOrigin])
 
   useEffect(() => {
     if (!location) return

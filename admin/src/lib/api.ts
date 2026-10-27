@@ -1,6 +1,21 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://konsel-setara.konaweselatankab.go.id'
+const PROD_API_URL = 'https://konsel-setara.konaweselatankab.go.id'
+
+function resolveApiUrl() {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (typeof window !== 'undefined') {
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    // Jika diakses dari hosting publik (seperti admin-konsel-setara.konaweselatankab.go.id),
+    // selalu arahkan ke backend produksi resmi agar request dari HP tidak gagal ke localhost
+    if (!isLocal && (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+      return PROD_API_URL
+    }
+  }
+  return envUrl || PROD_API_URL
+}
+
+const API_URL = resolveApiUrl()
 export const UPLOAD_URL = `${API_URL}/uploads`
 
 const api = axios.create({
