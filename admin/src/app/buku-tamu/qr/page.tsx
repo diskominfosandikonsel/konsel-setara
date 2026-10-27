@@ -100,7 +100,7 @@ export default function GuestbookQrPage() {
         width: 960,
         margin: 2,
         errorCorrectionLevel: "H",
-        color: { dark: "#064e3b", light: "#ffffff" },
+        color: { dark: "#78350f", light: "#ffffff" },
       })
 
       const ctx = canvas.getContext("2d")
@@ -266,12 +266,12 @@ export default function GuestbookQrPage() {
         <div className="guestbook-qr-page grid min-w-0 gap-4 px-3 sm:gap-5 sm:px-4 lg:grid-cols-[380px_minmax(0,1fr)] lg:px-6">
           <div className="guestbook-no-print min-w-0 space-y-4">
             <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><QrCode className="size-5 text-emerald-600" /> Pengaturan QR</CardTitle><CardDescription>QR mengarahkan tamu ke formulir khusus OPD tujuan.</CardDescription></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><QrCode className="size-5 text-amber-600" /> Pengaturan QR</CardTitle><CardDescription>QR mengarahkan tamu ke formulir khusus OPD tujuan.</CardDescription></CardHeader>
               <CardContent className="space-y-4">
                 {isSuperAdmin ? <OpdScopeSelect value={opdId} options={opdOptions} onChange={changeOpd} allowAll={false} label="OPD Tujuan" /> : <div className="rounded-lg border bg-muted/40 p-3"><p className="text-xs text-muted-foreground">OPD akun</p><p className="mt-1 text-sm font-semibold">{profile?.opd || "Belum terhubung"}</p></div>}
                 <div className="grid gap-1.5"><Label htmlFor="guestbook-label">Nama titik pelayanan</Label><Input id="guestbook-label" value={label} maxLength={120} onChange={(event) => setLabel(event.target.value)} placeholder="Contoh: Meja Resepsionis Utama" /></div>
-                <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
-                  <div className="flex items-start gap-2"><Wifi className="mt-0.5 size-4 shrink-0 text-emerald-700" /><div><p className="text-sm font-semibold">Informasi Wi-Fi Tamu</p><p className="text-xs text-muted-foreground">Opsional, akan ditampilkan pada poster.</p></div></div>
+                <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-900 dark:bg-amber-950/20">
+                  <div className="flex items-start gap-2"><Wifi className="mt-0.5 size-4 shrink-0 text-amber-700" /><div><p className="text-sm font-semibold">Informasi Wi-Fi Tamu</p><p className="text-xs text-muted-foreground">Opsional, akan ditampilkan pada poster.</p></div></div>
                   <div className="grid gap-1.5"><Label htmlFor="wifi-ssid">Nama Wi-Fi / Username</Label><Input id="wifi-ssid" value={wifiSsid} maxLength={120} onChange={(event) => setWifiSsid(event.target.value)} placeholder="Contoh: WIFI TAMU KONSEL" autoComplete="off" /></div>
                   {wifiSsid.trim() && <div className="grid gap-1.5"><Label htmlFor="wifi-password">Password</Label><Input id="wifi-password" value={wifiPassword} maxLength={120} onChange={(event) => setWifiPassword(event.target.value)} placeholder="Kosongkan jika FREE" autoComplete="off" /><p className="text-[11px] text-muted-foreground">Jika dikosongkan, poster akan menampilkan password FREE.</p></div>}
                 </div>
@@ -302,28 +302,28 @@ export default function GuestbookQrPage() {
 
           <div className="flex min-w-0 items-start justify-center overflow-hidden rounded-2xl border bg-muted/30 p-2 min-[360px]:p-3 sm:min-h-[650px] sm:p-8">
             {qrQuery.isLoading && <Skeleton className="h-[440px] w-full max-w-[520px] sm:h-[640px]" />}
-            {!qrQuery.isLoading && !location && <div className="guestbook-no-print flex min-h-[360px] max-w-sm flex-col items-center justify-center px-3 text-center sm:min-h-[580px]"><div className="rounded-full bg-emerald-500/10 p-4 sm:p-5"><QrCode className="size-10 text-emerald-600 sm:size-12" /></div><h2 className="mt-4 text-lg font-semibold sm:mt-5 sm:text-xl">QR belum tersedia</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{isSuperAdmin && !opdId ? "Pilih OPD terlebih dahulu untuk melihat atau membuat QR." : "Buat QR pertama untuk menerima tamu secara digital."}</p></div>}
+            {!qrQuery.isLoading && !location && <div className="guestbook-no-print flex min-h-[360px] max-w-sm flex-col items-center justify-center px-3 text-center sm:min-h-[580px]"><div className="rounded-full bg-amber-500/10 p-4 sm:p-5"><QrCode className="size-10 text-amber-600 sm:size-12" /></div><h2 className="mt-4 text-lg font-semibold sm:mt-5 sm:text-xl">QR belum tersedia</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{isSuperAdmin && !opdId ? "Pilih OPD terlebih dahulu untuk melihat atau membuat QR." : "Buat QR pertama untuk menerima tamu secara digital."}</p></div>}
             {location && qrDataUrl && (
               <div ref={posterPreviewRef} style={{ aspectRatio: `${posterSize.widthMm} / ${posterSize.heightMm}` }} className="guestbook-poster-preview relative w-full max-w-[520px] overflow-hidden rounded-[20px] bg-white shadow-xl ring-1 ring-slate-200 sm:rounded-[28px]">
                 <article style={{ width: basePosterWidth, height: basePosterHeight, transform: `scale(${previewScale})`, transformOrigin: "top left" }} className="guestbook-print-area absolute left-0 top-0 overflow-hidden bg-white text-slate-900">
-                  <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-emerald-700 via-lime-500 to-amber-400" />
+                  <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-[#78350F] via-[#D97706] to-[#FBBF24]" style={{ background: "linear-gradient(90deg, #78350F 0%, #D97706 18%, #F59E0B 52%, #FBBF24 100%)" }} />
                   <div className="relative h-full px-8 pb-6 pt-7 text-center">
                     <div className="mx-auto flex items-center justify-center gap-5">
                       <img src="/logo_konsel.png" alt="Logo Kabupaten Konawe Selatan" className="h-14 w-12 object-contain" />
                       <div className="h-11 w-px bg-slate-200" />
                       <img src="/new_logo_Setara.png" alt="Logo Konsel Setara" className="h-14 w-40 object-contain" />
                     </div>
-                    <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Pemerintah Kabupaten Konawe Selatan</p>
+                    <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-[#D97706]">Pemerintah Kabupaten Konawe Selatan</p>
                     <h2 className="mx-auto mt-2 max-w-md text-2xl font-black leading-tight">BUKU TAMU DIGITAL</h2>
                     <p className="mx-auto mt-2 max-w-md text-sm font-semibold leading-snug text-slate-600">{location.opd_name}</p>
 
-                    <div className="mx-auto mt-5 w-fit rounded-[24px] bg-gradient-to-br from-emerald-700 to-emerald-950 p-3 shadow-lg shadow-emerald-900/20">
+                    <div className="mx-auto mt-5 w-fit rounded-[24px] bg-gradient-to-br from-[#78350F] via-[#D97706] to-[#FBBF24] p-3 shadow-lg shadow-amber-950/25" style={{ background: "linear-gradient(135deg, #78350F 0%, #D97706 18%, #F59E0B 52%, #FBBF24 100%)" }}>
                       <div className="rounded-[16px] bg-white p-3"><img src={qrDataUrl} alt="QR Buku Tamu" className={wifiSsid.trim() ? "size-48" : "size-56"} /></div>
                     </div>
-                    <div className="mt-4"><p className="text-lg font-extrabold text-emerald-800">SCAN UNTUK MENGISI</p><p className="mt-1 text-sm text-slate-500">Arahkan kamera ponsel ke QR Code</p></div>
+                    <div className="mt-4"><p className="text-lg font-extrabold text-[#D97706]">SCAN UNTUK MENGISI</p><p className="mt-1 text-sm text-slate-500">Arahkan kamera ponsel ke QR Code</p></div>
 
-                    <div className="mt-4 rounded-2xl bg-emerald-50 px-5 py-3 text-sm"><p className="font-bold text-emerald-900">{label || location.label}</p><p className="mt-1 text-xs leading-relaxed text-emerald-800/80">Data kunjungan Anda tercatat secara aman dan hanya digunakan untuk kebutuhan pelayanan.</p></div>
-                    {wifiSsid.trim() && <div className="mt-3 rounded-2xl border border-emerald-200 bg-white px-5 py-3 text-left"><div className="flex items-center gap-2 text-emerald-800"><Wifi className="size-4" /><p className="text-xs font-extrabold tracking-wide">WIFI TAMU</p></div><div className="mt-2 grid grid-cols-[74px_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs"><span className="text-slate-500">Username</span><b className="break-all text-slate-800">: {wifiSsid}</b><span className="text-slate-500">Password</span><b className="break-all text-slate-800">: {wifiPassword.trim() || "FREE"}</b></div></div>}
+                    <div className="mt-4 rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/95 via-yellow-50/90 to-amber-50/95 px-5 py-3 text-sm"><p className="font-bold text-[#B45309]">{label || location.label}</p><p className="mt-1 text-xs leading-relaxed text-amber-800/80">Data kunjungan Anda tercatat secara aman dan hanya digunakan untuk kebutuhan pelayanan.</p></div>
+                    {wifiSsid.trim() && <div className="mt-3 rounded-2xl border border-amber-200/80 bg-white px-5 py-3 text-left"><div className="flex items-center gap-2 text-[#D97706]"><Wifi className="size-4" /><p className="text-xs font-extrabold tracking-wide">WIFI TAMU</p></div><div className="mt-2 grid grid-cols-[74px_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs"><span className="text-slate-500">Username</span><b className="break-all text-slate-800">: {wifiSsid}</b><span className="text-slate-500">Password</span><b className="break-all text-slate-800">: {wifiPassword.trim() || "FREE"}</b></div></div>}
                     <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400"><ShieldCheck className="size-3.5" /> Cepat · Aman · Tanpa Kertas</div>
                   </div>
                 </article>
