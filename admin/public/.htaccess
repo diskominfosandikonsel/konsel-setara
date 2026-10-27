@@ -6,3 +6,7 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Fallback untuk Apache jika mod_rewrite bypass atau sub-path
+ErrorDocument 404 /index.html
+
