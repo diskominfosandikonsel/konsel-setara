@@ -131,5 +131,10 @@ export const PerakService = {
         'File-Name': fileName
       }
     })
+  },
+
+  // 📄 CETAK KARTU KUNING (AK-1)
+  getKartuKuning(biodataId) {
+    return apiPerak.get(`laporan/query?id=${biodataId}`)
   }
 }
