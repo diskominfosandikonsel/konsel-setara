@@ -70,13 +70,13 @@ app.get('/openapi.json', (req, res) => {
 // Pengecekan Versi Aplikasi Mobile
 app.get('/api/v1/app-version', (req, res) => {
   res.json({
-    // latestVersion: '1.6.4',
-    latestVersion: '1.6.5', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
+    // latestVersion: '1.6.5',
+    latestVersion: '1.6.6', /// BUKA / AKTIFKAN JIKA SUDAH DISETUJUI & LIVE DI PLAYSTORE
     storeUrl: 'https://play.google.com/store/apps/details?id=id.go.konaweselatankab.setara',
     forceUpdate: false,
     whatsNew: [
-      'Fitur baru Video Konsel (Official & Daily)',
-      'Pembaruan filter & data paket pengadaan RUP',
+      'Pembaruan cetak Kartu Pencari Kerja (AK-1 Perak Konsel)',
+      'Optimalisasi tampilan thumbnail & pemutaran Video Konsel',
       'Peningkatan performa, keamanan & stabilitas sistem'
     ]
   });

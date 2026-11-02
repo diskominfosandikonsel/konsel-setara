@@ -124,7 +124,10 @@ app.get('/api/v1/app-version', (req, res) => {
 
 ## 📜 6. Riwayat Versi Rilis Aplikasi
 
-| **`1.6.5`** | **`14`** | 17 Okt 2026 | Minor (Fitur Baru) | Penambahan fitur Video Konsel (Official & Daily) pemutaran langsung in-app, serta modul manajemen video di Web Admin. |
+| Versi | Kode (*versionCode*) | Tanggal Rilis | Tipe Update | Catatan Ringkasan |
+| :---: | :---: | :---: | :---: | :--- |
+| **`1.6.6`** | **`15`** | 02 Nov 2026 | Patch | Pembaruan cetak Kartu Pencari Kerja (AK-1 Perak Konsel), optimasi thumbnail & pemutaran Video Konsel, serta stabilitas filter RUP. |
+| `1.6.5` | `14` | 17 Okt 2026 | Minor (Fitur Baru) | Penambahan fitur Video Konsel (Official & Daily) pemutaran langsung in-app, serta modul manajemen video di Web Admin. |
 | `1.6.4` | `13` | 17 Okt 2026 | Patch | Pembaruan filter & pembaruan data paket pengadaan pada modul RUP (Rencana Umum Pengadaan). |
 | `1.6.3` | `12` | 11 Okt 2026 | Minor (Wajib) | Penambahan Modul Layanan Koperasi & Katalog Pelaku UMKM Daerah (APLI DAKOP) dengan filter kecamatan, desa, sektor usaha, dan NIK. |
 | `1.6.2` | `11` | Okt 2026 | Patch | Pembaruan optimasi visual dashboard dan perbaikan rute. |

@@ -86,14 +86,14 @@ export default {
       updateStoreUrl: "",
       updateWhatsNew: [
         {
-          icon: "smart_display",
+          icon: "badge",
           color: "primary",
-          text: "Fitur baru Video Konsel (Official & Daily) pemutaran langsung di aplikasi",
+          text: "Pembaruan cetak Kartu Pencari Kerja (AK-1 Perak Konsel)",
         },
         {
-          icon: "filter_alt",
+          icon: "smart_display",
           color: "green-7",
-          text: "Pembaruan filter & data paket pengadaan RUP",
+          text: "Optimalisasi tampilan thumbnail & pemutaran Video Konsel",
         },
         {
           icon: "security",
