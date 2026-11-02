@@ -42,12 +42,13 @@
 
 <script>
 import { usePerakStore } from 'stores/perak'
+import { useAuthStore } from 'stores/auth'
+import { PerakService } from 'src/services/perak.service'
 
 export default {
     name: 'KartuPencariKerja',
     data() {
         return {
-
             loading: false,
             page_first: 1,
             cari_value: ''
@@ -56,6 +57,9 @@ export default {
     computed: {
         perak() {
             return usePerakStore()
+        },
+        auth() {
+            return useAuthStore()
         },
         status() {
             const backendStatus = this.perak.biodata?.[0]?.status;
@@ -92,12 +96,42 @@ export default {
             }
             await this.perak.fetchBiodata(payload)
         },
-        downloadKartu() {
-            if (this.perak.biodata?.[0]?.id) {
-                const biodataId = this.perak.biodata[0].id;
-                // Sesuai link yang diberikan, formatnya adalah:
-                const fileUrl = `https://serverperak.konaweselatankab.go.id/uploads/ak1_${biodataId}.pdf`;
-                window.open(fileUrl, '_blank');
+        sanitizeFilename(name) {
+            return String(name || 'pencari_kerja').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        },
+        async downloadKartu() {
+            if (!this.perak.biodata?.[0]?.id) {
+                this.$q.notify({
+                    type: 'warning',
+                    message: 'Data biodata tidak ditemukan'
+                });
+                return;
+            }
+
+            const biodata = this.perak.biodata[0];
+            const biodataId = biodata.id;
+            const namaPencaker = biodata.nama || this.auth?.user?.nama || 'pencari_kerja';
+            const safeName = this.sanitizeFilename(namaPencaker);
+            const defaultUrl = `${this.perak.URL_APP}uploads/ak1_${biodataId}_${safeName}.pdf`;
+
+            this.$q.loading.show({
+                message: 'Memeriksa & menyiapkan berkas Kartu Kuning (AK-1)...'
+            });
+
+            try {
+                // Request ke server perak untuk validasi apakah file sudah ada atau auto-generate baru
+                const response = await PerakService.getKartuKuning(biodataId);
+                if (response.data && response.data.fileName) {
+                    const fileUrl = `${this.perak.URL_APP}uploads/${response.data.fileName}`;
+                    window.open(fileUrl, '_blank');
+                } else {
+                    window.open(defaultUrl, '_blank');
+                }
+            } catch (error) {
+                console.warn('Gagal memanggil endpoint laporan/query, menggunakan URL fallback:', error);
+                window.open(defaultUrl, '_blank');
+            } finally {
+                this.$q.loading.hide();
             }
         },
     },
