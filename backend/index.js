@@ -24,6 +24,9 @@ app.get('/', (req, res) => {
 
 // Autentikasi & Media Statis
 app.use('/auth', auth);
+app.use('/uploads/tiktok-covers', express.static(path.join(__dirname, './uploads/tiktok-covers'), {
+  maxAge: '30d'
+}));
 app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 app.use('/icons', express.static(path.join(__dirname, '../frontend/public/icons')));
 
@@ -148,6 +151,14 @@ const server = app.listen(port, '0.0.0.0', () => {
     rupSyncService.initScheduler();
   } catch (err) {
     console.error('Gagal menginisialisasi RUP Scheduler:', err.message);
+  }
+
+  // Sinkronisasi sekali jalan untuk mengunduh thumbnail Video Konsel yang belum tersimpan lokal
+  try {
+    const tiktokService = require('./services/tiktokService');
+    tiktokService.syncMissingCoversInBackground();
+  } catch (err) {
+    console.error('Gagal menjalankan sinkronisasi cover TikTok:', err.message);
   }
 });
 

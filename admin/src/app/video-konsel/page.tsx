@@ -25,6 +25,9 @@ import { toast } from "sonner"
 import api from "@/lib/api"
 import { hasPermission } from "@/lib/permissions"
 
+const FALLBACK_COVER_SRC =
+  "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 180'%3E%3Crect width='120' height='180' fill='%230f172a'/%3E%3Cg transform='translate(34,56) scale(0.11)'%3E%3Cpath fill='%23475569' d='M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z'/%3E%3C/g%3E%3C/svg%3E"
+
 interface VideoItem {
   id: number
   tiktok_id: string
@@ -391,8 +394,14 @@ export default function Page() {
                               title="Klik untuk putar preview video"
                             >
                               <img
-                                src={vid.cover_url || "https://placehold.co/120x180?text=No+Cover"}
+                                src={vid.cover_url || FALLBACK_COVER_SRC}
                                 alt={vid.title}
+                                onError={(e) => {
+                                  const target = e.currentTarget
+                                  if (target.src !== FALLBACK_COVER_SRC) {
+                                    target.src = FALLBACK_COVER_SRC
+                                  }
+                                }}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition-colors">

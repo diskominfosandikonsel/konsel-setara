@@ -112,21 +112,27 @@
         <div class="video-scroll-container">
           <!-- Render videos dynamically -->
           <template v-if="displayedVideos.length > 0">
-            <q-card v-for="(vid, idx) in displayedVideos" :key="'vid' + idx"
-              class="video-card q-mr-sm no-shadow bordered-card cursor-pointer" @click="openVideoPlayer(vid)">
+            <q-card v-for="(vid, idx) in displayedVideos" :key="vid.id || ('vid-' + idx)"
+              class="video-card q-mr-sm no-shadow bordered-card cursor-pointer relative-position bg-dark" @click="openVideoPlayer(vid)">
               <q-img :src="vid.cover_url || vid.img || getThumbnail(vid.video_url || vid.link)" height="190px" class="bg-dark rounded-borders">
-                <!-- Play Icon Center -->
-                <div class="absolute-center bg-transparent">
-                  <div class="play-btn-circle">
-                    <q-icon name="play_arrow" color="white" size="24px" />
+                <template v-slot:error>
+                  <div class="absolute-full flex flex-center bg-dark">
+                    <img :src="getThumbnail('tiktok.com')" alt="Video Konsel" style="width: 72px; height: 72px; opacity: 0.75;" />
                   </div>
-                </div>
-
-                <!-- Bottom Title Overlay -->
-                <div class="absolute-bottom text-caption text-left text-white video-overlay">
-                  <div class="line-clamp-2 text-weight-medium text-xxs">{{ vid.title }}</div>
-                </div>
+                </template>
               </q-img>
+
+              <!-- Play Icon Center (Di luar q-img agar selalu tampil meski gambar lambat/gagal dimuat) -->
+              <div class="absolute-center bg-transparent" style="pointer-events: none; z-index: 2;">
+                <div class="play-btn-circle">
+                  <q-icon name="play_arrow" color="white" size="24px" />
+                </div>
+              </div>
+
+              <!-- Bottom Title Overlay (Di luar q-img agar judul selalu terbaca) -->
+              <div class="absolute-bottom text-caption text-left text-white video-overlay" style="pointer-events: none; z-index: 2;">
+                <div class="line-clamp-2 text-weight-medium text-xxs">{{ vid.title }}</div>
+              </div>
             </q-card>
           </template>
 
