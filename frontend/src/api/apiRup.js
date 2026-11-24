@@ -174,7 +174,7 @@ export async function getDaftarRup({
           opd: item.nama_satker || item.nama_instansi || '',
           metode: item.metode_pengadaan || item.cara_pengadaan_label || '',
           pagu: parseFloat(item.total_nilai || 0),
-          sumber_dana: item.sumber_dana || 'APBD',
+          sumber_dana: item.sumber_dana || '-',
           tahun: String(item.tahun_anggaran || currentYear),
           jenis: item.jenis_pengadaan || '',
           cara_pengadaan: item.cara_pengadaan || '',
@@ -248,5 +248,99 @@ export async function getSatkerList(tahun) {
   }
 
   return { success: false, items: [] }
+}
+
+/**
+ * Ambil detail lengkap 1 paket RUP berdasarkan kode_rup
+ * Prioritas: Backend Database Lokal (On-Demand Sync & Persist) -> Fallback Direct Web INAPROC
+ */
+export async function getDetailRup(kodeRup, caraPengadaan = '') {
+  const cleanKode = String(kodeRup || '').trim()
+  if (!cleanKode) {
+    return { success: false, error: 'Kode RUP tidak valid' }
+  }
+
+  // 1. Ambil dari backend (otomatis menyimpan ke tabel rup_paket jika belum tersimpan)
+  try {
+    const res = await api.get(`${BACKEND_BASE}/detail/${encodeURIComponent(cleanKode)}`, {
+      params: caraPengadaan ? { kind: caraPengadaan } : {},
+      timeout: 10000
+    })
+    if (res.data?.success && res.data?.data) {
+      return {
+        success: true,
+        source: res.data.source || 'database-local',
+        data: res.data.data
+      }
+    }
+  } catch {
+    // lanjut ke fallback direct web INAPROC
+  }
+
+  // 2. Fallback langsung ke web INAPROC jika backend sedang tidak terjangkau
+  try {
+    const detailParams = { kode: cleanKode }
+    if (caraPengadaan) detailParams.kind = caraPengadaan
+    const res = await fetchDirectInaproc('detail', detailParams)
+    if (res.data?.main) {
+      const m = res.data.main
+      const sd = Array.isArray(res.data.sumberDana) ? res.data.sumberDana : []
+      const makList = [...new Set(sd.map(s => String(s?.mak || '').trim()).filter(Boolean))]
+      return {
+        success: true,
+        source: 'inaproc-live',
+        data: {
+          kode_rup: cleanKode,
+          nama_paket: m.nama_paket || '',
+          opd: m.satuan_kerja || m.penyelenggara_swakelola || '',
+          satuan_kerja: m.satuan_kerja || m.penyelenggara_swakelola || '',
+          nama_klpd: m.nama_klpd || 'KAB. KONAWE SELATAN',
+          tahun: String(m.tahun_anggaran || ''),
+          tahun_anggaran: String(m.tahun_anggaran || ''),
+          pagu: parseFloat(m.total_pagu || 0) || 0,
+          total_pagu: parseFloat(m.total_pagu || 0) || 0,
+          metode: m.metode_pemilihan || '',
+          metode_pemilihan: m.metode_pemilihan || '',
+          jenis: m.jenis_pengadaan || '',
+          jenis_pengadaan: m.jenis_pengadaan || '',
+          pdn: m.produk_dalam_negeri || 'Ya',
+          produk_dalam_negeri: m.produk_dalam_negeri || 'Ya',
+          sumber_dana: sd[0]?.sumber_dana || '-',
+          uraian_pekerjaan: (m.uraian_pekerjaan || '').trim(),
+          spesifikasi_pekerjaan: (m.spesifikasi_pekerjaan || '').trim(),
+          volume_pekerjaan: (m.volume_pekerjaan || '').trim(),
+          usaha_kecil: m.usaha_kecil_koperasi || 'Tidak',
+          usaha_kecil_koperasi: m.usaha_kecil_koperasi || 'Tidak',
+          pra_dipa: m.pra_dipa_dpa || 'Tidak',
+          pra_dipa_dpa: m.pra_dipa_dpa || 'Tidak',
+          aspek_ekonomi: m.aspek_ekonomi || 'Tidak',
+          aspek_sosial: m.aspek_sosial || 'Tidak',
+          aspek_lingkungan: m.aspek_lingkungan || 'Tidak',
+          jadwal_pemilihan_mulai: m.jadwal_pemilihan_penyedia_mulai || '',
+          jadwal_pemilihan_akhir: m.jadwal_pemilihan_penyedia_akhir || '',
+          jadwal_kontrak_mulai: m.jadwal_pelaksanaan_kontrak_mulai || '',
+          jadwal_kontrak_akhir: m.jadwal_pelaksanaan_kontrak_akhir || '',
+          pemanfaatan_mulai: m.pemanfaatan_barang_jasa_mulai || '',
+          pemanfaatan_akhir: m.pemanfaatan_barang_jasa_akhir || '',
+          tipe_swakelola: m.tipe_swakelola || '',
+          penyelenggara_swakelola: m.penyelenggara_swakelola || '',
+          tanggal_umumkan: m.tanggal_umumkan_paket || '',
+          mak: makList.join(', '),
+          sumber_dana_list: sd.map(s => ({
+            klpd: s.klpd || 'Kab. Konawe Selatan',
+            mak: s.mak || '-',
+            pagu: parseFloat(s.pagu || 0) || 0,
+            sumber_dana: s.sumber_dana || '-',
+            tahun_anggaran: String(s.tahun_anggaran || m.tahun_anggaran || '')
+          })),
+          detail_synced: true
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Gagal mengambil detail RUP:', err.message)
+  }
+
+  return { success: false, error: 'Gagal memuat detail paket RUP' }
 }
 

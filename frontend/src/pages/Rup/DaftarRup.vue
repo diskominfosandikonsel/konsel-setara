@@ -222,15 +222,23 @@
       </div>
     </q-pull-to-refresh>
 
-    <!-- Dialog Detail RUP -->
+    <!-- Dialog Detail RUP Lengkap -->
     <q-dialog v-model="detailDialog" position="bottom" class="detail-dialog">
-      <q-card v-if="selectedItem" class="detail-sheet-card">
+      <q-card v-if="selectedItem" class="detail-sheet-card column no-wrap" style="max-height: 88vh;">
         <q-card-section class="bg-primary text-white row items-center justify-between q-py-sm">
-          <div class="text-subtitle1 text-weight-bold">Detail Paket RUP</div>
+          <div>
+            <div class="text-subtitle1 text-weight-bold">
+              Detail Paket {{ selectedItem.cara_pengadaan === 'Swakelola' ? 'Swakelola' : 'Penyedia' }}
+            </div>
+            <div class="text-caption text-blue-2">Kode RUP: {{ selectedItem.kode_rup }}</div>
+          </div>
           <q-btn flat round dense icon="close" v-close-popup />
         </q-card-section>
 
-        <q-card-section class="q-pa-md q-gutter-y-sm">
+        <q-linear-progress v-if="isLoadingDetail" indeterminate color="amber-7" />
+
+        <q-card-section class="q-pa-md q-gutter-y-sm scroll col">
+          <!-- Nama Paket -->
           <div>
             <div class="text-caption text-grey-6">Nama Paket</div>
             <div class="text-subtitle1 text-weight-bold text-grey-9 q-mt-xs">
@@ -238,6 +246,22 @@
             </div>
           </div>
 
+          <!-- Highlight Pagu -->
+          <div class="q-pa-md bg-blue-1 rounded-borders">
+            <div class="row items-center justify-between">
+              <div>
+                <div class="text-caption text-blue-9 text-weight-medium">Total Pagu Anggaran</div>
+                <div class="text-h6 text-weight-bolder text-primary">
+                  {{ formatRupiahLengkap(selectedItem.pagu) }}
+                </div>
+              </div>
+              <q-badge :color="getMetodeBadgeColor(selectedItem.metode)" class="q-px-sm q-py-xs text-weight-bold">
+                {{ selectedItem.metode || selectedItem.cara_pengadaan || 'Penyedia' }}
+              </q-badge>
+            </div>
+          </div>
+
+          <!-- Grid Identitas Utama -->
           <div class="row q-col-gutter-sm">
             <div class="col-6">
               <div class="text-caption text-grey-6">Kode RUP</div>
@@ -254,50 +278,144 @@
                 {{ selectedItem.tahun }}
               </div>
             </div>
+            <div class="col-6">
+              <div class="text-caption text-grey-6">Nama KLPD</div>
+              <div class="text-body2 text-weight-medium text-grey-9 q-mt-xs">
+                {{ selectedItem.nama_klpd || 'KAB. KONAWE SELATAN' }}
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-caption text-grey-6">Volume Pekerjaan</div>
+              <div class="text-body2 text-weight-bold text-grey-9 q-mt-xs">
+                {{ selectedItem.volume_pekerjaan || '-' }}
+              </div>
+            </div>
           </div>
 
           <div>
             <div class="text-caption text-grey-6">Satuan Kerja / OPD</div>
             <div class="text-body2 text-weight-medium text-grey-9 q-mt-xs">
-              {{ selectedItem.opd }}
-            </div>
-          </div>
-
-          <div class="row q-col-gutter-sm">
-            <div class="col-6">
-              <div class="text-caption text-grey-6">Metode Pemilihan</div>
-              <q-badge :color="getMetodeBadgeColor(selectedItem.metode)" class="q-mt-xs text-weight-bold">
-                {{ selectedItem.metode }}
-              </q-badge>
-            </div>
-            <div class="col-6">
-              <div class="text-caption text-grey-6">Sumber Dana</div>
-              <div class="text-body2 text-weight-bold text-grey-9 q-mt-xs">
-                {{ selectedItem.sumber_dana }}
-              </div>
+              {{ selectedItem.opd || selectedItem.satuan_kerja || '-' }}
             </div>
           </div>
 
           <div class="row q-col-gutter-sm">
             <div class="col-6">
               <div class="text-caption text-grey-6">Jenis Pengadaan</div>
-              <div class="text-body2 text-grey-9 q-mt-xs">
+              <div class="text-body2 text-weight-medium text-grey-9 q-mt-xs">
                 {{ selectedItem.jenis || '-' }}
               </div>
             </div>
             <div class="col-6">
-              <div class="text-caption text-grey-6">Produk Dalam Negeri</div>
+              <div class="text-caption text-grey-6">Sumber Dana</div>
               <div class="text-body2 text-weight-bold text-grey-9 q-mt-xs">
-                {{ selectedItem.pdn === 'Ya' ? 'Ya (PDN)' : 'Tidak' }}
+                {{ selectedItem.sumber_dana || '-' }}
               </div>
             </div>
           </div>
 
-          <!-- Highlight Pagu -->
-          <div class="q-pa-md bg-blue-1 rounded-borders q-mt-sm">
-            <div class="text-caption text-blue-9 font-weight-medium">Pagu Anggaran Paket</div>
-            <div class="text-h6 text-weight-bolder text-primary">
-              {{ formatRupiahLengkap(selectedItem.pagu) }}
+          <!-- Uraian & Spesifikasi Pekerjaan -->
+          <div v-if="selectedItem.uraian_pekerjaan || selectedItem.spesifikasi_pekerjaan" class="q-pa-sm bg-grey-2 rounded-borders q-gutter-y-xs">
+            <div v-if="selectedItem.uraian_pekerjaan">
+              <div class="text-caption text-grey-7 text-weight-bold">Uraian Pekerjaan</div>
+              <div class="text-body2 text-grey-9" style="white-space: pre-line;">{{ selectedItem.uraian_pekerjaan }}</div>
+            </div>
+            <q-separator v-if="selectedItem.uraian_pekerjaan && selectedItem.spesifikasi_pekerjaan" />
+            <div v-if="selectedItem.spesifikasi_pekerjaan">
+              <div class="text-caption text-grey-7 text-weight-bold">Spesifikasi Pekerjaan</div>
+              <div class="text-body2 text-grey-9" style="white-space: pre-line;">{{ selectedItem.spesifikasi_pekerjaan }}</div>
+            </div>
+          </div>
+
+          <!-- Rincian Sumber Dana & Kode Rekening (MAK) -->
+          <div class="q-pa-sm rounded-borders" style="border: 1px solid #e2e8f0; background: #f8fafc;">
+            <div class="text-caption text-weight-bold text-primary q-mb-xs">
+              Sumber Dana &amp; Kode Rekening (MAK)
+            </div>
+            <div
+              v-for="(sd, idx) in (selectedItem.sumber_dana_list && selectedItem.sumber_dana_list.length ? selectedItem.sumber_dana_list : [{ klpd: 'Kab. Konawe Selatan', mak: selectedItem.mak || '-', pagu: selectedItem.pagu, sumber_dana: selectedItem.sumber_dana || '-', tahun_anggaran: selectedItem.tahun }])"
+              :key="idx"
+              class="q-py-xs"
+              :class="{ 'border-top': idx > 0 }"
+            >
+              <div class="row items-center justify-between text-caption text-grey-8">
+                <span class="text-weight-bold">{{ sd.sumber_dana }} ({{ sd.tahun_anggaran || selectedItem.tahun }})</span>
+                <span class="text-weight-bold text-primary">{{ formatRupiahLengkap(sd.pagu) }}</span>
+              </div>
+              <div class="row items-center justify-between no-wrap q-mt-xs">
+                <div class="text-caption text-grey-9" style="font-family: monospace; word-break: break-all;">
+                  MAK: <strong>{{ sd.mak || '-' }}</strong>
+                </div>
+                <q-btn
+                  v-if="sd.mak && sd.mak !== '-'"
+                  flat
+                  round
+                  dense
+                  size="xs"
+                  icon="content_copy"
+                  color="primary"
+                  @click="copyKodeRup(sd.mak)"
+                >
+                  <q-tooltip>Salin Kode MAK</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </div>
+
+          <!-- Jadwal Pelaksanaan & Pemilihan -->
+          <div
+            v-if="selectedItem.jadwal_pemilihan_mulai || selectedItem.jadwal_kontrak_mulai || selectedItem.pemanfaatan_mulai"
+            class="q-pa-sm rounded-borders"
+            style="border: 1px solid #e2e8f0;"
+          >
+            <div class="text-caption text-weight-bold text-grey-8 q-mb-xs">Jadwal Pengadaan</div>
+            <div class="row q-col-gutter-xs text-caption">
+              <div v-if="selectedItem.jadwal_pemilihan_mulai || selectedItem.jadwal_pemilihan_akhir" class="col-12 row justify-between">
+                <span class="text-grey-7">Pemilihan Penyedia:</span>
+                <span class="text-weight-bold text-grey-9">
+                  {{ selectedItem.jadwal_pemilihan_mulai || '-' }} s/d {{ selectedItem.jadwal_pemilihan_akhir || '-' }}
+                </span>
+              </div>
+              <div v-if="selectedItem.jadwal_kontrak_mulai || selectedItem.jadwal_kontrak_akhir" class="col-12 row justify-between">
+                <span class="text-grey-7">Pelaksanaan Kontrak:</span>
+                <span class="text-weight-bold text-grey-9">
+                  {{ selectedItem.jadwal_kontrak_mulai || '-' }} s/d {{ selectedItem.jadwal_kontrak_akhir || '-' }}
+                </span>
+              </div>
+              <div v-if="selectedItem.pemanfaatan_mulai || selectedItem.pemanfaatan_akhir" class="col-12 row justify-between">
+                <span class="text-grey-7">Pemanfaatan Barang/Jasa:</span>
+                <span class="text-weight-bold text-grey-9">
+                  {{ selectedItem.pemanfaatan_mulai || '-' }} s/d {{ selectedItem.pemanfaatan_akhir || '-' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Karakteristik & Aspek Pengadaan -->
+          <div class="row q-col-gutter-sm text-caption">
+            <div class="col-4">
+              <div class="text-grey-6">Produk Dalam Negeri</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.pdn || 'Ya' }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-grey-6">Usaha Kecil/Koperasi</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.usaha_kecil || 'Tidak' }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-grey-6">Pra DIPA / DPA</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.pra_dipa || 'Tidak' }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-grey-6">Aspek Ekonomi</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.aspek_ekonomi || 'Tidak' }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-grey-6">Aspek Sosial</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.aspek_sosial || 'Tidak' }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-grey-6">Aspek Lingkungan</div>
+              <div class="text-weight-bold text-grey-9 q-mt-xs">{{ selectedItem.aspek_lingkungan || 'Tidak' }}</div>
             </div>
           </div>
         </q-card-section>
@@ -398,7 +516,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar, copyToClipboard } from 'quasar'
-import { getDaftarRup, getRupSummary, getSatkerList } from 'src/api/apiRup'
+import { getDaftarRup, getRupSummary, getSatkerList, getDetailRup } from 'src/api/apiRup'
 
 export default {
   name: 'DaftarRupPage',
@@ -445,6 +563,7 @@ export default {
     const showFilterDialog = ref(false)
     const detailDialog = ref(false)
     const selectedItem = ref(null)
+    const isLoadingDetail = ref(false)
 
     const isLoading = ref(false)
     const isLoadingMore = ref(false)
@@ -797,9 +916,33 @@ export default {
       return 'Rp\u00a0' + Number(val).toLocaleString('id-ID')
     }
 
-    const openDetail = (item) => {
-      selectedItem.value = item
+    const openDetail = async (item) => {
+      selectedItem.value = { ...item }
       detailDialog.value = true
+
+      if (!item?.kode_rup) return
+
+      // Jika detail belum lengkap, ambil & simpan otomatis ke database via endpoint detail
+      if (!item.detail_synced && !item.uraian_pekerjaan && !item.mak) {
+        isLoadingDetail.value = true
+        try {
+          const res = await getDetailRup(item.kode_rup, item.cara_pengadaan)
+          if (res?.success && res.data) {
+            const merged = { ...item, ...res.data, id: item.id || res.data.kode_rup }
+            if (selectedItem.value?.kode_rup === item.kode_rup) {
+              selectedItem.value = merged
+            }
+            const idx = allPaket.value.findIndex(p => p.kode_rup === item.kode_rup)
+            if (idx !== -1) {
+              allPaket.value[idx] = merged
+            }
+          }
+        } catch (err) {
+          console.warn('Gagal memuat detail paket RUP:', err)
+        } finally {
+          isLoadingDetail.value = false
+        }
+      }
     }
 
     const copyKodeRup = (kodeRup) => {
@@ -854,6 +997,7 @@ export default {
       showFilterDialog,
       detailDialog,
       selectedItem,
+      isLoadingDetail,
       isLoading,
       isLoadingMore,
       loadError,

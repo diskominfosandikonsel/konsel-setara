@@ -9,6 +9,13 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   RefreshCw,
   Clock,
   Database,
@@ -20,6 +27,8 @@ import {
   Server,
   Sliders,
   Search,
+  Eye,
+  FileText,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
@@ -37,8 +46,10 @@ interface SyncConfig {
   last_message: string | null
   total_paket_synced: number
   total_pagu_synced: number | string
+  total_detail_synced?: number
   updated_at: string
   is_running?: boolean
+  is_detail_syncing?: boolean
 }
 
 interface SyncLog {
@@ -53,17 +64,45 @@ interface SyncLog {
   message: string
 }
 
+interface SumberDanaRow {
+  klpd: string
+  mak: string
+  pagu: number
+  sumber_dana: string
+  tahun_anggaran: string
+}
+
 interface RupItem {
   id: string
   kode_rup: string
   nama_paket: string
   opd: string
+  satuan_kerja?: string
+  nama_klpd?: string
   metode: string
   pagu: number
   sumber_dana: string
   tahun: string
   jenis: string
   cara_pengadaan: string
+  pdn?: string
+  uraian_pekerjaan?: string
+  spesifikasi_pekerjaan?: string
+  volume_pekerjaan?: string
+  usaha_kecil?: string
+  pra_dipa?: string
+  aspek_ekonomi?: string
+  aspek_sosial?: string
+  aspek_lingkungan?: string
+  jadwal_pemilihan_mulai?: string
+  jadwal_pemilihan_akhir?: string
+  jadwal_kontrak_mulai?: string
+  jadwal_kontrak_akhir?: string
+  pemanfaatan_mulai?: string
+  pemanfaatan_akhir?: string
+  mak?: string
+  sumber_dana_list?: SumberDanaRow[]
+  detail_synced?: boolean
 }
 
 export default function RupSyncPage() {
@@ -89,6 +128,36 @@ export default function RupSyncPage() {
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewSearch, setPreviewSearch] = useState("")
   const [previewTotal, setPreviewTotal] = useState(0)
+
+  // Detail Modal State
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedDetail, setSelectedDetail] = useState<RupItem | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
+
+  const handleOpenDetail = async (item: RupItem) => {
+    setSelectedDetail(item)
+    setDetailModalOpen(true)
+    if (!item.kode_rup) return
+
+    setLoadingDetail(true)
+    try {
+      const res = await api.get(`/api/v1/rup/detail/${encodeURIComponent(item.kode_rup)}`, {
+        params: item.cara_pengadaan ? { kind: item.cara_pengadaan } : {},
+      })
+      if (res.data?.success && res.data?.data) {
+        const merged = { ...item, ...res.data.data }
+        setSelectedDetail(merged)
+        setPreviewData((prev) =>
+          prev.map((p) => (p.kode_rup === item.kode_rup ? merged : p))
+        )
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Gagal memuat detail paket RUP")
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
 
   const getFrequencyLabel = (type?: string, val?: number, time?: string) => {
     const t = time || scheduleTime || "02:00"
@@ -181,10 +250,10 @@ export default function RupSyncPage() {
     loadAll()
   }, [loadAll])
 
-  // Polling saat status running
+  // Polling saat status running atau detail sedang disinkronkan
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
-    if (config?.is_running || config?.last_status === "running") {
+    if (config?.is_running || config?.last_status === "running" || config?.is_detail_syncing) {
       interval = setInterval(() => {
         fetchConfig()
         fetchLogs()
@@ -193,7 +262,7 @@ export default function RupSyncPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [config?.is_running, config?.last_status, fetchConfig, fetchLogs])
+  }, [config?.is_running, config?.last_status, config?.is_detail_syncing, fetchConfig, fetchLogs])
 
   const handleSaveConfig = async () => {
     setSaving(true)
@@ -342,7 +411,11 @@ export default function RupSyncPage() {
                       {(config?.total_paket_synced || 0).toLocaleString("id-ID")}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Paket RUP T.A. {config?.sync_year || syncYear}
+                      Detail tersimpan:{" "}
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                        {(config?.total_detail_synced || 0).toLocaleString("id-ID")}
+                      </span>{" "}
+                      paket {config?.is_detail_syncing ? "(menyinkronkan...)" : ""}
                     </p>
                   </>
                 )}
@@ -845,27 +918,32 @@ export default function RupSyncPage() {
                       <th className="py-2.5 px-4 font-semibold">Metode / Cara</th>
                       <th className="py-2.5 px-4 font-semibold text-right">Pagu Anggaran</th>
                       <th className="py-2.5 px-4 font-semibold">Sumber Dana</th>
+                      <th className="py-2.5 px-4 font-semibold text-center">Detail</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {previewLoading ? (
                       [...Array(5)].map((_, i) => (
                         <tr key={i}>
-                          <td colSpan={6} className="py-3 px-4">
+                          <td colSpan={7} className="py-3 px-4">
                             <Skeleton className="h-4 w-full" />
                           </td>
                         </tr>
                       ))
                     ) : previewData.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                        <td colSpan={7} className="py-8 text-center text-muted-foreground">
                           Tidak ada paket RUP yang ditemukan
                         </td>
                       </tr>
                     ) : (
                       previewData.map((item) => (
-                        <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="py-3 px-4 font-mono font-medium text-emerald-700 whitespace-nowrap">
+                        <tr
+                          key={item.id}
+                          onClick={() => handleOpenDetail(item)}
+                          className="hover:bg-muted/40 transition-colors cursor-pointer"
+                        >
+                          <td className="py-3 px-4 font-mono font-semibold text-emerald-700 hover:underline whitespace-nowrap">
                             {item.kode_rup}
                           </td>
                           <td className="py-3 px-4 font-medium text-foreground max-w-sm">
@@ -890,6 +968,21 @@ export default function RupSyncPage() {
                           <td className="py-3 px-4 font-medium whitespace-nowrap text-muted-foreground">
                             {item.sumber_dana}
                           </td>
+                          <td className="py-3 px-4 text-center whitespace-nowrap">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleOpenDetail(item)
+                              }}
+                            >
+                              <Eye className="h-3.5 w-3.5 mr-1" />
+                              Detail
+                            </Button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -898,6 +991,123 @@ export default function RupSyncPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Modal Detail Paket RUP Lengkap (23 Atribut + Tabel Sumber Dana / MAK) */}
+          <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
+            <DialogContent className="sm:max-w-3xl max-h-[88vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-emerald-600" />
+                  Detail Paket {selectedDetail?.cara_pengadaan === "Swakelola" ? "Swakelola" : "Penyedia"}:{" "}
+                  <span className="font-mono text-emerald-700">{selectedDetail?.kode_rup}</span>
+                </DialogTitle>
+                <DialogDescription className="text-xs">
+                  Data detail RUP tersinkronisasi dan tersimpan di database lokal MySQL Konsel Setara.
+                </DialogDescription>
+              </DialogHeader>
+
+              {selectedDetail && (
+                <div className="space-y-5 text-xs">
+                  {loadingDetail && (
+                    <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      <span>Mengambil &amp; menyimpan kelengkapan detail paket dari INAPROC...</span>
+                    </div>
+                  )}
+
+                  {/* Tabel 23 Atribut Detail Paket */}
+                  <div className="rounded-lg border overflow-hidden">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-muted/60 border-b text-muted-foreground">
+                        <tr>
+                          <th className="py-2 px-3 w-12 text-center font-semibold">No.</th>
+                          <th className="py-2 px-3 w-64 font-semibold">Deskripsi</th>
+                          <th className="py-2 px-3 font-semibold">Detail</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {[
+                          ["Kode RUP", selectedDetail.kode_rup],
+                          ["Nama Paket", selectedDetail.nama_paket],
+                          ["Nama KLPD", selectedDetail.nama_klpd || "KAB. KONAWE SELATAN"],
+                          ["Satuan Kerja", selectedDetail.opd || selectedDetail.satuan_kerja || "-"],
+                          ["Tahun Anggaran", selectedDetail.tahun],
+                          ["Total Pagu", formatRupiah(selectedDetail.pagu)],
+                          ["Metode Pemilihan", selectedDetail.metode || selectedDetail.cara_pengadaan || "-"],
+                          ["Jenis Pengadaan", selectedDetail.jenis || "-"],
+                          ["Volume Pekerjaan", selectedDetail.volume_pekerjaan || "-"],
+                          ["Uraian Pekerjaan", selectedDetail.uraian_pekerjaan || "-"],
+                          ["Spesifikasi Pekerjaan", selectedDetail.spesifikasi_pekerjaan || "-"],
+                          ["Produk Dalam Negeri", selectedDetail.pdn || "Ya"],
+                          ["Usaha Kecil/Koperasi", selectedDetail.usaha_kecil || "Tidak"],
+                          ["Pra DIPA / DPA", selectedDetail.pra_dipa || "Tidak"],
+                          ["Aspek Ekonomi", selectedDetail.aspek_ekonomi || "Tidak"],
+                          ["Aspek Sosial", selectedDetail.aspek_sosial || "Tidak"],
+                          ["Aspek Lingkungan", selectedDetail.aspek_lingkungan || "Tidak"],
+                          ["Jadwal Pemilihan Penyedia Mulai", selectedDetail.jadwal_pemilihan_mulai || "-"],
+                          ["Jadwal Pemilihan Penyedia Akhir", selectedDetail.jadwal_pemilihan_akhir || "-"],
+                          ["Jadwal Pelaksanaan Kontrak Mulai", selectedDetail.jadwal_kontrak_mulai || "-"],
+                          ["Jadwal Pelaksanaan Kontrak Akhir", selectedDetail.jadwal_kontrak_akhir || "-"],
+                          ["Pemanfaatan Barang/Jasa Mulai", selectedDetail.pemanfaatan_mulai || "-"],
+                          ["Pemanfaatan Barang/Jasa Akhir", selectedDetail.pemanfaatan_akhir || "-"],
+                        ].map(([label, val], idx) => (
+                          <tr key={label} className="hover:bg-muted/20">
+                            <td className="py-2 px-3 text-center text-muted-foreground font-mono">{idx + 1}</td>
+                            <td className="py-2 px-3 font-medium text-muted-foreground">{label}</td>
+                            <td className="py-2 px-3 font-medium text-foreground whitespace-pre-line">{val}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Tabel Sumber Dana & MAK */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm text-foreground">Sumber Dana</h4>
+                    <div className="rounded-lg border overflow-hidden">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead className="bg-muted/60 border-b text-muted-foreground">
+                          <tr>
+                            <th className="py-2 px-3 w-12 text-center font-semibold">No.</th>
+                            <th className="py-2 px-3 font-semibold">KLPD</th>
+                            <th className="py-2 px-3 font-semibold">MAK</th>
+                            <th className="py-2 px-3 font-semibold text-right">Pagu</th>
+                            <th className="py-2 px-3 font-semibold">Sumber Dana</th>
+                            <th className="py-2 px-3 font-semibold text-center">Tahun Anggaran</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {(selectedDetail.sumber_dana_list && selectedDetail.sumber_dana_list.length > 0
+                            ? selectedDetail.sumber_dana_list
+                            : [
+                                {
+                                  klpd: "Kab. Konawe Selatan",
+                                  mak: selectedDetail.mak || "-",
+                                  pagu: selectedDetail.pagu,
+                                  sumber_dana: selectedDetail.sumber_dana || "-",
+                                  tahun_anggaran: selectedDetail.tahun,
+                                },
+                              ]
+                          ).map((sd, idx) => (
+                            <tr key={idx} className="hover:bg-muted/20">
+                              <td className="py-2 px-3 text-center font-mono text-muted-foreground">{idx + 1}</td>
+                              <td className="py-2 px-3">{sd.klpd || "Kab. Konawe Selatan"}</td>
+                              <td className="py-2 px-3 font-mono text-[11px] break-all">{sd.mak || "-"}</td>
+                              <td className="py-2 px-3 font-mono font-semibold text-right whitespace-nowrap">
+                                {formatRupiah(sd.pagu)}
+                              </td>
+                              <td className="py-2 px-3">{sd.sumber_dana}</td>
+                              <td className="py-2 px-3 text-center font-mono">{sd.tahun_anggaran || selectedDetail.tahun}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </BaseLayout>
     </AuthGuard>

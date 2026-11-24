@@ -91,6 +91,34 @@ router.post('/sync/trigger', middleware.isLoggedIn, requirePermission('rup', 'up
 });
 
 /**
+ * POST /api/v1/rup/sync/details
+ * Memicu pengisian detail paket RUP (untuk paket yang detail_synced_at IS NULL) di background
+ */
+router.post('/sync/details', middleware.isLoggedIn, requirePermission('rup', 'update'), async (req, res) => {
+  try {
+    if (rupSyncService.isCurrentlySyncingDetails()) {
+      return res.status(409).json({
+        success: false,
+        message: 'Proses sinkronisasi detail RUP sedang berlangsung di background.',
+      });
+    }
+
+    const tahun = req.body?.tahun || new Date().getFullYear().toString();
+    rupSyncService.syncMissingDetailsInBackground(tahun).catch((err) => {
+      console.error('[RUP DETAIL SYNC ERROR]', err.message);
+    });
+
+    return res.json({
+      success: true,
+      message: `Sinkronisasi detail paket RUP T.A. ${tahun} sedang berjalan di background.`,
+      status: 'running',
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
  * GET /api/v1/rup/sync/logs
  * Mengambil riwayat log sinkronisasi
  */
@@ -183,6 +211,7 @@ router.get('/paket-penyedia', async (req, res) => {
     const satker = req.query.satker || '';
 
     // Cek apakah ada data di database untuk tahun ini
+    await rupSyncService.ensureDetailColumns();
     const [countCheck] = await db.promise().query(
       'SELECT COUNT(*) as cnt FROM rup_paket WHERE tahun = ?',
       [tahun]
@@ -215,9 +244,11 @@ router.get('/paket-penyedia', async (req, res) => {
       }
 
       if (search) {
-        whereClauses.push('(p.kode_rup LIKE ? OR p.nama_paket LIKE ? OR s.nama LIKE ?)');
+        whereClauses.push(
+          '(p.kode_rup LIKE ? OR p.nama_paket LIKE ? OR s.nama LIKE ? OR EXISTS (SELECT 1 FROM rup_sumber_dana sd WHERE sd.kode_rup = p.kode_rup AND sd.mak LIKE ?))'
+        );
         const searchPattern = `%${search}%`;
-        params.push(searchPattern, searchPattern, searchPattern);
+        params.push(searchPattern, searchPattern, searchPattern, searchPattern);
       }
 
       const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
@@ -246,6 +277,22 @@ router.get('/paket-penyedia', async (req, res) => {
         [...params, limit, offset]
       );
 
+      // Ambil rincian sumber dana dari tabel rup_sumber_dana untuk paket-paket pada halaman ini
+      const sdMap = new Map();
+      if (rows.length > 0) {
+        const kodeList = rows.map((r) => r.kode_rup).filter(Boolean);
+        if (kodeList.length > 0) {
+          const [sdRows] = await db.promise().query(
+            'SELECT kode_rup, mak, pagu, sumber_dana FROM rup_sumber_dana WHERE kode_rup IN (?) ORDER BY id ASC',
+            [kodeList]
+          );
+          for (const sd of sdRows) {
+            if (!sdMap.has(sd.kode_rup)) sdMap.set(sd.kode_rup, []);
+            sdMap.get(sd.kode_rup).push(sd);
+          }
+        }
+      }
+
       return res.json({
         success: true,
         source: 'database-local',
@@ -260,19 +307,8 @@ router.get('/paket-penyedia', async (req, res) => {
           total,
         },
         data: rows.map((item, idx) => ({
+          ...rupSyncService.formatPaketRowWithDetail(item, tahun, sdMap.get(item.kode_rup) || []),
           id: item.kode_rup || `${page}-${idx + 1}`,
-          kode_rup: item.kode_rup || '',
-          nama_paket: item.nama_paket || '',
-          kode_satker: item.kode_satker || '',
-          opd: item.opd || item.nama_satker || '',
-          metode: item.metode || item.cara_pengadaan || '',
-          pagu: parseFloat(item.pagu || 0),
-          sumber_dana: item.sumber_dana || 'APBD',
-          tahun: String(item.tahun || tahun),
-          jenis: item.jenis || '',
-          cara_pengadaan: item.cara_pengadaan || '',
-          pdn: item.pdn || 'Ya',
-          status: item.status || 'Aktif',
         })),
       });
     }
@@ -318,7 +354,7 @@ router.get('/paket-penyedia', async (req, res) => {
           opd: item.nama_satker || item.nama_instansi || '',
           metode: item.metode_pengadaan || item.cara_pengadaan_label || '',
           pagu: parseFloat(item.total_nilai || 0),
-          sumber_dana: item.sumber_dana || 'APBD',
+          sumber_dana: item.sumber_dana || '-',
           tahun: String(item.tahun_anggaran || tahun),
           jenis: item.jenis_pengadaan || '',
           cara_pengadaan: item.cara_pengadaan || '',
@@ -338,6 +374,26 @@ router.get('/paket-penyedia', async (req, res) => {
       success: false,
       error: err.message,
       message: 'Gagal mengambil data RUP',
+    });
+  }
+});
+
+/**
+ * GET /api/v1/rup/detail/:kode_rup
+ * Mengambil detail lengkap paket RUP dari database lokal (atau mengambil dari INAPROC & menyimpannya ke rup_paket)
+ */
+router.get('/detail/:kode_rup', async (req, res) => {
+  try {
+    const { kode_rup } = req.params;
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    const caraPengadaan = req.query.kind || req.query.cara_pengadaan || '';
+    const result = await rupSyncService.getOrSyncPaketDetail(kode_rup, { forceRefresh, caraPengadaan });
+    return res.json(result);
+  } catch (err) {
+    return res.status(404).json({
+      success: false,
+      error: err.message,
+      message: 'Gagal memuat detail paket RUP',
     });
   }
 });
