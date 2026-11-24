@@ -139,39 +139,45 @@ function extractSatkerCode(rawNamaSatker, rawKdSatker) {
  */
 async function syncSatker(tahun) {
   console.log(`[RUP SYNC] Menarik daftar satker untuk tahun ${tahun}...`);
-  const result = await fetchInaprocWeb('/profil-pengadaan/satker', {
-    tahun,
-    jenis: JENIS_KLPD,
-    instansi: INSTANSI_KONSEL,
-  });
+  try {
+    const result = await fetchInaprocWeb('/profil-pengadaan/satker', {
+      tahun,
+      jenis: JENIS_KLPD,
+      instansi: INSTANSI_KONSEL,
+    });
 
-  if (result.status !== 200 || !Array.isArray(result.data?.items)) {
-    throw new Error('Gagal mengambil data Satker dari INAPROC: ' + (result.error || `HTTP ${result.status}`));
+    if (result.status === 200 && Array.isArray(result.data?.items)) {
+      const satkers = result.data.items;
+      if (satkers.length > 0) {
+        const values = satkers.map((s) => {
+          const kode = String(s.kode || s.kd_satker || '').trim();
+          const rawNama = String(s.nama || s.nama_satker || '').trim();
+          const namaBersih = cleanSatkerName(rawNama, kode);
+          return [kode, namaBersih];
+        }).filter((s) => s[0] && s[1]);
+
+        if (values.length > 0) {
+          const sql = `
+            INSERT INTO rup_satker (kode, nama)
+            VALUES ?
+            ON DUPLICATE KEY UPDATE
+              nama = VALUES(nama),
+              updated_at = NOW()
+          `;
+
+          await db.promise().query(sql, [values]);
+          console.log(`[RUP SYNC] Sukses menyimpan ${values.length} satker master (nama bersih tanpa kode).`);
+          return values.length;
+        }
+      }
+    }
+
+    console.warn(`[RUP SYNC] Endpoint master satker INAPROC tidak tersedia (HTTP ${result?.status || 'Unknown'}). Satker akan dikoleksi otomatis dari paket.`);
+    return 0;
+  } catch (err) {
+    console.warn(`[RUP SYNC] Peringatan: Gagal menarik satker dari endpoint INAPROC (${err.message}). Satker akan dikoleksi otomatis dari paket.`);
+    return 0;
   }
-
-  const satkers = result.data.items;
-  if (satkers.length === 0) return 0;
-
-  const values = satkers.map((s) => {
-    const kode = String(s.kode || s.kd_satker || '').trim();
-    const rawNama = String(s.nama || s.nama_satker || '').trim();
-    const namaBersih = cleanSatkerName(rawNama, kode);
-    return [kode, namaBersih];
-  }).filter((s) => s[0] && s[1]);
-
-  if (values.length === 0) return 0;
-
-  const sql = `
-    INSERT INTO rup_satker (kode, nama)
-    VALUES ?
-    ON DUPLICATE KEY UPDATE
-      nama = VALUES(nama),
-      updated_at = NOW()
-  `;
-
-  await db.promise().query(sql, [values]);
-  console.log(`[RUP SYNC] Sukses menyimpan ${values.length} satker master (nama bersih tanpa kode).`);
-  return values.length;
 }
 
 /**
@@ -209,6 +215,36 @@ async function syncPaket(tahun, onProgress) {
     if (rows.length === 0) {
       hasMore = false;
       break;
+    }
+
+    // Ekstrak satker dari setiap paket untuk memastikan rup_satker selalu lengkap
+    const satkerBatchMap = new Map();
+    rows.forEach((r) => {
+      const rawNama = String(r.nama_satker || r.nama_instansi || '').trim();
+      const rawKd = r.kd_satker || r.kode_satker;
+      const kodeSatker = extractSatkerCode(rawNama, rawKd);
+      if (kodeSatker) {
+        const namaBersih = cleanSatkerName(rawNama, kodeSatker);
+        if (namaBersih && !satkerBatchMap.has(kodeSatker)) {
+          satkerBatchMap.set(kodeSatker, namaBersih);
+        }
+      }
+    });
+
+    if (satkerBatchMap.size > 0) {
+      const satkerValues = Array.from(satkerBatchMap.entries()).map(([k, n]) => [k, n]);
+      const satkerSql = `
+        INSERT INTO rup_satker (kode, nama)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE
+          nama = VALUES(nama),
+          updated_at = NOW()
+      `;
+      try {
+        await db.promise().query(satkerSql, [satkerValues]);
+      } catch (errSatker) {
+        console.warn('[RUP SYNC] Gagal upsert satker dari paket:', errSatker.message);
+      }
     }
 
     const values = rows.map((r) => {
@@ -309,11 +345,22 @@ async function runSync({ tahun, triggeredBy = 'manual' } = {}) {
   `);
 
   try {
-    // 1. Sinkronisasi Satker
-    const totalSatker = await syncSatker(syncYear);
+    // 1. Sinkronisasi Satker (Fallback graceful)
+    let totalSatker = 0;
+    try {
+      totalSatker = await syncSatker(syncYear);
+    } catch (errSatker) {
+      console.warn('[RUP SYNC] Lewati syncSatker:', errSatker.message);
+    }
 
     // 2. Sinkronisasi Paket
     const { totalPaket, totalPagu } = await syncPaket(syncYear);
+
+    // Hitung total satker di database
+    try {
+      const [satkerCount] = await db.promise().query('SELECT COUNT(*) as cnt FROM rup_satker');
+      if (satkerCount[0]?.cnt) totalSatker = satkerCount[0].cnt;
+    } catch (_) {}
 
     const message = `Sukses menyinkronkan ${totalSatker} Satker dan ${totalPaket} Paket RUP (Total Pagu: Rp ${totalPagu.toLocaleString('id-ID')}).`;
 
