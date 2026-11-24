@@ -356,6 +356,17 @@ async function runSync({ tahun, triggeredBy = 'manual' } = {}) {
     // 2. Sinkronisasi Paket
     const { totalPaket, totalPagu } = await syncPaket(syncYear);
 
+    // Tandai paket yang sudah tidak ada / dibatalkan di INAPROC tahun berjalan sebagai 'Dibatalkan'
+    try {
+      await db.promise().query(`
+        UPDATE rup_paket 
+        SET status = 'Dibatalkan' 
+        WHERE tahun = ? AND updated_at < ? AND status = 'Aktif'
+      `, [syncYear, startTime]);
+    } catch (errCancel) {
+      console.warn('[RUP SYNC] Gagal menandai paket lama:', errCancel.message);
+    }
+
     // Hitung total satker di database
     try {
       const [satkerCount] = await db.promise().query('SELECT COUNT(*) as cnt FROM rup_satker');
